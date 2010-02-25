@@ -1,11 +1,15 @@
-{	"version":"1.4.1",
-	"url1":"http://noblesse-oblige.org/lukifer/scripts/MrScript.user.js",
-	"url2":"http://noblesse-oblige.org/lukifer/scripts/MrScript.min.user.js",
+{	"version":"1.4.8",
+	"url1":"http://noblesse-oblige.org/hellion/scripts/MrScript.user.js",
 	"desc":"<b>Fixed</b>
-<br />- Telescope problem when iventory images are disabled
+<br />- Typo in a tower item or two
 <br />- Typo bug with attached links
-<br />- Bug with max buttons
-<br /><br /><b>New</b><br />- Right-click store proprietor image to equip Travoltan Trousers.
-<br />- Added use link for bottles of absinthe and dance cards.
-<br />- Added dissasemble clover links to barrels."
+<br /><br /><b>New</b>
+<br />- More ML spoilers.
+<br />- Option to have the moons link to the NO Calendar.
+<br />- one-click wine glyph listing.
+<br />- automatic tracking of which wines have dropped, and therefore which other wines can drop, in which corner.
+<br />- link from BHH to the accepted bounty zone.
+<br />- link from the untinker to Innabox if muscle class.
+"
+
 }
