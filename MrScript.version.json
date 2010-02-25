@@ -1,0 +1,11 @@
+{	"version":"1.4.1",
+	"url1":"http://noblesse-oblige.org/lukifer/scripts/MrScript.user.js",
+	"url2":"http://noblesse-oblige.org/lukifer/scripts/MrScript.min.user.js",
+	"desc":"<b>Fixed</b>
+<br />- Telescope problem when iventory images are disabled
+<br />- Typo bug with attached links
+<br />- Bug with max buttons
+<br /><br /><b>New</b><br />- Right-click store proprietor image to equip Travoltan Trousers.
+<br />- Added use link for bottles of absinthe and dance cards.
+<br />- Added dissasemble clover links to barrels."
+}
