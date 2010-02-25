@@ -34,6 +34,7 @@
 // link to BHH zone when you accept a bounty: DONE
 // link to smith from untinker if muscle class: DONE
 // add cheat sheet of wine drop combos in the wine cellar: DONE  (whew!)
+// Some more auto-options when fighting certain monsters: DONE
 // change auto-update code to point somewhere that's under my control
 
 
@@ -1572,66 +1573,85 @@ function at_main() {
 // ----------------------------------------------
 // Things to do in a fight:
 // check for yoinked items
-// check for Dr. Awkward, put up "change outfit" reminder
 // auto-select rock band flyers or jam band flyers
 // auto-select magnet for gremlins
 function at_fight() {
 // code for NS Lair spoilers borrowed shamelessly from Tard's NS Trainer v0.8
-	// monster name:[item that beats it,is this lair-spoilery]
+	// monster name:[preferred combat item,funkslingign item,is this lair-spoilery]
 	var MonsterArray = {
-	"a Beer Batter":["baseball",1],
-	"a best-selling novelist":["plot hole",1],
-	"a Big Meat Golem":["meat vortex",1],
-	"a Bowling Cricket":["sonar-in-a-biscuit",1],
-	"a Bronze Chef":["leftovers of indeterminate origin",1],
-	"a collapsed mineshaft golem":["stick of dynamite",1],
-	"a concert pianist":["Knob Goblin firecracker",1],
-	"the darkness":["inkwell",1],
-	" El Diablo":["mariachi G-string",1],		// note: leading space is very important.  do not remove it.
-	"an Electron Submarine":["photoprotoneutron torpedo",1],
-	"an endangered inflatable white tiger":["pygmy blowgun",1],
-	"an Enraged Cow":["barbed-wire fence",1],
-	"a fancy bath slug":["fancy bath salts",1],
-	"the Fickle Finger of F8":["razor-sharp can lid",1],
-	"a Flaming Samurai":["frigid ninja stars",1],
-	"a giant bee":["tropical orchid",1],
-	"a giant fried egg":["black pepper",1],
-	"a Giant Desktop Globe":["NG",1],
-	"an Ice Cube":["hair spray",1],
-	"a malevolent crop circle":["bronzed locust",1],
-	"a possessed pipe-organ":["powdered organs",1],
-	"a Pretty Fly":["spider web",1],
-	"a Tyrannosaurus Tex":["chaos butterfly",1],
-	"a Vicious Easel":["disease",1],
-	"The Guy Made Of Bees":["antique hand mirror",0],
-	"an erudite gremlin":["rock band flyers",0],
-	"a vegetable gremlin":["rock band flyers",0],
-	"an AMC gremlin":["rock band flyers",0],
-	"a spider gremlin":["rock band flyers",0],
-	"a batwinged gremlin":["rock band flyers",0],
-	"a tetchy pirate":["The Big Book of Pirate Insults",0],
-	"a toothy pirate":["The Big Book of Pirate Insults",0],
-	"a tipsy pirate":["The Big Book of Pirate Insults",0]
+	"a Beer Batter":["baseball","",1],
+	"a best-selling novelist":["plot hole","",1],
+	"a Big Meat Golem":["meat vortex","",1],
+	"a Bowling Cricket":["sonar-in-a-biscuit","",1],
+	"a Bronze Chef":["leftovers of indeterminate origin","",1],
+	"a collapsed mineshaft golem":["stick of dynamite","",1],
+	"a concert pianist":["Knob Goblin firecracker","",1],
+	"the darkness":["inkwell","",1],
+	" El Diablo":["mariachi G-string","",1],		// note: leading space is very important.  do not remove it.
+	"an Electron Submarine":["photoprotoneutron torpedo","",1],
+	"an endangered inflatable white tiger":["pygmy blowgun","",1],
+	"an Enraged Cow":["barbed-wire fence","",1],
+	"a fancy bath slug":["fancy bath salts","",1],
+	"the Fickle Finger of F8":["razor-sharp can lid","",1],
+	"a Flaming Samurai":["frigid ninja stars","",1],
+	"a giant bee":["tropical orchid","",1],
+	"a giant fried egg":["black pepper","",1],
+	"a Giant Desktop Globe":["NG","",1],
+	"an Ice Cube":["hair spray","",1],
+	"a malevolent crop circle":["bronzed locust","",1],
+	"a possessed pipe-organ":["powdered organs","",1],
+	"a Pretty Fly":["spider web","",1],
+	"a Tyrannosaurus Tex":["chaos butterfly","",1],
+	"a Vicious Easel":["disease","",1],
+	"The Guy Made Of Bees":["antique hand mirror","",0],
+	"an erudite gremlin":["band flyers","molybdenum magnet",0],
+	"a vegetable gremlin":["band flyers","molybdenum magnet",0],
+	"an AMC gremlin":["band flyers","",0],
+	"a spider gremlin":["band flyers","molybdenum magnet",0],
+	"a batwinged gremlin":["band flyers","molybdenum magnet",0],
+	"a tetchy pirate":["The Big Book of Pirate Insults","",0],
+	"a toothy pirate":["The Big Book of Pirate Insults","",0],
+	"a tipsy pirate":["The Big Book of Pirate Insults","",0]
 	};
 	
 	var monsterName = document.getElementById('monname').innerHTML;
-	var monsterItem = MonsterArray[monsterName];
-	if (monsterItem != undefined && GetPref('lairspoil') != 1 && monsterItem[1] == 1) return;	// found something, spoilers are off, and this is a spoilery monster?
-	if (monsterItem != undefined) {
-		var dropdown = document.getElementsByTagName('select')[0];
-		for(var i=1;i<dropdown.options.length;i++) {
-			if(dropdown.options[i].text.indexOf(monsterItem[0]) != -1) {
-				dropdown.options.selectedIndex = i;
-				break;
+	var infight = GetData("infight");
+	if (infight != "Y") {	// first time through this particular fight?
+		SetData("infight","Y");
+		var monsterItem = MonsterArray[monsterName];
+		if (monsterItem != undefined && GetPref('lairspoil') != 1 && monsterItem[2] == 1) return;	// found something, spoilers are off, and this is a spoilery monster?
+		if (monsterItem != undefined) {	// let's do something specific with this critter.
+			var dropdown = document.getElementsByTagName('select')[0];
+			for(var i=1;i<dropdown.options.length;i++) {
+				if(dropdown.options[i].text.indexOf(monsterItem[0]) != -1) {
+					dropdown.options.selectedIndex = i;
+					break;
+				}
+			}
+			if (monsterItem[1] != "") {	// is there a funkslinging preference given?
+				dropdown = document.getElementsByTagName('select')[1];
+				if (dropdown && dropdown.name == "whichitem2") {	// any other name is not for funkslinging.
+					for(var i=1;i<dropdown.options.length;i++) {
+						if(dropdown.options[i].text.indexOf(monsterItem[1]) != -1) {
+							dropdown.options.selectedIndex = i;
+							break;
+						}
+					}
+				}
 			}
 		}
 	}
 // end shameless codeborrow
-//	GM_log("fighting:["+monsterName+"]");
+
+	// post-loss processing:
+	if (/You lose.  You slink away,/.test(document.body.innerHTML) || /You run away, like a sissy/.test(document.body.innerHTML)) {
+		SetData("infight","N");
+	}
 
 	// post-win processing:	
 	if (/WINWINW/.test(document.body.innerHTML)) {
-//		GM_log("yay, we beat the ["+monsterName+"]");
+		GM_log("yay, we beat the ["+monsterName+"]");
+		SetData("infight","N");
 		switch (monsterName) {
 		case "a skeletal sommelier":
 		case "a possessed wine rack":
@@ -1656,13 +1676,7 @@ function at_fight() {
 			}
 			break;
 		case " Dr. Awkward":
-			$("p:contains('Adventure')").each(function() {
-				var adv = $(this);
-				GM_log("inner="+adv.innerHTML);
-				adv.text("TAKE OFF THE MEGA-GEM AND TALISMAN, AND PUT ON SOME REAL GEAR.");
-				adv.append(AppendLink('[inventory]','inventory.php?which=2'));
-//				adv.textContent += "\n<font color=red size=6>TAKE OFF THE MEGA GEM AND TALISMAN AND PUT SOME REAL GEAR ON</font>";
-			});
+			$("p:contains('Adventure')").html('<a href="inventory.php?which=2">TAKE OFF THE MEGA-GEM AND PUT SOMETHING ELSE ON.</a>');
 			break;
 		}
 	}
@@ -1698,6 +1712,7 @@ function at_valhalla() {
 	SetCharData("corner179",'');
 	SetCharData("corner180",'');
 	SetCharData("corner181",'');
+	SetCharData("winelist",'');
 }
 
 
@@ -2991,11 +3006,6 @@ function at_charpane()
 	};
 
 	SetData("charname",bText[0].textContent);
-//	for (var i=1, len=centerThing.length; i<len; i++)
-//	{	var temp = centerThing[i];
-//		if (temp.firstChild.nodeName == 'B' || temp.firstChild.nodeName == 'A')
-//		{	centerThing = temp; break;
-//	}	}
 
 	// Compact Mode
 	if (compactMode)
@@ -3155,9 +3165,9 @@ level = (parseInt(Math.sqrt(stat-4)))+1; */
 			switch (effNum)
 			{	case 275: // hydrated
 					var hydtxt = img.parentNode.nextSibling.textContent;
-					if(/\(1\)/.test(hydtxt))			// 1 turn left?  set marker to add rehydrate link next adventure.
+					if (/\(1\)/.test(hydtxt))			// 1 turn left?  set marker to add rehydrate link next adventure.
 						SetData('hydrate', advcount-1);
-					else if(/\(5\)/.test(hydtxt))		// got 5 turns now?  add Desert link.
+					else if (/\(5\)/.test(hydtxt) || /\(20\)/.test(hydtxt))		// got 5 turns (or 20 from clover) now?  add Desert link.
 					{	if(compactMode) $('a[href=adventure.php?snarfblat=122]')
 						.after(':<br /><a href="adventure.php?' +
 						'snarfblat=123" target="mainpane">' +
@@ -3536,23 +3546,27 @@ function at_manor3()
 		3:[7,"Marsala, Merlot, Muscat"]
 	};
 // new:	
-	var match = {178:[0,0,0,0,0],179:[0,0,0,0,0],180:[0,0,0,0,0],181:[0,0,0,0,0]};
+	var match = {178:[0,0,0,0,0],179:[0,0,0,0,0],180:[0,0,0,0,0],181:[0,0,0,0,0],182:[0,0,0,0,0]};
 	for (i=0;i<4;i++) {
 		match[178][i] = ((NW | wineConfig[i][0]) == wineConfig[i][0])? 1: 0;
 		match[179][i] = ((NE | wineConfig[i][0]) == wineConfig[i][0])? 1: 0;
 		match[180][i] = ((SW | wineConfig[i][0]) == wineConfig[i][0])? 1: 0;
 		match[181][i] = ((SE | wineConfig[i][0]) == wineConfig[i][0])? 1: 0;
 	}
-	for (n=178;n<182;n++) {				// calculate the "sum-of" column.  If the total of the first 4 columns is 1, this row is fully ID'd.
-		for (i=0; i<4; i++) match[n][4] += match[n][i];
+	for (n=178;n<182;n++) {				// calculate the "sum-of" columns.  If the total of the first 4 columns is 1, this row is fully ID'd.
+		for (i=0; i<4; i++) {
+			match[n][4] += match[n][i];
+			match[182][i] += match[n][i];
+		}
 	}
 //debug:	
-//	GM_log("pre-reduction:");
-//	for (n=178;n<182;n++) {
+	GM_log("pre-reduction:");
+	for (n=178;n<183;n++) {
+		GM_log("match["+n+"][]:"+match[n][0]+match[n][1]+match[n][2]+match[n][3]+match[n][4]);
 //		for (i=0;i<5;i++) GM_log("match["+n+"]["+i+"]="+match[n][i]);
-//	}
+	}
 //
-	for (n=0; n<2; n++) {				// do this whole thing twice to accommodate starting in the wrong corner.
+	for (n=0; n<4; n++) {				// 4 passes should solve the most difficult-but-solvable configuration.
 		for (check=178; check<182; check++) {
 			if (match[check][4] == 1) {								// fully-ID'd row?
 				for (i=0; i<4; i++) if (match[check][i]) break;		// find the set ID column
@@ -3560,22 +3574,41 @@ function at_manor3()
 					if (set==check) continue;						// I said all the OTHER rows, see?
 					if (match[set][i] == 1) {						// if it's set,
 						match[set][4] -= 1;							//    decrement the sum-of-array total
+						match[182][i] -= 1;							//    and the other sum-of-array total
 						match[set][i] = 0;							//    and unset it.
 					}
 				}
 			}
 		}
 	}	
+	
+	for (n=0; n<4; n++) {				// 4 passes should solve the most difficult-but-solvable configuration.
+		for (check=0;check<4;check++) {
+			if (match[182][check] == 1) {								// fully-ID'd column?
+				for (j=178;j<182; j++) if (match[j][check]) break;		// find the set ID row
+				for (set=0; set<4; set++) {							// unset it in all the other columns
+					if (set==check) continue;						// I said all the OTHER columns, see?
+					if (match[j][set] == 1) {						// if it's set,
+						match[j][4] -= 1;							//    decrement the sum-of-array total
+						match[182][set] -= 1;						//    and the other sum-of-array total
+						match[j][set] = 0;							//    and unset it.
+					}
+				}
+			}
+		}
+	}	
+	
 	var possibilities = ["","","",""];
 	var cornername = {178:" NW ", 179: " NE ", 180:" SW ", 181:" SE "};
-	for (n=178; n<182; n++) {
-		for (i=0; i<4; i++) if (match[n][i] == 1) possibilities[i] += cornername[n];
+	for (i=0; i<4; i++) {
+		for (n=178; n<182; n++) if (match[n][i] == 1) possibilities[i] += cornername[n];
 	}
-//	GM_log("Post-reduction:");
-//	for (n=178;n<182;n++) {
+	GM_log("Post-reduction:");
+	for (n=178;n<183;n++) {
+		GM_log("match["+n+"][]:"+match[n][0]+match[n][1]+match[n][2]+match[n][3]+match[n][4]);
 //		for (i=0;i<5;i++) GM_log("match["+n+"]["+i+"]="+match[n][i]);
-//	}
-//	for (i=0;i<4;i++) GM_log("possibilities["+i+"]="+possibilities[i]);
+	}
+	for (i=0;i<4;i++) GM_log("possibilities["+i+"]="+possibilities[i]);
 
 // old:
 //	for (var i=0;i<4;i++) {
@@ -3605,12 +3638,20 @@ function at_manor3()
 		tr1.appendChild(td1);
 		CornerSpoilers.appendChild(tr1);
 	}
-	GM_log("spoilers should say:"+CornerSpoilers.innerHTML);
+//	GM_log("spoilers should say:"+CornerSpoilers.innerHTML);
 	getWinelist.innerHTML = '<font size="2">[Garcon, the wine list, please?]</font>';
 	getWinelist.setAttribute('href','#');
 	getWinelist.addEventListener('click',function(evt)
 	{	
 		getWinelist.innerHTML='<font size="2">M\'sieur, your choices are:</font>';
+		var wineHTML = GetCharData("winelist");
+		GM_log("wineHTML="+wineHTML);
+		if (wineHTML != undefined) {	// did we do this the hard way already?  Then just display the results from last time.
+			GM_log("whee");
+			wineDisplay.innerHTML = wineHTML;
+			getWinelist.parentNode.appendChild(wineDisplay);
+			return;
+		}	// else 
 		GM_get(server+"/desc_item.php?whichitem="+wineDB[2271], function(b1) {
 			winelist[2271]=scrape(b1);
 			GM_get(server+"/desc_item.php?whichitem="+wineDB[2272], function(b2) {
@@ -3630,6 +3671,7 @@ function at_manor3()
 									GM_log("winelist[i][0]="+winelist[i][0]+", winelist[i][1]="+winelist[i][1]);
 								}
 								wineDisplay.innerHTML += "</table>";
+								SetCharData("winelist",wineDisplay.innerHTML);	// this is an expensive operation, let's only do it once.
 								getWinelist.parentNode.appendChild(wineDisplay);
 							});
 						});
@@ -4497,6 +4539,15 @@ function at_topmenu()
 	}
 //end moonslink
 
+	// some housekeeping stuff that I want to make sure gets checked regularly and can't think of a better place for...
+	// gotta clear these out when you ascend, which you may do on a different computer occasionally.
+	if (parseInt(GetData('level')) < 11) {
+		SetCharData("corner178",'');
+		SetCharData("corner179",'');
+		SetCharData("corner180",'');
+		SetCharData("corner181",'');
+		SetCharData("winelist",'');
+	}
 	var compactmode = document.getElementsByName('loc').length; // compact mode has a dropdown listbox called 'loc', full mode doesn't.
 	if (compactmode > 0) {	
 		at_compactmenu();
@@ -4674,14 +4725,14 @@ function at_topmenu()
 		var poop = document.createElement('span'); poop.innerHTML = "&nbsp;";
 		toprow1.appendChild(poop);
 		AddTopLink(toprow1, 'mainpane', 'multiuse.php', 'multi-use', 1);
-	AddTopLink(toprow1, 'mainpane', 'craft.php?mode=combine', 'combine', 1);
-	AddTopLink(toprow1, 'mainpane', 'sellstuff.php', 'sell', 1);
-	AddTopLink(toprow1, 'mainpane', 'craft.php?mode=cook', 'cook', 1);
-	AddTopLink(toprow1, 'mainpane', 'craft.php?mode=cocktail', 'mix', 1);
-	AddTopLink(toprow1, 'mainpane', 'craft.php?mode=smith', 'smith', 1);
-	AddTopLink(toprow1, 'mainpane', 'council.php', 'council', 1);
-	AddTopLink(toprow1, 'mainpane', 'guild.php', 'guild', 1);
-		if (haveLair == 1 && GetData('level') == 11)
+		AddTopLink(toprow1, 'mainpane', 'craft.php?mode=combine', 'combine', 1);
+		AddTopLink(toprow1, 'mainpane', 'sellstuff.php', 'sell', 1);
+		AddTopLink(toprow1, 'mainpane', 'craft.php?mode=cook', 'cook', 1);
+		AddTopLink(toprow1, 'mainpane', 'craft.php?mode=cocktail', 'mix', 1);
+		AddTopLink(toprow1, 'mainpane', 'craft.php?mode=smith', 'smith', 1);
+		AddTopLink(toprow1, 'mainpane', 'council.php', 'council', 1);
+		AddTopLink(toprow1, 'mainpane', 'guild.php', 'guild', 1);
+		if (haveLair == 1 && GetData('level') == 13)
 			AddTopLink(toprow1, 'mainpane', 'lair2.php?action=door', 'door', 1);
 		a = document.createElement('a'); a.innerHTML = "more"; a.setAttribute('href','#');
 		a.addEventListener('click', function(event)
