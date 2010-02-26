@@ -3507,15 +3507,7 @@ function at_manor3()
 		.attr('border','0')
 		.wrap('<a target="mainpane" href="inv_equip.php?pwd=' +
 			pwd + '&which=2&action=equip&whichitem=1916&slot=3"></a>');
-
-// add link to display 			
-	function scrape(txt) {
-		var bottleOf = txt.match(/dusty bottle of (.*?)\</)[1];
-		var glyphNum = txt.match(/\/glyph([0-9])/)[1];
-		var bInfo = [bottleOf, glyphNum];
-		return bInfo;
-	}
-		
+	
 	var getWinelist = document.createElement('a');
 	var wineDisplay = document.createElement('table');
 	wineDisplay.setAttribute('border','1');
@@ -3534,18 +3526,21 @@ function at_manor3()
 	CornerSpoilers.setAttribute('border','1');
 	var tr1;
 	var td1;
-	var NW = GetCharData("corner178"); if (NE == null) NE = 0;
-	var NE = GetCharData("corner179"); if (NW == null) NW = 0;
-	var SW = GetCharData("corner180"); if (SE == null) SE = 0;
-	var SE = GetCharData("corner181"); if (SW == null) SW = 0;
-//	GM_log("178:"+NW+", 179:"+NE+", 180:"+SW+", 181:"+SE);
+	var NW = GetCharData("corner178"); if (NW === undefined) NW = 0;
+	var NE = GetCharData("corner179"); if (NE === undefined) NE = 0;
+	var SW = GetCharData("corner180"); if (SW === undefined) SW = 0;
+	var SE = GetCharData("corner181"); if (SE === undefined) SE = 0;
+	GM_log("178:"+NW+", 179:"+NE+", 180:"+SW+", 181:"+SE);
 	var wineConfig = {
 		0:[25,"Merlot, Pinot Noir, Port"], 
 		1:[42,"Marsala, Pinot Noir, Zinfandel"], 
 		2:[52,"Muscat, Port, Zinfandel"],
 		3:[7,"Marsala, Merlot, Muscat"]
 	};
-// new:	
+	
+
+	var oldsum = 0;
+	var newsum = 0;
 	var match = {178:[0,0,0,0,0],179:[0,0,0,0,0],180:[0,0,0,0,0],181:[0,0,0,0,0],182:[0,0,0,0,0]};
 	for (i=0;i<4;i++) {
 		match[178][i] = ((NW | wineConfig[i][0]) == wineConfig[i][0])? 1: 0;
@@ -3553,20 +3548,24 @@ function at_manor3()
 		match[180][i] = ((SW | wineConfig[i][0]) == wineConfig[i][0])? 1: 0;
 		match[181][i] = ((SE | wineConfig[i][0]) == wineConfig[i][0])? 1: 0;
 	}
-	for (n=178;n<182;n++) {				// calculate the "sum-of" columns.  If the total of the first 4 columns is 1, this row is fully ID'd.
+	for (n=178;n<182;n++) {				// calculate the "sum-of" data.  If the total of the first 4 columns is 1, this row is fully ID'd.
 		for (i=0; i<4; i++) {
 			match[n][4] += match[n][i];
 			match[182][i] += match[n][i];
+			newsum = newsum + match[n][i];
 		}
 	}
 //debug:	
-	GM_log("pre-reduction:");
-	for (n=178;n<183;n++) {
-		GM_log("match["+n+"][]:"+match[n][0]+match[n][1]+match[n][2]+match[n][3]+match[n][4]);
-//		for (i=0;i<5;i++) GM_log("match["+n+"]["+i+"]="+match[n][i]);
-	}
-//
-	for (n=0; n<4; n++) {				// 4 passes should solve the most difficult-but-solvable configuration.
+//	GM_log("pre-reduction:");
+//	for (n=178;n<183;n++) {
+//		GM_log("match["+n+"][]:"+match[n][0]+match[n][1]+match[n][2]+match[n][3]+match[n][4]);
+//	}
+//	GM_log("oldsum, newsum: "+oldsum+" "+newsum);
+
+	while (oldsum != newsum) {
+//		GM_log("oldsum, newsum: "+oldsum+" "+newsum);
+		oldsum = newsum;
+		// reduce the matrix of possibilities row-wise
 		for (check=178; check<182; check++) {
 			if (match[check][4] == 1) {								// fully-ID'd row?
 				for (i=0; i<4; i++) if (match[check][i]) break;		// find the set ID column
@@ -3575,14 +3574,13 @@ function at_manor3()
 					if (match[set][i] == 1) {						// if it's set,
 						match[set][4] -= 1;							//    decrement the sum-of-array total
 						match[182][i] -= 1;							//    and the other sum-of-array total
+						newsum--;									//    and the sum-of-sum total
 						match[set][i] = 0;							//    and unset it.
 					}
 				}
 			}
 		}
-	}	
-	
-	for (n=0; n<4; n++) {				// 4 passes should solve the most difficult-but-solvable configuration.
+		// and then reduce it column-wise
 		for (check=0;check<4;check++) {
 			if (match[182][check] == 1) {								// fully-ID'd column?
 				for (j=178;j<182; j++) if (match[j][check]) break;		// find the set ID row
@@ -3591,6 +3589,7 @@ function at_manor3()
 					if (match[j][set] == 1) {						// if it's set,
 						match[j][4] -= 1;							//    decrement the sum-of-array total
 						match[182][set] -= 1;						//    and the other sum-of-array total
+						newsum--;									//    and the sum-of-sum total
 						match[j][set] = 0;							//    and unset it.
 					}
 				}
@@ -3603,24 +3602,12 @@ function at_manor3()
 	for (i=0; i<4; i++) {
 		for (n=178; n<182; n++) if (match[n][i] == 1) possibilities[i] += cornername[n];
 	}
-	GM_log("Post-reduction:");
-	for (n=178;n<183;n++) {
-		GM_log("match["+n+"][]:"+match[n][0]+match[n][1]+match[n][2]+match[n][3]+match[n][4]);
-//		for (i=0;i<5;i++) GM_log("match["+n+"]["+i+"]="+match[n][i]);
-	}
-	for (i=0;i<4;i++) GM_log("possibilities["+i+"]="+possibilities[i]);
-
-// old:
-//	for (var i=0;i<4;i++) {
-//		var thiscorner = "";
-//		GM_log("wineConfig[i][0]="+wineConfig[i][0]+", NE="+NE+", NW="+NW+", SE="+SE+", SW="+SW);
-//		if ((wineConfig[i][0] | NE) == wineConfig[i][0]) thiscorner += " NE ";
-//		if ((wineConfig[i][0] | NW) == wineConfig[i][0]) thiscorner += " NW ";
-//		if ((wineConfig[i][0] | SE) == wineConfig[i][0]) thiscorner += " SE ";
-//		if ((wineConfig[i][0] | SW) == wineConfig[i][0]) thiscorner += " SW ";
-//		GM_log("i="+i+", thiscorner="+thiscorner);
-//		possibilities.push([i, thiscorner]);
+//	GM_log("Post-reduction:");
+//	for (n=178;n<183;n++) {
+//		GM_log("match["+n+"][]:"+match[n][0]+match[n][1]+match[n][2]+match[n][3]+match[n][4]);
 //	}
+//	for (i=0;i<4;i++) GM_log("possibilities["+i+"]="+possibilities[i]);
+
 	var th1 = document.createElement('th');
 	th1.textContent = "this set of wines:";
 	CornerSpoilers.appendChild(th1);
@@ -3639,15 +3626,22 @@ function at_manor3()
 		CornerSpoilers.appendChild(tr1);
 	}
 //	GM_log("spoilers should say:"+CornerSpoilers.innerHTML);
+
+	function scrape(txt) {
+		var bottleOf = txt.match(/dusty bottle of (.*?)\</)[1];
+		var glyphNum = txt.match(/\/glyph([0-9])/)[1];
+		var bInfo = [bottleOf, glyphNum];
+		return bInfo;
+	}
+	
 	getWinelist.innerHTML = '<font size="2">[Garcon, the wine list, please?]</font>';
 	getWinelist.setAttribute('href','#');
 	getWinelist.addEventListener('click',function(evt)
 	{	
 		getWinelist.innerHTML='<font size="2">M\'sieur, your choices are:</font>';
 		var wineHTML = GetCharData("winelist");
-		GM_log("wineHTML="+wineHTML);
+//		GM_log("wineHTML="+wineHTML);
 		if (wineHTML != undefined) {	// did we do this the hard way already?  Then just display the results from last time.
-			GM_log("whee");
 			wineDisplay.innerHTML = wineHTML;
 			getWinelist.parentNode.appendChild(wineDisplay);
 			return;
