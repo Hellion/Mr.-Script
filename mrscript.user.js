@@ -1535,7 +1535,7 @@ function at_main() {
 	// If over X hours, check for updates
 	if ((currentHours - lastUpdated) > 24)
 	{
-	GM_get("noblesse-oblige.org/lukifer/scripts/MrScript.version.json",
+	GM_get("noblesse-oblige.org/hellion/scripts/MrScript.version.json",
 		function(txt)
 		{	var json = eval('('+txt+')');
 			if(!json.version) return;
@@ -4483,6 +4483,14 @@ function spoil_seafloor()
 		if(ml) this.setAttribute('title','ML: '+ml);
 });	}		
 
+function spoil_wormwood()
+{	$('img').each(function()
+	{	var ml= null; var src = this.getAttribute('src');
+		if (src.indexOf("wormwood3") != -1) ml = '9-7 for skirt, STLT, myst; 5-4 for !pipe, necklace, moxie; 1 for flask, mask, muscle'; // Mansion 
+		if (src.indexOf("wormwood4") != -1) ml = '9-7 for mask, !pipe, muscle; 5-4 for skirt, flask, myst; 1 for STLT, necklace, moxie'; // dome
+		if (src.indexOf("wormwood8") != -1) ml = '9-7 for necklace, flask, moxie; 5-4 for mask, STLT, muscle; 1 for skirt, !pipe, myst'; // windmill
+		if (ml) this.setAttribute('title',ml);
+});	}
 
 
 // -------------------------
@@ -5109,7 +5117,7 @@ function at_account()
 			ul.setAttribute('href','#');
 			ul.innerHTML = "Check For Update";
 			ul.addEventListener('click',function(event)
-			{	GM_get("noblesse-oblige.org/lukifer/scripts/MrScript.version.txt", function(txt)
+			{	GM_get("noblesse-oblige.org/hellion/scripts/MrScript.version.txt", function(txt)
 				{	var uspan = document.getElementsByName('updatespan')[0];
 					var txtsplit = txt.split(',');
 					var versionNumber = txtsplit[0].replace('.','').replace('.','');
@@ -5126,13 +5134,13 @@ function at_account()
 			ul2.innerHTML = "Update Item DB";
 			ul2.addEventListener('click',function(event)
 			{	if (confirm("Are you sure? You should only perform this action if Mr. Script is not functioning properly."))
-				{	UpdateItemDB(0); alert("Database will attempt to update. Please contact Lukifer if the problem persists.");
+				{	UpdateItemDB(0); alert("Database will attempt to update. Please contact Hellion if the problem persists.");
 			}	}, true);
-			var ul3 = document.createElement('a');
-			ul3.setAttribute('target', '_blank');
-			ul3.setAttribute('href','https://www.paypal.com/cgi-bin/webscr?'+
-'cmd=_donations&business=lukifer%40mail%2ecom&item_name=Mr%2e%20Script&page_style=PayPal&no_shipping=1&cn=Comments&tax=0&currency_code=USD&lc=US&bn=PP%2dDonationsBF&charset=UTF%2d8');
-			ul3.innerHTML = 'Say Thanks With Money!';
+//			var ul3 = document.createElement('a');
+//			ul3.setAttribute('target', '_blank');
+//			ul3.setAttribute('href','https://www.paypal.com/cgi-bin/webscr?'+
+//'cmd=_donations&business=lukifer%40mail%2ecom&item_name=Mr%2e%20Script&page_style=PayPal&no_shipping=1&cn=Comments&tax=0&currency_code=USD&lc=US&bn=PP%2dDonationsBF&charset=UTF%2d8');
+//			ul3.innerHTML = 'Say Thanks With Money!';
 			var ul4 = document.createElement('a');
 			ul4.setAttribute('href','javascript:void(0);');
 			ul4.innerHTML = "Renew Password Hash";
@@ -5154,9 +5162,9 @@ function at_account()
 			ulspan.appendChild(document.createTextNode(' - '));
 			ulspan.appendChild(ul4);
 			ulspan.appendChild(document.createElement('br'));
-			ulspan.appendChild(document.createElement('br'));
-			ulspan.appendChild(document.createTextNode('Like Mr. Script? '));
-			ulspan.appendChild(ul3);
+//			ulspan.appendChild(document.createElement('br'));
+//			ulspan.appendChild(document.createTextNode('Like Mr. Script? '));
+//			ulspan.appendChild(ul3);
 			bigSpan.appendChild(centre);
 
 			var prefLink = document.createElement('a');
