@@ -2,7 +2,6 @@
 	"url1":"http://noblesse-oblige.org/hellion/scripts/MrScript.user.js",
 	"desc":"<b>Fixed</b>
 <br />- Typo in a tower item or two
-<br />- Typo bug with attached links
 <br /><br /><b>New</b>
 <br />- More ML spoilers.
 <br />- Option to have the moons link to the NO Calendar.
@@ -10,6 +9,8 @@
 <br />- automatic tracking of which wines have dropped, and therefore which other wines can drop, in which corner.
 <br />- link from BHH to the accepted bounty zone.
 <br />- link from the untinker to Innabox if muscle class.
+<br />- autoupdate points somewhese that might work more often now.
+<br />- mouseover spoilers for Worm Wood to help you get your rewards.
 "
 
 }
