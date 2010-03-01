@@ -1609,6 +1609,7 @@ function at_fight() {
 	"an AMC gremlin":["band flyers","",0],
 	"a spider gremlin":["band flyers","molybdenum magnet",0],
 	"a batwinged gremlin":["band flyers","molybdenum magnet",0],
+	" Ed the Undying":["band flyers","",0],
 	"a tetchy pirate":["The Big Book of Pirate Insults","",0],
 	"a toothy pirate":["The Big Book of Pirate Insults","",0],
 	"a tipsy pirate":["The Big Book of Pirate Insults","",0]
@@ -1676,7 +1677,7 @@ function at_fight() {
 			}
 			break;
 		case " Dr. Awkward":
-			$("p:contains('Adventure')").html('<a href="inventory.php?which=2">TAKE OFF THE MEGA-GEM AND PUT SOMETHING ELSE ON.</a>');
+			$("p:contains('Adventure')").html('<a href="inventory.php?which=2"><font size=4>TAKE OFF THE MEGA-GEM AND PUT SOMETHING ELSE ON.</font></a>');
 			break;
 		}
 	}
@@ -2415,6 +2416,20 @@ function at_galaktik()
 	howMany.after(checkSpan);
 }
 
+// -------------------------------------------------------------
+// BIGISLAND: add inventory check to Frat/Hippy Trade-In stores.
+// -------------------------------------------------------------
+function at_bigisland()
+{
+//	GM_log("bigisland:"+document.location.search);
+//	if (document.location.search.indexOf("place=camp") != -1) {
+		$('img').each(function()
+		{	var onclick = this.getAttribute('onclick');
+			if (onclick != undefined && onclick.indexOf("desc") != -1)
+				AddInvCheck(this);
+		});
+//	}
+}
 
 // ---------------------------------------------
 // STORE: Add use boxes and links as appropriate
@@ -3002,6 +3017,7 @@ function at_charpane()
 	'15f811':295,	// socialismydia
 	'c69907':297,	// temporary amnesia
 	'9a12b9':301,	// Cunctatitis
+	'ebaff6':357,	// Absinthe-minded
 	'91635b':331	// On The Trail
 	};
 
@@ -3182,12 +3198,18 @@ level = (parseInt(Math.sqrt(stat-4)))+1; */
 					var func = "top.mainpane.location.href = 'http://";
 					func += server + "/inv_use.php?which=3&whichitem=1794&pwd="+pwd+"'; return false;";
 					img.setAttribute('oncontextmenu', func); break;
+					
+				case 357:	// absinthe-minded: light up on 9/5/1 turns left.
+					var abstxt = img.parentNode.nextSibling.textContent;
+					if (/\(9/.test(abstxt) || /\(5/.test(abstxt) || /\(1\)/.test(abstxt))
+						img.parentNode.nextSibling.innerHTML = '<a target=mainpane href=wormwood.php><font color="red"><b>' + img.parentNode.nextSibling.innerHTML + "</b></font></a>";
+					break;
 				
 				// snowcone reuse upon expiration of effect became obsolete when snowcones became multi-usable.
 				//	case 139: case 140: case 141: case 142: case 143: case 144:
 				//	if(/\(1\)/.test(img.parentNode.nextSibling.textContent))
 				//		SetData('snowcone', advcount-1);
-					break;
+				//	break;
 
 // I have no idea what the hell this is supposed to be for. 27Jan10 Hellion
 //				case 123: case 456:
