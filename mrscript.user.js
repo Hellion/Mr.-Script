@@ -1651,7 +1651,7 @@ function at_fight() {
 
 	// post-win processing:	
 	if (/WINWINW/.test(document.body.innerHTML)) {
-		GM_log("yay, we beat the ["+monsterName+"]");
+//		GM_log("yay, we beat the ["+monsterName+"]");
 		SetData("infight","N");
 		switch (monsterName) {
 		case "a skeletal sommelier":
@@ -2283,22 +2283,28 @@ if(quickequip > 0)
 
 	if (GetPref('shortlinks') > 1 && firstTable.rows[0].textContent == "Results:")
 	{	var resultsText = firstTable.rows[1].textContent, bText;
+// this is where we go back to a useful location if we've done/used something elsewhere that caused the inventory page to load.
 		if (resultsText.indexOf("tumbling rocks") != -1 &&
-			document.referrer.indexOf('bathole.php') != -1)
+			document.referrer.indexOf('bathole.php') != -1)	// used a sonar at the bathole
 			parent.frames[2].location =
 				'http://' + server + '/bathole.php';
 		else if (resultsText.indexOf("cheap ratchet") != -1 &&
-			document.referrer.indexOf('pyramid.php') != -1)
+			document.referrer.indexOf('pyramid.php') != -1)	// used a tomb ratchet at the pyramid
 			parent.frames[2].location =
 				'http://' + server + '/pyramid.php';
-		else if (resultsText.indexOf("duck talk") != -1)
+		else if (resultsText.indexOf("duck talk") != -1)	// used the giant castle map successfully
 		{	bText = document.getElementsByTagName('b')[1];
 			if (bText.textContent == "quantum egg")
 			{	bText.parentNode.appendChild(AppendLink('[rowboat]',
 				'craft.php?mode=combine&action=craft&a=652&b=609&pwd=' + pwd + '&quantity=1'));
 				GoGoGadgetPlunger();
-		}	}
-
+			}	
+		}
+		else if (resultsText.indexOf("All items unequipped") != -1 &&
+			document.referrer.indexOf('lair6.php') != -1)	// clicked the 'get nekkid' link at the gash
+			parent.frames[2].location = 
+				'http://'+ server + '/lair6.php';
+// and this is where we add all the nifty little links after equipping something.
 		else if (resultsText.indexOf("You equip an item") != -1)
 		{	bText = document.getElementsByTagName('b')[1];
 			//var item = resultsText.substring(14);
@@ -2366,7 +2372,8 @@ if(quickequip > 0)
 				equipText.appendChild(AppendLink('[battlefield]', 'adventure.php?snarfblat=85'));
 			else if (outfit.indexOf("Frat Warrior") != -1 || outfit.indexOf("War Hippy") != -1)
 				equipText.appendChild(AppendLink('[island]', 'island.php'));
-	}	}
+		}	
+	}
 }
 
 
@@ -3164,9 +3171,11 @@ level = (parseInt(Math.sqrt(stat-4)))+1; */
 		{	img.parentNode.parentNode.setAttribute('name','poison');
 			img.addEventListener('contextmenu', function(event)
 			{	document.getElementsByName('poison')[0].childNodes[1].innerHTML = "<i><span style='font-size:10px;'>Un-un-unpoisoning...</span></i>";
-				GM_get(server+'/store.php?howmany=1&buying=Yep.&whichstore=m&whichitem=829&phash='+pwd,
+// '/store.php?howmany=1&buying=Yep.&whichstore=m&whichitem=829&phash='+pwd,	// when anti-anti was in the demon market.
+				GM_get(server+'/galaktik.php?howmany=1&action=buyitem&whichitem=829&pwd='+pwd,
 				function(result)
-				{	if (result.indexOf('acquire') != -1)
+				{	GM_log(result);
+					if (result.indexOf('acquire') != -1)
 						GM_get(server+'/inv_use.php?which=1&whichitem=829&pwd='+pwd,function(event)
 						{	top.frames[1].location.reload(); });
 				}); event.stopPropagation(); event.preventDefault();
@@ -3500,6 +3509,7 @@ function at_manor()
 // ---------------------------------------
 function at_manor3()
 {
+// very basic spoilers, part 1: display glyphs while selecting the wines.
 	var wineDB = {'2275':'278847834','2271':'163456429','2276':'147519269',
 				  '2273':'905945394','2272':'289748376','2274':'625138517'};
 
@@ -3524,17 +3534,19 @@ function at_manor3()
 		});
 	});
 
+// very basic spoilers, part 2: link to equip spectacles when needed.
+// this part is all-but-unnecessary, only being needed on someone's first runthrough, but
+// we'll leave it here on the off chance that someone uses Mr. Script that early in their KoL career.
 	$('img[src*=lar2a]')
 		.attr('title','Click to Equip Spectacles')
 		.attr('border','0')
 		.wrap('<a target="mainpane" href="inv_equip.php?pwd=' +
 			pwd + '&which=2&action=equip&whichitem=1916&slot=3"></a>');
 	
-	var getWinelist = document.createElement('a');
-	var wineDisplay = document.createElement('table');
-	wineDisplay.setAttribute('border','1');
-	wineDisplay.setAttribute('cellpadding','2');
-	wineDisplay.setAttribute('width','80%');
+// advanced spoilers:
+
+// phase 1: generate "which wine is in which corner" spoilage.
+
 	var winelist = [];
 	var wineeffectlist = {
 		1:"3-4 adv/2 drunk", 
@@ -3544,23 +3556,23 @@ function at_manor3()
 		5:"3-4 adv/2 drunk, lose 60-70% of maxHP",
 		6:"0 adv/2 drunk, lose 80-90% of maxHP"
 	};
-	var CornerSpoilers = document.createElement('table');
-	CornerSpoilers.setAttribute('border','1');
-	var tr1;
-	var td1;
-	var NW = GetCharData("corner178"); if (NW === undefined) NW = 0;
-	var NE = GetCharData("corner179"); if (NE === undefined) NE = 0;
-	var SW = GetCharData("corner180"); if (SW === undefined) SW = 0;
-	var SE = GetCharData("corner181"); if (SE === undefined) SE = 0;
-	GM_log("178:"+NW+", 179:"+NE+", 180:"+SW+", 181:"+SE);
 	var wineConfig = {
 		0:[25,"Merlot, Pinot Noir, Port"], 
 		1:[42,"Marsala, Pinot Noir, Zinfandel"], 
 		2:[52,"Muscat, Port, Zinfandel"],
 		3:[7,"Marsala, Merlot, Muscat"]
 	};
-	
-
+	var CornerSpoilers = document.createElement('table');
+	CornerSpoilers.setAttribute('border','1');
+	var tr1;
+	var td1;
+	// get the what-dropped-where info that we grabbed in at_fight().
+	var NW = GetCharData("corner178"); if (NW === undefined) NW = 0;
+	var NE = GetCharData("corner179"); if (NE === undefined) NE = 0;
+	var SW = GetCharData("corner180"); if (SW === undefined) SW = 0;
+	var SE = GetCharData("corner181"); if (SE === undefined) SE = 0;
+//	GM_log("178:"+NW+", 179:"+NE+", 180:"+SW+", 181:"+SE);
+	// load it up into an array for comparing "what-dropped-where" with "what-combos-are-possible".
 	var oldsum = 0;
 	var newsum = 0;
 	var match = {178:[0,0,0,0,0],179:[0,0,0,0,0],180:[0,0,0,0,0],181:[0,0,0,0,0],182:[0,0,0,0,0]};
@@ -3570,10 +3582,10 @@ function at_manor3()
 		match[180][i] = ((SW | wineConfig[i][0]) == wineConfig[i][0])? 1: 0;
 		match[181][i] = ((SE | wineConfig[i][0]) == wineConfig[i][0])? 1: 0;
 	}
-	for (n=178;n<182;n++) {				// calculate the "sum-of" data.  If the total of the first 4 columns is 1, this row is fully ID'd.
-		for (i=0; i<4; i++) {
-			match[n][4] += match[n][i];
-			match[182][i] += match[n][i];
+	for (n=178;n<182;n++) {				// calculate the "sum-of" data.  If the total of the first 4 columns is 1, this row is
+		for (i=0; i<4; i++) {			// fully ID'd--only 1 possible configuration matches what dropped.  Conversely, if the
+			match[n][4] += match[n][i];	// total of the first 4 row entries is 1, only 1 drop pattern is left that can fit that
+			match[182][i] += match[n][i];	// configuration.
 			newsum = newsum + match[n][i];
 		}
 	}
@@ -3584,6 +3596,7 @@ function at_manor3()
 //	}
 //	GM_log("oldsum, newsum: "+oldsum+" "+newsum);
 
+	// reduce the matrix of drops-vs.-possibilities to its most-restricted form:
 	while (oldsum != newsum) {
 //		GM_log("oldsum, newsum: "+oldsum+" "+newsum);
 		oldsum = newsum;
@@ -3619,6 +3632,7 @@ function at_manor3()
 		}
 	}	
 	
+	// convert out array of drop possibilities into a list of corners for display.
 	var possibilities = ["","","",""];
 	var cornername = {178:" NW ", 179: " NE ", 180:" SW ", 181:" SE "};
 	for (i=0; i<4; i++) {
@@ -3630,6 +3644,7 @@ function at_manor3()
 //	}
 //	for (i=0;i<4;i++) GM_log("possibilities["+i+"]="+possibilities[i]);
 
+	// build the display table.
 	var th1 = document.createElement('th');
 	th1.textContent = "this set of wines:";
 	CornerSpoilers.appendChild(th1);
@@ -3647,59 +3662,120 @@ function at_manor3()
 		tr1.appendChild(td1);
 		CornerSpoilers.appendChild(tr1);
 	}
-//	GM_log("spoilers should say:"+CornerSpoilers.innerHTML);
 
 	function scrape(txt) {
+//		GM_log("scraping:" + itemid);
 		var bottleOf = txt.match(/dusty bottle of (.*?)\</)[1];
 		var glyphNum = txt.match(/\/glyph([0-9])/)[1];
-		var bInfo = [bottleOf, glyphNum];
+		var bInfo = [bottleOf, glyphNum];	
 		return bInfo;
 	}
+	function countWines(wl, needs) {	// wl is expected to be an array of bInfo's from the scrape() function.
+		GM_get(server+'/js_inv.php?for=MrScript',function(response) {
+			if (response[0] != '{') {		
+				var i1 = response.split('inventory = ')[1].split(';')[0];	// should get everything from { to }, inclusive.
+				response = i1;
+			}
+			var invcache = eval('('+response+')');
+			var dustyX;
+			var dustylist = new Array();
+			for (var i=2271; i<2277; i++) {
+				dustyX = invcache[i]; if (dustyX === undefined) dustyX = 0;
+				dustylist[i] = dustyX;
+				GM_log("found "+dustyX+" of wine "+i);
+			}
+			var youNeed = "You need: ";
+			for (i=0;i<3;i++) {
+				youNeed += winelist[needs[i]][0];
+				youNeed += " (you have "+dustylist[needs[i]]+"), ";
+			}
+			youNeed = youNeed.slice(0, -2);
+			getWinelist.innerHTML = youNeed;
+		});
+	}
+
+	var wineDisplay = document.createElement('table');
+	wineDisplay.setAttribute('border','1');
+	wineDisplay.setAttribute('cellpadding','2');
+	wineDisplay.setAttribute('width','80%');
 	
-	getWinelist.innerHTML = '<font size="2">[Garcon, the wine list, please?]</font>';
-	getWinelist.setAttribute('href','#');
-	getWinelist.addEventListener('click',function(evt)
-	{	
-		getWinelist.innerHTML='<font size="2">M\'sieur, your choices are:</font>';
-		var wineHTML = GetCharData("winelist");
-//		GM_log("wineHTML="+wineHTML);
-		if (wineHTML != undefined) {	// did we do this the hard way already?  Then just display the results from last time.
-			wineDisplay.innerHTML = wineHTML;
-			getWinelist.parentNode.appendChild(wineDisplay);
-			return;
-		}	// else 
-		GM_get(server+"/desc_item.php?whichitem="+wineDB[2271], function(b1) {
-			winelist[2271]=scrape(b1);
-			GM_get(server+"/desc_item.php?whichitem="+wineDB[2272], function(b2) {
-				winelist[2272] = scrape(b2);
-				GM_get(server+"/desc_item.php?whichitem="+wineDB[2273], function(b3) {
-					winelist[2273] = scrape(b3);
-					GM_get(server+"/desc_item.php?whichitem="+wineDB[2274], function(b4) {
-						winelist[2274] = scrape(b4);
-						GM_get(server+"/desc_item.php?whichitem="+wineDB[2275], function(b5) {
-							winelist[2275] = scrape(b5);
-							GM_get(server+"/desc_item.php?whichitem="+wineDB[2276], function(b6) {
-								winelist[2276] = scrape(b6);
-								for (var i=2271;i<2277;i++) {
-									wineDisplay.innerHTML += "<tr><td align=center>" + winelist[i][0]+"</td><td align=center>"+
-									"<img src=http://images.kingdomofloathing.com/otherimages/manor/glyph"+winelist[i][1]+".gif"+
-									" </td><td>Yields "+wineeffectlist[winelist[i][1]]+"</td></tr>";
-									GM_log("winelist[i][0]="+winelist[i][0]+", winelist[i][1]="+winelist[i][1]);
-								}
-								wineDisplay.innerHTML += "</table>";
-								SetCharData("winelist",wineDisplay.innerHTML);	// this is an expensive operation, let's only do it once.
-								getWinelist.parentNode.appendChild(wineDisplay);
+	var getWinelist = document.createElement('p');
+	document.body.appendChild(getWinelist);
+	document.body.appendChild(CornerSpoilers);
+	getWinelist.innerHTML='Checking wine information....';
+	
+	var wineHTML = GetCharData("wineHTML");
+	var winesneeded;
+//	GM_log("wineHTML="+wineHTML);
+	if (wineHTML != undefined) {	// did we do this the hard way already?  Then just display the results from last time.
+		GM_log("easy way:");
+		wineDisplay.innerHTML = wineHTML;
+		winelist = eval('('+GetCharData("winelist")+')');
+		winesneeded = eval('('+GetCharData("winesNeeded")+')');
+		getWinelist.parentNode.appendChild(wineDisplay);
+		GM_log("calling listNeeds from the easy way");
+//		getWinelist.innerHTML = 
+		countWines(winelist, winesneeded); 
+//		GM_log("we took the cheap way.");
+	} else {	// else 
+		GM_get(server+"/manor3.php?place=goblet", function (atext) {
+			GM_log("goblet text:"+atext);
+			var pdiv = document.createElement('div');
+			pdiv.innerHTML = atext;
+			var glimgs = pdiv.getElementsByTagName('img');
+			var glyphids = new Array();
+			GM_log(glimgs[0].getAttribute('src'));
+			glyphids[0] = glimgs[0].getAttribute('src').match(/(?:otherimages\/manor\/glyph)(\d)/)[1];
+			glyphids[1] = glimgs[1].getAttribute('src').match(/(?:otherimages\/manor\/glyph)(\d)/)[1];
+			glyphids[2] = glimgs[3].getAttribute('src').match(/(?:otherimages\/manor\/glyph)(\d)/)[1];
+			GM_log("glyphids.length="+glyphids.length);
+			for (j=0;j<glyphids.length;j++) GM_log("glyphids["+j+"]="+glyphids[j]);
+			GM_get(server+"/desc_item.php?whichitem="+wineDB[2271], function(b1) {
+				winelist[2271]=scrape(b1);
+				GM_get(server+"/desc_item.php?whichitem="+wineDB[2272], function(b2) {
+					winelist[2272] = scrape(b2);
+					GM_get(server+"/desc_item.php?whichitem="+wineDB[2273], function(b3) {
+						winelist[2273] = scrape(b3);
+						GM_get(server+"/desc_item.php?whichitem="+wineDB[2274], function(b4) {
+							winelist[2274] = scrape(b4);
+							GM_get(server+"/desc_item.php?whichitem="+wineDB[2275], function(b5) {
+								winelist[2275] = scrape(b5);
+								GM_get(server+"/desc_item.php?whichitem="+wineDB[2276], function(b6) {
+									winelist[2276] = scrape(b6);
+									for (var i=2271;i<2277;i++) {
+										wineDisplay.innerHTML += "<tr><td align=center>" + winelist[i][0]+"</td><td align=center>"+
+										"<img src=http://images.kingdomofloathing.com/otherimages/manor/glyph"+winelist[i][1]+".gif"+
+										" </td><td>Yields "+wineeffectlist[winelist[i][1]]+"</td></tr>";
+										GM_log("winelist[i][0]="+winelist[i][0]+", winelist[i][1]="+winelist[i][1]);
+									}
+									wineDisplay.innerHTML += "</table>";
+									// this is an expensive operation, let's only do it once.  Save the table display:
+									SetCharData("wineHTML",wineDisplay.innerHTML);	
+									getWinelist.parentNode.appendChild(wineDisplay);
+									// and save the list of wine->glyph mappings and the list of which wines we actually need.
+									var json = "{"; var json2 = "{";
+									for (i=2271;i<2277;i++) {
+										for (j=0;j<glyphids.length;j++)
+										if (winelist[i][1] == glyphids[j]) json = json + j + ":" + i + ",";
+										json2 = json2 + i+':["'+winelist[i][0]+'",'+winelist[i][1]+'],';
+									}
+									json = json + "}"; json2 = json2 + "}";
+									SetCharData("winesNeeded",json);
+									SetCharData("winelist",json2);
+									winesneeded = eval('('+json+')');
+									GM_log("calling listNeeds from the hard way");
+//									getWinelist.innerHTML = 
+									countWines(winelist, winesneeded);
+								});
 							});
 						});
 					});
 				});
 			});
 		});
-	}, false);
-	document.body.appendChild(getWinelist);
+	}
 	if (GetPref('zonespoil') == 1)
-	{	document.body.appendChild(CornerSpoilers);
-		var msg = null; $('img').each(function()
+	{	var msg = null; $('img').each(function()
 		{	var ml = null; var src = this.getAttribute('src');
 			if (src.indexOf("cellar") != -1) msg = 'ML: 158-168';
 			else if (src.indexOf("chambera") != -1) msg = 'ML: 170';
