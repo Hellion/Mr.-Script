@@ -1,4 +1,4 @@
-// Mr. Script v1.4.8
+// Mr. Script v1.5.0
 //
 // --------------------------------------------------------------------
 // This is a user script.  To install it, you need Greasemonkey 0.8 or
@@ -11,7 +11,7 @@
 // ==UserScript==
 // @name        Mr. Script
 // @namespace   http://www.noblesse-oblige.org/lukifer/scripts/
-// @description Version 1.4.8
+// @description Version 1.5.0
 // @author		Lukifer
 // @contributor	Ohayou
 // @contributor Hellion
@@ -28,28 +28,25 @@
 // @require     http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js
 // @unwrap
 // ==/UserScript==
-// n.b. version number should always be a 3-digit number.  If you move to 1.5, call it 1.5.0.
+// n.b. version number should always be a 3-digit number.  If you move to 1.6, call it 1.6.0.  Don't go to 1.5.10 or some such.
 
 // Feature Requests:
 // link to BHH zone when you accept a bounty: DONE
 // link to smith from untinker if muscle class: DONE
 // add cheat sheet of wine drop combos in the wine cellar: DONE  (whew!)
 // Some more auto-options when fighting certain monsters: DONE
-// change auto-update code to point somewhere that's under my control
+// change auto-update code to point somewhere that's under my control: DONE
+// add yoinked and/or otherwise found-during-combat items to the end-of-combat screen for right-clicky goodness.
 
 
 var place = location.pathname.replace(/\/|\.(php|html)$/gi, "").toLowerCase();
 //console.time("Mr. Script @ " + place);
-GM_log("at:" + place);
+//GM_log("at:" + place);
 
 var VERSION = 148;
 var MAXLIMIT = 999;
 var ENABLE_QS_REFRESH = 1;
 var DISABLE_ITEM_DB = 0;
-// "new format" link at pastebin has been changed to a rickroll.  bleah.
-// var ITEMDB_URL = "kol.pastebin.com/pastebin.php?dl=f79aec3e4";
-// old database format: "kol.cmeister2.co.uk/items/?mode=json2";
-// we now use a kolmafia svn file instead.
 var ITEMDB_URL = "kolmafia.svn.sourceforge.net/viewvc/*checkout*/kolmafia/src/data/itemdescs.txt";
 
 var thePath = location.pathname;
@@ -124,9 +121,6 @@ function dropped_item() {
   });
 }
 
-
-
-
 // ----------------------------------------------------------------------------
 // Don't ask why this guy bothered to write wrapper functions. He just did. :-)
 // ----------------------------------------------------------------------------
@@ -137,9 +131,11 @@ function persist(key, value) {
     console.error('Error while setting '+ key +' to '+ value +': '+ e.message);
   }
 }
+
 function integer(n) {
   return parseInt(n.replace(/^\D+|,/g, ""), 10);
 }
+
 function text(x) {
   switch (typeof x) {
     case "object":
@@ -156,6 +152,7 @@ function text(x) {
 function SetPref(which, value) {
   persist("pref." + which, value);
 }
+
 function GetPref(which) {
   return GM_getValue("pref." + which);
 }
@@ -164,6 +161,7 @@ function GetPref(which) {
 function SetData(which, value) {
   persist(serverNo + which, value);
 }
+
 function GetData(which) {
   return GM_getValue(serverNo + which);
 }
@@ -192,21 +190,11 @@ function FindHash() {
 
 // ----------------------------------------------------------
 // new way to get item info, courtesy of LogiKol PriceGun...
-
-// Pricegun has a status bar, Mr. Script does not.
-function status(string) {
-	GM_log(string);
-//	if(typeof statusLocation !="undefined") {
-//		statusLocation.nodeValue = string + "...";
-//	}
-}
+// ----------------------------------------------------------
 function getItemList(callback) 
-{	status('retrieving item list');
-	//use kolmafia's item list:
+{	
 	GM_get(ITEMDB_URL,parseItems);
 	function parseItems(itemList) {
-		status('parsing item list');
-		
 		var currentTime = parseInt(new Date().getTime()/60000);
 		GM_setValue("lastItemUpdate",currentTime);
 		
@@ -292,52 +280,12 @@ function UpdateItemDB(version)
 		itemDB = storedItemList;
 	}
 	return;
-	
-// this was the old way...	
-//	var url = ITEMDB_URL;
-//	if (version > 0) url += "&version=" + version;
-//	GM_get(url,function(result)
-//	{	if (result == "" || result[0] != "{") 
-//		{	GM_log("unable to retrieve ItemDB.");
-//			return;
-//		}
-//		SetPref("itemdb",result);
-//		var span = document.createElement('span');
-//		itemDB = eval('('+result+')');
-//		$(span)
-//			.attr('style','font-size:10px')
-//			.html('<br>Mr. Script: Updated Item Database To Version ' + itemDB.version + '<br><br>');
-//		//addHere.parentNode.insertBefore(span, addHere);
-//		$('table:first').before(span);
-//	});
 }
 
 function GetItemDB(force) 
-{	// the new way...
+{	
 	unstoreItemList(force);
 	return;
-	
-// here's the old way, for reference.
-//	if (itemDB != null && force == null) return;
-//	if (DISABLE_ITEM_DB) { itemDB = []; return; }
-//	var idb;
-//	if (unsafeWindow.top.NO_itemDB) {
-//		itemDB = unsafeWindow.top.NO_itemDB;
-//	} else if (!(idb = GetPref("itemdb"))) {			// if trying to assign it results in a null, go re-load it.
-//		UpdateItemDB(0);
-//	} else {
-//		var db = eval('('+ idb +')'), items = {};
-//		for (var i in db.items) {
-//			var item = db.items[i];
-//			if (!item) continue;
-//			var page = item["invpage"], id = item["itemid"], name = item["name"];		// was 0, 1, 2
-// //			items[id] = { itemid: i, name: name, invpage: page };
-//			items[i] = { itemid: id, name: name, invpage: page };						// primary key = descID, not ItemID.
-// //			GM_log("loaded item: id=["+id+"], itemid=["+i+"],name=["+name+"],invpage=["+page+"]");
-//		}
-//		itemDB = { version: db.version, items: items };
-//		unsafeWindow.top.NO_itemDB = itemDB;
-//	}
 }
 
 
@@ -455,21 +403,19 @@ function FindMaxQuantity(item, howMany, deefault, safeLevel)
 // -------------------------------------------------------------------------
 // HASITEM: Parse HTML and determine if item is present and return quantity.
 // -------------------------------------------------------------------------
-function HasItem(itemName, text)
-{	var index = text.indexOf(itemName);
-//GM_log("searching for ["+itemName+"]");
-	if (index == -1) return 0;
-	var quantityText = text.substr(index+itemName.length+18, 15);		// changed from +4, 12 05Jan10 Hellion.
-//GM_log("HasItem: quantityText="+quantityText);
-	if (quantityText.indexOf('(') != -1)
-	{	quantityText = quantityText.split('<')[0];
-		quantityText = quantityText.split(')')[0];
-		quantityText = quantityText.split('(')[1];
-//GM_log("HasItem: quantityText now = "+quantityText);
-		if (parseInt(quantityText)) return parseInt(quantityText);
-		else return 1;
-	} else return 1;
-}
+// dead code now.... 04Mar10 Hellion
+//function HasItem(itemName, text)
+//{	var index = text.indexOf(itemName);
+//	if (index == -1) return 0;
+//	var quantityText = text.substr(index+itemName.length+18, 15);
+//	if (quantityText.indexOf('(') != -1)
+//	{	quantityText = quantityText.split('<')[0];
+//		quantityText = quantityText.split(')')[0];
+//		quantityText = quantityText.split('(')[1];
+//		if (parseInt(quantityText)) return parseInt(quantityText);
+//		else return 1;
+//	} else return 1;
+//}
 
 
 // ----------------------------------------------------
@@ -495,8 +441,7 @@ function GM_get(dest, callback, errCallback)
 // ---------------------------------------------------------------
 function DescToItem(zeedesc)
 {	GetItemDB();
-//	return itemDB.items[zeedesc.match(/[0-9]{7,10}/)];		// needs to be {6,10} to match frickin' strawberries
-	return itemDB[zeedesc.match(/[0-9]{6,10}/)];			// new itemDB format
+	return itemDB[zeedesc.match(/[0-9]{6,10}/)];
 }
 
 
@@ -760,7 +705,6 @@ function AddInvCheck(img)
 				// so if we don't get something that starts with the { character, assume we got the full javascript source
 				// and break it down to just the inventory info that we want here.
 				// n.b. JS source file version should no longer arrive as of 11Jan10, but we'll play it safe.
-//				GM_log("invcache="+details);
 				if (details[0] != '{') {		
 					var i1 = details.split('inventory = ')[1].split(';')[0];	// should get everything from { to }, inclusive.
 					details = i1;
@@ -1159,7 +1103,7 @@ function SkillUseLimit(skillNum)
 	{	case 8000: case 8001: case 8002: limit = 3; break;	// 3 Tomes maximum.	
 		case 3012: limit = 1;  break;						// Cannelloni Cocoon
 		case 8200: case 8201: limit = 1; break;				// Grimoires
-		case 45: limit = 1; break;							// vent rage gland
+		case 45:   case 53: limit = 1; break;				// vent rage gland, summon crimbo candy
 		case 3006: case 4006: case 5014: limit = 5; break;	// summon noodles, reagents, garnishes
 		case 3009: min=10; max=30; break;					// lasagna bandages
 		case 1007: min=10; max=20; break;					// tongue of the otter
@@ -1169,6 +1113,7 @@ function SkillUseLimit(skillNum)
 		case 6020: case 6021: case 6022: 
 		case 6023: case 6024: case 6025: limit = 10; break;	// AT Hobo skills
 		case 6026: limit = 50; break;						// AT Sea skill
+		case 6028: limit = 5; break;						// AT Trader skill (Inigo's)
 	} 
 	if (max != 0)
 	{	var hp = GetData("maxHP") - GetData("currentHP");
@@ -1178,7 +1123,6 @@ function SkillUseLimit(skillNum)
 			case 2: limit = parseInt(0.5+hp/max); break;
 		}	
 	} 
-//	GM_log("skilluselimit:" + limit);
 	return limit;
 }
 
@@ -1513,18 +1457,9 @@ function at_main_c() {
 // MAIN.PHP: Look for updates and post link if needed.
 // ---------------------------------------------------
 function at_main() {
-// GM_log ("Main: location.pathname = " + location.pathname);
   if ((location.pathname == "/main.html") ||	// frame thing above
 	  (location.pathname == "/main.php")) { 	// 21Dec09 Hellion main.php appears to be a new name for main.html.
 		at_main_c();
-//    setTimeout("f = document.getElementsByTagName('frameset')[1]; "+	// 21Dec09 Hellion: don't know what this was for and
-//	       "f.setAttribute('rows','53,*');", 50);						// it causes an error now, so out it goes.
-/*	var frames = document.getElementsByTagName('frameset')
-	for (var i=0, len=frames.length; i<len; i++)
-	{	if (frames[i].getAttribute('id') == 'menuset')
-		{	frames[i].rows = "53,*";
-			break;
-	}	} */
 		return;
 	}
 
@@ -1571,13 +1506,9 @@ function at_main() {
 // ----------------------------------------------
 // FIGHT: special processing for certain critters
 // ----------------------------------------------
-// Things to do in a fight:
-// check for yoinked items
-// auto-select rock band flyers or jam band flyers
-// auto-select magnet for gremlins
 function at_fight() {
 // code for NS Lair spoilers borrowed shamelessly from Tard's NS Trainer v0.8
-	// monster name:[preferred combat item,funkslingign item,is this lair-spoilery]
+	// monster name:[preferred combat item,funkslinging item,is this lair-spoilery]
 	var MonsterArray = {
 	"a Beer Batter":["baseball","",1],
 	"a best-selling novelist":["plot hole","",1],
@@ -1651,12 +1582,10 @@ function at_fight() {
 
 	// post-win processing:	
 	if (/WINWINW/.test(document.body.innerHTML)) {
-//		GM_log("yay, we beat the ["+monsterName+"]");
 		SetData("infight","N");
 		switch (monsterName) {
 		case "a skeletal sommelier":
 		case "a possessed wine rack":
-//			GM_log("manor basement post-fight");
 			var winebits = {"Merlot":1,"Marsala":2,"Muscat":4,"Pinot Noir":8,"Port":16,"Zinfandel":32};
 			var imgs = document.getElementsByTagName('img'); 
 			if (imgs.length > 1) {		// image 0 is the monster pic.  anything else might be a drop.
@@ -1677,7 +1606,7 @@ function at_fight() {
 			}
 			break;
 		case " Dr. Awkward":
-			$("p:contains('Adventure')").html('<a href="inventory.php?which=2"><font size=4>TAKE OFF THE MEGA-GEM AND PUT SOMETHING ELSE ON.</font></a>');
+			$("p:contains('Adventure')").html('<a href="inventory.php?which=2"><font size="4">TAKE OFF THE MEGA-GEM AND PUT SOMETHING ELSE ON.</font></a>');
 			break;
 		}
 	}
@@ -1690,7 +1619,6 @@ function at_loggedout() {
   SetPwd(0);
   SetData("NSDoorCode",'');
   SetData("plungeraccess",'');
-//  SetData("funksling",'');
 }
 
 // ------------------------------------------------
@@ -1709,10 +1637,10 @@ function at_login() {
 function at_valhalla() {
 	SetData("NSDoorCode",'');
 	SetData("plungeraccess",'');
-	SetCharData("corner178",'');
-	SetCharData("corner179",'');
-	SetCharData("corner180",'');
-	SetCharData("corner181",'');
+	SetCharData("corner178",0);
+	SetCharData("corner179",0);
+	SetCharData("corner180",0);
+	SetCharData("corner181",0);
 	SetCharData("winelist",'');
 	SetCharData("wineHTML",'');
 	SetCharData("winesNeeded",'');
@@ -1787,21 +1715,6 @@ function at_bhh() {
 		}
 	});
 }
-
-// ------------------------------------------------
-// Degrassi Knoll
-// ------------------------------------------------
-// all this just to get an [untinker] link when the smith has the screwdriver?  eh, what the heck.
-// or maybe not-- should be handled by dropped_item().
-
-//function at_knoll() {
-//	$('img').each(function()
-//	{	var onclick = this.getAttribute('onclick');
-//		if (onclick != undefined && onclick.indexOf("desc") != -1)
-//		{	AddLinks(onclick, this.parentNode.parentNode, this.parentNode.parentNode.parentNode.parentNode.parentNode, thePath);
-//		}
-//	});
-//}
 
 // ---------------------------------------------------
 // SEARCHMALL: the new, improved mall search/buy page.
@@ -2430,14 +2343,11 @@ function at_galaktik()
 // -------------------------------------------------------------
 function at_bigisland()
 {
-//	GM_log("bigisland:"+document.location.search);
-//	if (document.location.search.indexOf("place=camp") != -1) {
-		$('img').each(function()
-		{	var onclick = this.getAttribute('onclick');
-			if (onclick != undefined && onclick.indexOf("desc") != -1)
-				AddInvCheck(this);
-		});
-//	}
+	$('img').each(function()
+	{	var onclick = this.getAttribute('onclick');
+		if (onclick != undefined && onclick.indexOf("desc") != -1)
+			AddInvCheck(this);
+	});
 }
 
 // ---------------------------------------------
@@ -2591,8 +2501,7 @@ function at_store()
 // CASINO: Add link for buying pass.
 // ---------------------------------
 function at_casino()
-{	//var firstTable = document.getElementsByTagName('table')[0];
-	if (GetPref('shortlinks') > 1)
+{	if (GetPref('shortlinks') > 1)
 	{	if($('table:first tr:eq(1)').text().indexOf("Casino Pass") != -1)
 			$('p:first').html(AppendBuyBox(40, 'm', 'Buy Casino Pass', 1));
 	}	
@@ -2703,7 +2612,6 @@ function at_sewer()
 // 12Jan10 Hellion: also add right-click inventory checking.
 function at_hermit()
 {	
-//	GM_log("at hermit.");
 	$('img').each(function()
 	{	var onclick = this.getAttribute('onclick');
 		if (onclick != undefined && onclick.indexOf(":item") != -1)	// Hermit calls js:item(descid) instead of js:descitem(descid)
@@ -3055,16 +2963,6 @@ function at_charpane()
 		}
 		advcount = parseInt($('a:contains(Adv):first').parent().next().text());
 
-		// Retrieve stats and calculate level
-//		var a = $("td:contains('Mus:'):first").next().text();
-//		if(a != parseInt(a)) a = a.match(/\(([0-9]+)\)/)[1];
-//		var b = $("td:contains('Mys:'):first").next().text();
-//		if(b != parseInt(b)) b = b.match(/\(([0-9]+)\)/)[1];
-//		var c = $("td:contains('Mox:'):first").next().text();
-//		if(c != parseInt(c)) c = c.match(/\(([0-9]+)\)/)[1];
-//		level = (parseInt(Math.sqrt((Math.max(a,Math.max(b,c)))-4)))+1;
-	
-		// let's skip the calculations and just grab the freakin' level already.
 		var lvlblock = $("center:contains('Lvl.'):first").text();
 		level = lvlblock.match(/Lvl. (\d+)/)[1];
 
@@ -3084,26 +2982,9 @@ function at_charpane()
 		data.shift(); // meat
 		advcount = integer(data.shift());
 
-    // Retrieve stats and calculate level
-//    var stats = $("td:contains('Moxie:'):first").parents("tbody").children()
-//      .map(function get_max_stat() {
-//        var n = text(this);
-//        var max = n.match(/\((\d+)\)/);
-//        if (max) return integer(max[1]);
-//        return integer(n);
-//      });
-	
-// how about just retrieve level? ...	
 		var lvlblock = $("td:contains('Level'):first").text();
 		level = lvlblock.match(/Level (\d+)/)[1];
-	
-//    var mus = stats[0], mys = stats[1], mox = stats[2];
-//    level = 1 + parseInt(Math.sqrt(Math.max(mus, mys, mox) - 4));
-    //console.info("level "+ level +": "+ mus+"/"+mys+"/"+mox);
 		SetData("level", level);
-
-/* To get to level x, you must get (x − 1)^2 + 4 of your main stat
-level = (parseInt(Math.sqrt(stat-4)))+1; */
 
 		// Change image link for costumes
 		var img = imgs[0];
@@ -3122,20 +3003,11 @@ level = (parseInt(Math.sqrt(stat-4)))+1; */
 		}
 
 		// Add SGEEA to Effects right-click
-		/*
-		for (i=4, len=bText.length; i<len; i++)
-		{	if (bText[i].textContent.indexOf("Effects") != -1)
-			{	bText[i].setAttribute("oncontextmenu",
-				"top.mainpane.location.href='http://" + server + "/uneffect.php'; return false;"); break;
-		}	}
-		*/
 		var bEff = $('b:gt(4):contains(Effects)');
 		if(bEff.length>0) bEff.get(0).setAttribute("oncontextmenu",
 			"top.mainpane.location.href='http://" + server +
 			"/uneffect.php'; return false;");
 	}
-
-	var hoboEffects = '';
 
 	// Re-hydrate (0)
 	var temphydr = parseInt(GetData('hydrate'));
@@ -3176,7 +3048,7 @@ level = (parseInt(Math.sqrt(stat-4)))+1; */
 // '/store.php?howmany=1&buying=Yep.&whichstore=m&whichitem=829&phash='+pwd,	// when anti-anti was in the demon market.
 				GM_get(server+'/galaktik.php?howmany=1&action=buyitem&whichitem=829&pwd='+pwd,
 				function(result)
-				{	// GM_log(result);
+				{	
 					if (result.indexOf('acquire') != -1)
 						GM_get(server+'/inv_use.php?which=1&whichitem=829&pwd='+pwd,function(event)
 						{	top.frames[1].location.reload(); });
@@ -3205,6 +3077,7 @@ level = (parseInt(Math.sqrt(stat-4)))+1; */
 						'The Arid, Extra-Dry Desert</a><br />')
 						.parent().parent().attr('align','center');
 					} break;
+					
 				case 221: // chalk: right-click to use more
 					var func = "top.mainpane.location.href = 'http://";
 					func += server + "/inv_use.php?which=3&whichitem=1794&pwd="+pwd+"'; return false;";
@@ -3215,30 +3088,16 @@ level = (parseInt(Math.sqrt(stat-4)))+1; */
 					if (/\(9/.test(abstxt) || /\(5/.test(abstxt) || /\(1\)/.test(abstxt))
 						img.parentNode.nextSibling.innerHTML = '<a target=mainpane href=wormwood.php><font color="red"><b>' + img.parentNode.nextSibling.innerHTML + "</b></font></a>";
 					break;
-				
-				// snowcone reuse upon expiration of effect became obsolete when snowcones became multi-usable.
-				//	case 139: case 140: case 141: case 142: case 143: case 144:
-				//	if(/\(1\)/.test(img.parentNode.nextSibling.textContent))
-				//		SetData('snowcone', advcount-1);
-				//	break;
-
-// I have no idea what the hell this is supposed to be for. 27Jan10 Hellion
-//				case 123: case 456:
-//					hoboEffects += effNum + ',';
-//					break;
-
+					
 				case 189: case 190: case 191: case 192: case 193: SetData("phial", effNum);
 				default:
 					if (effName == undefined) effName = "";
 					func = "if (confirm('Uneffect "+effName+"?')) top.mainpane.location.href = 'http://";
 					func += server + "/uneffect.php?using=Yep.&whicheffect="+effNum+"&pwd="+pwd+"';return false;";
 					img.setAttribute('oncontextmenu', func); break;
-		}	}
+			}
+		}
 	}
-
-// But it's related to this.  27Jan10 Hellion.
-//	SetData('hoboeffects', hoboEffects);
-//	GetData('hoboeffects');
 }
 
 
@@ -3250,7 +3109,6 @@ function at_skills()
 	var inputStuff = document.getElementsByTagName("input");
 	var noDisable = GetPref('nodisable');
 	
-//	GM_log("at_skills");
 	// Remove stupid "The " from menu
 	if (miniSkills)
 	{	var sel = document.getElementsByTagName("select")[0];
@@ -3316,7 +3174,6 @@ function at_skills()
 					else this.value = val;					
 					event.stopPropagation(); event.preventDefault();
 				} else if (ENABLE_QS_REFRESH == 1 && event.which == 82) self.location.reload();	// 'r'
-//				GM_log("quantity: this.value= "+ this.value);
 			}, true);
 
 			if (!miniSkills && temp.getAttribute('id') != 'skilltimes')
@@ -3335,29 +3192,7 @@ function at_skills()
 
 		// Attach maximum buffs event handler and "Max" button
 		if (temp.value == "1" && temp.name == "bufftimes")
-		{	// thanks to JiK4eva for this patch that works around a problem introduced on 08Jan10
-			// somehow, adding the Max button on the bufftimes input box causes the form submission
-			// to not submit the input box contents at all.	--Hellion 11Jan10
-//			var formWrapper = document.createElement('form');
-//			formWrapper.action = 'skills.php';
-//			formWrapper.method = 'post';
-//
-//			var formInterior = temp.parentNode.parentNode;
-//			temp.parentNode.parentNode.parentNode.replaceChild(formWrapper, temp.parentNode.parentNode);
-//			formWrapper.appendChild(formInterior);
-//
-//			var inputElement = document.createElement('input');
-//			inputElement.type = 'hidden';
-//			inputElement.name = 'pwd';
-//			inputElement.value = pwd;
-//			formWrapper.appendChild(inputElement);
-//			inputElement = document.createElement('input');
-//			inputElement.type = 'hidden';
-//			inputElement.name = 'action';
-//			inputElement.value = 'Skillz';
-//			formWrapper.appendChild(inputElement);
-			// end JiK's patch.
-
+		{	
 			var padding = document.createElement('div');
 			padding.setAttribute('style','padding-top: 4px');
 			temp.parentNode.insertBefore(padding, temp);
@@ -3368,7 +3203,6 @@ function at_skills()
 					this.value = parseInt(GetData("currentMP") / cost);
 					event.stopPropagation(); event.preventDefault();
 				}	
-//				GM_log("bufftimes: this.value=", this.value);
 			}, true);
 			MakeMaxButton(temp, function(event)
 			{	var selectItem = document.getElementsByName('whichskill')[1];
@@ -3521,9 +3355,6 @@ function at_manor3()
 			"/desc_item.php?whichitem=" + wineDB[wine],
 		function(txt)
 		{	var num = txt.charAt(txt.indexOf("/glyph") + 6);
-			// I know, I know, I should learn regexps.
-			//GM_log(num, txt.match(/\/glyph[0-9]/), txt);
-
 			var glyph = $('#daglyph');
 			if(glyph.length == 0)
 			{	$('select:first').parent().parent().append(
@@ -3549,11 +3380,11 @@ function at_manor3()
 // basic spoilers, part 3: link to equip spectacles when needed.
 // this part is all-but-unnecessary, only being needed on someone's first runthrough, but
 // we'll leave it here on the off chance that someone uses Mr. Script that early in their KoL career.
-//	$('img[src*=lar2a]')
-//		.attr('title','Click to Equip Spectacles')
-//		.attr('border','0')
-//		.wrap('<a target="mainpane" href="inv_equip.php?pwd=' +
-//			pwd + '&which=2&action=equip&whichitem=1916&slot=3"></a>');
+	$('img[src*=lar2a]')
+		.attr('title','Click to Equip Spectacles')
+		.attr('border','0')
+		.wrap('<a target="mainpane" href="inv_equip.php?pwd=' +
+			pwd + '&which=2&action=equip&whichitem=1916&slot=3"></a>');
 
 // advanced spoilers:
 
@@ -3696,7 +3527,6 @@ function at_manor3()
 
 	var wineDisplay = document.createElement('table');
 	wineDisplay.setAttribute('id','wineDisplay');
-//	wineDisplay.setAttribute('border','1');
 	wineDisplay.setAttribute('cellpadding','2');
 	wineDisplay.setAttribute('width','95%');
 	wineDisplay.style.display = "none";
@@ -4651,10 +4481,10 @@ function at_topmenu()
 	// some housekeeping stuff that I want to make sure gets checked regularly and can't think of a better place for...
 	// gotta clear these out when you ascend, which you may do on a different computer occasionally.
 	if (parseInt(GetData('level')) < 11) {
-		SetCharData("corner178",'');
-		SetCharData("corner179",'');
-		SetCharData("corner180",'');
-		SetCharData("corner181",'');
+		SetCharData("corner178",0);
+		SetCharData("corner179",0);
+		SetCharData("corner180",0);
+		SetCharData("corner181",0);
 		SetCharData("winelist",'');
 		SetCharData("wineHTML",'');
 		SetCharData("winesNeeded",'');
