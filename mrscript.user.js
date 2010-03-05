@@ -28,7 +28,6 @@
 // @require     http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js
 // @unwrap
 // ==/UserScript==
-// n.b. version number should always be a 3-digit number.  If you move to 1.6, call it 1.6.0.  Don't go to 1.5.10 or some such.
 
 // Feature Requests:
 // link to BHH zone when you accept a bounty: DONE
@@ -43,7 +42,8 @@ var place = location.pathname.replace(/\/|\.(php|html)$/gi, "").toLowerCase();
 //console.time("Mr. Script @ " + place);
 //GM_log("at:" + place);
 
-var VERSION = 148;
+// n.b. version number should always be a 3-digit number.  If you move to 1.6, call it 1.6.0.  Don't go to 1.5.10 or some such.
+var VERSION = 150;
 var MAXLIMIT = 999;
 var ENABLE_QS_REFRESH = 1;
 var DISABLE_ITEM_DB = 0;

@@ -1,4 +1,4 @@
-{	"version":"1.4.8",
+{	"version":"1.5.0",
 	"url1":"http://noblesse-oblige.org/hellion/scripts/MrScript.user.js",
 	"desc":"<b>Fixed</b>
 <br />- Typo in a tower item or two
@@ -15,5 +15,4 @@
 <br />- Absinthe-minded changes color at 9, 5, and 1 turn left, and links to the wormwood.
 <br />- add right-click inventory count to images in hippy/frat war-traders.
 "
-
 }
