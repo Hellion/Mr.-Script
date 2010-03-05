@@ -35,12 +35,12 @@
 // add cheat sheet of wine drop combos in the wine cellar: DONE  (whew!)
 // Some more auto-options when fighting certain monsters: DONE
 // change auto-update code to point somewhere that's under my control: DONE
-// add yoinked and/or otherwise found-during-combat items to the end-of-combat screen for right-clicky goodness.
+// add yoinked and/or otherwise found-during-combat items to the end-of-combat screen for right-clicky goodness: next time.
 
 
 var place = location.pathname.replace(/\/|\.(php|html)$/gi, "").toLowerCase();
 //console.time("Mr. Script @ " + place);
-//GM_log("at:" + place);
+GM_log("at:" + place);
 
 // n.b. version number should always be a 3-digit number.  If you move to 1.6, call it 1.6.0.  Don't go to 1.5.10 or some such.
 var VERSION = 150;
@@ -1440,7 +1440,7 @@ function MakeOption(text, num, pref, opt1, opt2)
 function at_main_c() {
 	FindHash();
 	setTimeout("if (frames[0].location == 'about:blank')" +
-             "  frames[0].location = 'topmenu.php'", 1500);
+             "  frames[0].location = 'topmenu.php'", 1500);	// fix for top menu not always loading properly
 	if (GetData("plungeraccess") == undefined || GetData("plungeraccess") == 0) {	// not set yet?  go check.
 		GM_get(server + "/knoll.php",function(response)
 		{	if (response != "")
@@ -1450,19 +1450,33 @@ function at_main_c() {
 			}
 		});
 	}
+	var update = GetData("Update");
+	if (update != '') {
+		$('table:first').before(update);
+		SetData("Update",'');
+	}
 // may also want to add a check for Funkslinging here.
 }
 
 // ---------------------------------------------------
-// MAIN.PHP: Look for updates and post link if needed.
+// MAIN.PHP: call main_c if needed (this function will probably be refactored away in the next release)
 // ---------------------------------------------------
 function at_main() {
-  if ((location.pathname == "/main.html") ||	// frame thing above
+	GM_log("location.pathname="+location.pathname);
+	if ((location.pathname == "/main.html") ||	
 	  (location.pathname == "/main.php")) { 	// 21Dec09 Hellion main.php appears to be a new name for main.html.
 		at_main_c();
 		return;
 	}
+}
 
+// ---------------------------------------------------
+// GAME.PHP: look for updates and post link if needed.
+// ---------------------------------------------------
+// Created 05Mar10 Hellion to fix the update-displaying process.
+// n.b. game.php is the outermost, non-frame window that contains all the frames.
+// 		as such, you only see it exactly once, when you're logging in.
+function at_game() {
 	var lastUpdated = parseInt(GM_getValue('MrScriptLastUpdate', 0));
 	var currentHours = parseInt(new Date().getTime()/3600000);
 	GetItemDB();
@@ -1472,7 +1486,8 @@ function at_main() {
 	{
 	GM_get("noblesse-oblige.org/hellion/scripts/MrScript.version.json",
 		function(txt)
-		{	var json = eval('('+txt+')');
+		{	txt = txt.replace(/\n/,'');		// strip carriage returns so that eval() doesn't blow up
+			var json = eval('('+txt+')');
 			if(!json.version) return;
 			var vnum = json.version.replace(/\./g, "");	// strip points: 1.4.3 => 143.
 			if(!vnum) return;
@@ -1494,8 +1509,8 @@ function at_main() {
 			html += (json.desc ?
 			'<p style="margin:0 auto; text-align:left; font-size:10px;">'+
 			json.desc+'</p>' : '<br />') + '</div>';
-
-			$('table:first').before(html);
+			SetData("Update",html);
+//			$('table:first').before(html);
 		});
 
 		// Update item database
@@ -1606,7 +1621,8 @@ function at_fight() {
 			}
 			break;
 		case " Dr. Awkward":
-			$("p:contains('Adventure')").html('<a href="inventory.php?which=2"><font size="4">TAKE OFF THE MEGA-GEM AND PUT SOMETHING ELSE ON.</font></a>');
+			$("p:contains('Adventure')").html('<a href="inventory.php?which=2"><font size="4">CLICK HERE TO CHANGE YOUR GEAR</font></a>');
+			$("p:contains('Go back to')").html('');
 			break;
 		}
 	}
@@ -3038,14 +3054,12 @@ function at_charpane()
 		else if (imgSrc == 'hp.gif')
 			img.addEventListener('contextmenu', RightClickHP, false);
 		if (imgClick == null || imgClick.substr(0,4) != "eff(") continue;
-		var effName = img.parentNode.nextSibling.firstChild.innerHTML;
-
+		var effName = (compactMode ? img.getAttribute('title') : img.parentNode.nextSibling.firstChild.innerHTML);
 
 		if (imgSrc == 'poison.gif')
 		{	img.parentNode.parentNode.setAttribute('name','poison');
 			img.addEventListener('contextmenu', function(event)
 			{	document.getElementsByName('poison')[0].childNodes[1].innerHTML = "<i><span style='font-size:10px;'>Un-un-unpoisoning...</span></i>";
-// '/store.php?howmany=1&buying=Yep.&whichstore=m&whichitem=829&phash='+pwd,	// when anti-anti was in the demon market.
 				GM_get(server+'/galaktik.php?howmany=1&action=buyitem&whichitem=829&pwd='+pwd,
 				function(result)
 				{	
@@ -3083,7 +3097,7 @@ function at_charpane()
 					func += server + "/inv_use.php?which=3&whichitem=1794&pwd="+pwd+"'; return false;";
 					img.setAttribute('oncontextmenu', func); break;
 					
-				case 357:	// absinthe-minded: light up on 9/5/1 turns left.
+				case 357:	// absinthe-minded: light up and link on 9/5/1 turns left.
 					var abstxt = img.parentNode.nextSibling.textContent;
 					if (/\(9/.test(abstxt) || /\(5/.test(abstxt) || /\(1\)/.test(abstxt))
 						img.parentNode.nextSibling.innerHTML = '<a target=mainpane href=wormwood.php><font color="red"><b>' + img.parentNode.nextSibling.innerHTML + "</b></font></a>";
