@@ -30,7 +30,12 @@
 // ==/UserScript==
 
 // Feature Requests:
-// add yoinked and/or otherwise found-during-combat items to the end-of-combat screen for right-clicky goodness: next time.
+// notice when gremlins brandish their tool OR show "no tool" message and react appropriately: IN PROGRESS
+// add checklist to ascend.php for reference: V1.0 DONE
+// detect hidden city spheres, update altar drop-downs: IN PROGRESS
+// add link to discard Karma at the gash: DONE
+// fix issue where topmenu switches to compact mode: FLABBERGASTED
+// add yoinked and/or otherwise found-during-combat items to the end-of-combat screen for right-clicky goodness: ON DECK
 
 
 var place = location.pathname.replace(/\/|\.(php|html)$/gi, "").toLowerCase();
@@ -1556,10 +1561,10 @@ function at_fight() {
 	"a spider gremlin":["band flyers","molybdenum magnet",0,"combattext"],
 	"a batwinged gremlin":["band flyers","molybdenum magnet",0,"combattext"],
 	" Ed the Undying":["band flyers","",0],
-	"a pygmy headhunter":["","",0,"combattext"],
-	"a boaraffe":["","",0,"combattext"],
-	"a pygmy blowgunner":["","",0,"combattext"],
-	"a pygmy assault squad":["","",0,"combattext"],
+	"a pygmy headhunter":["--","",0,"combattext"],
+	"a boaraffe":["--","",0,"combattext"],
+	"a pygmy blowgunner":["--","",0,"combattext"],
+	"a pygmy assault squad":["--","",0,"combattext"],
 	"a clingy pirate":["cocktail napkin","",0],
 	"a tetchy pirate":["The Big Book of Pirate Insults","",0],
 	"a toothy pirate":["The Big Book of Pirate Insults","",0],
@@ -1676,16 +1681,20 @@ function at_fight() {
 				if (/You hold the \w+ \w+ \w+ up in the air./.test(document.body.innerHTML)) {
 					GM_log("detected a stone.");
 					var stone = {"mossy":2174, "smooth":2175, "cracked":2176, "rough":2177};
-					var sname=/You hold the (\w+) stone sphere up in the air./.exec(document.body.innerHTML)[1];
-					var color=/It radiates a bright (\w+) light,/.exec(document.body.innerHTML)[1];
-					GM_log("stone="+stone+", color="+color);
-					
-					switch (color) 
-					{
-						case "yellow":SetCharData("altar1",stone[sname]); break;
-						case "blue":SetCharData("altar2",stone[sname]); break;
-						case "red":SetCharData("altar3",stone[sname]); break;
-						case "green":SetCharData("altar4",stone[sname]);break;
+					var snRegex = /You hold the (\w+) stone sphere up in the air./g;
+					var scRegex = /It radiates a bright (\w+) light,/g;
+					var sname; 
+					var color; 
+					while ((sname = snRegex.exec(document.body.innerHTML)) != null) {	// account for funkslung stones.
+						color = scRegex.exec(document.body.innerHTML);
+						GM_log("stone="+stone[sname[1]]+", color="+color[1]);
+						switch (color[1]) 
+						{
+							case "yellow":	SetCharData("altar1",stone[sname[1]]); break;
+							case "blue":	SetCharData("altar2",stone[sname[1]]); break;
+							case "red":		SetCharData("altar3",stone[sname[1]]); break;
+							case "green":	SetCharData("altar4",stone[sname[1]]);break;
+						}
 					}
 				}
 			break;
@@ -1779,12 +1788,18 @@ function at_valhalla() {
 // ---------
 // need to restrict this to only the altar pages.  shouldn't be a problem since the other place they show up is just fight.php...
 // 2174=mossy, 2175=smooth, 2176=cracked, 2177=rough.
+// altar 1=yellow, 2=blue, 3=red, 4=green.
 function at_hiddencity() {
-//	$('option:not([value=2174],[value=2175],[value=2176],[value=2177])').remove();
-	var altar = $('img:first').attr("src"); GM_log("altar="+altar);
-
-	$('option:not([value="2174"]):not([value="2175"]):not([value="2176"]):not([value="2177"])').remove();
-
+	var ball = {1: 1900, 2: 1901, 3: 1904, 4: 1905};
+	var altarsrc = $('img:first').attr("src"); 
+	var altar = parseInt(altarsrc.charAt(altarsrc.indexOf("/altar") + 6));	// This will be a number from 1 to 4 on the right pages.
+	var stone = GetCharData('altar'+altar);
+	GM_log("altarsrc="+altarsrc+", altar="+altar+", stone="+stone);
+	if (stone != undefined) {
+		$('option:not([value="'+stone+'"]):not([value="'+ball[altar]+'"])').remove();
+	} else {
+		$('option:not([value="2174"]):not([value="2175"]):not([value="2176"]):not([value="2177"]):not([value="'+ball[altar]+'"])').remove();
+	}
 }
 
 function at_town_right() {
