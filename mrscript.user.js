@@ -30,12 +30,12 @@
 // ==/UserScript==
 
 // Feature Requests:
-// notice when gremlins brandish their tool OR show "no tool" message and react appropriately: IN PROGRESS
-// add checklist to ascend.php for reference: V1.0 DONE
-// detect hidden city spheres, update altar drop-downs: IN PROGRESS
-// add link to discard Karma at the gash: DONE
-// fix issue where topmenu switches to compact mode: FLABBERGASTED
-// add yoinked and/or otherwise found-during-combat items to the end-of-combat screen for right-clicky goodness: ON DECK
+// link to BHH zone when you accept a bounty: DONE
+// link to smith from untinker if muscle class: DONE
+// add cheat sheet of wine drop combos in the wine cellar: DONE  (whew!)
+// Some more auto-options when fighting certain monsters: DONE
+// change auto-update code to point somewhere that's under my control: DONE
+// add yoinked and/or otherwise found-during-combat items to the end-of-combat screen for right-clicky goodness: next time.
 
 
 var place = location.pathname.replace(/\/|\.(php|html)$/gi, "").toLowerCase();
@@ -1313,8 +1313,6 @@ function Defaults(revert)
 //		if (GetPref('eatagain') == undefined) 	SetPref('eatagain', 0);
 		if (GetPref('lairspoil') == undefined)	SetPref('lairspoil', 1);
 		if (GetPref('moonslink') == undefined)  SetPref('moonslink', 1);
-		
-		if (GetPref('ascension_list') == undefined) SetPref('ascension_list','cook key pies<br>explode chef<br>explode bartender<br>discard karma<br>');
 
 		if (GetPref('menu1link0') == undefined) SetPref('menu1link0', 'market;town_market.php');
 		if (GetPref('menu1link1') == undefined) SetPref('menu1link1', 'hermit;hermit.php');
@@ -1452,9 +1450,6 @@ function at_main_c() {
 			}
 		});
 	}
-	
-	$('tr:contains("Noob."):eq(1)').append(AppendLink('[Toot]','mtnoob.php?action=toot'));	// fresh from valhalla?  get things rolling.
-	
 	var update = GetData("Update");
 	if (update != '') {
 		$('table:first').before(update);
@@ -1555,17 +1550,12 @@ function at_fight() {
 	"a Tyrannosaurus Tex":["chaos butterfly","",1],
 	"a Vicious Easel":["disease","",1],
 	"The Guy Made Of Bees":["antique hand mirror","",0],
-	"an erudite gremlin":["band flyers","molybdenum magnet",0,"combattext"],
-	"a vegetable gremlin":["band flyers","molybdenum magnet",0,"combattext"],
-	"an A.M.C. gremlin":["band flyers","",0,"combattext"],
-	"a spider gremlin":["band flyers","molybdenum magnet",0,"combattext"],
-	"a batwinged gremlin":["band flyers","molybdenum magnet",0,"combattext"],
+	"an erudite gremlin":["band flyers","molybdenum magnet",0],
+	"a vegetable gremlin":["band flyers","molybdenum magnet",0],
+	"an AMC gremlin":["band flyers","",0],
+	"a spider gremlin":["band flyers","molybdenum magnet",0],
+	"a batwinged gremlin":["band flyers","molybdenum magnet",0],
 	" Ed the Undying":["band flyers","",0],
-	"a pygmy headhunter":["--","",0,"combattext"],
-	"a boaraffe":["--","",0,"combattext"],
-	"a pygmy blowgunner":["--","",0,"combattext"],
-	"a pygmy assault squad":["--","",0,"combattext"],
-	"a clingy pirate":["cocktail napkin","",0],
 	"a tetchy pirate":["The Big Book of Pirate Insults","",0],
 	"a toothy pirate":["The Big Book of Pirate Insults","",0],
 	"a tipsy pirate":["The Big Book of Pirate Insults","",0]
@@ -1579,8 +1569,7 @@ function at_fight() {
 		if (monsterItem != undefined && GetPref('lairspoil') != 1 && monsterItem[2] == 1) return;	// found something, spoilers are off, and this is a spoilery monster?
 		if (monsterItem != undefined) {	// let's do something specific with this critter.
 			var dropdown = document.getElementsByTagName('select')[0];
-			var dlen = dropdown ? dropdown.options.length : 0;
-			for(var i=1;i<dlen;i++) {
+			for(var i=1;i<dropdown.options.length;i++) {
 				if(dropdown.options[i].text.indexOf(monsterItem[0]) != -1) {
 					dropdown.options.selectedIndex = i;
 					break;
@@ -1597,114 +1586,6 @@ function at_fight() {
 					}
 				}
 			}
-			var special = 0;
-			var type = 0;
-			switch (monsterName)
-			{
-				case "an A.M.C. gremlin":
-				case "an erudite gremlin":
-				case "a vegetable gremlin":
-				case "a spider gremlin":
-				case "a batwinged gremlin":special = 1; break;
-				case "a pygmy headhunter":
-				case "a boaraffe":
-				case "a pygmy blowgunner":
-				case "a pygmy assault squad": special = 2; break;
-			}
-			SetData("special",special);
-			GM_log("set special to: "+special);
-			GM_log("document.referrer="+document.referrer);
-			SetData("zone",document.referrer.slice(-3));	
-			GM_log("zone="+GetData("zone"));
-		}
-	} else if (GetData("special") != 0)	{	// in a fight already: is it with something special?
-		GM_log("checking because special="+GetData("special"));
-		switch (GetData("special"))
-		{
-			case 1:	// gremlins 
-//				var weapon 		= {	182:"hammer",
-//									183:"pair of pliers",
-//									184:"wrench",
-//									185:"screwdriver",
-//									186:"blah blah blah hurr hurr"}; // placeholder 
-//				var noweapon 	= {	182:"a bombing run over",
-//									183:"fibula with its mandibles",
-//									184:"automatic eyeball-peeler",
-//									185:"off of itself and",
-//									186:"an A.M.C. gremlin"};
-				var gremlininfo	= {	"a batwinged gremlin":[182, "hammer", 			"a bombing run over"],
-									"a spider gremlin"	 :[183, "pair of pliers", 	"fibula with its mandibles"],
-									"an erudite gremlin" :[184, "wrench", 			"automatic eyeball-peeler"],
-									"a vegetable gremlin":[185, "screwdriver", 		"off of itself and"],
-									"an A.M.C. gremlin"  :[186, "blah blah hruugh", "an A.M.C. gremlin"]};
-				var zone = parseInt(GetData("zone"));
-				GM_log("zone:"+zone);
-				if ((zone < 182) || (zone > 186)) { zone = gremlininfo[monsterName][0]; GM_log("new zone:"+zone); }
-				GM_log("weapon="+gremlininfo[monsterName][1]);
-				GM_log("noweapon="+gremlininfo[monsterName][2]);
-				
-				// if the monster doesn't drop the item in this zone, or we see the "i-don't-have-it" message...
-				if 
-				// ((gremlininfo[monsterName][0] != zone) || // I don't know how to make this work yet.  dammit.
-				((document.body.innerHTML.indexOf(gremlininfo[monsterName][2]) != -1)) {		
-					GM_log("It's definitely not here. kill it.");
-					var p = document.createElement('p');
-					p.innerHTML = "<font size='4' color='red'>WHACK IT UNTIL IT DIES!</font>";
-					document.body.appendChild(p);
-					SetData("special",3);
-				} else {								// the monster might drop the item in this zone.
-					if (document.body.innerHTML.indexOf(gremlininfo[monsterName][1]) != -1) {
-						GM_log("there it is!");
-						var p = document.createElement('p');
-						p.innerHTML = "MAGNET IT NOW!";
-						document.body.appendChild(p);
-						
-						var funkSelect = document.getElementsByTagName('select')[1];
-						var funkAvail = (funkSelect && funkSelect.name == "whichitem2")? true : false;
-						$('select:first').val(2497);
-// if funkslinging is available, set to: (rock band/jam band)/magnet if flyers are present, just magnet if no flyers;
-// else set to magnet.
-						if (funkAvail) {	
-							$('select:first').val(2405);
-							if ($('select:first option:selected').val() != 2405) {
-								$('select:first').val(2404);
-								if ($('select:first option:selected').val() != 2404) $('select:first').val=2497;
-							}	
-							if ($('select:first option:selected').val() != 2497) $('select:eq(1)').val(2497);
-						} else $('select:first').val(2497);
-					}
-					
-				}
-			break;
-			case 2: // hidden city monsters--look for sphere messages.
-				GM_log("in special=2");
-				if (/You hold the \w+ \w+ \w+ up in the air./.test(document.body.innerHTML)) {
-					GM_log("detected a stone.");
-					var stone = {"mossy":2174, "smooth":2175, "cracked":2176, "rough":2177};
-					var snRegex = /You hold the (\w+) stone sphere up in the air./g;
-					var scRegex = /It radiates a bright (\w+) light,/g;
-					var sname; 
-					var color; 
-					while ((sname = snRegex.exec(document.body.innerHTML)) != null) {	// account for funkslung stones.
-						color = scRegex.exec(document.body.innerHTML);
-						GM_log("stone="+stone[sname[1]]+", color="+color[1]);
-						switch (color[1]) 
-						{
-							case "yellow":	SetCharData("altar1",stone[sname[1]]); break;
-							case "blue":	SetCharData("altar2",stone[sname[1]]); break;
-							case "red":		SetCharData("altar3",stone[sname[1]]); break;
-							case "green":	SetCharData("altar4",stone[sname[1]]);break;
-						}
-					}
-				}
-			break;
-			case 3: // gremlin that we know needs to die:
-				var p = document.createElement('p');
-				p.innerHTML = "<font size='4' color='red'>WHACK IT UNTIL IT DIES!</font>";
-				document.body.appendChild(p);
-			break;
-			default:
-			break;
 		}
 	}
 // end shameless codeborrow
@@ -1712,13 +1593,11 @@ function at_fight() {
 	// post-loss processing:
 	if (/You lose.  You slink away,/.test(document.body.innerHTML) || /You run away, like a sissy/.test(document.body.innerHTML)) {
 		SetData("infight","N");
-		SetData("special",0)
 	}
 
 	// post-win processing:	
 	if (/WINWINW/.test(document.body.innerHTML)) {
 		SetData("infight","N");
-		SetData("special",0);
 		switch (monsterName) {
 		case "a skeletal sommelier":
 		case "a possessed wine rack":
@@ -1783,24 +1662,6 @@ function at_valhalla() {
 	SetCharData("winesNeeded",'');
 }
 
-// ---------
-// HIDDENCITY: remove non-useful spherical objects from the dropdown list.
-// ---------
-// need to restrict this to only the altar pages.  shouldn't be a problem since the other place they show up is just fight.php...
-// 2174=mossy, 2175=smooth, 2176=cracked, 2177=rough.
-// altar 1=yellow, 2=blue, 3=red, 4=green.
-function at_hiddencity() {
-	var ball = {1: 1900, 2: 1901, 3: 1904, 4: 1905};
-	var altarsrc = $('img:first').attr("src"); 
-	var altar = parseInt(altarsrc.charAt(altarsrc.indexOf("/altar") + 6));	// This will be a number from 1 to 4 on the right pages.
-	var stone = GetCharData('altar'+altar);
-	GM_log("altarsrc="+altarsrc+", altar="+altar+", stone="+stone);
-	if (stone != undefined) {
-		$('option:not([value="'+stone+'"]):not([value="'+ball[altar]+'"])').remove();
-	} else {
-		$('option:not([value="2174"]):not([value="2175"]):not([value="2176"]):not([value="2177"]):not([value="'+ball[altar]+'"])').remove();
-	}
-}
 
 function at_town_right() {
 	var linkloc = GetData("plungeraccess")=="Y" ? "knoll.php?place=smith" :"adventure.php?snarfblat=18"
@@ -1975,7 +1836,8 @@ function at_inventory()
 
 	// Misc: Blackbird
 	else if (searchString.indexOf("action=message") != -1)
-	{	var fimg = $('img:first');
+	{	GM_log('checking things in inventory!');
+		var fimg = $('img:first');
 		var src = fimg.attr('src');
 		if(src.indexOf('blackbird1') != -1)
 		{	var fly = document.createElement('a');
@@ -1992,7 +1854,13 @@ function at_inventory()
 				if(!quant) quant = 1;
 				clov.append(AppendLink('[disassemble]','multiuse.php?pwd='+
 				pwd+'&action=useitem&quantity='+quant+'&whichitem=24'));
-		}	}
+			}	
+		}
+		else if (src.indexOf('Satan then grabs you by the pants and neck') != -1) {
+			var foo = document.createElement('b');
+			foo.innerHTML = "Ha ha!";
+			firstTable.appendChild(foo);
+		}
 	}
 
 	// Equipment page only
@@ -2353,8 +2221,6 @@ if(quickequip > 0)
 
 	if (GetPref('shortlinks') > 1 && firstTable.rows[0].textContent == "Results:")
 	{	var resultsText = firstTable.rows[1].textContent, bText;
-		GM_log("resultsText:"+resultsText);
-		GM_log("referrer:"+document.referrer);
 // this is where we go back to a useful location if we've done/used something elsewhere that caused the inventory page to load.
 		if (resultsText.indexOf("tumbling rocks") != -1 &&
 			document.referrer.indexOf('bathole.php') != -1)	// used a sonar at the bathole
@@ -2374,14 +2240,8 @@ if(quickequip > 0)
 		}
 		else if (resultsText.indexOf("All items unequipped") != -1 &&
 			document.referrer.indexOf('lair6.php') != -1)	// clicked the 'get nekkid' link at the gash
-		{	parent.frames[2].location = 
+			parent.frames[2].location = 
 				'http://'+ server + '/lair6.php';
-		} 
-		else if (resultsText.indexOf("You discard your Instant Karma") != -1 && 
-			document.referrer.indexOf('lair6.php') != -1)	// clicked the 'discard karma' link at the gash
-		{	parent.frames[2].location = 
-				'http://' + server + '/lair6.php';
-		}
 // and this is where we add all the nifty little links after equipping something.
 		else if (resultsText.indexOf("You equip an item") != -1)
 		{	bText = document.getElementsByTagName('b')[1];
@@ -3072,7 +2932,6 @@ function at_charpane()
 	var imgs = document.images;
 	if (imgs.length == 0 || imgs == null) return;
 	var compactMode = imgs[0].getAttribute('height') < 60;
-	GM_log("charpane: compactMode = "+ compactMode);
 	var bText = document.getElementsByTagName('b');
 	var curHP, maxHP, curMP, maxMP, level, str, advcount, effLink;
 	var oldcount = parseInt(GetData('advcount'));
@@ -3928,7 +3787,7 @@ function at_lair1()
 		else if (ptxt.indexOf("Light") != -1) p.appendChild(AppendLink('[dod potion - moxie]','multiuse.php'));
 		else if (ptxt.indexOf("Mind") != -1) p.appendChild(AppendLink('[dod potion - myst]','multiuse.php'));
 		else if (ptxt.indexOf("Ogre") != -1) p.appendChild(AppendLink('[dod potion - muscle]','multiuse.php'));
-		else if (ptxt.indexOf("NOt a Gate") != -1) p.appendChild(AppendLink('[dod potion - teleport]','multiuse.php'));
+		else if (ptxt.indexOf("Not a Gate") != -1) p.appendChild(AppendLink('[dod potion - teleport]','multiuse.php'));
 	}
 }
 
@@ -3977,7 +3836,6 @@ function at_lair6()
 		zif.setAttribute('align','center');
 		zif.innerHTML += "<br><br><a class='tiny' href='storage.php'>Hagnk's</a>";
 		zif.innerHTML += "<br><a class='tiny' href='inv_equip.php?pwd="+pwd+"&action=unequipall'>get nekkid</a>";
-		zif.innerHTML += "<br><br><br><a class='tiny' href='inventory.php?which=1&action=discard&pwd="+pwd+"&whichitem=4448'>discard a karma</a>";
 	}	
 // door and familiar coding shamelessly borrowed from Tard's NS Trainer script v0.8
 	if (window.location.search == "" && GetPref("lairspoil") == 1) {
@@ -4653,8 +4511,8 @@ function at_topmenu()
 		SetCharData("winesNeeded",'');
 	}
 	var compactmode = document.getElementsByName('loc').length; // compact mode has a dropdown listbox called 'loc', full mode doesn't.
-	GM_log("topmenu: compactmode = " + compactmode);
 	if (compactmode > 0) {	
+		GM_log("topmenu discerned compact mode");
 		at_compactmenu();
 		return;
 	}
@@ -4710,7 +4568,8 @@ function at_topmenu()
 
 		if (txt == "plains")
 		{	a.after(' <a href="manor.php" target="mainpane">manor</a>');
-
+			GM_log("topmenu:level=["+parseInt(GetData('level'))+"]");
+			GM_log("level>9?"+(parseInt(GetData('level')) > 9) ? "Y" : "N");
 			if (parseInt(GetData('level')) > 9)
 				a.after(' <a href="beanstalk.php" target="mainpane">stalk</a>');
 
@@ -4900,19 +4759,7 @@ function at_topmenu()
 	}
 }
 
-function at_ascend()
-{
-	var checklist = GetPref('ascension_list');
-	GM_log("checklist:"+checklist);
-	if (checklist != '') {
-		checklist = checklist.replace(/,/g,"<br>");
-		GM_log("processed list:"+checklist);
-		checklist = "<center><b>Make sure that you have:</b><br>" + checklist + "</center>";
-		var clDisplay = document.createElement('div');
-		clDisplay.innerHTML = checklist;
-		document.body.appendChild(clDisplay);
-	}
-}
+
 
 
 
@@ -4921,7 +4768,7 @@ function at_ascend()
 // --------------------------------------------
 function at_compactmenu()
 {
-	GM_log("in compactmenu!");
+//	GM_log("compactmenu!");
 	var selectItem, links, oonTD, linkTD;
 	var quickSkills = 0, moveqs = 0;
 
@@ -5125,7 +4972,6 @@ function at_account()
 			prefSpan.appendChild(MakeOption("Moons link to NO Calendar: ", 2, 'moonslink', "Off", "On"));
 			prefSpan.appendChild(MakeOption("Sword-Guy Link: ", -1, 'swordguy', 0, 0));
 			prefSpan.appendChild(MakeOption("Backup Outfit Name: ", -1, 'backup', 0, 0));
-			prefSpan.appendChild(MakeOption("Ascension Checklist: ", -1, 'ascension_list', 0, 0));
 
 			var menu1Span = document.createElement('span');
 			var menu2Span = document.createElement('span');
