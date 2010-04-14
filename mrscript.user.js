@@ -4368,32 +4368,31 @@ function spoil_cave()			// dark and dank and sinister cave, that is...
 function spoil_bigisland()
 {	$('img').each(function()
 	{	var ml = null; var src = this.getAttribute('src');
-		// Note to wiki peoples: more spoilers, plz
-//		GM_log("src = " + src);
-		if (src.indexOf("nunnery1") != -1) ml = '168';
+
+		if (src.indexOf("nunnery1") != -1) ml = 'ML: 168';
 		else if (src.indexOf("bfleft") != -1) ml = this.getAttribute('title') + ' (ML: 170-210)'; // don't overwrite image number info
 		else if (src.indexOf("bfright") != -1) ml = this.getAttribute('title') + ' (ML: 170-210)';
-		else if (src.indexOf("junk1") != -1) ml = '168-172';
-		else if (src.indexOf("junk3") != -1) ml = '168-172';
-		else if (src.indexOf("junk5") != -1) ml = '168-172';
-		else if (src.indexOf("junk7") != -1) ml = '168-172';
-		else if (src.indexOf("filth4") != -1) ml = '165';
-		else if (src.indexOf("filth6") != -1) ml = '167';
-		else if (src.indexOf("filth8") != -1) ml = '169';
-		else if (src.indexOf("filth9") != -1) ml = '173';
-		else if (src.indexOf("farm1d") != -1) ml = '170-179, cold (weak=hot/spooky)';
-		else if (src.indexOf("farm2d") != -1) ml = '170-177, hot (weak=stench/sleaze)';
-		else if (src.indexOf("farm3d") != -1) ml = '173, sleaze (weak=cold/spooky)';
-		else if (src.indexOf("farm4d") != -1) ml = '175 (no elemental alignment)';
-		else if (src.indexOf("farm5d") != -1) ml = '166-168';
-		else if (src.indexOf("farm6d") != -1) ml = '169-174, stench (weak=cold/sleaze)';
-		else if (src.indexOf("farm7d") != -1) ml = '171-175, spooky (weak=hot/stench)';
-		else if (src.indexOf("farm8d") != -1) ml = '165-180 (no elemental alignment)';
-		else if (src.indexOf("bmim24") != -1) ml = '330-375';		// wrong section?  hippy camp, bombed.
-		else if (src.indexOf("bmim23") != -1) ml = '330-375';		// wrong section?  frat house, bombed.
-		else if (src.indexOf("lighthouse_left") != -1) ml = '171';
-		
-		if(ml) this.setAttribute('title','ML: '+ml);
+		else if (src.indexOf("junk1") != -1) ml = 'ML: 168-172';
+		else if (src.indexOf("junk3") != -1) ml = 'ML: 168-172';
+		else if (src.indexOf("junk5") != -1) ml = 'ML: 168-172';
+		else if (src.indexOf("junk7") != -1) ml = 'ML: 168-172';
+		else if (src.indexOf("filth4") != -1) ml = 'ML: 165';
+		else if (src.indexOf("filth6") != -1) ml = 'ML: 167';
+		else if (src.indexOf("filth8") != -1) ml = 'ML: 169';
+		else if (src.indexOf("filth9") != -1) ml = 'ML: 173';
+		else if (src.indexOf("farm1d") != -1) ml = 'ML: 170-179, cold (weak=hot/spooky)';
+		else if (src.indexOf("farm2d") != -1) ml = 'ML: 170-177, hot (weak=stench/sleaze)';
+		else if (src.indexOf("farm3d") != -1) ml = 'ML: 173, sleaze (weak=cold/spooky)';
+		else if (src.indexOf("farm4d") != -1) ml = 'ML: 175 (no elemental alignment)';
+		else if (src.indexOf("farm5d") != -1) ml = 'ML: 166-168';
+		else if (src.indexOf("farm6d") != -1) ml = 'ML: 169-174, stench (weak=cold/sleaze)';
+		else if (src.indexOf("farm7d") != -1) ml = 'ML: 171-175, spooky (weak=hot/stench)';
+		else if (src.indexOf("farm8d") != -1) ml = 'ML: 165-180 (no elemental alignment)';
+		else if (src.indexOf("bmim24") != -1) ml = 'ML: 240-251';		//  hippy camp, bombed.
+		else if (src.indexOf("bmim23") != -1) ml = 'ML: 240-251';		//  frat house, bombed.
+		else if (src.indexOf("lighthouse_left") != -1) ml = 'ML: 171';
+// don't add the "ML:" down here because of the special case when the war is still on and you want to see the images numbers, it looks stupid to say "ML: image 34 (ML: 170-210)".		
+		if(ml) this.setAttribute('title',ml);
 });	}
 
 function spoil_postwarisland()		
