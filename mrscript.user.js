@@ -2908,7 +2908,9 @@ function at_questlog()
 			{	b.append(AppendLink("[o 'nam]", 'inv_equip.php?pwd='+pwd+
 					"&which=2&slot=3&whichitem=486"));
 				b.append(AppendLink('[palindome]',
-					'adventure.php?adventure=119'));
+					'adventure.php?snarfblat=119'));
+				b.append(AppendLink('[poop deck]',
+					'adventure.php?snarfblat=159'));					
 			} else if (txt.indexOf("Worship") != -1)
 				b.append(AppendLink('[hidden city]', 'hiddencity.php'));
 		});
@@ -3780,7 +3782,7 @@ function at_lair1()
 		else if (ptxt.indexOf("Light") != -1) p.appendChild(AppendLink('[dod potion - moxie]','multiuse.php'));
 		else if (ptxt.indexOf("Mind") != -1) p.appendChild(AppendLink('[dod potion - myst]','multiuse.php'));
 		else if (ptxt.indexOf("Ogre") != -1) p.appendChild(AppendLink('[dod potion - muscle]','multiuse.php'));
-		else if (ptxt.indexOf("NOt a Gate") != -1) p.appendChild(AppendLink('[dod potion - teleport]','multiuse.php'));
+		else if (ptxt.indexOf("Not a Gate") != -1) p.appendChild(AppendLink('[dod potion - teleport]','multiuse.php'));
 	}
 }
 
