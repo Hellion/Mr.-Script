@@ -2545,20 +2545,22 @@ function at_store()
 
 	// You can thank Mr. Mag for this one...
 	// right-click on the image of the shopkeeper to put on your travoltan trousers without leaving the store.
-	$("img[src*=otherimages]:first").attr('id','proprietor').get(0)
-	.addEventListener('contextmenu', function(evt)
-	{	GM_get(server+'/inv_equip.php?pwd='+pwd+
-			'&which=2&action=equip&whichitem=1792',
-		function(txt)
-		{	var pimg = document.getElementById('proprietor');
-			pimg.removeAttribute('id');
-			pimg.parentNode.nextSibling.innerHTML +=
-			'<br /><div class="tiny">' +
-			(txt.indexOf('You equip') != -1 ?
-			'Travoltan Trousers Equipped' :
-			'Travoltan Trousers Could Not Be Equipped') + '</span>';
-		}); evt.stopPropagation(); evt.preventDefault();
-	}, true);
+	if (whichstore != 'g') {	// can't switch pants in the lab store, and this throws an error if you're in the wrong outfit anyway.
+		$("img[src*=otherimages]:first").attr('id','proprietor').get(0)
+		.addEventListener('contextmenu', function(evt)
+		{	GM_get(server+'/inv_equip.php?pwd='+pwd+
+				'&which=2&action=equip&whichitem=1792',
+			function(txt)
+			{	var pimg = document.getElementById('proprietor');
+				pimg.removeAttribute('id');
+				pimg.parentNode.nextSibling.innerHTML +=
+				'<br /><div class="tiny">' +
+				(txt.indexOf('You equip') != -1 ?
+				'Travoltan Trousers Equipped' :
+				'Travoltan Trousers Could Not Be Equipped') + '</span>';
+			}); evt.stopPropagation(); evt.preventDefault();
+		}, true);
+	}
 
 	if (GetPref('shortlinks') > 1 && firstTable != undefined &&
 		firstTable.children('tr:first').text() == "Market Results:" &&
@@ -2603,53 +2605,58 @@ function at_store()
 	if (GetPref('shortlinks') > 1)
 	{
 		if (whichstore == 'g') // Stupid Lab Key *sigh*
-		{	if (document.body.textContent == "")
-			{	GM_get(server+'/knob2.php',function(knob2)
+		{	
+			if (document.body.textContent == "Uh Oh!You don't belong in this store.")
+			{	
+				GM_get(server+'/knob2.php',function(knob2)
 				{	if (knob2.indexOf('locked') != -1) document.firstChild.innerHTML = knob2;
 				else {
-			var style = $(document.createElement('style'))
-				.attr('type', 'text/css')
-				.html("body {font-family: Arial, Helvetica, sans-serif; background-color: white; color: black;} " +
-				"td {font-family: Arial, Helvetica, sans-serif;} input.button {border: 2px black solid; " +
-				"font-family: Arial, Helvetica, sans-serif; font-size: 10pt; font-weight: bold; background-color: #FFFFFF;}");
-			//document.firstChild.firstChild.appendChild(style);
-			$('head').append(style);
+					var style = $(document.createElement('style'))
+						.attr('type', 'text/css')
+						.html("body {font-family: Arial, Helvetica, sans-serif; background-color: white; color: black;} " +
+						"td {font-family: Arial, Helvetica, sans-serif;} input.button {border: 2px black solid; " +
+						"font-family: Arial, Helvetica, sans-serif; font-size: 10pt; font-weight: bold; background-color: #FFFFFF;}");
+					//document.firstChild.firstChild.appendChild(style);
+					$('head').append(style);
 
-			var tabl = $(document.createElement('table'))
-				.attr('width','95%')
-				.attr('style','font-family: Arial, Helvetica, sans-serif')
-				.attr('cellspacing','0')
-				.attr('cellpadding','0')
-				.append(document.createElement('tbody'));
-			tabl.children('tbody')
-				.append(document.createElement('tr'))
-				.append(document.createElement('tr'));
-			var td = $(document.createElement('td'))
-				.attr('bgcolor','blue')
-				.attr('align','center')
-				.attr('style','color: white;')
-				.html('<b>Knob Goblin Laboratory</b>');
-			//td.firstChild.innerHTML = "Knob Goblin Laboratory";
-			tabl.find('tbody tr:first').append(td);
-			td = $(document.createElement('td'))
-				.attr('style','border: 1px solid blue; padding: 5px;')
-				.attr('align','center')
-				.append('<p><img src="http://images.kingdomofloathing.com'
-				+ '/otherimages/shopgoblin.gif" align="middle">'
-				+ 'How did <i>you</i> get here? This store is '
-				+ 'for guards only!<br>')
-			//td.firstChild.innerHTML = ';
-			td.children('p').append(
-				AppendOutfitSwap(5, "Get In Gear, Soldier!",0));
-			tabl.find('tbody tr:eq(1)').append(td);
-			var centre = $(document.createElement('center'))
-				.append(tabl);
-			$('body').append(centre);
-			}});}
-			else
-			{	$('p:first').append(
+					var tabl = $(document.createElement('table'))
+						.attr('width','95%')
+						.attr('style','font-family: Arial, Helvetica, sans-serif')
+						.attr('cellspacing','0')
+						.attr('cellpadding','0')
+						.append(document.createElement('tbody'));
+					tabl.children('tbody')
+						.append(document.createElement('tr'))
+						.append(document.createElement('tr'));
+					var td = $(document.createElement('td'))
+						.attr('bgcolor','blue')
+						.attr('align','center')
+						.attr('style','color: white;')
+						.html('<b>Knob Goblin Laboratory</b>');
+					//td.firstChild.innerHTML = "Knob Goblin Laboratory";
+					tabl.find('tbody tr:first').append(td);
+					td = $(document.createElement('td'))
+						.attr('style','border: 1px solid blue; padding: 5px;')
+						.attr('align','center')
+						.append('<p><img src="http://images.kingdomofloathing.com'
+						+ '/otherimages/shopgoblin.gif" align="middle">'
+						+ 'How did <i>you</i> get here? This store is '
+						+ 'for guards only!<br>')
+					//td.firstChild.innerHTML = ';
+					td.children('p').append(
+						AppendOutfitSwap(5, "Get In Gear, Soldier!",0));
+					tabl.find('tbody tr:eq(1)').append(td);
+					var centre = $(document.createElement('center'))
+						.append(tabl);
+					$('body').append(centre);
+					}
+				});
+			}
+			else {	
+				$('p:first').append(
 					AppendOutfitSwap(0, "Return To Civilian Life", 0));
-		}	}
+			}	
+		}
 		else if (whichstore == 'h')
 		{	if (noform == 1)
 				swap = AppendOutfitSwap(2, "Like, Get Groovy, Man", 0);
@@ -3488,6 +3495,14 @@ function at_clan_viplounge()
 			}
 		}
 	}
+}
+
+// -------------------------------------------------------
+// THESEA: if the sea is not present, talk to the old man.
+// -------------------------------------------------------
+function at_thesea()
+{	if (document.body.textContent.length == 0)
+		top.document.getElementsByName('mainpane')[0].contentDocument.location.pathname = '/oldman.php?action=talk';
 }
 
 // -------------------------------------------------
@@ -4712,6 +4727,10 @@ function at_topmenu()
 
 		// Yes I know this link only applies to a handful of people. I'm doing it anyway.
 		if (txt == "devster panel") a.html("devster");
+		
+		// shorten things up to make some room for our other additions
+		if (txt == "campground") a.html("camp");
+		if (txt == "mountains") a.html("mtns");
 
 		// Lair
 		if (txt == "lair") haveLair = 1;
@@ -4735,6 +4754,18 @@ function at_topmenu()
 			// This is as good a place as any; get span for adding links later.
 			weBuildHere = a.parent().get(0);
 			weBuildHere.parentNode.setAttribute('nowrap','nowrap');
+		}
+		
+		if (txt == "beach")
+		{	if (parseInt(GetData('level')) > 12) 
+			a.after(' <a href="thesea.php" target="mainpane">sea</a>');
+		}
+		
+		if (txt == "town")
+		{
+			a.after(' <a href="dungeons.php" target="mainpane">dungeons</a>');
+			a.after(' <a href="town_right.php" target="mainpane">R</a>');
+			a.after(' <a href="town_wrong.php" target="mainpane">W</a>');
 		}
 
 		// Remove last row, which will be manually re-added.
