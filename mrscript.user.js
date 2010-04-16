@@ -2609,46 +2609,45 @@ function at_store()
 			if (document.body.textContent == "Uh Oh!You don't belong in this store.")
 			{	
 				GM_get(server+'/knob2.php',function(knob2)
-				{	if (knob2.indexOf('locked') != -1) document.firstChild.innerHTML = knob2;
-				else {
-					var style = $(document.createElement('style'))
-						.attr('type', 'text/css')
-						.html("body {font-family: Arial, Helvetica, sans-serif; background-color: white; color: black;} " +
-						"td {font-family: Arial, Helvetica, sans-serif;} input.button {border: 2px black solid; " +
-						"font-family: Arial, Helvetica, sans-serif; font-size: 10pt; font-weight: bold; background-color: #FFFFFF;}");
-					//document.firstChild.firstChild.appendChild(style);
-					$('head').append(style);
+				{	
+					if (knob2.indexOf('locked') != -1) document.firstChild.innerHTML += knob2;
+					else {
+						var style = $(document.createElement('style'))
+							.attr('type', 'text/css')
+							.html("body {font-family: Arial, Helvetica, sans-serif; background-color: white; color: black;} " +
+							"td {font-family: Arial, Helvetica, sans-serif;} input.button {border: 2px black solid; " +
+							"font-family: Arial, Helvetica, sans-serif; font-size: 10pt; font-weight: bold; background-color: #FFFFFF;}");
+						//document.firstChild.firstChild.appendChild(style);
+						$('head').append(style);
 
-					var tabl = $(document.createElement('table'))
-						.attr('width','95%')
-						.attr('style','font-family: Arial, Helvetica, sans-serif')
-						.attr('cellspacing','0')
-						.attr('cellpadding','0')
-						.append(document.createElement('tbody'));
-					tabl.children('tbody')
-						.append(document.createElement('tr'))
-						.append(document.createElement('tr'));
-					var td = $(document.createElement('td'))
-						.attr('bgcolor','blue')
-						.attr('align','center')
-						.attr('style','color: white;')
-						.html('<b>Knob Goblin Laboratory</b>');
-					//td.firstChild.innerHTML = "Knob Goblin Laboratory";
-					tabl.find('tbody tr:first').append(td);
-					td = $(document.createElement('td'))
-						.attr('style','border: 1px solid blue; padding: 5px;')
-						.attr('align','center')
-						.append('<p><img src="http://images.kingdomofloathing.com'
-						+ '/otherimages/shopgoblin.gif" align="middle">'
-						+ 'How did <i>you</i> get here? This store is '
-						+ 'for guards only!<br>')
-					//td.firstChild.innerHTML = ';
-					td.children('p').append(
-						AppendOutfitSwap(5, "Get In Gear, Soldier!",0));
-					tabl.find('tbody tr:eq(1)').append(td);
-					var centre = $(document.createElement('center'))
-						.append(tabl);
-					$('body').append(centre);
+						var tabl = $(document.createElement('table'))
+							.attr('width','95%')
+							.attr('style','font-family: Arial, Helvetica, sans-serif')
+							.attr('cellspacing','0')
+							.attr('cellpadding','0')
+							.append(document.createElement('tbody'));
+						tabl.children('tbody')
+							.append(document.createElement('tr'))
+							.append(document.createElement('tr'));
+						var td = $(document.createElement('td'))
+							.attr('bgcolor','blue')
+							.attr('align','center')
+							.attr('style','color: white;')
+							.html('<b>Knob Goblin Laboratory</b>');
+						tabl.find('tbody tr:first').append(td);
+						td = $(document.createElement('td'))
+							.attr('style','border: 1px solid blue; padding: 5px;')
+							.attr('align','center')
+							.append('<p><img src="http://images.kingdomofloathing.com'
+							+ '/otherimages/shopgoblin.gif" align="middle">'
+							+ 'How did <i>you</i> get here? This store is '
+							+ 'for guards only!<br>');
+						td.children('p').append(
+							AppendOutfitSwap(5, "Get In Gear, Soldier!",0));
+						tabl.find('tbody tr:eq(1)').append(td);
+						var centre = $(document.createElement('center'))
+							.append(tabl);
+						$('body').append(centre);
 					}
 				});
 			}
@@ -3503,6 +3502,45 @@ function at_clan_viplounge()
 function at_thesea()
 {	if (document.body.textContent.length == 0)
 		top.document.getElementsByName('mainpane')[0].contentDocument.location.pathname = '/oldman.php?action=talk';
+}
+
+// --------------------------------------------------------------------
+// OLDMAN: If the old man is not present, put up a SCUBA gear reminder.
+// --------------------------------------------------------------------
+function at_oldman()
+{ 	if (document.body.textContent.length == 0) {
+		var style = $(document.createElement('style'))
+			.attr('type', 'text/css')
+			.html("body {font-family: Arial, Helvetica, sans-serif; background-color: white; color: black;} " +
+			"td {font-family: Arial, Helvetica, sans-serif;} input.button {border: 2px black solid; " +
+			"font-family: Arial, Helvetica, sans-serif; font-size: 10pt; font-weight: bold; background-color: #FFFFFF;}");
+		//document.firstChild.firstChild.appendChild(style);
+		$('head').append(style);
+
+		var tabl = $(document.createElement('table'))
+			.attr('width','95%')
+			.attr('style','font-family: Arial, Helvetica, sans-serif')
+			.attr('cellspacing','0')
+			.attr('cellpadding','0')
+			.append(document.createElement('tbody'));
+		tabl.children('tbody')
+			.append(document.createElement('tr'))
+			.append(document.createElement('tr'));
+		var td = $(document.createElement('td'))
+			.attr('bgcolor','blue')
+			.attr('align','center')
+			.attr('style','color: white;')
+			.html('<b>No old man, see?</b>');
+		tabl.find('tbody tr:first').append(td);
+		td = $(document.createElement('td'))
+			.attr('style','border: 1px solid blue; padding: 5px;')
+			.attr('align','center')
+			.append('<p>You need some makeshift SCUBA gear, matey.<br>');
+		tabl.find('tbody tr:eq(1)').append(td);
+		var centre = $(document.createElement('center'))
+			.append(tabl);
+		$('body').append(centre);
+	}
 }
 
 // -------------------------------------------------
