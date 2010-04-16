@@ -1,1 +1,1 @@
-1.5.0,http://www.noblesse-oblige.org/hellion/scripts/MrScript.user.js,Update Now,,,
+1.5.1,http://userscripts.org/scripts/source/65705.user.js,Update Now,,,
