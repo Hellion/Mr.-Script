@@ -1,4 +1,4 @@
-// Mr. Script v1.5.1
+// Mr. Script v1.5.0
 //
 // --------------------------------------------------------------------
 // This is a user script.  To install it, you need Greasemonkey 0.8 or
@@ -36,15 +36,15 @@
 // detect hidden city spheres, update altar drop-downs: DONE
 // add link to discard Karma at the gash: DONE
 // fix issue where topmenu switches to compact mode: FLABBERGASTED
-// add yoinked and/or otherwise found-during-combat items to the end-of-combat screen for right-clicky goodness: ON DECK
+// add yoinked and/or otherwise found-during-combat items to the end-of-combat screen for right-clicky goodness: DONE!
 
 
 var place = location.pathname.replace(/\/|\.(php|html)$/gi, "").toLowerCase();
 //console.time("Mr. Script @ " + place);
-//GM_log("at:" + place);
+GM_log("at:" + place);
 
 // n.b. version number should always be a 3-digit number.  If you move to 1.6, call it 1.6.0.  Don't go to 1.5.10 or some such.
-var VERSION = 151;
+var VERSION = 150;
 var MAXLIMIT = 999;
 var ENABLE_QS_REFRESH = 1;
 var DISABLE_ITEM_DB = 0;
@@ -1506,17 +1506,20 @@ function at_game() {
 	var lastUpdated = parseInt(GM_getValue('MrScriptLastUpdate', 0));
 	var currentHours = parseInt(new Date().getTime()/3600000);
 	GetItemDB();
+	GM_log("currentHours:"+currentHours+", lastUpdate:"+lastUpdated);
 
 	// If over X hours, check for updates
-	if ((currentHours - lastUpdated) > 24)
+	if ((currentHours - lastUpdated) > 0)
 	{
 	GM_get("noblesse-oblige.org/hellion/scripts/MrScript.version.json",
 		function(txt)
 		{	txt = txt.replace(/\n/,'');		// strip carriage returns so that eval() doesn't blow up
+			GM_log("txt="+txt);
 			var json = eval('('+txt+')');
 			if(!json.version) return;
 			var vnum = json.version.replace(/\./g, "");	// strip points: 1.4.3 => 143.
 			if(!vnum) return;
+			GM_log("vnum="+vnum+",VERSION="+VERSION);
 			if(parseInt(vnum) <= VERSION)		// number returned via lookup is not newer than what this script says it is...
 			{	persist('MrScriptLastUpdate',
 					parseInt(new Date().getTime()/3600000)); return;
@@ -1594,6 +1597,8 @@ function at_fight() {
 	
 	var monsterName = document.getElementById('monname').innerHTML;
 	var infight = GetData("infight");
+	
+// PART 1: FIRST-ROUND STUFF
 	if (infight != "Y") {	// first time through this particular fight?
 		SetData("infight","Y");
 		var monsterItem = MonsterArray[monsterName];
@@ -1625,6 +1630,8 @@ function at_fight() {
 			}
 		}
 	}
+
+// PART 2: SPECIAL-PROCESS STUFF
 	if (GetData("special") != 0)	{	// in a fight with something special?
 		switch (GetData("special"))
 		{
@@ -1708,12 +1715,7 @@ function at_fight() {
 		}
 	}
 
-	// post-loss processing:
-	if (/You lose.  You slink away,/.test(document.body.innerHTML) || /You run away, like a sissy/.test(document.body.innerHTML)) {
-		SetData("infight","N");
-		SetData("special",0)
-	}
-
+// PART 3: LAST-ROUND STUFF
 	// post-win processing:	
 	if (/WINWINW/.test(document.body.innerHTML)) {
 		SetData("infight","N");
@@ -1745,6 +1747,55 @@ function at_fight() {
 			$("p:contains('Adventure')").html('<a href="inventory.php?which=2"><font size="4">CLICK HERE TO CHANGE YOUR GEAR</font></a>');
 			$("p:contains('Go back to')").html('');
 			break;
+		}
+		showYoinks();
+	}
+		// post-loss processing:
+	else if (/You lose.  You slink away,/.test(document.body.innerHTML) || /You run away, like a sissy/.test(document.body.innerHTML)) {
+		SetData("infight","N");
+		SetData("special",0);
+		showYoinks();
+	}
+// PART 4: ANY-ROUND STUFF	
+	// yoinked-item processing
+	else if (document.body.innerHTML.indexOf(">You acquire an item: <") != -1)	
+        {
+            var imgs = document.body.getElementsByTagName("img");
+            for (var i = 0; i < imgs.length; i++)
+            {
+                var img = imgs[i];
+                if (img.getAttribute("class") != "hand")
+                    continue;
+                // toast
+                if (img.getAttribute("onClick") == "descitem(931984879)")
+                    continue;
+
+                var text = img.parentNode.parentNode.parentNode.parentNode.parentNode.innerHTML;
+                text = text.replace(/ acquire /, " yoinked "); 
+				
+                GM_setValue("yoink", GM_getValue("yoink", "") + text);
+                break;
+            }
+        }
+}
+
+function showYoinks()
+{
+	var yoink = GM_getValue("yoink", "");
+	if (yoink != "")
+	{
+		GM_setValue("yoink", "");
+		var centers = document.body.getElementsByTagName("center");
+		for (var i = 0; i < centers.length; i++)
+		{
+			if (centers[i].innerHTML.indexOf("You win the fight") == 0)
+			{
+				var yoinkNode = document.createElement("table");
+				yoinkNode.innerHTML = yoink;
+				centers[i].insertBefore(yoinkNode, 
+					centers[i].childNodes[3]);
+				break;
+			}
 		}
 	}
 }
@@ -3064,7 +3115,7 @@ function at_questlog()
 				b.append(AppendLink('[palindome]',
 					'adventure.php?snarfblat=119'));
 				b.append(AppendLink('[poop deck]',
-					'adventure.php?snarfblat=159'));					
+					'adventure.php?snarfblat=159'));
 			} else if (txt.indexOf("Worship") != -1)
 				b.append(AppendLink('[hidden city]', 'hiddencity.php'));
 			else if (txt.indexOf("Manor of Spooking") != -1)
