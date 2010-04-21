@@ -1,4 +1,4 @@
-// Mr. Script v1.5.0
+// Mr. Script v1.5.2
 //
 // --------------------------------------------------------------------
 // This is a user script.  To install it, you need Greasemonkey 0.8 or
@@ -11,7 +11,7 @@
 // ==UserScript==
 // @name        Mr. Script
 // @namespace   http://www.noblesse-oblige.org/lukifer/scripts/
-// @description Version 1.5.0
+// @description Version 1.5.2
 // @author		Lukifer
 // @contributor	Ohayou
 // @contributor Hellion
@@ -41,10 +41,10 @@
 
 var place = location.pathname.replace(/\/|\.(php|html)$/gi, "").toLowerCase();
 //console.time("Mr. Script @ " + place);
-GM_log("at:" + place);
+//GM_log("at:" + place);
 
 // n.b. version number should always be a 3-digit number.  If you move to 1.6, call it 1.6.0.  Don't go to 1.5.10 or some such.
-var VERSION = 150;
+var VERSION = 152;
 var MAXLIMIT = 999;
 var ENABLE_QS_REFRESH = 1;
 var DISABLE_ITEM_DB = 0;
@@ -1506,7 +1506,7 @@ function at_game() {
 	var lastUpdated = parseInt(GM_getValue('MrScriptLastUpdate', 0));
 	var currentHours = parseInt(new Date().getTime()/3600000);
 	GetItemDB();
-	GM_log("currentHours:"+currentHours+", lastUpdate:"+lastUpdated);
+//	GM_log("currentHours:"+currentHours+", lastUpdate:"+lastUpdated);
 
 	// If over X hours, check for updates
 	if ((currentHours - lastUpdated) > 0)
@@ -1514,12 +1514,12 @@ function at_game() {
 	GM_get("noblesse-oblige.org/hellion/scripts/MrScript.version.json",
 		function(txt)
 		{	txt = txt.replace(/\n/,'');		// strip carriage returns so that eval() doesn't blow up
-			GM_log("txt="+txt);
+//			GM_log("txt="+txt);
 			var json = eval('('+txt+')');
 			if(!json.version) return;
 			var vnum = json.version.replace(/\./g, "");	// strip points: 1.4.3 => 143.
 			if(!vnum) return;
-			GM_log("vnum="+vnum+",VERSION="+VERSION);
+//			GM_log("vnum="+vnum+",VERSION="+VERSION);
 			if(parseInt(vnum) <= VERSION)		// number returned via lookup is not newer than what this script says it is...
 			{	persist('MrScriptLastUpdate',
 					parseInt(new Date().getTime()/3600000)); return;
@@ -1599,9 +1599,7 @@ function at_fight() {
 	var infight = GetData("infight");
 	
 	function setItem(sel, itemName) {
-		GM_log("setItem");
 		for (var i=1; i < sel.options.length; i++) {
-			GM_log("i="+i+", option="+sel.options[i].text);
 			if (sel.options[i].text.indexOf(itemName) != -1) {
 				sel.options.selectedIndex = i;
 				break;
