@@ -1,4 +1,4 @@
-{	"version":"1.5.1",
+{	"version":"1.5.2",
 	"url1":"http://userscripts.org/scripts/source/65705.user.js",
-	"desc":"<b>Fixed</b><br />- Broken links in questlog<br />- Typo preventing detection of teleportation gate<br />- detection of Lab Store inaccessibility<br />- Some ML spoilers were corrected<br /><br /><b>New</b><br />tracks which sphere is what color if you use the spheres in combat in the hidden city<br />eliminates incorrect spheres and non-buff-giving spherical items from the dropdown at hidden city altars<br />marks gremlins that show the tool or that show the no-tool message<br />a few more links in the questlog<br />link to discard karma when you're at the gash<br />configurable reminder list that shows up when you're about to ascend (set through the Optionarium)<br />"
+	"desc":"<b>Fixed</b><br />- Broken stone selection in hidden city<br />- proper item selection against gremlins<br /><b>New</b><br />Pickpocketed items are listed at end-of-combat, with RCM enabled<br />"
 }
