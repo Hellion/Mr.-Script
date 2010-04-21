@@ -1598,31 +1598,29 @@ function at_fight() {
 	var monsterName = document.getElementById('monname').innerHTML;
 	var infight = GetData("infight");
 	
+	function setItem(sel, itemName) {
+		GM_log("setItem");
+		for (var i=1; i < sel.options.length; i++) {
+			GM_log("i="+i+", option="+sel.options[i].text);
+			if (sel.options[i].text.indexOf(itemName) != -1) {
+				sel.options.selectedIndex = i;
+				break;
+			}
+		}
+	}
+	
 // PART 1: FIRST-ROUND STUFF
 	if (infight != "Y") {	// first time through this particular fight?
 		SetData("infight","Y");
 		var monsterItem = MonsterArray[monsterName];
 		if (monsterItem != undefined && GetPref('lairspoil') != 1 && monsterItem[2] == 1) return;	// found something, spoilers are off, and this is a spoilery monster?
 		if (monsterItem != undefined) {	// let's do something specific with this critter.
-			var dropdown = document.getElementsByTagName('select')[0];
-			var dlen = dropdown ? dropdown.options.length : 0;
-			for(var i=1;i<dlen;i++) {
-				if(dropdown.options[i].text.indexOf(monsterItem[0]) != -1) {
-					dropdown.options.selectedIndex = i;
-					break;
-				}
-			}
+			var dropdown = document.getElementsByName('whichitem');
+			if (dropdown) setItem(dropdown[0], monsterItem[0]);
 // shameless codeborrow	ends somewhere around here.
 			if (monsterItem[1] != "") {	// is there a funkslinging preference given?
-				dropdown = document.getElementsByTagName('select')[1];
-				if (dropdown && dropdown.name == "whichitem2") {	// any other name is not for funkslinging.
-					for(var i=1;i<dropdown.options.length;i++) {
-						if(dropdown.options[i].text.indexOf(monsterItem[1]) != -1) {
-							dropdown.options.selectedIndex = i;
-							break;
-						}
-					}
-				}
+				dropdown = document.getElementsByName('whichitem2');
+				if (dropdown) setItem(dropdown[0], monsterItem[1]);
 			}
 			// n.b. we set this in a separate long-term variable so that we can tweak it mid-fight if needed.
 			if (monsterItem[3] != 0) {
@@ -1658,22 +1656,14 @@ function at_fight() {
 										'<b>MAGNET IT NOW!</b></div></td></tr>';
 						AddToTopOfMain(tr, document);
 						
-						var funkSelect = document.getElementsByTagName('select')[1];
-						var funkAvail = (funkSelect && funkSelect.name == "whichitem2")? true : false;
-						$('select:first').val(2497);
-// if funkslinging is available:
-//		if rock flyers are available: set to rock flyers/magnet
-//		else if jam flyers are available: set to jam flyers/magnet
-//		else set to magnet
-// else set to magnet.
-						if (funkAvail) {	
-							$('select:first').val(2405);
-							if ($('select:first option:selected').val() != 2405) {
-								$('select:first').val(2404);
-								if ($('select:first option:selected').val() != 2404) $('select:first').val=2497;
-							}	
-							if ($('select:first option:selected').val() != 2497) $('select:eq(1)').val(2497);
-						} else $('select:first').val(2497);
+						var itemSelect = document.getElementsByName('whichitem');
+						var funkSelect = document.getElementsByName('whichitem2');
+						if (funkSelect) {
+							setItem(itemSelect[0], "band flyer");
+							setItem(funkSelect[0], "molybdenum magnet");
+						} else {
+							setItem(itemSelect[0], "molybdenum magnet");
+						}
 					} else {
 						var tr = document.createElement('tr');
 						tr.innerHTML = '<tr><td><div style="color: blue;font-size: 80%;width: 100%;text-align:center">' +
@@ -1848,7 +1838,7 @@ function at_hiddencity() {
 	var altarsrc = $('img:first').attr("src"); 
 	var altar = parseInt(altarsrc.charAt(altarsrc.indexOf("/altar") + 6));	// This will be a number from 1 to 4 on the right pages.
 	var stone = GetCharData('altar'+altar);
-	if (stone != undefined) {
+	if ((stone != undefined) && (stone != '')) {
 		$('option:not([value="'+stone+'"]):not([value="'+ball[altar]+'"])').remove();
 	} else {
 		$('option:not([value="2174"]):not([value="2175"]):not([value="2176"]):not([value="2177"]):not([value="'+ball[altar]+'"])').remove();
