@@ -1614,11 +1614,11 @@ function at_fight() {
 		if (monsterItem != undefined && GetPref('lairspoil') != 1 && monsterItem[2] == 1) return;	// found something, spoilers are off, and this is a spoilery monster?
 		if (monsterItem != undefined) {	// let's do something specific with this critter.
 			var dropdown = document.getElementsByName('whichitem');
-			if (dropdown) setItem(dropdown[0], monsterItem[0]);
+			if (dropdown.length) setItem(dropdown[0], monsterItem[0]);
 // shameless codeborrow	ends somewhere around here.
 			if (monsterItem[1] != "") {	// is there a funkslinging preference given?
 				dropdown = document.getElementsByName('whichitem2');
-				if (dropdown) setItem(dropdown[0], monsterItem[1]);
+				if (dropdown.length) setItem(dropdown[0], monsterItem[1]);
 			}
 			// n.b. we set this in a separate long-term variable so that we can tweak it mid-fight if needed.
 			if (monsterItem[3] != 0) {
@@ -1648,6 +1648,7 @@ function at_fight() {
 					AddToTopOfMain(tr, document);
 					SetData("special",2);
 				} else {								// the monster might drop the item.
+					GM_log("check for item show");
 					if (document.body.innerHTML.indexOf(gremlininfo[monsterName][1]) != -1) {	// and there it is!
 						var tr = document.createElement('tr');
 						tr.innerHTML = '<tr><td><div style="color: green;font-size: 100%;width: 100%;text-align:center">' +
@@ -1656,7 +1657,7 @@ function at_fight() {
 						
 						var itemSelect = document.getElementsByName('whichitem');
 						var funkSelect = document.getElementsByName('whichitem2');
-						if (funkSelect) {
+						if (funkSelect.length) {
 							setItem(itemSelect[0], "band flyer");
 							setItem(funkSelect[0], "molybdenum magnet");
 						} else {
@@ -5095,10 +5096,14 @@ function at_compactmenu()
 				AddTopOption("Favorites","inventory.php?which=4",selectItem,selectItem.options[i+3]);
 				if (GetPref('shortlinks') % 2 == 0) break;
 			}
-// force Quests to go to the Notes page.  May make this configurable eventually.  Hellion04Jan2010			
+// if splitquest pref is set, make Quests go to Current Quests and add a Notes entry.
+// otherwise Quests always goes to the Notes page.
 			if (selectItem.options[i].innerHTML == "Quests")
-			{	selectItem.options[i].value="questlog.php?which=4";
-//				AddTopOption("Quest Notes","questlog.php?which=4",selectItem, selectItem.options[i+1]);
+			{	if (GetPref('splitquest')) {
+					AddTopOption("Notes","questlog.php?which=4", selectItem, selectItem.options[i+1]);
+					selectItem.options[i].value="questlog.php?which=1";
+				}
+				else selectItem.options[i].value="questlog.php?which=4";
 			}
 			if (selectItem.options[i].innerHTML == "Account Menu")
 			{	AddTopOption("-", "nothing", selectItem, selectItem.options[i+1]);
