@@ -1719,7 +1719,7 @@ function at_fight() {
 				}
 				// save info about what wines dropped for the wine location solver.
 				if (dropcode != 0) {
-					var corner = "corner" + document.getElementsByTagName('a')[0].href.match(/snarfblat=(\d+)/)[1];
+					var corner = "corner" + document.getElementsByTagName('a')[1].href.match(/snarfblat=(\d+)/)[1];
 					var winesfound = GetCharData(corner);
 					winesfound |= dropcode;
 					SetCharData(corner, winesfound);
