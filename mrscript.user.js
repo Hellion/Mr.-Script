@@ -1,4 +1,4 @@
-// Mr. Script v1.5.0
+// Mr. Script v1.5.2
 //
 // --------------------------------------------------------------------
 // This is a user script.  To install it, you need Greasemonkey 0.8 or
@@ -11,7 +11,7 @@
 // ==UserScript==
 // @name        Mr. Script
 // @namespace   http://www.noblesse-oblige.org/lukifer/scripts/
-// @description Version 1.5.0
+// @description Version 1.5.2
 // @author		Lukifer
 // @contributor	Ohayou
 // @contributor Hellion
@@ -28,23 +28,16 @@
 // @require     http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js
 // @unwrap
 // ==/UserScript==
-
-// Feature Requests:
-// notice when gremlins brandish their tool OR show "no tool" message and react appropriately: V1.0 DONE
-//   (need to figure out how to detect a gremlin that is "the wrong one for the zone" immediately.)
-// add checklist to ascend.php for reference: V1.0 DONE
-// detect hidden city spheres, update altar drop-downs: DONE
-// add link to discard Karma at the gash: DONE
-// fix issue where topmenu switches to compact mode: FLABBERGASTED
-// add yoinked and/or otherwise found-during-combat items to the end-of-combat screen for right-clicky goodness: DONE!
+// WIP:
+//   need to figure out how to detect a gremlin that is "the wrong one for the zone" immediately.
 
 
 var place = location.pathname.replace(/\/|\.(php|html)$/gi, "").toLowerCase();
 //console.time("Mr. Script @ " + place);
-GM_log("at:" + place);
+//GM_log("at:" + place);
 
 // n.b. version number should always be a 3-digit number.  If you move to 1.6, call it 1.6.0.  Don't go to 1.5.10 or some such.
-var VERSION = 150;
+var VERSION = 152;
 var MAXLIMIT = 999;
 var ENABLE_QS_REFRESH = 1;
 var DISABLE_ITEM_DB = 0;
@@ -352,12 +345,35 @@ function FindMaxQuantity(item, howMany, deefault, safeLevel)
 			min = 30; max = 40; break;
 		case 2370: // fennel Sooooooda
 			min = 82; max = 120; break;
+		case 2378: // banana spritzer
+			min = 40; max = 100; break;
 		case 2437: // New Cloke!
 			min = 140; max = 160; break;
 		case 2606: // palm-frond fan
 			min = 35; max = 45; break;
 		case 3357: // delicious moth
 			min = 30; max = 40; break;
+		case 3450: // cotton candy pinch
+			min = 7;  max = 15; break;
+		case 3451: // cotton candy smidgen
+			min = 11; max = 23; break;
+		case 3452: // cc skoche
+			min = 15; max = 30; break;
+		case 3453: // cc plug
+			min = 19; max = 38; break;
+		case 3454: // cc cone
+			min = 26; max = 52; break;
+		case 3455: // cc pillow
+			min = 34; max = 68; break;
+		case 3456: // cc bale
+			min = 41; max = 82; break;
+		
+		case 3697: // high-pressure seltzer bottle
+			min = 150;max = 200; break;
+		case 3727: // Nardz	-- questionable data, went with conservative (i.e. high) values.
+			min = 55; max = 85; break;
+		case 4192: // sugar shard
+			min = 5;  max = 10; break;
 
 		case 231: // Doc G's Pungent Unguent
 			min = 3; max = 5; hp = 1; break;
@@ -925,7 +941,7 @@ function AddLinks(descId, theItem, formWhere, path) {
 		case 2044: // MacGuffin
 			addWhere.append(AppendLink('[read]',"diary.php?textversion=1")); break;
 
-		case  485: // Talisman
+		case  485: // snakehead charrrm: make talisman
 			addWhere.append(AppendLink('[man, o nam]', 'craft.php?mode=combine&' +
                                  'action=craft&a=485&b=485&pwd='+ pwd +
                                  '&quantity=1')); GoGoGadgetPlunger(); break;
@@ -1506,7 +1522,7 @@ function at_game() {
 	var lastUpdated = parseInt(GM_getValue('MrScriptLastUpdate', 0));
 	var currentHours = parseInt(new Date().getTime()/3600000);
 	GetItemDB();
-	GM_log("currentHours:"+currentHours+", lastUpdate:"+lastUpdated);
+//	GM_log("currentHours:"+currentHours+", lastUpdate:"+lastUpdated);
 
 	// If over X hours, check for updates
 	if ((currentHours - lastUpdated) > 0)
@@ -1514,12 +1530,12 @@ function at_game() {
 	GM_get("noblesse-oblige.org/hellion/scripts/MrScript.version.json",
 		function(txt)
 		{	txt = txt.replace(/\n/,'');		// strip carriage returns so that eval() doesn't blow up
-			GM_log("txt="+txt);
+//			GM_log("txt="+txt);
 			var json = eval('('+txt+')');
 			if(!json.version) return;
 			var vnum = json.version.replace(/\./g, "");	// strip points: 1.4.3 => 143.
 			if(!vnum) return;
-			GM_log("vnum="+vnum+",VERSION="+VERSION);
+//			GM_log("vnum="+vnum+",VERSION="+VERSION);
 			if(parseInt(vnum) <= VERSION)		// number returned via lookup is not newer than what this script says it is...
 			{	persist('MrScriptLastUpdate',
 					parseInt(new Date().getTime()/3600000)); return;
@@ -1599,9 +1615,7 @@ function at_fight() {
 	var infight = GetData("infight");
 	
 	function setItem(sel, itemName) {
-		GM_log("setItem");
 		for (var i=1; i < sel.options.length; i++) {
-			GM_log("i="+i+", option="+sel.options[i].text);
 			if (sel.options[i].text.indexOf(itemName) != -1) {
 				sel.options.selectedIndex = i;
 				break;
@@ -1616,11 +1630,11 @@ function at_fight() {
 		if (monsterItem != undefined && GetPref('lairspoil') != 1 && monsterItem[2] == 1) return;	// found something, spoilers are off, and this is a spoilery monster?
 		if (monsterItem != undefined) {	// let's do something specific with this critter.
 			var dropdown = document.getElementsByName('whichitem');
-			if (dropdown) setItem(dropdown[0], monsterItem[0]);
+			if (dropdown.length) setItem(dropdown[0], monsterItem[0]);
 // shameless codeborrow	ends somewhere around here.
 			if (monsterItem[1] != "") {	// is there a funkslinging preference given?
 				dropdown = document.getElementsByName('whichitem2');
-				if (dropdown) setItem(dropdown[0], monsterItem[1]);
+				if (dropdown.length) setItem(dropdown[0], monsterItem[1]);
 			}
 			// n.b. we set this in a separate long-term variable so that we can tweak it mid-fight if needed.
 			if (monsterItem[3] != 0) {
@@ -1650,6 +1664,7 @@ function at_fight() {
 					AddToTopOfMain(tr, document);
 					SetData("special",2);
 				} else {								// the monster might drop the item.
+					GM_log("check for item show");
 					if (document.body.innerHTML.indexOf(gremlininfo[monsterName][1]) != -1) {	// and there it is!
 						var tr = document.createElement('tr');
 						tr.innerHTML = '<tr><td><div style="color: green;font-size: 100%;width: 100%;text-align:center">' +
@@ -1658,7 +1673,8 @@ function at_fight() {
 						
 						var itemSelect = document.getElementsByName('whichitem');
 						var funkSelect = document.getElementsByName('whichitem2');
-						if (funkSelect) {
+
+						if (funkSelect.length) {
 							setItem(itemSelect[0], "band flyer");
 							setItem(funkSelect[0], "molybdenum magnet");
 						} else {
@@ -2881,10 +2897,7 @@ function at_craft()
 // MOUNTAINS: Always-visible hermit.
 // ---------------------------------
 function at_mountains()
-{	if (GetPref('zonespoil') == 1)
-	{	$("img[src*=valley2]").attr('title','ML: 75-87');
-		$("img[src*=bigbarrel]").attr('title','ML: 15/25/35');
-	}
+{	
 	var img = $('img:last');
 	if(img.attr('src').indexOf("mount4") != -1)
 	{
@@ -3611,33 +3624,42 @@ function at_manor3()
 	var wineDB = {'2275':'278847834','2271':'163456429','2276':'147519269',
 				  '2273':'905945394','2272':'289748376','2274':'625138517'};
 
-				  $('select:first').change(function()
-	{	var wine = this.childNodes[this.selectedIndex].value;
-		if (wine > 0) GM_get(server +
-			"/desc_item.php?whichitem=" + wineDB[wine],
-		function(txt)
-		{	var num = txt.charAt(txt.indexOf("/glyph") + 6);
+// new way: use the glyph info we scraped once while building the wine list.
+	$('select:first').change(function()
+	{	
+	var winelist = eval('('+GetCharData("winelist")+')');	// {2271:["name",glyphid], 2272:["name",glyphid], etc.}
+	var wine = this.childNodes[this.selectedIndex].value;
+		if (wine > 0) {
 			var glyph = $('#daglyph');
-			if(glyph.length == 0)
+			if (glyph.length == 0)		// if it doesn't exist, add it.
 			{	$('select:first').parent().parent().append(
 					$(document.createElement('img')).attr('id', 'daglyph'));
 				glyph = $('#daglyph');
 			}
 			glyph.attr('src',
 				'http://images.kingdomofloathing.com/' +
-				'otherimages/manor/glyph'+num+'.gif');
-		});
+				'otherimages/manor/glyph'+winelist[wine][1]+'.gif');
+		}
 	});
-
-// basic spoilers, part 2:  mouseover zone ML info.
-	if (GetPref('zonespoil') == 1)
-	{	var msg = null; $('img').each(function()
-		{	var ml = null; var src = this.getAttribute('src');
-			if (src.indexOf("cellar") != -1) msg = 'ML: 158-168';
-			else if (src.indexOf("chambera") != -1) msg = 'ML: 170';
-			if(msg) this.setAttribute('title', msg);
-		});
-	}
+	
+// old way: scrape the description every time we change the wine selection.	
+//	$('select:first').change(function()
+//	{	var wine = this.childNodes[this.selectedIndex].value;
+//		if (wine > 0) GM_get(server +
+//			"/desc_item.php?whichitem=" + wineDB[wine],
+//		function(txt)
+//		{	var num = txt.charAt(txt.indexOf("/glyph") + 6);
+//			var glyph = $('#daglyph');
+//			if(glyph.length == 0)
+//			{	$('select:first').parent().parent().append(
+//					$(document.createElement('img')).attr('id', 'daglyph'));
+//				glyph = $('#daglyph');
+//			}
+//			glyph.attr('src',
+//				'http://images.kingdomofloathing.com/' +
+//				'otherimages/manor/glyph'+num+'.gif');
+//		});
+//	});
 	
 // basic spoilers, part 3: link to equip spectacles when needed.
 // this part is all-but-unnecessary, only being needed on someone's first runthrough, but
@@ -3778,9 +3800,13 @@ function at_manor3()
 				dustylist[i] = dustyX;
 			}
 			var youNeed = "You need: ";
-			for (i=0;i<3;i++) {
-				youNeed += winelist[needs[i]][0];
-				youNeed += " (you have "+dustylist[needs[i]]+"), ";
+			if (needs[0] == undefined) {
+				youNeed = "   ";
+			} else {
+				for (i=0;i<3;i++) {
+					youNeed += winelist[needs[i]][0];
+					youNeed += " (you have "+dustylist[needs[i]]+"), ";
+				}
 			}
 			youNeed = youNeed.slice(0, -2);
 			getWinelist.innerHTML = youNeed;
@@ -3828,6 +3854,7 @@ function at_manor3()
 	} else {											// Better do it the long way.... 
 		GM_get(server+"/manor3.php?place=goblet", function (atext) {	// check the altar for the glyphs we need
 			var pdiv = document.createElement('div');
+			GM_log("place=goblet text:"+atext);
 			pdiv.innerHTML = atext;
 			var glimgs = pdiv.getElementsByTagName('img');
 			var glyphids = new Array();
@@ -3836,10 +3863,12 @@ function at_manor3()
 					"You need: Lord Spookyraven's spectacles! <font size='2'><a href=adventure.php?snarfblat=108>[bedroom]</a></font>";
 				return;
 			} // else...
-			glyphids[0] = glimgs[0].getAttribute('src').match(/(?:otherimages\/manor\/glyph)(\d)/)[1];
-			glyphids[1] = glimgs[1].getAttribute('src').match(/(?:otherimages\/manor\/glyph)(\d)/)[1];
-						//glimgs[2] is the big encircled-triangle in the middle.
-			glyphids[2] = glimgs[3].getAttribute('src').match(/(?:otherimages\/manor\/glyph)(\d)/)[1];
+			if (atext.indexOf("Nothing more to see here.") == -1) {	// make sure we're not trying this after the chamber has been emptied
+				glyphids[0] = glimgs[0].getAttribute('src').match(/(?:otherimages\/manor\/glyph)(\d)/)[1];
+				glyphids[1] = glimgs[1].getAttribute('src').match(/(?:otherimages\/manor\/glyph)(\d)/)[1];
+							//glimgs[2] is the big encircled-triangle in the middle.
+				glyphids[2] = glimgs[3].getAttribute('src').match(/(?:otherimages\/manor\/glyph)(\d)/)[1];
+			}
 			GM_get(server+"/desc_item.php?whichitem="+wineDB[2271], function(b1) {	// get the glyph number off the wine descriptions
 				winelist[2271]=scrape(b1);
 				GM_get(server+"/desc_item.php?whichitem="+wineDB[2272], function(b2) {
@@ -3899,7 +3928,6 @@ function at_palinshelves()
 		sels[2].value = 493; sels[3].value = 2261;
 }	}
 
-
 // --------------------------------------------
 // PYRAMID: Display ratchets and other goodies.
 // --------------------------------------------
@@ -3912,7 +3940,6 @@ function at_pyramid()
 	var checkInv = document.createElement('a');
 	checkInv.innerHTML = '<font size="2">[check inventory]</font>';
 	checkInv.setAttribute('href', '#');
-// the "new way":
 	checkInv.addEventListener('click', function(evt)
 	{	checkInv.innerHTML = '<font size="2">[checking...]</font>';
 		GM_get(server+'/js_inv.php?for=MrScript',function(response) {
@@ -3961,22 +3988,7 @@ function at_pyramid()
 		}
     }
 // end de-ratter
-
-	if (GetPref('zonespoil') == 1)
-	{	var msg = null; $('img').each(function()
-		{	var ml = null; var src = this.getAttribute('src');
-			if (src.indexOf("mid2") != -1) msg = 'ML: 162-176';
-			else if (src.indexOf("mid3b") != -1) msg = 'ML: 162-180';
-			else if (src.indexOf("mid4_5") != -1) msg = 'Keep Going...';
-			else if (src.indexOf("mid4_2") != -1) msg = 'Keep Going...';
-			else if (src.indexOf("mid4_4") != -1) msg = 'Phase 1: Token';
-			else if (src.indexOf("mid4_3") != -1) msg = 'Phase 2: ???';
-			else if (src.indexOf("mid4_1.") != -1) msg = 'Phase 3: Profit!';
-			if(msg) this.setAttribute('title', msg);
-		});
-	}
 }
-
 
 // -------------------
 // LAIR: More linkies.
@@ -4144,9 +4156,7 @@ function at_lair6()
 		},false);
 	}
 // end shameless code borrowing
-	
 }
-
 
 // -------------------------------------------------
 // FAMILIAR: Blackbird singing in the dead of night.
@@ -4170,18 +4180,16 @@ function at_familiar()
 
 // ------------------------------------------
 // MINING: uber-twinklify all twinkly images.
-// Image courtesy of Picklish's Mining Helper script.
 // ------------------------------------------
 function at_mining() 
 {
+// Image courtesy of Picklish's Mining Helper script.
 	var staticSparkleImg = "data:image/gif;base64,R0lGODlhMgAyAOMPAP39/dvb2zc3NycnJ5qams3NzQUFBRAQEGtra6enp7W1te3t7UZGRldXV319ff///yH/C05FVFNDQVBFMi4wAwEAAAAh+QQJAQAPACwAAAAAMgAyAAAEW/DJSau9OOvNu/9gKI5kaZ5oqq5s675wLM90bd94ru8rg/AUR+AAfBwCgd/OMFA4GguEQXcEJAQEQGM3ECAAUSIwkJgWn0WJwZxuu9/wuHxOr9vv+Lx+z+/77xEAIfkECQEADwAsAAAAADIAMgAABGvwyUmrvTjrzbv/YCiOZGmeaKqubOu+cCzPdG3feM4Jhm4FA18lIRBSEgzjpKDoGRmLAsJAddYaBEJAMQB4AYqbIKuILhwCRlAXWKyNWaVEKn8kEHVCo36w1v+AgYKDhIWGh4iJiouMjY4kEQAh+QQJAQAPACwAAAAAMgAyAAAEl/DJSau9OOvNu/9gKI5kaZ5oqq5s675wLLeHMXNHYd/aAAy83i+YMRQERMwhgEhefA6npQFISCmGQEJ3NTAUhYMCYRM0CMCYoYEoAAi1Adi9OMoGhXwgIDAcHAsJDEE7Bgl8eQM7TkYACotXVA1XFD6DlBIDC2mYRpyUOUiYD56jpAWXowqfpq2ur7CxsrO0tba3uLm6GhEAIfkECQEADwAsAAAAADIAMgAABGvwyUmrvTjrzbv/YCiOZGmeaKqubOu+cCzPdG3feM4Jhm4FA18lIRBSEgzjpKDoGRmLAsJAddYaBEJAMQB4AYqbIKuILhwCRlAXWKyNWaVEKn8kEHVCo36w1v+AgYKDhIWGh4iJiouMjY4kEQAh+QQJAQAPACwAAAAAMgAyAAAEW/DJSau9OOvNu/9gKI5kaZ5oqq5s675wLM90bd94ru8rg/AUR+AAfBwCgd/OMFA4GguEQXcEJAQEQGM3ECAAUSIwkJgWn0WJwZxuu9/wuHxOr9vv+Lx+z+/77xEAOw==";
-
 	$("img[src*=wallsparkle]").attr("src",staticSparkleImg);
 }
 
 // -------------------------
 // OCEAN: Lat/Long spoilers.
-// 21Dec09 Hellion: added access to all varieties of statgain adventures and the gathering of objects.
 // -------------------------
 function at_ocean()
 {	$("input[name=lat]").parents("table:first").before(
@@ -4441,6 +4449,16 @@ function spoil_manor2()
 		if(ml) this.setAttribute('title','ML: '+ml);
 });	}
 
+function spoil_manor3() 
+{	var msg = null; 
+	$('img').each(function()
+	{	var ml = null; 
+		var src = this.getAttribute('src');
+		if (src.indexOf("cellar") != -1) msg = 'ML: 158-168';
+		else if (src.indexOf("chambera") != -1) msg = 'ML: 170';
+		if (msg) this.setAttribute('title', msg);
+});	}
+
 function spoil_beach()
 {	$('img').each(function()
 	{	var ml = null; var src = this.getAttribute('src');
@@ -4448,6 +4466,21 @@ function spoil_beach()
 		else if (src.indexOf("desert.gif") != -1) ml = '134-142';
 		else if (src.indexOf("oasis") != -1) ml = '132-137';
 		if(ml) this.setAttribute('title','ML: '+ml);
+});	}
+
+function spoil_pyramid() 
+{	var msg = null; 
+	$('img').each(function()
+	{	var ml = null; 
+		var src = this.getAttribute('src');
+		if (src.indexOf("mid2") != -1) msg = 'ML: 162-176';
+		else if (src.indexOf("mid3b") != -1) msg = 'ML: 162-180';
+		else if (src.indexOf("mid4_5") != -1) msg = 'Keep Going...';
+		else if (src.indexOf("mid4_2") != -1) msg = 'Keep Going...';
+		else if (src.indexOf("mid4_4") != -1) msg = 'Phase 1: Token';
+		else if (src.indexOf("mid4_3") != -1) msg = 'Phase 2: ???';
+		else if (src.indexOf("mid4_1.") != -1) msg = 'Phase 3: Profit!';
+		if(msg) this.setAttribute('title', msg);
 });	}
 
 function spoil_bathole()
@@ -4582,6 +4615,11 @@ function spoil_lair3()
 			.parent().attr('style','text-align:center;');
 }	}
 
+function spoil_mountains()
+{	$("img[src*=valley2]").attr('title','ML: 75-87');
+	$("img[src*=bigbarrel]").attr('title','ML: 15/25/35');
+}
+
 function spoil_mclargehuge()
 {	$('img').each(function()
 	{	var ml = null; var src = this.getAttribute('src');
@@ -4696,15 +4734,15 @@ function at_mtnoob()
 		pwd + '&which=3&whichitem=1155'));
 }
 
-function at_showplayer()
-{	if (location.search != "?who=53596" && location.search != "?who=73736")
-		return;
-	var img = document.getElementsByTagName('img'); for (var i=50, len=img.length; i<len; i++)
-	{	var temp = img[i]; if (temp.width == 100 && temp.title.indexOf("Tiny") != -1)
-		{	var nu = document.createElement('img'); nu.title = "Worst. Trophy. Ever.";
-			nu.src = "http://images.kingdomofloathing.com/otherimages/trophy/not_wearing_any_pants.gif";
-			temp.parentNode.insertBefore(nu,temp.nextSibling); break;
-}	}	}
+//function at_showplayer()
+//{	if (location.search != "?who=53596" && location.search != "?who=73736")
+//		return;
+//	var img = document.getElementsByTagName('img'); for (var i=50, len=img.length; i<len; i++)
+//	{	var temp = img[i]; if (temp.width == 100 && temp.title.indexOf("Tiny") != -1)
+//		{	var nu = document.createElement('img'); nu.title = "Worst. Trophy. Ever.";
+//			nu.src = "http://images.kingdomofloathing.com/otherimages/trophy/not_wearing_any_pants.gif";
+//			temp.parentNode.insertBefore(nu,temp.nextSibling); break;
+//}	}	}
 
 // ---------------------------------------------------
 // DESC_ITEM: Add use boxes/links to item descriptions
@@ -4712,6 +4750,7 @@ function at_showplayer()
 function at_desc_item() {
   linkKOLWiki();
 }
+
 function at_desc_effect() {
   linkKOLWiki();
 }
@@ -5097,10 +5136,14 @@ function at_compactmenu()
 				AddTopOption("Favorites","inventory.php?which=4",selectItem,selectItem.options[i+3]);
 				if (GetPref('shortlinks') % 2 == 0) break;
 			}
-// force Quests to go to the Notes page.  May make this configurable eventually.  Hellion04Jan2010			
+// if splitquest pref is set, make Quests go to Current Quests and add a Notes entry.
+// otherwise Quests always goes to the Notes page.
 			if (selectItem.options[i].innerHTML == "Quests")
-			{	selectItem.options[i].value="questlog.php?which=4";
-//				AddTopOption("Quest Notes","questlog.php?which=4",selectItem, selectItem.options[i+1]);
+			{	if (GetPref('splitquest')) {
+					AddTopOption("Notes","questlog.php?which=4", selectItem, selectItem.options[i+1]);
+					selectItem.options[i].value="questlog.php?which=1";
+				}
+				else selectItem.options[i].value="questlog.php?which=4";
 			}
 			if (selectItem.options[i].innerHTML == "Account Menu")
 			{	AddTopOption("-", "nothing", selectItem, selectItem.options[i+1]);
@@ -5171,9 +5214,6 @@ function at_compactmenu()
 		AddTopOption("Hagnk","storage.php",selectItem,0);
 	}
 }
-
-
-
 
 // -------------------------------------
 // ACCOUNT: Preference-Type Thing-Thing.
@@ -5422,7 +5462,6 @@ function at_account()
 			var addHere = tables[i].rows[1].firstChild.firstChild.firstChild.firstChild.firstChild.firstChild;
 			addHere.appendChild(pDiddy); break;
 }	}	}
-
 
 // -----------------------------------------------------------
 // HAGNK'S/MANAGESTORE/STASH: Support autoclear for added rows
