@@ -1632,10 +1632,14 @@ function at_fight() {
 									"a vegetable gremlin":[185, "screwdriver", 		"off of itself and"],
 									"an A.M.C. gremlin"  :[186, "blah blah hruugh", "an A.M.C. gremlin"]};
 				// need a way to tell what zone we're adventuring in so we can mark 'wrong' gremlins immediately. 
-				// unfortunately, I don't know any such way that is decently reliable.
+				var zonetext = GetData("square");
+				GM_log("zonetext="+zonetext);
+				var zone = zonetext ? parseInt(zonetext.match(/(\d+)/)[1]) : 0;
 				
 				// if the monster doesn't drop the item in this zone, or we see the "i-don't-have-it" message...
-				if ((document.body.innerHTML.indexOf(gremlininfo[monsterName][2]) != -1)) { 	// gremlin showed the no-tool message?
+				if ((gremlininfo[monsterName][0] != zone) ||
+					(document.body.innerHTML.indexOf(gremlininfo[monsterName][2]) != -1)) { 	// gremlin showed the no-tool message?
+					GM_log("zone="+zone+", name="+monsterName+", gi[name][0]="+gremlininfo[monsterName][0]);
 					var tr = document.createElement('tr');
 					tr.innerHTML = '<tr><td><div style="color: red;font-size: 100%;width: 100%;text-align:center">' + 
 									'<b>SMACK THE LITTLE BUGGER DOWN!</b></div></td></tr>';
@@ -1703,6 +1707,42 @@ function at_fight() {
 	if (/WINWINW/.test(document.body.innerHTML)) {
 		SetData("infight","N");
 		SetData("special",0);
+		var square=GetData("square");
+		SetData("square",false);
+		if (square) {
+			GM_log("square="+square);
+			if (square.indexOf("hiddencity") != -1) {
+				var thissquare = square.match(/(\d+)/)[1];	// the "22" in "hiddencity.php?which=22"
+				GM_log("this square = "+thissquare);
+				var nextsquare = parseInt(thissquare)+1;
+				if (nextsquare < 25) {
+					var myhref = "hiddencity.php?which="+nextsquare;
+					var clicky = "SetData('square','"+myhref+"')";
+					$('<center><p><a href="'+myhref+'" id="bwahaha">Explore Next Square</a></center>').appendTo($('center:last'));
+					$('#bwahaha').click(function() {
+						var a = $(this);
+						GM_log("href="+a.attr('href'));
+						SetData("square",a.attr('href'));
+					});
+				}
+			} else {
+				var location = parseInt(square.match(/(\d+)/)[1]);	// the 185 in "adventure.php?snarfblat=185"
+				GM_log("location="+location);
+				switch (location)	{
+				case 182:
+				case 183:
+				case 184:
+				case 185:	// add onclick to "adventure again" link to tell ourselves where we are.
+					GM_log("adding onclick event.");
+					$('a:contains("dventure")').click(function() {
+						var a = $(this);
+						GM_log("href="+a.attr('href'));
+						SetData("square",a.attr('href'));
+					});
+				break;
+				}
+			}
+		}
 		switch (monsterName) {
 		case "a skeletal sommelier":
 		case "a possessed wine rack":
@@ -1737,6 +1777,7 @@ function at_fight() {
 	else if (/You lose.  You slink away,/.test(document.body.innerHTML) || /You run away, like a sissy/.test(document.body.innerHTML)) {
 		SetData("infight","N");
 		SetData("special",0);
+		SetData("square",false);
 		showYoinks();
 	}
 // PART 4: ANY-ROUND STUFF	
@@ -1827,15 +1868,31 @@ function at_valhalla() {
 // 2174=mossy, 2175=smooth, 2176=cracked, 2177=rough.
 // altar 1=yellow, 2=blue, 3=red, 4=green.
 function at_hiddencity() {
+	SetData("square",false);		// if we click on an altar, unmark it.
 	var ball = {1: 1900, 2: 1901, 3: 1904, 4: 1905};	// that's "altar:ID of ball that gives buff at this altar".
 	var altarsrc = $('img:first').attr("src"); 
-	var altar = parseInt(altarsrc.charAt(altarsrc.indexOf("/altar") + 6));	// This will be a number from 1 to 4 on the right pages.
-	var stone = GetCharData('altar'+altar);
-	if ((stone != undefined) && (stone != '')) {
-		$('option:not([value="'+stone+'"]):not([value="'+ball[altar]+'"])').remove();
-	} else {
-		$('option:not([value="2174"]):not([value="2175"]):not([value="2176"]):not([value="2177"]):not([value="'+ball[altar]+'"])').remove();
+	if (altarsrc) {
+		var altar = parseInt(altarsrc.charAt(altarsrc.indexOf("/altar") + 6));	// This will be a number from 1 to 4 on the right pages.
+		var stone = GetCharData('altar'+altar);
+		if ((stone != undefined) && (stone != '')) {
+			$('option:not([value="'+stone+'"]):not([value="'+ball[altar]+'"])').remove();
+		} else {
+			$('option:not([value="2174"]):not([value="2175"]):not([value="2176"]):not([value="2177"]):not([value="'+ball[altar]+'"])').remove();
+		}
 	}
+	$('a').click(function() {
+		var a = $(this);
+		GM_log("href="+a.attr('href'));
+		SetData("square",a.attr('href'));
+	});
+}
+
+function at_adventure() {
+	SetData("square",false);
+}
+
+function at_choice() {
+	SetData("square",false);
 }
 
 function at_town_right() {
@@ -2546,6 +2603,14 @@ function at_bigisland()
 		if (onclick != undefined && onclick.indexOf("desc") != -1)
 			AddInvCheck(this);
 	});
+	GM_log("at bigisland:"+document.location.search);
+	if (document.location.search == "?place=junkyard") {
+		$('a:lt(4)').click(function() {
+		var a = $(this);
+		GM_log("href="+a.attr('href'));
+		SetData("square",a.attr('href'));
+		});
+	}
 }
 
 // ---------------------------------------------
