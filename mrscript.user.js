@@ -1655,6 +1655,7 @@ function at_fight() {
 						
 						var itemSelect = document.getElementsByName('whichitem');
 						var funkSelect = document.getElementsByName('whichitem2');
+
 						if (funkSelect.length) {
 							setItem(itemSelect[0], "band flyer");
 							setItem(funkSelect[0], "molybdenum magnet");
