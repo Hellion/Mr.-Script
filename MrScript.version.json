@@ -1,4 +1,4 @@
-{	"version":"1.5.2",
+{	"version":"1.5.3",
 	"url1":"http://userscripts.org/scripts/source/65705.user.js",
-	"desc":"<b>Fixed</b><br />- Broken stone selection in hidden city<br />- proper item selection against gremlins<br /><b>New</b><br />Pickpocketed items are listed at end-of-combat, with RCM enabled<br />"
+	"desc":"<b>Fixed</b><br />truly fixed proper item selection against gremlins<br /><b>New</b><br />Enabling the SplitQuest preference now adds a "Notes" item in compact topmenu mode, and forces the "Quest" item to go to Current Quests.<br />A couple of performance tweaks<br />Knows a few more MP restorer ranges<br />"
 }

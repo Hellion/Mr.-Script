@@ -1,4 +1,4 @@
-// Mr. Script v1.5.2
+// Mr. Script v1.5.3
 //
 // --------------------------------------------------------------------
 // This is a user script.  To install it, you need Greasemonkey 0.8 or
@@ -11,7 +11,7 @@
 // ==UserScript==
 // @name        Mr. Script
 // @namespace   http://www.noblesse-oblige.org/lukifer/scripts/
-// @description Version 1.5.2
+// @description Version 1.5.3
 // @author		Lukifer
 // @contributor	Ohayou
 // @contributor Hellion
@@ -28,16 +28,13 @@
 // @require     http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js
 // @unwrap
 // ==/UserScript==
-// WIP:
-//   need to figure out how to detect a gremlin that is "the wrong one for the zone" immediately.
-
 
 var place = location.pathname.replace(/\/|\.(php|html)$/gi, "").toLowerCase();
 //console.time("Mr. Script @ " + place);
 //GM_log("at:" + place);
 
 // n.b. version number should always be a 3-digit number.  If you move to 1.6, call it 1.6.0.  Don't go to 1.5.10 or some such.
-var VERSION = 152;
+var VERSION = 153;
 var MAXLIMIT = 999;
 var ENABLE_QS_REFRESH = 1;
 var DISABLE_ITEM_DB = 0;
@@ -48,24 +45,24 @@ var itemDB = null;
 
 var global = this, mr = unsafeWindow.top.mr = global;
 
-items = new Object();		// for new itemDB sourcing/parsing
+var items = new Object();		// for new itemDB sourcing/parsing
 
 makeTags("form,input".split(",")); // convenient node creation
 
 // run eval(mr.script.call(this)) from the Firebug console to get script globals
 mr.script = function script(x) {
-  var stuff = [], target = this === global ? unsafeWindow.top : this;
-  var privates = true; // stuff defined before our stuff is potentially harmful
-  for (var id in global) {
-    if (privates && "$x" != id) continue;
-    privates = false;
-    stuff.push(id);
-    if ("script" == id) { // anything after our stuff is potentially harmful too
-      return "var "+stuff.map(function(n) { return n+" = this."+n; }).join(",");
-    }
-    target[id] = global[id];
-  }
-  return 'console.error("Failed to find Mr. Script global identifiers. :-(");';
+	var stuff = [], target = this === global ? unsafeWindow.top : this;
+	var privates = true; // stuff defined before our stuff is potentially harmful
+	for (var id in global) {
+		if (privates && "$x" != id) continue;
+		privates = false;
+		stuff.push(id);
+		if ("script" == id) { // anything after our stuff is potentially harmful too
+			 return "var " + stuff.map(function(n) { return n + " = this." + n; }).join(",");
+		}
+		target[id] = global[id];
+	}
+	return 'console.error("Failed to find Mr. Script global identifiers. :-(");';
 };
 
 
@@ -73,7 +70,7 @@ var server = location.host, serverNo = (server.match(/(.)\./) || {1:"L"})[1]; //
 var pwd = GM_getValue('hash.' + server.split('.')[0]);
 
 jQuery.prototype.toString = function() {
-  return "[jQuery:"+ this.length +"]";
+  return "[jQuery:" + this.length + "]";
 };
 
 var autoclear = GetPref('autoclear');
@@ -82,15 +79,17 @@ var spoilers = GetPref('zonespoil') == 1;
 anywhere(); // stuff we always add where we can
 
 // added town_right to cover untinkered results...
-if (/^(adventure|choice|craft|fight|knoll|shore|town_right)$/.test(place))
-  dropped_item();
-
+if (/^(adventure|choice|craft|fight|knoll|shore|town_right)$/.test(place)) {
+	dropped_item();
+}
 // where are we and what do we thus want to do?
 var handler;
-if ((handler = global["at_" + place]))
-  handler();
-if ((handler = spoilers && global["spoil_" + place]))
-  handler();
+if ((handler = global["at_" + place])) {
+	handler();
+}
+if ((handler = spoilers && global["spoil_" + place])) {
+	handler();
+}
 
 // no imperative top-level code below here; the rest is function definitions:
 
@@ -98,69 +97,72 @@ if ((handler = spoilers && global["spoil_" + place]))
 // ANYWHERE: stuff that we want to do on every possible occasion.
 // --------------------------------------------------------------
 function anywhere() {
-  if (autoclear) {
-    $('input[value=1]').each(function(i) {
-      AddAutoClear(this, autoclear);
-    });
-  }
+	if (autoclear) {
+		$('input[value=1]').each(function(i) {
+			AddAutoClear(this, autoclear);
+		});
+	}
 }
 
 // ------------------------------------------------
 // Dropped_Item: Add stuffy-stuff to dropped items.
 // ------------------------------------------------
 function dropped_item() {
-  if ("fight" == place && !/WINWINW/.test(document.body.innerHTML)) return;
-  $('img').each(function() {
-    var onclick = this.getAttribute("onclick");
-    if (/desc/.test(onclick || "")) {
-      AddLinks(onclick, this.parentNode.parentNode, null, thePath);
-    }
-  });
+	if ("fight" == place && !/WINWINW/.test(document.body.innerHTML)) {
+		return;
+	}
+	$('img').each(function() {
+		var onclick = this.getAttribute("onclick");
+		if (/desc/.test(onclick || "")) {
+			AddLinks(onclick, this.parentNode.parentNode, null, thePath);
+		}
+	});
 }
 
 // ----------------------------------------------------------------------------
 // Don't ask why this guy bothered to write wrapper functions. He just did. :-)
 // ----------------------------------------------------------------------------
 function persist(key, value) {
-  try {
-    GM_setValue(key, value);
-  } catch(e) {
-    console.error('Error while setting '+ key +' to '+ value +': '+ e.message);
-  }
+	try {
+		GM_setValue(key, value);
+	} catch(e) {
+		console.error('Error while setting ' + key + ' to ' + value + ': ' + e.message);
+	}
 }
 
 function integer(n) {
-  return parseInt(n.replace(/^\D+|,/g, ""), 10);
+	return parseInt(n.replace(/^\D+|,/g, ""), 10);
 }
 
 function text(x) {
-  switch (typeof x) {
-    case "object":
-      if ("undefined" != typeof x.textContent)
-        return $.trim(x.textContent);
-      break;
-    case "string":
-      return $.trim(x);
-  }
-  throw new Error("Failed to textify "+ x);
+	switch (typeof x) {
+	case "object":
+		if ("undefined" != typeof x.textContent)
+			return $.trim(x.textContent);
+		break;
+	case "string":
+		return $.trim(x);
+		break;
+	}
+	throw new Error("Failed to textify "+ x);
 }
 
 // Set/GetPref: store/retrieve data that applies to the script as a whole.
 function SetPref(which, value) {
-  persist("pref." + which, value);
+	persist("pref." + which, value);
 }
 
 function GetPref(which) {
-  return GM_getValue("pref." + which);
+	return GM_getValue("pref." + which);
 }
 
 // Set/GetData: store/retrieve data related to a particular session
 function SetData(which, value) {
-  persist(serverNo + which, value);
+	persist(serverNo + which, value);
 }
 
 function GetData(which) {
-  return GM_getValue(serverNo + which);
+	return GM_getValue(serverNo + which);
 }
 
 // Set/GetCharData: store/retrieve data related to a particular account/ascension
@@ -175,14 +177,14 @@ function GetCharData(which) {
 
 // Password hash functions.  whee.
 function SetPwd(hash) {
-  persist('hash.' + server.split('.')[0], hash);
+	persist('hash.' + server.split('.')[0], hash);
 }
 function FindHash() {
-  GM_get(server + '/store.php?whichstore=m', function(html) {
-    var hashIndex = html.indexOf("name=phash");
-    var hash = html.substring(hashIndex+18, hashIndex+50);
-    SetPwd(hash);
-  });
+	GM_get(server + '/store.php?whichstore=m', function(html) {
+		var hashIndex = html.indexOf("name=phash");
+		var hash = html.substring(hashIndex+18, hashIndex+50);
+		SetPwd(hash);
+	});
 }
 
 // ----------------------------------------------------------
@@ -213,7 +215,7 @@ function getItemList(callback)
 		//split by line
 		var a=itemList.split('\n');
 		
-		for(var i=0;i<a.length;i++){
+		for(var i = 0; i < a.length; i++){
 			if(/[0-9]/.test(a[i].charAt(0))) { 
 				var split = a[i].split('\t'); 
 				if(split[0] && split[1] && split[2]){
@@ -243,7 +245,7 @@ function unstoreItemList(force)
 	}
 	
 	var currentTime = parseInt(new Date().getTime()/60000);	// convert from milliseconds to minutes
-	lastUpdate = GM_getValue("lastItemUpdate",1);
+	var lastUpdate = GM_getValue("lastItemUpdate",1);
 	
 	//check every week.
 	if(itemListLength==0 || (currentTime-lastUpdate)>10080) {	// that's a week's worth of minutes
@@ -284,7 +286,6 @@ function GetItemDB(force)
 	unstoreItemList(force);
 	return;
 }
-
 
 // -----------------------------------------------------------
 // FINDMAXQUANTITY: Figure out how many MP restoratives to use
@@ -406,7 +407,7 @@ function FindMaxQuantity(item, howMany, deefault, safeLevel)
 	}
 
 	switch(safeLevel)
-	{ 	case 0: avg = (min+max)/2.0; break;
+	{	case 0: avg = (min+max)/2.0; break;
 		case 1: avg = ((max*2)+min)/3.0; break;
 		case 2: avg = max; break;
 	}
@@ -455,7 +456,6 @@ function GM_get(dest, callback, errCallback)
 				callback(details.responseText);
 }	}	});	}
 
-
 // ---------------------------------------------------------------
 // DESCTOITEM: Convert description ID to item entry from database.
 // ---------------------------------------------------------------
@@ -463,7 +463,6 @@ function DescToItem(zeedesc)
 {	GetItemDB();
 	return itemDB[zeedesc.match(/[0-9]{6,10}/)];
 }
-
 
 // --------------------------------------------------
 // APPENDLINK: Create link and return pointer to span
@@ -585,7 +584,6 @@ function AppendUseBox(itemNumber, skillsForm, maxButton, appendHere) {
   }, false);
 }
 
-
 // ---------------------------------------------
 // APPENDBUYBOX: Return HTML for buying an item.
 // ---------------------------------------------
@@ -614,7 +612,6 @@ function AppendBuyBox(itemNumber, whichStore, buttonText, noQuantityBox)
 	return(htmlString);
 }
 
-
 // ----------------------------------------------------
 // NUMBERLINK: Fine, you think of a good function name.
 // ----------------------------------------------------
@@ -632,7 +629,6 @@ function NumberLink(b)
 			"if(q.length) q[0].value=" + num + "; return false;";
 		b.innerHTML = "<a href='javascript:void(0);' onclick='" + func + "'>" + num + "</a>" + txt;
 }	}
-
 
 // ------------------------------------------------------
 // APPENDOUTFITSWAP: Aren't unified interfaces just keen?
@@ -695,8 +691,6 @@ function AppendOutfitSwap(outfitNumber, text)
 	} return span;
 }
 
-
-
 // -----------------------------------------------------------------------------
 // ADDINVCHECK: Extra links for items, independently of where they're displayed.
 // -----------------------------------------------------------------------------
@@ -755,7 +749,6 @@ function AddInvCheck(img)
 	}	
 }
 
-
 // ----------------------------------------------------------
 // ADDTOPLINK: Much easier for a function to do all the work.
 // ----------------------------------------------------------
@@ -770,7 +763,6 @@ function AddTopLink(putWhere, target, href, html, space)
 	putWhere.appendChild(a);
 	if (space) putWhere.appendChild(document.createTextNode(" "));
 }
-
 
 // -----------------------------------------------------------------------------
 // ADDLINKS: Extra links, etc. for items, independently of where they are.
@@ -1000,7 +992,6 @@ function AddLinks(descId, theItem, formWhere, path) {
   return doWhat;
 }
 
-
 // -------------------------------------------------
 // RIGHTCLICKMP: Fill up with standard restoratives.
 // -------------------------------------------------
@@ -1045,8 +1036,6 @@ function RightClickHP(event)
 	}	} event.stopPropagation(); event.preventDefault(); return false;
 }
 
-
-
 // ----------------------------------------------------------------------------
 // PARSESELECTQUANTITY: Figure out how many of a given restorative are present.
 // ----------------------------------------------------------------------------
@@ -1060,7 +1049,6 @@ function ParseSelectQuantity(selectItem, endToken)
 		howMany = howMany.split(endToken)[0];
 	} return parseInt(howMany);
 }
-
 
 // -----------------------------------------------------------------------------
 // MAKEMAXBUTTON: Wrap a "max" button around a text box.
@@ -1112,7 +1100,6 @@ function MakeMaxButton(textField, funktion)
 		.append(img);
 }
 
-
 // ----------------------------------------------------------------------
 // SKILLUSELIMIT: Calculate how many times various skills should be cast.
 // ----------------------------------------------------------------------
@@ -1146,7 +1133,6 @@ function SkillUseLimit(skillNum)
 	return limit;
 }
 
-
 // ---------------------------------------------
 // ONFOCUS: Make text input boxes clear on focus
 // ---------------------------------------------
@@ -1163,7 +1149,6 @@ function AddAutoClear(box, setting)
 			.attr('onBlur',  'if(this.value=="") this.value=1;');
 }	}
 
-
 // -----------------------------------------------------------
 // GOGOGADGETPLUNGER: Convert meat-paste links to The Plunger.
 // -----------------------------------------------------------
@@ -1179,7 +1164,6 @@ function GoGoGadgetPlunger()
 		});
 	}	
 }
-
 
 // --------------------------------------------------------
 // BLACKBIRDSTUFF: GM_get callbacks that do blackbird mojo.
@@ -1212,7 +1196,6 @@ function BlackBirdStuff()
 	});	});	});	});
 }
 
-
 // ------------------------------------------
 // UNEQUIPUPDATE: Callback to unequip inline.
 // ------------------------------------------
@@ -1225,7 +1208,6 @@ function UnequipUpdate(event)
 	asdf.prev().prev().html(' ');
 	event.stopPropagation(); event.preventDefault(); return false;
 }
-
 
 // -------------------------------------------------------------------
 // EQUIPUPDATE: This is silly, but the alternatives were even sillier.
@@ -1305,7 +1287,6 @@ function EquipUpdate(txt, itm)
 		else giftd.removeChild(giftd.firstChild);
 }	}
 
-
 // --------------------------------------------------------------
 // DEFAULTS: Pay no attention to the function behind the curtain.
 // --------------------------------------------------------------
@@ -1382,7 +1363,6 @@ function Defaults(revert)
 		SetPref('menu2link9', ';');
 }	}
 
-
 // ------------------------------------------------
 // ADDTOPOPTION: Add a menu option in compact mode.
 // ------------------------------------------------
@@ -1392,7 +1372,6 @@ function AddTopOption(name, url, select, putBefore)
 	if (putBefore == 0) select.appendChild(option);
 	else select.insertBefore(option, putBefore);
 }
-
 
 // -----------------------------------
 // MAKEOPTION: Does what it says. Yup.
@@ -1501,12 +1480,12 @@ function at_main_c() {
 }
 
 // ---------------------------------------------------
-// MAIN.PHP: call main_c if needed (this function will probably be refactored away in the next release)
+// MAIN.PHP: call main_c if needed (todo: remove this)
 // ---------------------------------------------------
 function at_main() {
 //	GM_log("location.pathname="+location.pathname);
 	if ((location.pathname == "/main.html") ||	
-	  (location.pathname == "/main.php")) { 	// 21Dec09 Hellion main.php appears to be a new name for main.html.
+	  (location.pathname == "/main.php")) { 	
 		at_main_c();
 		return;
 	}
@@ -1515,9 +1494,8 @@ function at_main() {
 // ---------------------------------------------------
 // GAME.PHP: look for updates and post link if needed.
 // ---------------------------------------------------
-// Created 05Mar10 Hellion to fix the update-displaying process.
 // n.b. game.php is the outermost, non-frame window that contains all the frames.
-// 		as such, you only see it exactly once, when you're logging in.
+// 		as such, the script only sees it exactly once, when you're logging in.
 function at_game() {
 	var lastUpdated = parseInt(GM_getValue('MrScriptLastUpdate', 0));
 	var currentHours = parseInt(new Date().getTime()/3600000);
@@ -1742,7 +1720,7 @@ function at_fight() {
 				}
 				// save info about what wines dropped for the wine location solver.
 				if (dropcode != 0) {
-					var corner = "corner" + document.getElementsByTagName('a')[0].href.match(/snarfblat=(\d+)/)[1];
+					var corner = "corner" + document.getElementsByTagName('a')[1].href.match(/snarfblat=(\d+)/)[1];
 					var winesfound = GetCharData(corner);
 					winesfound |= dropcode;
 					SetCharData(corner, winesfound);
@@ -1986,7 +1964,6 @@ function at_beerpong()
 			.html(' '));
 }	}
 
-
 // -----------------------------------------------
 // INVENTORY: Add shortcuts when equipping outfits
 // -----------------------------------------------
@@ -1998,7 +1975,6 @@ function at_inventory()
 	var searchString = document.location.search;
 	if (searchString.indexOf("which=2") != -1) gearpage = 1;
 
-	
 // Eat/drink page: add "eat another"/"drink another" link/checkboxes after eating/drinking something.
 // 13Jan10 Hellion:
 // with the advent of "(eat/drink) some" links in-game, this functionality is relatively superfluous.
@@ -2156,258 +2132,260 @@ function at_inventory()
 					if (yetAnotherVariable == 1) unlink.parentNode.insertBefore(
 						document.createTextNode(" - "),unlink);
 					break;
-		}	}	}
-
-if(quickequip > 0)
-{
-		var shelfToNum =
-		{"Hats:":0,"Shirts:":1,"Melee Weapons:":2,"Ranged Weapons:":2,"Mysticality Weapons:":2,
-		"Weapons:":2,"Off-Hand Items:":3,"Pants:":4,"Accessories:":5,"Familiar Equipment:":8};
-
-		numToEquipType =
-		{0:"Hat:",1:"Shirt:",2:"Weapon:",3:"Off-Hand:",4:"Pants:",
-		5:"Accessory 1:",6:"Accessory 2:",7:"Accessory 3:",8:"Familiar:"};
-
-		equipTypeToNum =
-		{"Hat:":0,"Shirt:":1,"Weapon:":2,"Off-Hand:":3,"Pants:":4,
-		"Accessory_1:":5,"Accessory_2:":6,"Accessory_3:":7,"Familiar:":8};
-
-		shelfNumToLink =
-		{0:"Hats",1:"Shirts",2:"Weapons",3:"Off-Hand",4:"Pants",
-		5:"Accessories",6:"Accessories",7:"Accessories",8:"Familiar"};
-
-		var equips = []; var pics = []; var selects = []; var curgear = [];
-		var curgearnum = []; var hands = 1;
-		GetItemDB();
-
-		// First pass: Get currently equipped items
-		var gearList = selecty.parentNode.previousSibling.firstChild;
-		len = gearList.childNodes.length;
-		for (var i=0, len=gearList.childNodes.length; i<len; i++)
-		{	var tr = gearList.childNodes[i];
-
-			if (tr.childNodes.length < 2) break;
-			//if (tr.childNodes[0].innerHTML.length == 0) continue;
-
-			var shelfText = tr.childNodes[0].textContent.replace(/[\s]/, '_');
-
-			var shelfNum = equipTypeToNum[shelfText];
-			//var shelfNum = i;
-
-			// Store item number and name of currently equipped item.
-			if (tr.childNodes[1].firstChild
-			&& tr.childNodes[1].firstChild.tagName == 'IMG')
-			{	if (shelfNum == 2 && tr.childNodes[2]
-					.textContent.indexOf("1h") == -1) hands = 2;
-				equips[shelfNum] = tr.childNodes[2];
-
-				var pic = tr.childNodes[1].firstChild;
-				if (pic != undefined)
-				{	pics[shelfNum] = pic.parentNode.innerHTML;
-					var piclic = pic.getAttribute('onclick');
-					if (piclic != undefined)
-					{	var itm = DescToItem(piclic);
-						if(itm)
-						{	curgear[shelfNum] = itm[1];		// was ['name']
-							curgearnum[shelfNum] = itm[0];	// was ['itemid']
-			}	}	}	}
-
-			// Item slot is empty
-			else
-			{	equips[shelfNum] = (tr.childNodes.length > 2 ?
-					tr.childNodes[2] : tr.childNodes[1]);
-			}
-
-			// Create select menus
-			var newsel = document.createElement('select');
-			newsel.setAttribute('style',"width:250px;");
-			newsel.setAttribute('name', shelfNum);
-			if (shelfNum == 3)
-			{	if(hands == 2) newsel.setAttribute('disabled','disabled');
-			}
-			if (curgearnum[shelfNum] > 0)
-			{	newsel.appendChild(document.createElement('option'));
-			}
-			selects[shelfNum] = newsel;
+				}
+			}	
 		}
 
-		// Second pass: Create new table and rows.
-		var nuTabl = $(document.createElement('table'));
-		var len = 9;
-		for (var i=0; i<len; i++)
+		if(quickequip > 0)
 		{
-			var extra = (i==8 && famLock ? '<a href="' + famLock.href + '">' +
-			'<img class="hand" src="'+ famLock.firstChild.src +
-			'" style="height:20px;width:20px;margin-right:15px;" /></a>' : '');
+			var shelfToNum =
+			{"Hats:":0,"Shirts:":1,"Melee Weapons:":2,"Ranged Weapons:":2,"Mysticality Weapons:":2,
+			"Weapons:":2,"Off-Hand Items:":3,"Pants:":4,"Accessories:":5,"Familiar Equipment:":8};
 
-			nuTabl.append('<tr align="right"><td height="30">' + extra +
-			'<a class="nounder" href="#' + shelfNumToLink[i] + '">' +
-			numToEquipType[i] + '</a></td><td>' +
-			(pics[i] != undefined ? pics[i] : '&nbsp;') +
-			'</td><td> </td><td align="left"> </td></tr>');
+			numToEquipType =
+			{0:"Hat:",1:"Shirt:",2:"Weapon:",3:"Off-Hand:",4:"Pants:",
+			5:"Accessory 1:",6:"Accessory 2:",7:"Accessory 3:",8:"Familiar:"};
 
-			if(curgear[i] == undefined)
-			{	curgear[i] = "";
-				curgearnum[i] = 0;
-			}
+			equipTypeToNum =
+			{"Hat:":0,"Shirt:":1,"Weapon:":2,"Off-Hand:":3,"Pants:":4,
+			"Accessory_1:":5,"Accessory_2:":6,"Accessory_3:":7,"Familiar:":8};
 
-			// Create selects for blank rows
-			if(selects[i] == undefined)
-			{	var newsel = document.createElement('select');
+			shelfNumToLink =
+			{0:"Hats",1:"Shirts",2:"Weapons",3:"Off-Hand",4:"Pants",
+			5:"Accessories",6:"Accessories",7:"Accessories",8:"Familiar"};
+
+			var equips = []; var pics = []; var selects = []; var curgear = [];
+			var curgearnum = []; var hands = 1;
+			GetItemDB();
+
+			// First pass: Get currently equipped items
+			var gearList = selecty.parentNode.previousSibling.firstChild;
+			len = gearList.childNodes.length;
+			for (var i=0, len=gearList.childNodes.length; i<len; i++)
+			{	var tr = gearList.childNodes[i];
+
+				if (tr.childNodes.length < 2) break;
+				//if (tr.childNodes[0].innerHTML.length == 0) continue;
+
+				var shelfText = tr.childNodes[0].textContent.replace(/[\s]/, '_');
+
+				var shelfNum = equipTypeToNum[shelfText];
+				//var shelfNum = i;
+
+				// Store item number and name of currently equipped item.
+				if (tr.childNodes[1].firstChild
+				&& tr.childNodes[1].firstChild.tagName == 'IMG')
+				{	if (shelfNum == 2 && tr.childNodes[2]
+						.textContent.indexOf("1h") == -1) hands = 2;
+					equips[shelfNum] = tr.childNodes[2];
+
+					var pic = tr.childNodes[1].firstChild;
+					if (pic != undefined)
+					{	pics[shelfNum] = pic.parentNode.innerHTML;
+						var piclic = pic.getAttribute('onclick');
+						if (piclic != undefined)
+						{	var itm = DescToItem(piclic);
+							if(itm)
+							{	curgear[shelfNum] = itm[1];		// was ['name']
+								curgearnum[shelfNum] = itm[0];	// was ['itemid']
+				}	}	}	}
+
+				// Item slot is empty
+				else
+				{	equips[shelfNum] = (tr.childNodes.length > 2 ?
+						tr.childNodes[2] : tr.childNodes[1]);
+				}
+
+				// Create select menus
+				var newsel = document.createElement('select');
 				newsel.setAttribute('style',"width:250px;");
-				newsel.setAttribute('name', i);
-				//if (curgearnum[i] != 0)
-				newsel.appendChild(document.createElement('option'));
-				selects[i] = newsel;
-				equips[i] = document.createElement('td');
-			}
-		}
-
-		// Attach new gear table and links to the DOM
-		$(gearList.parentNode)
-			.before(nuTabl.get(0))
-			.before(unlink.parentNode)
-			.before(document.createElement('br'))
-			.attr('style','display:none;');
-
-		// Iterate through links
-		len = lnks.length;
-		var lensub = len-1;
-		var theSel, itemText, shelf;
-		for (var i=0; i<len; i++)
-		{	var lnk = lnks[i];
-
-			// Switch to new shelf, and add anchor
-			if (lnk.href.substr(0,4) == 'java')
-			{	shelf = shelfToNum[lnk.text];
-				continue;
+				newsel.setAttribute('name', shelfNum);
+				if (shelfNum == 3)
+				{	if(hands == 2) newsel.setAttribute('disabled','disabled');
+				}
+				if (curgearnum[shelfNum] > 0)
+				{	newsel.appendChild(document.createElement('option'));
+				}
+				selects[shelfNum] = newsel;
 			}
 
-			// Add equippable item to drop-down of current shelf.
-			else if (lnk.text == "[equip]" || lnk.text == "[offhand]")
-			{	itemText = lnk.parentNode.parentNode.firstChild.innerHTML;
+			// Second pass: Create new table and rows.
+			var nuTabl = $(document.createElement('table'));
+			var len = 9;
+			for (var i=0; i<len; i++)
+			{
+				var extra = (i==8 && famLock ? '<a href="' + famLock.href + '">' +
+				'<img class="hand" src="'+ famLock.firstChild.src +
+				'" style="height:20px;width:20px;margin-right:15px;" /></a>' : '');
 
-				// Three iterations for accessories.
-				var limit = 1; if (shelf == 5) limit = 3;
-				for (var j=0; j<limit; j++)
-				{	var zshelf; if (lnk.text == "[offhand]") zshelf = 3;
-					else zshelf = shelf+j;
-					theSel = selects[zshelf];
-					if (theSel == undefined) continue;
+				nuTabl.append('<tr align="right"><td height="30">' + extra +
+				'<a class="nounder" href="#' + shelfNumToLink[i] + '">' +
+				numToEquipType[i] + '</a></td><td>' +
+				(pics[i] != undefined ? pics[i] : '&nbsp;') +
+				'</td><td> </td><td align="left"> </td></tr>');
 
-					// Create the select menu option
-					var opt = document.createElement("option");
-					opt.setAttribute("value",lnk.href.split("item=")[1]);
-					if(lnk.text == "[offhand]")
-					{	opt.setAttribute('dualwield', 1);
-					}
-					opt.innerHTML = itemText;
+				if(curgear[i] == undefined)
+				{	curgear[i] = "";
+					curgearnum[i] = 0;
+				}
 
-					// Add the currently worn item to the menu, if necessary
-					if (!theSel.getAttribute("gearfound"))
-					{	var curText = curgear[zshelf].toLowerCase();
-						var tstText = itemText.toLowerCase();
-						if (tstText == curText) selects[zshelf].setAttribute('gearfound','gearfound');
-						else if (tstText > curText)
-						/*|| lnks[i+1] == undefined || lnks[i+1].href.indexOf(":t") != -1)*/
-						{	var opt2 = document.createElement("option");
-							opt2.setAttribute("value",curgearnum[zshelf]);
-							opt2.innerHTML = curgear[zshelf];
-							theSel.appendChild(opt2);
-							theSel.setAttribute('gearfound','gearfound');
+				// Create selects for blank rows
+				if(selects[i] == undefined)
+				{	var newsel = document.createElement('select');
+					newsel.setAttribute('style',"width:250px;");
+					newsel.setAttribute('name', i);
+					//if (curgearnum[i] != 0)
+					newsel.appendChild(document.createElement('option'));
+					selects[i] = newsel;
+					equips[i] = document.createElement('td');
+				}
+			}
+
+			// Attach new gear table and links to the DOM
+			$(gearList.parentNode)
+				.before(nuTabl.get(0))
+				.before(unlink.parentNode)
+				.before(document.createElement('br'))
+				.attr('style','display:none;');
+
+			// Iterate through links
+			len = lnks.length;
+			var lensub = len-1;
+			var theSel, itemText, shelf;
+			for (var i=0; i<len; i++)
+			{	var lnk = lnks[i];
+
+				// Switch to new shelf, and add anchor
+				if (lnk.href.substr(0,4) == 'java')
+				{	shelf = shelfToNum[lnk.text];
+					continue;
+				}
+
+				// Add equippable item to drop-down of current shelf.
+				else if (lnk.text == "[equip]" || lnk.text == "[offhand]")
+				{	itemText = lnk.parentNode.parentNode.firstChild.innerHTML;
+
+					// Three iterations for accessories.
+					var limit = 1; if (shelf == 5) limit = 3;
+					for (var j=0; j<limit; j++)
+					{	var zshelf; if (lnk.text == "[offhand]") zshelf = 3;
+						else zshelf = shelf+j;
+						theSel = selects[zshelf];
+						if (theSel == undefined) continue;
+
+						// Create the select menu option
+						var opt = document.createElement("option");
+						opt.setAttribute("value",lnk.href.split("item=")[1]);
+						if(lnk.text == "[offhand]")
+						{	opt.setAttribute('dualwield', 1);
 						}
+						opt.innerHTML = itemText;
+
+						// Add the currently worn item to the menu, if necessary
+						if (!theSel.getAttribute("gearfound"))
+						{	var curText = curgear[zshelf].toLowerCase();
+							var tstText = itemText.toLowerCase();
+							if (tstText == curText) selects[zshelf].setAttribute('gearfound','gearfound');
+							else if (tstText > curText)
+							/*|| lnks[i+1] == undefined || lnks[i+1].href.indexOf(":t") != -1)*/
+							{	var opt2 = document.createElement("option");
+								opt2.setAttribute("value",curgearnum[zshelf]);
+								opt2.innerHTML = curgear[zshelf];
+								theSel.appendChild(opt2);
+								theSel.setAttribute('gearfound','gearfound');
+							}
+						}
+						theSel.appendChild(opt);
 					}
-					theSel.appendChild(opt);
 				}
 			}
-		}
 
-		gearList = nuTabl.get(0).firstChild;
+			gearList = nuTabl.get(0).firstChild;
 
-		var unq = ["hat","shirt","weapon","offhand","pants",
-					"acc1","acc2","acc3","familiarequip"];
+			var unq = ["hat","shirt","weapon","offhand","pants",
+						"acc1","acc2","acc3","familiarequip"];
 
-		// Add the select menus to the DOM and select the currently worn item
-		for (var i=0; i<9; i++)
-		{
-			var row = gearList.childNodes[i];
-			var eqnum = i;
-			var tempsel = selects[i]; var nuus = [];
-			var action = "equip";
+			// Add the select menus to the DOM and select the currently worn item
+			for (var i=0; i<9; i++)
+			{
+				var row = gearList.childNodes[i];
+				var eqnum = i;
+				var tempsel = selects[i]; var nuus = [];
+				var action = "equip";
 
-			// Add currently equipped item if not found in equip links
-			if(!tempsel.getAttribute('gearfound') && curgearnum[i] > 0)
-			{	var newopt = document.createElement('option');
-				newopt.innerHTML = curgear[i];
-				newopt.setAttribute("value", curgearnum[i]);
-				tempsel.appendChild(newopt);
-				//tempsel.setAttribute('gearfound');
-			}
-
-			for (var j=0, len2=tempsel.childNodes.length; j<len2; j++)
-			{	if (tempsel.childNodes[j].value == curgearnum[i])
-				{	tempsel.selectedIndex = j;	break;
-			}	}
-
-			// Attach event handler that does the work
-			tempsel.addEventListener('change',function(event)
-			{	if (this.value == 0) return;
-				var loading =
-'data:image/gif;base64,R0lGODlhEgASAJECAMDAwNvb2%2F%2F%2F%2FwAAACH%2FC05FVFNDQVBFMi4wAwEAAAAh%2BQQFCgACACwAAAAAEgASAAACMpSPqQmw39o7IYjo6qpacpt8iKhoITiiG0qWnNGepjCv7u3WMfxqO0%2FrqVa1CdCIRBQAACH5BAUKAAIALAcAAQAIAAYAAAIOVCKZd2osAFhISmcnngUAIfkEBQoAAgAsCwADAAYACAAAAg5UInmnm4ZeAuBROq%2BtBQAh%2BQQFCgACACwLAAcABgAIAAACD5QTJojH2gQAak5jKdaiAAAh%2BQQFCgACACwHAAsACAAGAAACDpQdcZgKIFp4Lzq6RF0FACH5BAUKAAIALAMACwAIAAYAAAIOFCCZd2osQlhISmcnngUAIfkEBQoAAgAsAQAHAAYACAAAAg4UIHmnm4ZeCuFROq%2BtBQAh%2BQQFCgACACwBAAMABgAIAAACD5QBJojH2kQIak5jKdaiAAA7';
-
-				this.setAttribute('previtem',this.value);
-				var imgtd = this.parentNode.previousSibling;
-
-				$(imgtd.firstChild).attr('style','display:none;')
-				.before('<img src="'+loading+'" width="30" height="30" />');
-
-				if(this.childNodes[this.selectedIndex]
-					.getAttribute('dualwield')) action = "dualwield";
-
-				if (imgtd.childNodes.length > 0)
-					this.setAttribute('previmg',imgtd.firstChild.src);
-				else this.setAttribute('previmg',0);
-
-				var ztype = parseInt(this.getAttribute('name'));
-				var url = /*'http://'+*/server+"/inv_equip.php?pwd="+
-				pwd+"&which=2&action="+action+"&whichitem="+this.value;
-				if (ztype == 5) url += "&slot=1";
-				else if (ztype == 6) url += "&slot=2";
-				else if (ztype == 7) url += "&slot=3";
-
-			// I forget why I had to do this, but I'm sure there was a reason.
-				switch(ztype)
-				{	case 0: GM_get(url, function(t){EquipUpdate(t,0);}); break;
-					case 1: GM_get(url, function(t){EquipUpdate(t,1);}); break;
-					case 2: GM_get(url, function(t){EquipUpdate(t,2);}); break;
-					case 3: GM_get(url, function(t){EquipUpdate(t,3);}); break;
-					case 4: GM_get(url, function(t){EquipUpdate(t,4);}); break;
-					case 5: GM_get(url, function(t){EquipUpdate(t,5);}); break;
-					case 6: GM_get(url, function(t){EquipUpdate(t,6);}); break;
-					case 7: GM_get(url, function(t){EquipUpdate(t,7);}); break;
-					case 8: GM_get(url, function(t){EquipUpdate(t,8);}); break;
+				// Add currently equipped item if not found in equip links
+				if(!tempsel.getAttribute('gearfound') && curgearnum[i] > 0)
+				{	var newopt = document.createElement('option');
+					newopt.innerHTML = curgear[i];
+					newopt.setAttribute("value", curgearnum[i]);
+					tempsel.appendChild(newopt);
+					//tempsel.setAttribute('gearfound');
 				}
-			}, false);
 
-			gearList.childNodes[i].childNodes[2].appendChild(tempsel);
+				for (var j=0, len2=tempsel.childNodes.length; j<len2; j++)
+				{	if (tempsel.childNodes[j].value == curgearnum[i])
+					{	tempsel.selectedIndex = j;	break;
+				}	}
 
-			// Add power and unequip links
-			var pow = '';
-			var descTD = $(row.childNodes[3]);
-			pow = equips[i].innerHTML.match(/\(Pow.+\)/);
-			if(pow != null) descTD.append('<font size="1"> '+ pow+ '</font> ');
-			else descTD.append(' ');
+				// Attach event handler that does the work
+				tempsel.addEventListener('change',function(event)
+				{	if (this.value == 0) return;
+					var loading =
+	'data:image/gif;base64,R0lGODlhEgASAJECAMDAwNvb2%2F%2F%2F%2FwAAACH%2FC05FVFNDQVBFMi4wAwEAAAAh%2BQQFCgACACwAAAAAEgASAAACMpSPqQmw39o7IYjo6qpacpt8iKhoITiiG0qWnNGepjCv7u3WMfxqO0%2FrqVa1CdCIRBQAACH5BAUKAAIALAcAAQAIAAYAAAIOVCKZd2osAFhISmcnngUAIfkEBQoAAgAsCwADAAYACAAAAg5UInmnm4ZeAuBROq%2BtBQAh%2BQQFCgACACwLAAcABgAIAAACD5QTJojH2gQAak5jKdaiAAAh%2BQQFCgACACwHAAsACAAGAAACDpQdcZgKIFp4Lzq6RF0FACH5BAUKAAIALAMACwAIAAYAAAIOFCCZd2osQlhISmcnngUAIfkEBQoAAgAsAQAHAAYACAAAAg4UIHmnm4ZeCuFROq%2BtBQAh%2BQQFCgACACwBAAMABgAIAAACD5QBJojH2kQIak5jKdaiAAA7';
 
-			if(row.childNodes[1].firstChild.tagName == 'IMG')
-			{	var un = document.createElement('a');
-				un.innerHTML = '<font size="1">[unequip]</font>';
-				un.setAttribute('href', 'inv_equip.php?pwd='+pwd+
-				'&which=2&action=unequip&type='+unq[i]);
-				un.addEventListener('click', UnequipUpdate, false);
-				descTD.append(un);
+					this.setAttribute('previtem',this.value);
+					var imgtd = this.parentNode.previousSibling;
+
+					$(imgtd.firstChild).attr('style','display:none;')
+					.before('<img src="'+loading+'" width="30" height="30" />');
+
+					if(this.childNodes[this.selectedIndex]
+						.getAttribute('dualwield')) action = "dualwield";
+
+					if (imgtd.childNodes.length > 0)
+						this.setAttribute('previmg',imgtd.firstChild.src);
+					else this.setAttribute('previmg',0);
+
+					var ztype = parseInt(this.getAttribute('name'));
+					var url = /*'http://'+*/server+"/inv_equip.php?pwd="+
+					pwd+"&which=2&action="+action+"&whichitem="+this.value;
+					if (ztype == 5) url += "&slot=1";
+					else if (ztype == 6) url += "&slot=2";
+					else if (ztype == 7) url += "&slot=3";
+
+				// I forget why I had to do this, but I'm sure there was a reason.
+					switch(ztype)
+					{	case 0: GM_get(url, function(t){EquipUpdate(t,0);}); break;
+						case 1: GM_get(url, function(t){EquipUpdate(t,1);}); break;
+						case 2: GM_get(url, function(t){EquipUpdate(t,2);}); break;
+						case 3: GM_get(url, function(t){EquipUpdate(t,3);}); break;
+						case 4: GM_get(url, function(t){EquipUpdate(t,4);}); break;
+						case 5: GM_get(url, function(t){EquipUpdate(t,5);}); break;
+						case 6: GM_get(url, function(t){EquipUpdate(t,6);}); break;
+						case 7: GM_get(url, function(t){EquipUpdate(t,7);}); break;
+						case 8: GM_get(url, function(t){EquipUpdate(t,8);}); break;
+					}
+				}, false);
+
+				gearList.childNodes[i].childNodes[2].appendChild(tempsel);
+
+				// Add power and unequip links
+				var pow = '';
+				var descTD = $(row.childNodes[3]);
+				pow = equips[i].innerHTML.match(/\(Pow.+\)/);
+				if(pow != null) descTD.append('<font size="1"> '+ pow+ '</font> ');
+				else descTD.append(' ');
+
+				if(row.childNodes[1].firstChild.tagName == 'IMG')
+				{	var un = document.createElement('a');
+					un.innerHTML = '<font size="1">[unequip]</font>';
+					un.setAttribute('href', 'inv_equip.php?pwd='+pwd+
+					'&which=2&action=unequip&type='+unq[i]);
+					un.addEventListener('click', UnequipUpdate, false);
+					descTD.append(un);
+				}
 			}
-		}
-	} // quickequip
+		} // quickequip
 	} // equippage
 
 	if (GetPref('shortlinks') > 1 && firstTable.rows[0].textContent == "Results:")
@@ -2723,7 +2701,6 @@ function at_store()
 	}
 }
 
-
 // ---------------------------------
 // CASINO: Add link for buying pass.
 // ---------------------------------
@@ -2814,7 +2791,6 @@ function at_craft()
 	}
 }
 
-
 // -------------------------------
 // SEWER: Add form for buying gum.
 // -------------------------------
@@ -2831,7 +2807,6 @@ function at_sewer()
 		}
 	}	
 }
-
 
 // ------------------------------------
 // HERMIT: Add form for buying permits.
@@ -2869,7 +2844,6 @@ function at_hermit()
 	}	
 }
 
-
 // ------------------------------
 // COMBINE: Auto-make meat paste.
 // ------------------------------
@@ -2891,7 +2865,6 @@ function at_craft()
 		});
 	}	
 }
-
 
 // ---------------------------------
 // MOUNTAINS: Always-visible hermit.
@@ -2921,7 +2894,6 @@ function at_barrel()
 		{	AddLinks(onclick, this.parentNode.parentNode, null, thePath);
 	}	});
 }
-
 
 // -----------------------------------------------
 // COUNCIL: Add shortcut links for current quests.
@@ -3032,7 +3004,6 @@ function at_council()
 	});
 }
 
-
 // -----------------------------------------------------
 // QUESTLOG: Add MORE shortcut links for current quests!
 // -----------------------------------------------------
@@ -3130,8 +3101,6 @@ function at_questlog()
 		});
 	}
 }
-
-
 
 // ----------------------------------------
 // CHARPANE: Find HP, MP, do effects stuff.
@@ -3330,7 +3299,6 @@ function at_charpane()
 	}
 }
 
-
 // -----------------------------------------------------------------
 // SKILLPAGE: Autofill the proper "maxed-out" number in the use box.
 // -----------------------------------------------------------------
@@ -3468,9 +3436,6 @@ function at_skills()
 		}
 	}
 }
-
-
-
 
 // -----------------------------------------------------------------
 // MULITUSE: Autofill the proper "maxed-out" number in the use box.
@@ -3661,7 +3626,7 @@ function at_manor3()
 //		});
 //	});
 	
-// basic spoilers, part 3: link to equip spectacles when needed.
+// basic spoilers, part 2: link to equip spectacles when needed.
 // this part is all-but-unnecessary, only being needed on someone's first runthrough, but
 // we'll leave it here on the off chance that someone uses Mr. Script that early in their KoL career.
 	$('img[src*=lar2a]')
@@ -3671,7 +3636,6 @@ function at_manor3()
 			pwd + '&which=2&action=equip&whichitem=1916&slot=3"></a>');
 
 // advanced spoilers:
-
 // phase 1: generate "which wine is in which corner" spoilage.
 
 	var winelist = [];
@@ -3779,12 +3743,14 @@ function at_manor3()
 	}
 
 // phase 2: get info about which wine is which glyph this run
+	// helper function 1: get the glyph info out of a wine's description page
 	function scrape(txt) {
 		var bottleOf = txt.match(/dusty bottle of (.*?)\</)[1];
 		var glyphNum = txt.match(/\/glyph([0-9])/)[1];
 		var bInfo = [bottleOf, glyphNum];	
 		return bInfo;
 	}
+	// helper function 2: check player inventory for quantity of wines.
 	function countWines(wl, needs) {	
 	// wl is an array of bInfo's from the scrape() function; needs is an array of the wine IDs that are required for the altar.
 		GM_get(server+'/js_inv.php?for=MrScript',function(response) {
@@ -3800,15 +3766,15 @@ function at_manor3()
 				dustylist[i] = dustyX;
 			}
 			var youNeed = "You need: ";
-			if (needs[0] == undefined) {
-				youNeed = "   ";
+			if (needs[0] == undefined) {	// may be undefined due to calling this function after the altar is completed.
+				youNeed = "";
 			} else {
 				for (i=0;i<3;i++) {
 					youNeed += winelist[needs[i]][0];
 					youNeed += " (you have "+dustylist[needs[i]]+"), ";
 				}
+				youNeed = youNeed.slice(0, -2);
 			}
-			youNeed = youNeed.slice(0, -2);
 			getWinelist.innerHTML = youNeed;
 		});
 	}
@@ -3851,7 +3817,7 @@ function at_manor3()
 		winesneeded = eval('('+GetCharData("winesNeeded")+')');
 		document.body.appendChild(wineDisplay);
 		countWines(winelist, winesneeded); 
-	} else {											// Better do it the long way.... 
+	} else {											// No saved results: Better do it the long way.... 
 		GM_get(server+"/manor3.php?place=goblet", function (atext) {	// check the altar for the glyphs we need
 			var pdiv = document.createElement('div');
 			GM_log("place=goblet text:"+atext);
@@ -4212,7 +4178,6 @@ function at_ocean()
 	'</select>');
 }
 
-
 // ------------------------------
 // CAMPGROUND: Telescope spoilers
 // ------------------------------
@@ -4324,9 +4289,11 @@ function at_campground()
 			else if(txt.indexOf("wooden beam") != -1)
 				snarf = ['stick of dynamite','dynamite','shore.php','shore'];
 
-			if(snarf)
+			if (snarf)
 			{	var html =
-'<div style="width:180px; font-size:12px; margin-left:10px; vertical-align:top; text-align:right; float:right;"><img style="float:right; margin:0 0 2px 5px;" src="http://images.kingdomofloathing.com/itemimages/'+snarf[1]+'.gif"/>' + '<b class="combatitem">' + snarf[0] + '</b><br/><a class="small" href="'+snarf[2]+'" target="mainpane">[' + snarf[3] + ']</a>';
+'<div style="width:180px; font-size:12px; margin-left:10px; vertical-align:top; text-align:right; float:right;">' +
+'<img style="float:right; margin:0 0 2px 5px;" src="http://images.kingdomofloathing.com/itemimages/'+snarf[1]+'.gif"/>' + 
+'<b class="combatitem">' + snarf[0] + '</b><br/><a class="small" href="'+snarf[2]+'" target="mainpane">[' + snarf[3] + ']</a>';
 				$(this).before(html+'</div>')
 					.after('<div style="clear:both;"></div>');
 			}
@@ -4339,7 +4306,6 @@ function at_campground()
 				else this.setAttribute('style','color:red;');
 		});	});
 }	}
-
 
 // --------------------------------------------
 // BASEMENT: Im in ur base, spoilin ur puzzlez.
@@ -4723,7 +4689,6 @@ function spoil_wormwood()
 		if (ml) this.setAttribute('title',ml);
 });	}
 
-
 // -------------------------
 // MTNOOB: Open letter! Yay!
 // -------------------------
@@ -5063,7 +5028,7 @@ function at_ascend()
 	var checklist = GetPref('ascension_list');
 	if (checklist != '') {
 		checklist = checklist.replace(/,/g,"<br>");
-		checklist = "<center><b>Make sure that you have:</b><br>" + checklist + "</center>";
+		checklist = "<center><b>Checklist:</b><br>" + checklist + "</center>";
 		var clDisplay = document.createElement('div');
 		clDisplay.innerHTML = checklist;
 		document.body.appendChild(clDisplay);
@@ -5075,7 +5040,6 @@ function at_ascend()
 // --------------------------------------------
 function at_compactmenu()
 {
-//	GM_log("in compactmenu!");
 	var selectItem, links, oonTD, linkTD;
 	var quickSkills = 0, moveqs = 0;
 
