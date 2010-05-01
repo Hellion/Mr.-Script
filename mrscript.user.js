@@ -975,7 +975,7 @@ function AddLinks(descId, theItem, formWhere, path) {
 		{	AppendUseBox(itemNum, 1, 1, formWhere.get(0));
 		} else
         {	addWhere.append(AppendLink('[use]', 'skills.php?pwd='+ pwd +
-			           '&action=useitem&quantity=1&whichitem='+
+			           '&action=useitem&bounce=skills.php?action=useditem&itemquantity=1&whichitem='+
                                    itemNum));
 		}
 		break;
@@ -1631,13 +1631,13 @@ function at_fight() {
 									"an erudite gremlin" :[184, "wrench", 			"automatic eyeball-peeler"],
 									"a vegetable gremlin":[185, "screwdriver", 		"off of itself and"],
 									"an A.M.C. gremlin"  :[186, "blah blah hruugh", "an A.M.C. gremlin"]};
-				// need a way to tell what zone we're adventuring in so we can mark 'wrong' gremlins immediately. 
+
 				var zonetext = GetData("square");
 				GM_log("zonetext="+zonetext);
 				var zone = zonetext ? parseInt(zonetext.match(/(\d+)/)[1]) : 0;
 				
 				// if the monster doesn't drop the item in this zone, or we see the "i-don't-have-it" message...
-				if ((gremlininfo[monsterName][0] != zone) ||
+				if ((zone && (gremlininfo[monsterName][0] != zone)) ||
 					(document.body.innerHTML.indexOf(gremlininfo[monsterName][2]) != -1)) { 	// gremlin showed the no-tool message?
 					GM_log("zone="+zone+", name="+monsterName+", gi[name][0]="+gremlininfo[monsterName][0]);
 					var tr = document.createElement('tr');
@@ -1711,21 +1711,22 @@ function at_fight() {
 		SetData("square",false);
 		if (square) {
 			GM_log("square="+square);
-			if (square.indexOf("hiddencity") != -1) {
-				var thissquare = square.match(/(\d+)/)[1];	// the "22" in "hiddencity.php?which=22"
-				GM_log("this square = "+thissquare);
+			if (square.indexOf("hiddencity") != -1 || square.indexOf("rats.php") != -1) {	
+				var thissquare = square.match(/(\d+)/)[1];	// break the "22" off of "rats.php?where=22", for example.
+				var hloc = (square.indexOf("hiddencity") != -1 ? "hiddencity.php?which=":"rats.php?where=");
+				GM_log("part1="+hloc+", thissquare = "+thissquare);
 				var nextsquare = parseInt(thissquare)+1;
 				if (nextsquare < 25) {
-					var myhref = "hiddencity.php?which="+nextsquare;
+					var myhref = hloc+nextsquare;
 					var clicky = "SetData('square','"+myhref+"')";
-					$('<center><p><a href="'+myhref+'" id="bwahaha">Explore Next Square</a></center>').appendTo($('center:last'));
+					$('<center><p><a href="'+myhref+'" id="bwahaha">Explore Next Square</a></center>').prependTo($('center:last'));
 					$('#bwahaha').click(function() {
 						var a = $(this);
 						GM_log("href="+a.attr('href'));
 						SetData("square",a.attr('href'));
 					});
 				}
-			} else {
+			} else {	// handling adventure.php?snarfblat=X options.
 				var location = parseInt(square.match(/(\d+)/)[1]);	// the 185 in "adventure.php?snarfblat=185"
 				GM_log("location="+location);
 				switch (location)	{
@@ -1887,8 +1888,59 @@ function at_hiddencity() {
 	});
 }
 
+function at_rats() {
+// set up info to track what square we clicked on.
+	$('a').click(function() {	
+		var a = $(this);
+		GM_log("href="+a.attr('href'));
+		SetData("square",a.attr('href'));
+	});
+// add "next square" link when we click on a drink-dropping non-combat square.
+	$('td:contains("You acquire an item")').each(function() {
+		var td = $(this);
+		var square=GetData("square");
+		SetData("square",false);
+		if (square) {
+			var hloc = "rats.php?where=";
+			var thissquare = square.match(/(\d+)/)[1];	// the "22" in "hiddencity.php?which=22" or "rats.php?where=22"
+			GM_log("this square = "+thissquare);
+			var nextsquare = parseInt(thissquare)+1;
+			if (nextsquare < 26) {
+				var myhref = hloc+nextsquare;
+				var clicky = "SetData('square','"+myhref+"')";
+				$('<center><p><a href="'+myhref+'" id="bwahaha">Explore Next Square</a></center>').appendTo($(this).parent().parent());
+				$('#bwahaha').click(function() {
+					var a = $(this);
+					GM_log("href="+a.attr('href'));
+					SetData("square",a.attr('href'));
+				});
+			}
+		}	
+	});
+}
+
 function at_adventure() {
+	var square=GetData("square");
 	SetData("square",false);
+	if (square) {
+		var hloc = '';
+		if (square.indexOf("hiddencity") != -1) hloc = "hiddencity.php?which=";
+		else if (square.indexOf("rats") != -1) hloc = "rats.php?where=";
+		if (hloc == '') return;
+		var thissquare = square.match(/(\d+)/)[1];	// the "22" in "hiddencity.php?which=22" or "rats.php?where=22"
+		GM_log("this square = "+thissquare);
+		var nextsquare = parseInt(thissquare)+1;
+		if (nextsquare < 25) {
+			var myhref = "hiddencity.php?which="+nextsquare;
+			var clicky = "SetData('square','"+myhref+"')";
+			$('<center><p><a href="'+myhref+'" id="bwahaha">Explore Next Square</a></center>').prependTo($('center:last'));
+			$('#bwahaha').click(function() {
+				var a = $(this);
+				GM_log("href="+a.attr('href'));
+				SetData("square",a.attr('href'));
+			});
+		}
+	}
 }
 
 function at_choice() {
