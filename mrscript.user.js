@@ -493,95 +493,96 @@ function AppendLink(linkString, linkURL)
 
 // returns a function bound to self (with additional args passed pre-populated)
 function bind( func, self /*, param 1, param 2, ... */ ) {
-  var params = [].slice.call( arguments, 2 );
-  return function a( /* param1, ..., param n,   param n+1, ... */ ) {
-    return func.apply( self, params.concat( [].slice.call( arguments ) ) );
-  };
+	var params = [].slice.call( arguments, 2 );
+	return function a( /* param1, ..., param n,   param n+1, ... */ ) {
+		return func.apply( self, params.concat( [].slice.call( arguments ) ) );
+	};
 }
 
 // comfy way of concatenating a bunch of nodes into a DocumentFragment
 function FRAGMENT(nodes, doc) {
-  doc = doc || document;
-  var fragment = doc.createDocumentFragment();
-  for (var i = 0, node; node = nodes[i]; i++ ) {
-    if ("string" == typeof node)
-      node = doc.createTextNode( node );
-    fragment.appendChild(node);
-  }
-  return fragment;
+	doc = doc || document;
+	var fragment = doc.createDocumentFragment();
+	for (var i = 0, node; node = nodes[i]; i++ ) {
+		if ("string" == typeof node)
+			node = doc.createTextNode( node );
+		fragment.appendChild(node);
+	}
+	return fragment;
 }
 
 function makeTags(names, doc) {
-  function tagMaker(name, attrs, children) {
-    console.log(name, attrs, children);
-    var node = this.createElement( name );
-    if ("object" != typeof attrs || $.isArray(attrs)) {
-      children = attrs;
-      attrs = null;
-    }
-    if (attrs) {
-      for (var a in attrs)
-        node.setAttribute(a, attrs[a]);
-      if (attrs['class'])
-        node.className = attrs['class'];
-      if (attrs['style'])
-        node.style.cssText = attrs['style'];
-    }
-    if (children) {
-      if ($.isArray(children))
-        node.appendChild( FRAGMENT(children, this) );
-      else if (({ "string":1, "number": 1 })[typeof children])
-        node.appendChild( this.createTextNode( children+"" ) );
-      else if (children.tagName)
-        node.appendChild( children );
-    }
-    return node;
-  }
-
-  names.forEach(function(name) {
-    global[name.toUpperCase()] = bind(tagMaker, doc||document, name);
-  });
+	function tagMaker(name, attrs, children) {
+		console.log(name, attrs, children);
+		var node = this.createElement( name );
+		if ("object" != typeof attrs || $.isArray(attrs)) {
+			children = attrs;
+			attrs = null;
+		}
+		if (attrs) {
+			for (var a in attrs)
+				node.setAttribute(a, attrs[a]);
+			if (attrs['class'])
+				node.className = attrs['class'];
+			if (attrs['style'])
+				node.style.cssText = attrs['style'];
+		}
+		if (children) {
+			if ($.isArray(children))
+				node.appendChild( FRAGMENT(children, this) );
+			else if (({ "string":1, "number": 1 })[typeof children])
+				node.appendChild( this.createTextNode( children+"" ) );
+			else if (children.tagName)
+				node.appendChild( children );
+		}
+		return node;
+	}
+	names.forEach(function(name) {
+		global[name.toUpperCase()] = bind(tagMaker, doc||document, name);
+	});
 }
 
 // ---------------------------------------
 // APPENDUSEBOX: Attach use multiple form.
 // ---------------------------------------
 function AppendUseBox(itemNumber, skillsForm, maxButton, appendHere) {
-  function HIDDEN(name, value) {
-    return INPUT({ type: "hidden", name: name, value: value });
-  }
-  var max = FindMaxQuantity(itemNumber, 999, 0, GetPref('safemax'));
-  var text, form = appendHere.appendChild(FORM({ method:"post" }, [
-    HIDDEN("action", "useitem"),
-    HIDDEN("pwd", pwd),
-    HIDDEN("whichitem", itemNumber),
-    text = INPUT({ type: "text", "class": "text", value: 1, size: 2 }), " ",
-    INPUT({ type: "submit", "class": "button", value: "Use" })
-  ]));
+	function HIDDEN(name, value) {
+		return INPUT({ type: "hidden", name: name, value: value });
+	}
+	var max = FindMaxQuantity(itemNumber, 999, 0, GetPref('safemax'));
+	var text, form = appendHere.appendChild(FORM({ method:"post" }, [
+		HIDDEN("action", "useitem"),
+		HIDDEN("pwd", pwd),
+		HIDDEN("whichitem", itemNumber),
+		text = INPUT({ type: "text", "class": "text", value: 1, size: 2 }), " ",
+		INPUT({ type: "submit", "class": "button", value: "Use" })
+	]));
 
-  if (skillsForm == 0) {
-    form.setAttribute('action', 'multiuse.php');
-    text.setAttribute('name', 'quantity');
-    if (maxButton != 0)
-      MakeMaxButton(text, function(event) {
-        var box = document.getElementsByName('quantity')[0];
-        box.value = FindMaxQuantity(itemNumber, 999, 0, GetPref('safemax'));
-      });
-  } else {
-    form.setAttribute('action', 'skills.php');
-    text.setAttribute('name', 'itemquantity');
-    if (maxButton != 0)
-      MakeMaxButton(text, function(event) {
-	var box = document.getElementsByName('itemquantity')[0];
-        box.value = FindMaxQuantity(itemNumber, 999, 0, GetPref('safemax'));
-      });
-  }
-  text.addEventListener('keyup', function(event) {
-    if (event.which == 77 || event.which == 88) { // 77 = 'm', 88 = 'x'
-      var whichItem = document.getElementsByName('whichitem')[0];
-      this.value = FindMaxQuantity(whichItem.value, 999, 0, GetPref('safemax'));
-    }
-  }, false);
+	if (skillsForm == 0) {
+		form.setAttribute('action', 'multiuse.php');
+		text.setAttribute('name', 'quantity');
+		if (maxButton != 0) {
+			MakeMaxButton(text, function(event) {
+				var box = document.getElementsByName('quantity')[0];
+				box.value = FindMaxQuantity(itemNumber, 999, 0, GetPref('safemax'));
+			});
+		}
+	} else {
+		form.setAttribute('action', 'inv_use.php');
+		text.setAttribute('name', 'itemquantity');
+		if (maxButton != 0) {
+			MakeMaxButton(text, function(event) {
+				var box = document.getElementsByName('itemquantity')[0];
+				box.value = FindMaxQuantity(itemNumber, 999, 0, GetPref('safemax'));
+			});
+		}
+	}
+	text.addEventListener('keyup', function(event) {
+		if (event.which == 77 || event.which == 88) { // 77 = 'm', 88 = 'x'
+		  var whichItem = document.getElementsByName('whichitem')[0];
+		  this.value = FindMaxQuantity(whichItem.value, 999, 0, GetPref('safemax'));
+		}
+	}, false);
 }
 
 // ---------------------------------------------
@@ -974,7 +975,7 @@ function AddLinks(descId, theItem, formWhere, path) {
 		if (formWhere != null)
 		{	AppendUseBox(itemNum, 1, 1, formWhere.get(0));
 		} else
-        {	addWhere.append(AppendLink('[use]', 'skills.php?pwd='+ pwd +
+        {	addWhere.append(AppendLink('[use]', 'inv_use.php?pwd='+ pwd +
 			           '&action=useitem&bounce=skills.php?action=useditem&itemquantity=1&whichitem='+
                                    itemNum));
 		}
@@ -999,15 +1000,18 @@ function RightClickMP(event)
 {	var json = GetData("mplist");
 	if (json != undefined && json != "")
 	{	var num = 0; var quant = 0; var list = eval('('+json+')');
-			 if (list['518'])  num = "518";
-		else if (list['344'])  num = "344";
-		else if (list['2639']) num = "2639";
-		else if (list['1658']) num = "1658";
-		else if (list['1659']) num = "1659";
-		else if (list['1660']) num = "1660";
+			 if (list['518'])  num = "518";	// MMJ
+		else if (list['344'])  num = "344";	// KG seltzer
+		else if (list['2639']) num = "2639";// BCSoda
+		else if (list['1658']) num = "1658";// Cherry Cloaca
+		else if (list['1659']) num = "1659";// Diet Cloaca
+		else if (list['1660']) num = "1660";// Regular Cloaca
 		if (num > 0)
 		{	quant = FindMaxQuantity(parseInt(num), list[num], 0, GetPref("safemax"));
-			var url = server+'/skills.php?action=useitem&whichitem='+num+"&itemquantity="+quant+'&pwd='+pwd;
+//			var url = server + '/skills.php?action=useitem&whichitem='+num+"&itemquantity="+quant+'&pwd='+pwd;
+			var url = server + '/inv_use.php?pwd='+ pwd +
+			    '&action=useitem&bounce=skills.php?action=useditem&itemquantity='+quant+'&whichitem='+num;
+			GM_log("RC-MP: url="+url);
 			GM_get(url, function(result)
 				{	document.location.reload(); });
 	}	} event.stopPropagation(); event.preventDefault(); return false;
@@ -1018,6 +1022,7 @@ function RightClickMP(event)
 // -------------------------------------------------
 function RightClickHP(event)
 {	var json = GetData("hplist");
+	GM_log("rightclick HP... json ="+json);
 	if (json != undefined && json != "")
 	{
 		var num = 0; var quant = 0; var list = eval('('+json+')');
@@ -1029,8 +1034,10 @@ function RightClickHP(event)
 		else order = ['3012','5011','1010','3009','5007','1007'];
 
 		for(i=0; i<6; i++) if(list[order[i]]) { num = order[i]; break; }
+		GM_log("num="+num);
 		if (num > 0)
-		{		var url = server+'/skills.php?action=Skillz&whichskill='+num+"&quantity="+1+'&pwd='+pwd;
+		{	var url = server+'/skills.php?action=Skillz&whichskill='+num+"&quantity="+1+'&pwd='+pwd;
+			GM_log("RC-HP: url="+url);
 			GM_get(url, function(result)
 				{	document.location.reload(); });
 	}	} event.stopPropagation(); event.preventDefault(); return false;
@@ -1479,9 +1486,9 @@ function at_main_c() {
 // may also want to add a check for Funkslinging here.
 }
 
-// ---------------------------------------------------
-// MAIN.PHP: call main_c if needed (todo: remove this)
-// ---------------------------------------------------
+// -----------------------------------------------
+// MAIN: call main_c if needed (todo: remove this)
+// -----------------------------------------------
 function at_main() {
 //	GM_log("location.pathname="+location.pathname);
 	if ((location.pathname == "/main.html") ||	
@@ -1491,9 +1498,9 @@ function at_main() {
 	}
 }
 
-// ---------------------------------------------------
-// GAME.PHP: look for updates and post link if needed.
-// ---------------------------------------------------
+// -----------------------------------------------
+// GAME: look for updates and post link if needed.
+// -----------------------------------------------
 // n.b. game.php is the outermost, non-frame window that contains all the frames.
 // 		as such, the script only sees it exactly once, when you're logging in.
 function at_game() {
@@ -1710,34 +1717,41 @@ function at_fight() {
 		var square=GetData("square");
 		SetData("square",false);
 		if (square) {
-			GM_log("square="+square);
+//			GM_log("square="+square);
 			if (square.indexOf("hiddencity") != -1 || square.indexOf("rats.php") != -1) {	
 				var thissquare = square.match(/(\d+)/)[1];	// break the "22" off of "rats.php?where=22", for example.
-				var hloc = (square.indexOf("hiddencity") != -1 ? "hiddencity.php?which=":"rats.php?where=");
-				GM_log("part1="+hloc+", thissquare = "+thissquare);
+				var hloc = '';
+				var lastsquare = 0;
+				if (square.indexOf("hiddencity") != -1) {
+					hloc = "hiddencity.php?which=";
+					lastsquare=24;
+				} else {
+					hloc = "rats.php?where=";
+					lastsquare=25;
+				}
 				var nextsquare = parseInt(thissquare)+1;
-				if (nextsquare < 25) {
+				if (nextsquare <= lastsquare) {
 					var myhref = hloc+nextsquare;
 					var clicky = "SetData('square','"+myhref+"')";
 					$('<center><p><a href="'+myhref+'" id="bwahaha">Explore Next Square</a></center>').prependTo($('center:last'));
 					$('#bwahaha').click(function() {
 						var a = $(this);
-						GM_log("href="+a.attr('href'));
+//						GM_log("href="+a.attr('href'));
 						SetData("square",a.attr('href'));
 					});
 				}
 			} else {	// handling adventure.php?snarfblat=X options.
 				var location = parseInt(square.match(/(\d+)/)[1]);	// the 185 in "adventure.php?snarfblat=185"
-				GM_log("location="+location);
+//				GM_log("location="+location);
 				switch (location)	{
 				case 182:
 				case 183:
 				case 184:
 				case 185:	// add onclick to "adventure again" link to tell ourselves where we are.
-					GM_log("adding onclick event.");
+//					GM_log("adding onclick event.");
 					$('a:contains("dventure")').click(function() {
 						var a = $(this);
-						GM_log("href="+a.attr('href'));
+//						GM_log("href="+a.attr('href'));
 						SetData("square",a.attr('href'));
 					});
 				break;
@@ -1783,42 +1797,40 @@ function at_fight() {
 	}
 // PART 4: ANY-ROUND STUFF	
 	// yoinked-item processing
-	else if (document.body.innerHTML.indexOf(">You acquire an item: <") != -1)	
-        {
-            var imgs = document.body.getElementsByTagName("img");
-            for (var i = 0; i < imgs.length; i++)
-            {
-                var img = imgs[i];
-                if (img.getAttribute("class") != "hand")
-                    continue;
-                // toast
-                if (img.getAttribute("onClick") == "descitem(931984879)")
-                    continue;
+	else if (document.body.innerHTML.indexOf(">You acquire an item: <") != -1) {
+		var imgs = document.body.getElementsByTagName("img");
+		for (var i = 0; i < imgs.length; i++)
+		{
+			var img = imgs[i];
+			if (img.getAttribute("class") != "hand")
+				continue;
+			// toast
+			if (img.getAttribute("onClick") == "descitem(931984879)")
+				continue;
 
-                var text = img.parentNode.parentNode.parentNode.parentNode.parentNode.innerHTML;
-                text = text.replace(/ acquire /, " yoinked "); 
-				
-                GM_setValue("yoink", GM_getValue("yoink", "") + text);
-                break;
-            }
-        }
+			var text = img.parentNode.parentNode.parentNode.parentNode.parentNode.innerHTML;
+			text = text.replace(/ acquire /, " yoinked "); 
+			
+			GM_setValue("yoink", GM_getValue("yoink", "") + text);
+			break;
+		}
+	}
 }
 
-function showYoinks()
-{
+// ----------------------------------------
+// SHOWYOINKS:  display pickpocketed items.
+// Todo: figure out how to specify the correct placement via jquery....
+function showYoinks() {
 	var yoink = GM_getValue("yoink", "");
-	if (yoink != "")
-	{
+	if (yoink != "") {
 		GM_setValue("yoink", "");
+		
+		var yoinkNode = document.createElement("table");
+		yoinkNode.innerHTML = yoink;
 		var centers = document.body.getElementsByTagName("center");
-		for (var i = 0; i < centers.length; i++)
-		{
-			if (centers[i].innerHTML.indexOf("You win the fight") == 0)
-			{
-				var yoinkNode = document.createElement("table");
-				yoinkNode.innerHTML = yoink;
-				centers[i].insertBefore(yoinkNode, 
-					centers[i].childNodes[3]);
+		for (var i = 0; i < centers.length; i++) {
+			if (centers[i].innerHTML.indexOf("You win the fight") == 0) {
+				centers[i].insertBefore(yoinkNode, centers[i].childNodes[3]);
 				break;
 			}
 		}
@@ -1836,7 +1848,6 @@ function at_loggedout() {
 
 // ------------------------------------------------
 // LOGIN: clear password hash, just to be safe. :-)
-// 21Dec09 Hellion: added.
 // ------------------------------------------------
 function at_login() {
   SetPwd(0);
@@ -1863,9 +1874,9 @@ function at_valhalla() {
 	SetCharData("altar4",'');
 }
 
-// ---------
+// -----------------------------------------------------------------------
 // HIDDENCITY: remove non-useful spherical objects from the dropdown list.
-// ---------
+// -----------------------------------------------------------------------
 // 2174=mossy, 2175=smooth, 2176=cracked, 2177=rough.
 // altar 1=yellow, 2=blue, 3=red, 4=green.
 function at_hiddencity() {
@@ -1883,16 +1894,17 @@ function at_hiddencity() {
 	}
 	$('a').click(function() {
 		var a = $(this);
-		GM_log("href="+a.attr('href'));
+//		GM_log("href="+a.attr('href'));
 		SetData("square",a.attr('href'));
 	});
 }
 
+// ----------------------------------------------------------------------------------
+// RATS: track what square we clicked in order to provide "Explore Next Square" link.
+// ----------------------------------------------------------------------------------
 function at_rats() {
-// set up info to track what square we clicked on.
 	$('a').click(function() {	
 		var a = $(this);
-		GM_log("href="+a.attr('href'));
 		SetData("square",a.attr('href'));
 	});
 // add "next square" link when we click on a drink-dropping non-combat square.
@@ -1903,7 +1915,6 @@ function at_rats() {
 		if (square) {
 			var hloc = "rats.php?where=";
 			var thissquare = square.match(/(\d+)/)[1];	// the "22" in "hiddencity.php?which=22" or "rats.php?where=22"
-			GM_log("this square = "+thissquare);
 			var nextsquare = parseInt(thissquare)+1;
 			if (nextsquare < 26) {
 				var myhref = hloc+nextsquare;
@@ -1911,7 +1922,6 @@ function at_rats() {
 				$('<center><p><a href="'+myhref+'" id="bwahaha">Explore Next Square</a></center>').appendTo($(this).parent().parent());
 				$('#bwahaha').click(function() {
 					var a = $(this);
-					GM_log("href="+a.attr('href'));
 					SetData("square",a.attr('href'));
 				});
 			}
@@ -1919,16 +1929,18 @@ function at_rats() {
 	});
 }
 
+// ------------------------------------------------------------------------------------------
+// ADVENTURE: provide "Explore next square" link when we hit a non-combat in the Hidden City.
+// ------------------------------------------------------------------------------------------
 function at_adventure() {
 	var square=GetData("square");
 	SetData("square",false);
 	if (square) {
 		var hloc = '';
 		if (square.indexOf("hiddencity") != -1) hloc = "hiddencity.php?which=";
-		else if (square.indexOf("rats") != -1) hloc = "rats.php?where=";
+//		else if (square.indexOf("rats") != -1) hloc = "rats.php?where=";	// I don't believe this can ever happen, actually.
 		if (hloc == '') return;
 		var thissquare = square.match(/(\d+)/)[1];	// the "22" in "hiddencity.php?which=22" or "rats.php?where=22"
-		GM_log("this square = "+thissquare);
 		var nextsquare = parseInt(thissquare)+1;
 		if (nextsquare < 25) {
 			var myhref = "hiddencity.php?which="+nextsquare;
@@ -1943,10 +1955,16 @@ function at_adventure() {
 	}
 }
 
+// --------------------------------------------------------------------------------------------------
+// CHOICE: clear out "square" since it should never persist outside of the hidden city or the tavern.
+// --------------------------------------------------------------------------------------------------
 function at_choice() {
 	SetData("square",false);
 }
 
+// ----------------------------
+// TOWN_RIGHT: Untinker linker.
+// ----------------------------
 function at_town_right() {
 	var linkloc = GetData("plungeraccess")=="Y" ? "knoll.php?place=smith" :"adventure.php?snarfblat=18"
 	if (document.location.search == "?place=untinker") {
@@ -1964,6 +1982,9 @@ function at_town_right() {
 	}
 }
 
+// ---------------------------------------------
+// BHH: provide some convenience links here too.
+// ---------------------------------------------
 function at_bhh() {
 	var bountyloc = [
 		//item name, link display, adventure location ID
