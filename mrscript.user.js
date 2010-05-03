@@ -1740,22 +1740,18 @@ function at_fight() {
 					$('<center><p><a href="'+myhref+'" id="bwahaha">Explore Next Square</a></center>').prependTo($('center:last'));
 					$('#bwahaha').click(function() {
 						var a = $(this);
-//						GM_log("href="+a.attr('href'));
 						SetData("square",a.attr('href'));
 					});
 				}
 			} else {	// handling adventure.php?snarfblat=X options.
 				var location = parseInt(square.match(/(\d+)/)[1]);	// the 185 in "adventure.php?snarfblat=185"
-//				GM_log("location="+location);
 				switch (location)	{
 				case 182:
 				case 183:
 				case 184:
 				case 185:	// add onclick to "adventure again" link to tell ourselves where we are.
-//					GM_log("adding onclick event.");
 					$('a:contains("dventure")').click(function() {
 						var a = $(this);
-//						GM_log("href="+a.attr('href'));
 						SetData("square",a.attr('href'));
 					});
 				break;
@@ -1823,6 +1819,7 @@ function at_fight() {
 
 // ----------------------------------------
 // SHOWYOINKS:  display pickpocketed items.
+// ----------------------------------------
 // Todo: figure out how to specify the correct placement via jquery....
 function showYoinks() {
 	var yoink = GM_getValue("yoink", "");
@@ -1898,7 +1895,6 @@ function at_hiddencity() {
 	}
 	$('a').click(function() {
 		var a = $(this);
-//		GM_log("href="+a.attr('href'));
 		SetData("square",a.attr('href'));
 	});
 }
@@ -1952,7 +1948,6 @@ function at_adventure() {
 			$('<center><p><a href="'+myhref+'" id="bwahaha">Explore Next Square</a></center>').prependTo($('center:last'));
 			$('#bwahaha').click(function() {
 				var a = $(this);
-				GM_log("href="+a.attr('href'));
 				SetData("square",a.attr('href'));
 			});
 		}
@@ -2680,11 +2675,10 @@ function at_bigisland()
 		if (onclick != undefined && onclick.indexOf("desc") != -1)
 			AddInvCheck(this);
 	});
-	GM_log("at bigisland:"+document.location.search);
+	// if we're showing the junkyard, add onclick events to track which junkyard zone we go into.
 	if (document.location.search == "?place=junkyard") {
 		$('a:lt(4)').click(function() {
 		var a = $(this);
-		GM_log("href="+a.attr('href'));
 		SetData("square",a.attr('href'));
 		});
 	}
@@ -3961,7 +3955,7 @@ function at_manor3()
 	} else {											// No saved results: Better do it the long way.... 
 		GM_get(server+"/manor3.php?place=goblet", function (atext) {	// check the altar for the glyphs we need
 			var pdiv = document.createElement('div');
-			GM_log("place=goblet text:"+atext);
+//			GM_log("place=goblet text:"+atext);
 			pdiv.innerHTML = atext;
 			var glimgs = pdiv.getElementsByTagName('img');
 			var glyphids = new Array();
@@ -4754,32 +4748,31 @@ function spoil_cave()			// dark and dank and sinister cave, that is...
 function spoil_bigisland()
 {	$('img').each(function()
 	{	var ml = null; var src = this.getAttribute('src');
-		// Note to wiki peoples: more spoilers, plz
-//		GM_log("src = " + src);
-		if (src.indexOf("nunnery1") != -1) ml = '168';
+		if (src.indexOf("nunnery1") != -1) ml = 'ML: 168';
 		else if (src.indexOf("bfleft") != -1) ml = this.getAttribute('title') + ' (ML: 170-210)'; // don't overwrite image number info
 		else if (src.indexOf("bfright") != -1) ml = this.getAttribute('title') + ' (ML: 170-210)';
-		else if (src.indexOf("junk1") != -1) ml = '168-172';
-		else if (src.indexOf("junk3") != -1) ml = '168-172';
-		else if (src.indexOf("junk5") != -1) ml = '168-172';
-		else if (src.indexOf("junk7") != -1) ml = '168-172';
-		else if (src.indexOf("filth4") != -1) ml = '165';
-		else if (src.indexOf("filth6") != -1) ml = '167';
-		else if (src.indexOf("filth8") != -1) ml = '169';
-		else if (src.indexOf("filth9") != -1) ml = '173';
-		else if (src.indexOf("farm1d") != -1) ml = '170-179, cold (weak=hot/spooky)';
-		else if (src.indexOf("farm2d") != -1) ml = '170-177, hot (weak=stench/sleaze)';
-		else if (src.indexOf("farm3d") != -1) ml = '173, sleaze (weak=cold/spooky)';
-		else if (src.indexOf("farm4d") != -1) ml = '175 (no elemental alignment)';
-		else if (src.indexOf("farm5d") != -1) ml = '166-168';
-		else if (src.indexOf("farm6d") != -1) ml = '169-174, stench (weak=cold/sleaze)';
-		else if (src.indexOf("farm7d") != -1) ml = '171-175, spooky (weak=hot/stench)';
-		else if (src.indexOf("farm8d") != -1) ml = '165-180 (no elemental alignment)';
-		else if (src.indexOf("bmim24") != -1) ml = '330-375';		// wrong section?  hippy camp, bombed.
-		else if (src.indexOf("bmim23") != -1) ml = '330-375';		// wrong section?  frat house, bombed.
-		else if (src.indexOf("lighthouse_left") != -1) ml = '171';
+		else if (src.indexOf("junk1") != -1) ml = 'ML: 168-172';
+		else if (src.indexOf("junk3") != -1) ml = 'ML: 168-172';
+		else if (src.indexOf("junk5") != -1) ml = 'ML: 168-172';
+		else if (src.indexOf("junk7") != -1) ml = 'ML: 168-172';
+		else if (src.indexOf("filth4") != -1) ml = 'ML: 165';
+		else if (src.indexOf("filth6") != -1) ml = 'ML: 167';
+		else if (src.indexOf("filth8") != -1) ml = 'ML: 169';
+		else if (src.indexOf("filth9") != -1) ml = 'ML: 173';
+		else if (src.indexOf("farm1d") != -1) ml = 'ML: 170-179, cold (weak=hot/spooky)';
+		else if (src.indexOf("farm2d") != -1) ml = 'ML: 170-177, hot (weak=stench/sleaze)';
+		else if (src.indexOf("farm3d") != -1) ml = 'ML: 173, sleaze (weak=cold/spooky)';
+		else if (src.indexOf("farm4d") != -1) ml = 'ML: 175 (no elemental alignment)';
+		else if (src.indexOf("farm5d") != -1) ml = 'ML: 166-168';
+		else if (src.indexOf("farm6d") != -1) ml = 'ML: 169-174, stench (weak=cold/sleaze)';
+		else if (src.indexOf("farm7d") != -1) ml = 'ML: 171-175, spooky (weak=hot/stench)';
+		// farm8 is McMillicancuddy, he's never an adventurable zone
+		else if (src.indexOf("farm9d") != -1) ml = 'ML: 165-180 (no elemental alignment)';
+		else if (src.indexOf("bmim24") != -1) ml = 'ML: 240-250';		// wrong section?  hippy camp, bombed.
+		else if (src.indexOf("bmim23") != -1) ml = 'ML: 230-255';		// wrong section?  frat house, bombed.
+		else if (src.indexOf("lighthouse_left") != -1) ml = 'ML: 171';
 		
-		if(ml) this.setAttribute('title','ML: '+ml);
+		if(ml) this.setAttribute('title',ml);
 });	}
 
 function spoil_postwarisland()		
@@ -4789,11 +4782,11 @@ function spoil_postwarisland()
 		if (src.indexOf("nunnery1") != -1) ml = '168';
 		else if (src.indexOf("22.gif") != -1) ml = '61-69';		// pirate cove, undisguised
 		else if (src.indexOf("23.gif") != -1) ml = '39-41';		// hippy camp, unbombed
-		else if (src.indexOf("24.gif") != -1) ml = '330-375'; 	// hippy camp, bombed
+		else if (src.indexOf("24.gif") != -1) ml = '240-250'; 	// hippy camp, bombed
 		else if (src.indexOf("25.gif") != -1) ml = '169-172';	// Junkyard
 		else if (src.indexOf("26.gif") != -1) ml = '169-180';	// McMillicancuddy
 		else if (src.indexOf("27.gif") != -1) ml = '39-41'; 	// frathouse, unbombed 
-		else if (src.indexOf("28.gif") != -1) ml = '330-375'; 	// frathouse, bombed
+		else if (src.indexOf("28.gif") != -1) ml = '230-255'; 	// frathouse, bombed
 		if(ml) this.setAttribute('title','ML: '+ml);
 });	}
 
