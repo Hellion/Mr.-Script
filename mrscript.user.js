@@ -997,7 +997,7 @@ function AddLinks(descId, theItem, formWhere, path) {
 // RIGHTCLICKMP: Fill up with standard restoratives.
 // -------------------------------------------------
 function RightClickMP(event)
-{	var json = GetData("mplist");
+{	var json = GetCharData("mplist");
 	if (json != undefined && json != "")
 	{	var num = 0; var quant = 0; var list = eval('('+json+')');
 			 if (list['518'])  num = "518";	// MMJ
@@ -1021,13 +1021,17 @@ function RightClickMP(event)
 // RIGHTCLICKHP: Heal up with spells.
 // -------------------------------------------------
 function RightClickHP(event)
-{	var json = GetData("hplist");
+{	var json = GetCharData("hplist");
 	GM_log("rightclick HP... json ="+json);
 	if (json != undefined && json != "")
 	{
 		var num = 0; var quant = 0; var list = eval('('+json+')');
 		var order; var heal = GetData("maxHP") - GetData("currentHP");
 
+		if (heal == 0) {
+			GM_log("no healing needed.");
+			return;
+		}
 		if(heal < 20) order = ['3009','5007','1007','1010','5011','3012'];
 		else if(heal < 35) order = ['1010','5011','3012','3009','5007','1007'];
 		else if(heal < 45) order = ['5011','1010','3012','3009','5007','1007'];
@@ -3471,7 +3475,7 @@ function at_skills()
 					sel.childNodes[i].innerHTML.substr(4);
 		}
 		if (json == '{') json = ''; else json += '}';
-		SetData("hplist", json);
+		SetCharData("hplist", json);
 	}
 
 	// Store list of restoratives we care about
@@ -3490,7 +3494,7 @@ function at_skills()
 				default: break;
 		}	}
 		if (json == '{') json = ""; else json += "}";
-		SetData("mplist",json);
+		SetCharData("mplist",json);
 	}
 
 	for (var i=0, len=inputStuff.length; i<len; i++)
