@@ -1,4 +1,4 @@
-// Mr. Script v1.5.3
+// Mr. Script v1.5.4
 //
 // --------------------------------------------------------------------
 // This is a user script.  To install it, you need Greasemonkey 0.8 or
@@ -11,7 +11,7 @@
 // ==UserScript==
 // @name        Mr. Script
 // @namespace   http://www.noblesse-oblige.org/lukifer/scripts/
-// @description Version 1.5.3
+// @description Version 1.5.4
 // @author		Lukifer
 // @contributor	Ohayou
 // @contributor Hellion
@@ -34,7 +34,7 @@ var place = location.pathname.replace(/\/|\.(php|html)$/gi, "").toLowerCase();
 //GM_log("at:" + place);
 
 // n.b. version number should always be a 3-digit number.  If you move to 1.6, call it 1.6.0.  Don't go to 1.5.10 or some such.
-var VERSION = 153;
+var VERSION = 154;
 var MAXLIMIT = 999;
 var ENABLE_QS_REFRESH = 1;
 var DISABLE_ITEM_DB = 0;
@@ -1011,7 +1011,7 @@ function RightClickMP(event)
 //			var url = server + '/skills.php?action=useitem&whichitem='+num+"&itemquantity="+quant+'&pwd='+pwd;
 			var url = server + '/inv_use.php?pwd='+ pwd +
 			    '&action=useitem&bounce=skills.php?action=useditem&itemquantity='+quant+'&whichitem='+num;
-			GM_log("RC-MP: url="+url);
+//			GM_log("RC-MP: url="+url);
 			GM_get(url, function(result)
 				{	document.location.reload(); });
 	}	} event.stopPropagation(); event.preventDefault(); return false;
@@ -1022,7 +1022,7 @@ function RightClickMP(event)
 // -------------------------------------------------
 function RightClickHP(event)
 {	var json = GetCharData("hplist");
-	GM_log("rightclick HP... json ="+json);
+//	GM_log("rightclick HP... json ="+json);
 	if (json != undefined && json != "")
 	{
 		var num = 0; var quant = 0; var list = eval('('+json+')');
@@ -1038,10 +1038,10 @@ function RightClickHP(event)
 		else order = ['3012','5011','1010','3009','5007','1007'];
 
 		for(i=0; i<6; i++) if(list[order[i]]) { num = order[i]; break; }
-		GM_log("num="+num);
+//		GM_log("num="+num);
 		if (num > 0)
 		{	var url = server+'/skills.php?action=Skillz&whichskill='+num+"&quantity="+1+'&pwd='+pwd;
-			GM_log("RC-HP: url="+url);
+//			GM_log("RC-HP: url="+url);
 			GM_get(url, function(result)
 				{	document.location.reload(); });
 	}	} event.stopPropagation(); event.preventDefault(); return false;
@@ -1594,6 +1594,7 @@ function at_fight() {
 	"a boaraffe":["--","",0,3],
 	"a pygmy blowgunner":["--","",0,3],
 	"a pygmy assault squad":["--","",0,3],
+	"an ancient protector spirit":["--","",0,3],
 	"a clingy pirate":["cocktail napkin","",0,0],
 	"a tetchy pirate":["The Big Book of Pirate Insults","",0,0],
 	"a toothy pirate":["The Big Book of Pirate Insults","",0,0],
@@ -1644,20 +1645,19 @@ function at_fight() {
 									"an A.M.C. gremlin"  :[186, "blah blah hruugh", "an A.M.C. gremlin"]};
 
 				var zonetext = GetData("square");
-				GM_log("zonetext="+zonetext);
+//				GM_log("zonetext="+zonetext);
 				var zone = zonetext ? parseInt(zonetext.match(/(\d+)/)[1]) : 0;
 				
 				// if the monster doesn't drop the item in this zone, or we see the "i-don't-have-it" message...
 				if ((zone && (gremlininfo[monsterName][0] != zone)) ||
 					(document.body.innerHTML.indexOf(gremlininfo[monsterName][2]) != -1)) { 	// gremlin showed the no-tool message?
-					GM_log("zone="+zone+", name="+monsterName+", gi[name][0]="+gremlininfo[monsterName][0]);
+//					GM_log("zone="+zone+", name="+monsterName+", gi[name][0]="+gremlininfo[monsterName][0]);
 					var tr = document.createElement('tr');
 					tr.innerHTML = '<tr><td><div style="color: red;font-size: 100%;width: 100%;text-align:center">' + 
 									'<b>SMACK THE LITTLE BUGGER DOWN!</b></div></td></tr>';
 					AddToTopOfMain(tr, document);
 					SetData("special",2);
 				} else {								// the monster might drop the item.
-					GM_log("check for item show");
 					if (document.body.innerHTML.indexOf(gremlininfo[monsterName][1]) != -1) {	// and there it is!
 						var tr = document.createElement('tr');
 						tr.innerHTML = '<tr><td><div style="color: green;font-size: 100%;width: 100%;text-align:center">' +
