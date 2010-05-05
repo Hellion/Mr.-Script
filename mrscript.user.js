@@ -2676,7 +2676,7 @@ function at_bigisland()
 			AddInvCheck(this);
 	});
 	// if we're showing the junkyard, add onclick events to track which junkyard zone we go into.
-	if (document.location.search == "?place=junkyard") {
+	if ((document.location.search == "?place=junkyard") || (document.location.search.indexOf("action=junkman") != -1)) {
 		$('a:lt(4)').click(function() {
 		var a = $(this);
 		SetData("square",a.attr('href'));
