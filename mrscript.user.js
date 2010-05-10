@@ -1986,6 +1986,7 @@ function at_rats() {
 		var td = $(this);
 		var square=GetData("square");
 		SetData("square",false);
+		if (td.innerHTML.indexOf("shiny ring") != -1) return;	// no next square when we shut off the faucet.
 		if (square) {
 			var hloc = "rats.php?where=";
 			var thissquare = square.match(/(\d+)/)[1];	// the "22" in "hiddencity.php?which=22" or "rats.php?where=22"
