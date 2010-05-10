@@ -560,6 +560,7 @@ function AppendUseBox(itemNumber, skillsForm, maxButton, appendHere) {
 
 	if (skillsForm == 0) {
 		form.setAttribute('action', 'multiuse.php');
+		if (itemNumber == 829) form.setAttribute('action','inv_use.php');		// generalize this beyond anti-anti-antidotes if we ever need to.
 		text.setAttribute('name', 'quantity');
 		if (maxButton != 0) {
 			MakeMaxButton(text, function(event) {
@@ -818,7 +819,8 @@ function AddLinks(descId, theItem, formWhere, path) {
 		case   74: case   75: case   76:										// spooky temple stuff
 			itemNum = 74; doWhat = 'oneuse'; break;
 
-		case  275: case  191: case  313: case 1244: case 1245:	case 675:		// larva, boss bat bandana, KGKing items, dagon skull
+		case  275: case  191: case  313: case 1244: case 1245:	case 675:		// larva, boss bat bandana, KGKing items, dagon skull,
+		case 2334:																// MacGuffin
 			addWhere.append(AppendLink('[council]','council.php')); break;
 			
 		case 454: // rusty screwdriver
@@ -1596,9 +1598,9 @@ function at_fight() {
 	"a pygmy assault squad":["--","",0,3],
 	"an ancient protector spirit":["--","",0,3],
 	"a clingy pirate":["cocktail napkin","",0,0],
-	"a tetchy pirate":["The Big Book of Pirate Insults","",0,0],
-	"a toothy pirate":["The Big Book of Pirate Insults","",0,0],
-	"a tipsy pirate":["The Big Book of Pirate Insults","",0,0]
+	"a tetchy pirate":["The Big Book of Pirate Insults","",0,4],
+	"a toothy pirate":["The Big Book of Pirate Insults","",0,4],
+	"a tipsy pirate":["The Big Book of Pirate Insults","",0,4]
 	};
 	
 	var monsterName = document.getElementById('monname').innerHTML;
@@ -1612,6 +1614,17 @@ function at_fight() {
 			}
 		}
 	}
+	
+	// always process the pirate insult book if it's in the combat item list:
+	$('option[value="2947"]').each(function(){
+		var insultsList = GetCharData("insults"); if (insultsList == '') insultsList = "0;0;0;0;0;0;0;0";
+		var insultsArray = insultsList.split(";");
+		var numInsults = 0;
+		for (var i=0;i<insultsArray.length;i++) {
+			if (insultsArray[i]==1) numInsults++;
+		}
+		$(this).text("The Big Book of Pirate Insults ("+numInsults+"/8)");
+	});
 	
 // PART 1: FIRST-ROUND STUFF
 	if (infight != "Y") {	// first time through this particular fight?
@@ -1656,7 +1669,7 @@ function at_fight() {
 					tr.innerHTML = '<tr><td><div style="color: red;font-size: 100%;width: 100%;text-align:center">' + 
 									'<b>SMACK THE LITTLE BUGGER DOWN!</b></div></td></tr>';
 					AddToTopOfMain(tr, document);
-					SetData("special",2);
+					SetData("special",2);	// mark them as non-tool gremlins.
 				} else {								// the monster might drop the item.
 					if (document.body.innerHTML.indexOf(gremlininfo[monsterName][1]) != -1) {	// and there it is!
 						var tr = document.createElement('tr');
@@ -1707,7 +1720,43 @@ function at_fight() {
 					}
 				}
 			break;
-
+			case 4: // insulting pirates:
+				var insultsList = GetCharData("insults"); if (insultsList == undefined) insultsList = "0;0;0;0;0;0;0;0";
+				var insultsArray = insultsList.split(";");
+				var numInsults = 0;
+				var s = $('body').text();
+//				GM_log("body text="+s);
+				if (s.match("neither your tongue nor your wit is sharp enough")) {
+					insultsArray[0] = 1;
+				}
+				else if (s.match("be any worse than the smell of your breath")) {
+					insultsArray[1] = 1;
+				}
+				else if (s.match("tell your wife and sister I had a lovely time")) {
+					insultsArray[2] = 1;
+				}
+				else if (s.match("yellow would be more your color")) {
+					insultsArray[3] = 1;
+				}
+				else if (s.match("comfortable being compared to your girlfriend")) {
+					insultsArray[4] = 1;
+				}
+				else if (s.match("honor to learn from such an expert in the field")) {
+					insultsArray[5] = 1;
+				}
+				else if (s.match("do you manage to shave without using a mirror")) {
+					insultsArray[6] = 1;
+				}
+				else if (s.match("only seems that way because you have")) {
+					insultsArray[7] = 1;
+				}
+				for (var i=0;i<insultsArray.length;i++) {
+					if (insultsArray[i]==1) numInsults++;
+				}
+				insultsList = insultsArray.join(";");
+				SetCharData("insults",insultsList);
+				$('p:contains("Dang, man.")').html("Dang, man.  That hurts.  <font color='blue'>("+numInsults+"/8 insults gathered.)</font>");
+			break;
 			default:
 			break;
 		}
@@ -1860,8 +1909,11 @@ function at_login() {
 // VALHALLA: clear things that may change when you ascend.
 // -------------------------------------------------------
 function at_valhalla() {
+	// door code resets
 	SetData("NSDoorCode",'');
+	// might not go muscle sign this time
 	SetData("plungeraccess",'');
+	// wipe the cellar wine info
 	SetCharData("corner178",0);
 	SetCharData("corner179",0);
 	SetCharData("corner180",0);
@@ -1869,10 +1921,32 @@ function at_valhalla() {
 	SetCharData("winelist",'');
 	SetCharData("wineHTML",'');
 	SetCharData("winesNeeded",'');
+	// clear the hidden city stone settings
 	SetCharData("altar1",'');
 	SetCharData("altar2",'');
 	SetCharData("altar3",'');
 	SetCharData("altar4",'');
+	// reset pirate insult knowledge
+	SetCharData("insults",'0;0;0;0;0;0;0;0');
+}
+
+// COVE: display pirate insult information
+function at_cove() {
+	var insultsList=GetCharData("insults");
+	if (insultsList == undefined) { insultsList = "0;0;0;0;0;0;0;0"; SetCharData("insults",insultsList); }
+	var insultsArray = insultsList.split(";");
+	var numInsults = 0;
+	for (var i=0;i<insultsArray.length;i++) {
+		if (insultsArray[i]==1) numInsults++;
+	}
+	var iColor={0:"red",1:"red",2:"red",3:"red",4:"red",5:"maroon",6:"blue",7:"green",8:"green"}; 
+
+	//Create the page element
+	var newElement = document.createElement('tr');
+	newElement.innerHTML = '<tr><td><div style="color: '+iColor[numInsults]+';font-size: 80%;width: 40%;text-align:left;">' + 'Insult tracking: ' + numInsults + '\/8</div></td></tr>';
+	//Insert it at the top of the page
+	var element = document.getElementsByTagName("tr")[0];
+	element.parentNode.insertBefore(newElement,element);
 }
 
 // -----------------------------------------------------------------------
