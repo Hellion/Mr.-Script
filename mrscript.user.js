@@ -1,4 +1,4 @@
-// Mr. Script v1.5.3
+// Mr. Script v1.5.4
 //
 // --------------------------------------------------------------------
 // This is a user script.  To install it, you need Greasemonkey 0.8 or
@@ -11,7 +11,7 @@
 // ==UserScript==
 // @name        Mr. Script
 // @namespace   http://www.noblesse-oblige.org/lukifer/scripts/
-// @description Version 1.5.3
+// @description Version 1.5.4
 // @author		Lukifer
 // @contributor	Ohayou
 // @contributor Hellion
@@ -34,7 +34,7 @@ var place = location.pathname.replace(/\/|\.(php|html)$/gi, "").toLowerCase();
 //GM_log("at:" + place);
 
 // n.b. version number should always be a 3-digit number.  If you move to 1.6, call it 1.6.0.  Don't go to 1.5.10 or some such.
-var VERSION = 153;
+var VERSION = 154;
 var MAXLIMIT = 999;
 var ENABLE_QS_REFRESH = 1;
 var DISABLE_ITEM_DB = 0;
@@ -560,6 +560,7 @@ function AppendUseBox(itemNumber, skillsForm, maxButton, appendHere) {
 
 	if (skillsForm == 0) {
 		form.setAttribute('action', 'multiuse.php');
+		if (itemNumber == 829) form.setAttribute('action','inv_use.php');		// generalize this beyond anti-anti-antidotes if we ever need to.
 		text.setAttribute('name', 'quantity');
 		if (maxButton != 0) {
 			MakeMaxButton(text, function(event) {
@@ -818,7 +819,8 @@ function AddLinks(descId, theItem, formWhere, path) {
 		case   74: case   75: case   76:										// spooky temple stuff
 			itemNum = 74; doWhat = 'oneuse'; break;
 
-		case  275: case  191: case  313: case 1244: case 1245:	case 675:		// larva, boss bat bandana, KGKing items, dagon skull
+		case  275: case  191: case  313: case 1244: case 1245:	case 675:		// larva, boss bat bandana, KGKing items, dagon skull,
+		case 2334:																// MacGuffin
 			addWhere.append(AppendLink('[council]','council.php')); break;
 			
 		case 454: // rusty screwdriver
@@ -1011,7 +1013,7 @@ function RightClickMP(event)
 //			var url = server + '/skills.php?action=useitem&whichitem='+num+"&itemquantity="+quant+'&pwd='+pwd;
 			var url = server + '/inv_use.php?pwd='+ pwd +
 			    '&action=useitem&bounce=skills.php?action=useditem&itemquantity='+quant+'&whichitem='+num;
-			GM_log("RC-MP: url="+url);
+//			GM_log("RC-MP: url="+url);
 			GM_get(url, function(result)
 				{	document.location.reload(); });
 	}	} event.stopPropagation(); event.preventDefault(); return false;
@@ -1022,7 +1024,7 @@ function RightClickMP(event)
 // -------------------------------------------------
 function RightClickHP(event)
 {	var json = GetCharData("hplist");
-	GM_log("rightclick HP... json ="+json);
+//	GM_log("rightclick HP... json ="+json);
 	if (json != undefined && json != "")
 	{
 		var num = 0; var quant = 0; var list = eval('('+json+')');
@@ -1038,10 +1040,10 @@ function RightClickHP(event)
 		else order = ['3012','5011','1010','3009','5007','1007'];
 
 		for(i=0; i<6; i++) if(list[order[i]]) { num = order[i]; break; }
-		GM_log("num="+num);
+//		GM_log("num="+num);
 		if (num > 0)
 		{	var url = server+'/skills.php?action=Skillz&whichskill='+num+"&quantity="+1+'&pwd='+pwd;
-			GM_log("RC-HP: url="+url);
+//			GM_log("RC-HP: url="+url);
 			GM_get(url, function(result)
 				{	document.location.reload(); });
 	}	} event.stopPropagation(); event.preventDefault(); return false;
@@ -1594,10 +1596,11 @@ function at_fight() {
 	"a boaraffe":["--","",0,3],
 	"a pygmy blowgunner":["--","",0,3],
 	"a pygmy assault squad":["--","",0,3],
+	"an ancient protector spirit":["--","",0,3],
 	"a clingy pirate":["cocktail napkin","",0,0],
-	"a tetchy pirate":["The Big Book of Pirate Insults","",0,0],
-	"a toothy pirate":["The Big Book of Pirate Insults","",0,0],
-	"a tipsy pirate":["The Big Book of Pirate Insults","",0,0]
+	"a tetchy pirate":["The Big Book of Pirate Insults","",0,4],
+	"a toothy pirate":["The Big Book of Pirate Insults","",0,4],
+	"a tipsy pirate":["The Big Book of Pirate Insults","",0,4]
 	};
 	
 	var monsterName = document.getElementById('monname').innerHTML;
@@ -1611,6 +1614,17 @@ function at_fight() {
 			}
 		}
 	}
+	
+	// always process the pirate insult book if it's in the combat item list:
+	$('option[value="2947"]').each(function(){
+		var insultsList = GetCharData("insults"); if (insultsList == '') insultsList = "0;0;0;0;0;0;0;0";
+		var insultsArray = insultsList.split(";");
+		var numInsults = 0;
+		for (var i=0;i<insultsArray.length;i++) {
+			if (insultsArray[i]==1) numInsults++;
+		}
+		$(this).text("The Big Book of Pirate Insults ("+numInsults+"/8)");
+	});
 	
 // PART 1: FIRST-ROUND STUFF
 	if (infight != "Y") {	// first time through this particular fight?
@@ -1644,20 +1658,19 @@ function at_fight() {
 									"an A.M.C. gremlin"  :[186, "blah blah hruugh", "an A.M.C. gremlin"]};
 
 				var zonetext = GetData("square");
-				GM_log("zonetext="+zonetext);
+//				GM_log("zonetext="+zonetext);
 				var zone = zonetext ? parseInt(zonetext.match(/(\d+)/)[1]) : 0;
 				
 				// if the monster doesn't drop the item in this zone, or we see the "i-don't-have-it" message...
 				if ((zone && (gremlininfo[monsterName][0] != zone)) ||
 					(document.body.innerHTML.indexOf(gremlininfo[monsterName][2]) != -1)) { 	// gremlin showed the no-tool message?
-					GM_log("zone="+zone+", name="+monsterName+", gi[name][0]="+gremlininfo[monsterName][0]);
+//					GM_log("zone="+zone+", name="+monsterName+", gi[name][0]="+gremlininfo[monsterName][0]);
 					var tr = document.createElement('tr');
 					tr.innerHTML = '<tr><td><div style="color: red;font-size: 100%;width: 100%;text-align:center">' + 
 									'<b>SMACK THE LITTLE BUGGER DOWN!</b></div></td></tr>';
 					AddToTopOfMain(tr, document);
-					SetData("special",2);
+					SetData("special",2);	// mark them as non-tool gremlins.
 				} else {								// the monster might drop the item.
-					GM_log("check for item show");
 					if (document.body.innerHTML.indexOf(gremlininfo[monsterName][1]) != -1) {	// and there it is!
 						var tr = document.createElement('tr');
 						tr.innerHTML = '<tr><td><div style="color: green;font-size: 100%;width: 100%;text-align:center">' +
@@ -1708,7 +1721,43 @@ function at_fight() {
 					}
 				}
 			break;
-
+			case 4: // insulting pirates:
+				var insultsList = GetCharData("insults"); if (insultsList == undefined) insultsList = "0;0;0;0;0;0;0;0";
+				var insultsArray = insultsList.split(";");
+				var numInsults = 0;
+				var s = $('body').text();
+//				GM_log("body text="+s);
+				if (s.match("neither your tongue nor your wit is sharp enough")) {
+					insultsArray[0] = 1;
+				}
+				else if (s.match("be any worse than the smell of your breath")) {
+					insultsArray[1] = 1;
+				}
+				else if (s.match("tell your wife and sister I had a lovely time")) {
+					insultsArray[2] = 1;
+				}
+				else if (s.match("yellow would be more your color")) {
+					insultsArray[3] = 1;
+				}
+				else if (s.match("comfortable being compared to your girlfriend")) {
+					insultsArray[4] = 1;
+				}
+				else if (s.match("honor to learn from such an expert in the field")) {
+					insultsArray[5] = 1;
+				}
+				else if (s.match("do you manage to shave without using a mirror")) {
+					insultsArray[6] = 1;
+				}
+				else if (s.match("only seems that way because you have")) {
+					insultsArray[7] = 1;
+				}
+				for (var i=0;i<insultsArray.length;i++) {
+					if (insultsArray[i]==1) numInsults++;
+				}
+				insultsList = insultsArray.join(";");
+				SetCharData("insults",insultsList);
+				$('p:contains("Dang, man.")').html("Dang, man.  That hurts.  <font color='blue'>("+numInsults+"/8 insults gathered.)</font>");
+			break;
 			default:
 			break;
 		}
@@ -1861,8 +1910,11 @@ function at_login() {
 // VALHALLA: clear things that may change when you ascend.
 // -------------------------------------------------------
 function at_valhalla() {
+	// door code resets
 	SetData("NSDoorCode",'');
+	// might not go muscle sign this time
 	SetData("plungeraccess",'');
+	// wipe the cellar wine info
 	SetCharData("corner178",0);
 	SetCharData("corner179",0);
 	SetCharData("corner180",0);
@@ -1870,10 +1922,32 @@ function at_valhalla() {
 	SetCharData("winelist",'');
 	SetCharData("wineHTML",'');
 	SetCharData("winesNeeded",'');
+	// clear the hidden city stone settings
 	SetCharData("altar1",'');
 	SetCharData("altar2",'');
 	SetCharData("altar3",'');
 	SetCharData("altar4",'');
+	// reset pirate insult knowledge
+	SetCharData("insults",'0;0;0;0;0;0;0;0');
+}
+
+// COVE: display pirate insult information
+function at_cove() {
+	var insultsList=GetCharData("insults");
+	if (insultsList == undefined) { insultsList = "0;0;0;0;0;0;0;0"; SetCharData("insults",insultsList); }
+	var insultsArray = insultsList.split(";");
+	var numInsults = 0;
+	for (var i=0;i<insultsArray.length;i++) {
+		if (insultsArray[i]==1) numInsults++;
+	}
+	var iColor={0:"red",1:"red",2:"red",3:"red",4:"red",5:"maroon",6:"blue",7:"green",8:"green"}; 
+
+	//Create the page element
+	var newElement = document.createElement('tr');
+	newElement.innerHTML = '<tr><td><div style="color: '+iColor[numInsults]+';font-size: 80%;width: 40%;text-align:left;">' + 'Insult tracking: ' + numInsults + '\/8</div></td></tr>';
+	//Insert it at the top of the page
+	var element = document.getElementsByTagName("tr")[0];
+	element.parentNode.insertBefore(newElement,element);
 }
 
 // -----------------------------------------------------------------------
@@ -1913,6 +1987,7 @@ function at_rats() {
 		var td = $(this);
 		var square=GetData("square");
 		SetData("square",false);
+		if (td.innerHTML.indexOf("shiny ring") != -1) return;	// no next square when we shut off the faucet.
 		if (square) {
 			var hloc = "rats.php?where=";
 			var thissquare = square.match(/(\d+)/)[1];	// the "22" in "hiddencity.php?which=22" or "rats.php?where=22"
@@ -2677,7 +2752,7 @@ function at_bigisland()
 			AddInvCheck(this);
 	});
 	// if we're showing the junkyard, add onclick events to track which junkyard zone we go into.
-	if (document.location.search == "?place=junkyard") {
+	if ((document.location.search == "?place=junkyard") || (document.location.search.indexOf("action=junkman") != -1)) {
 		$('a:lt(4)').click(function() {
 		var a = $(this);
 		SetData("square",a.attr('href'));
