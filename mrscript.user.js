@@ -1578,7 +1578,7 @@ function at_fight() {
 	"a Flaming Samurai":["frigid ninja stars","",1,0],
 	"a giant bee":["tropical orchid","",1,0],
 	"a giant fried egg":["black pepper","",1,0],
-	"a Giant Desktop Globe":["NG","",1,0],
+	"a Giant Desktop Globe":["NG (","",1,0],
 	"an Ice Cube":["hair spray","",1,0],
 	"a malevolent crop circle":["bronzed locust","",1,0],
 	"a possessed pipe-organ":["powdered organs","",1,0],
@@ -1640,9 +1640,7 @@ function at_fight() {
 				if (dropdown.length) setItem(dropdown[0], monsterItem[1]);
 			}
 			// n.b. we set this in a separate long-term variable so that we can tweak it mid-fight if needed.
-			if (monsterItem[3] != 0) {
-				SetData("special",monsterItem[3]);
-			}
+			SetData("special",monsterItem[3]);
 		}
 	}
 
@@ -1835,14 +1833,16 @@ function at_fight() {
 			$("p:contains('Go back to')").html('');
 			break;
 		}
-		showYoinks();
+		showYoinks(true);
 	}
 		// post-loss processing:
-	else if (/You lose.  You slink away,/.test(document.body.innerHTML) || /You run away, like a sissy/.test(document.body.innerHTML)) {
+	else if (	/You lose.  You slink away,/.test(document.body.innerHTML) || 
+				/You run away, like a sissy/.test(document.body.innerHTML) ||
+				/>Go back to/.test(document.body.innerHTML)) {
 		SetData("infight","N");
 		SetData("special",0);
 		SetData("square",false);
-		showYoinks();
+		showYoinks(false);
 	}
 // PART 4: ANY-ROUND STUFF	
 	// yoinked-item processing
@@ -1870,19 +1870,22 @@ function at_fight() {
 // SHOWYOINKS:  display pickpocketed items.
 // ----------------------------------------
 // Todo: figure out how to specify the correct placement via jquery....
-function showYoinks() {
+function showYoinks(wonCombat) {
 	var yoink = GM_getValue("yoink", "");
 	if (yoink != "") {
 		GM_setValue("yoink", "");
-		
 		var yoinkNode = document.createElement("table");
 		yoinkNode.innerHTML = yoink;
-		var centers = document.body.getElementsByTagName("center");
-		for (var i = 0; i < centers.length; i++) {
-			if (centers[i].innerHTML.indexOf("You win the fight") == 0) {
-				centers[i].insertBefore(yoinkNode, centers[i].childNodes[3]);
-				break;
+		if (wonCombat) {
+			var centers = document.body.getElementsByTagName("center");
+			for (var i = 0; i < centers.length; i++) {
+				if (centers[i].innerHTML.indexOf("You win the fight") == 0) {
+					centers[i].insertBefore(yoinkNode, centers[i].childNodes[3]);
+					break;
+				}
 			}
+		} else {
+			$('a:contains("dventure")').parent().prepend(yoinkNode);
 		}
 	}
 }
@@ -2627,7 +2630,7 @@ function at_inventory()
 		{	bText = document.getElementsByTagName('b')[1];
 			//var item = resultsText.substring(14);
 			var item = bText.textContent;
-
+			GM_log("item="+item);
 			if (item == "continuum transfunctioner")
 				bText.parentNode.appendChild(AppendLink('[8-bit]', 'adventure.php?snarfblat=73'));
 			else if (item == "huge mirror shard")
@@ -2641,7 +2644,7 @@ function at_inventory()
 				bText.parentNode.appendChild(AppendLink('[chalk]', 'inv_use.php?pwd='+
 				pwd + '&which=3&whichitem=1794'));
 			else if (item == "Talisman o' Nam")
-               bText.parentNode.appendChild(AppendLink('[palindome]', 'adventure.php?snarfblat=119'));
+               bText.parentNode.appendChild(AppendLink('[palindome]', 'plains.php'));
 			else if (item == "worm-riding hooks")
                bText.parentNode.appendChild(AppendLink('[drum]', 'inv_use.php?pwd='+
                pwd + '&which=2&whichitem=2328'));
@@ -3492,10 +3495,12 @@ function at_charpane()
 					func += server + "/inv_use.php?which=3&whichitem=1794&pwd="+pwd+"'; return false;";
 					img.setAttribute('oncontextmenu', func); break;
 					
-				case 357:	// absinthe-minded: light up and link on 9/5/1 turns left.
+				case 357:	// absinthe-minded: link to wormwood; light up on 9/5/1 turns left.
 					var abstxt = img.parentNode.nextSibling.textContent;
-					if (/\(9/.test(abstxt) || /\(5/.test(abstxt) || /\(1\)/.test(abstxt))
-						img.parentNode.nextSibling.innerHTML = '<a target=mainpane href=wormwood.php><font color="red"><b>' + img.parentNode.nextSibling.innerHTML + "</b></font></a>";
+					var fontA, fontB;
+					if (/\(9/.test(abstxt) || /\(5/.test(abstxt) || /\(1\)/.test(abstxt)) { fontA = '<font color="red">'; fontB = '</font>'; }
+					else { fontA = ''; fontB = ''; }
+					img.parentNode.nextSibling.innerHTML = '<a target=mainpane href=wormwood.php>' + fontA + '<b>' + img.parentNode.nextSibling.innerHTML + '</b>' + fontB + '</a>';
 					break;
 					
 				case 189: case 190: case 191: case 192: case 193: SetData("phial", effNum);
