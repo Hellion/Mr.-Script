@@ -1540,7 +1540,7 @@ function at_game() {
 			html +=
 'Uncompressed</a>&nbsp;&nbsp;&nbsp;&nbsp;<b>OR</b>' +
 '&nbsp;&nbsp;&nbsp;&nbsp;<a href="' + json.url2 +
-'" target="_blank">Minified</a>&nbsp;&nbsp;<span style="font-size:10px;">(Recommended)</span><br />';
+'" target="_blank">Minified</a>&nbsp;&nbsp;<span style="font-size:10px;"></span><br />';
 			else html += 'Update</a><br />';
 			html += (json.desc ?
 			'<p style="margin:0 auto; text-align:left; font-size:10px;">'+
