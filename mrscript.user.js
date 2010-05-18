@@ -1992,10 +1992,11 @@ function at_rats() {
 	});
 // add "next square" link when we click on a drink-dropping non-combat square.
 	$('td:contains("You acquire an item")').each(function() {
-		var td = $(this);
+		var tdhtml = $(this).html();
+		if (tdhtml.indexOf("You acquire") != 0) return;	// only select the "innermost" td.
 		var square=GetData("square");
 		SetData("square",false);
-		if (td.innerHTML.indexOf("shiny ring") != -1) return;	// no next square when we shut off the faucet.
+		if (tdhtml.indexOf("shiny ring") != -1) return;	// no next square when we shut off the faucet.
 		if (square) {
 			var hloc = "rats.php?where=";
 			var thissquare = square.match(/(\d+)/)[1];	// the "22" in "hiddencity.php?which=22" or "rats.php?where=22"
@@ -2003,7 +2004,7 @@ function at_rats() {
 			if (nextsquare < 26) {
 				var myhref = hloc+nextsquare;
 				var clicky = "SetData('square','"+myhref+"')";
-				$('<center><p><a href="'+myhref+'" id="bwahaha">Explore Next Square</a></center>').appendTo($(this).parent().parent());
+				$('<center><p><a href="'+myhref+'" id="bwahaha">Explore Next Square</a></center>').appendTo($(this).parent().parent().parent().parent());
 				$('#bwahaha').click(function() {
 					var a = $(this);
 					SetData("square",a.attr('href'));
