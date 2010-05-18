@@ -1617,7 +1617,7 @@ function at_fight() {
 	
 	// always process the pirate insult book if it's in the combat item list:
 	$('option[value="2947"]').each(function(){
-		var insultsList = GetCharData("insults"); if (insultsList == '') insultsList = "0;0;0;0;0;0;0;0";
+		var insultsList = GetCharData("insults"); if (insultsList == undefined) insultsList = "0;0;0;0;0;0;0;0";
 		var insultsArray = insultsList.split(";");
 		var numInsults = 0;
 		for (var i=0;i<insultsArray.length;i++) {
@@ -1629,6 +1629,7 @@ function at_fight() {
 // PART 1: FIRST-ROUND STUFF
 	if (infight != "Y") {	// first time through this particular fight?
 		SetData("infight","Y");
+		SetData("special",0);	// defensive clearing in case it got left set somehow.
 		var monsterItem = MonsterArray[monsterName];
 		if (monsterItem != undefined && GetPref('lairspoil') != 1 && monsterItem[2] == 1) return;	// found something, spoilers are off, and this is a spoilery monster?
 		if (monsterItem != undefined) {	// let's do something specific with this critter.
@@ -1649,10 +1650,10 @@ function at_fight() {
 		switch (GetData("special"))
 		{
 			case 1:	// gremlins 
-				var gremlininfo	= {	"a batwinged gremlin":[182, "hammer", 			"a bombing run over"],
-									"a spider gremlin"	 :[183, "pair of pliers", 	"fibula with its mandibles"],
-									"an erudite gremlin" :[184, "wrench", 			"automatic eyeball-peeler"],
-									"a vegetable gremlin":[185, "screwdriver", 		"off of itself and"],
+				var gremlininfo	= {	"a batwinged gremlin":[182, "whips out a hammer", 			"a bombing run over"],
+									"a spider gremlin"	 :[183, "whips out a pair of pliers", 	"fibula with its mandibles"],
+									"an erudite gremlin" :[184, "whips out a crescent wrench", 	"automatic eyeball-peeler"],
+									"a vegetable gremlin":[185, "whips out a screwdriver", 		"off of itself and"],
 									"an A.M.C. gremlin"  :[186, "blah blah hruugh", "an A.M.C. gremlin"]};
 
 				var zonetext = GetData("square");
@@ -1677,9 +1678,13 @@ function at_fight() {
 						
 						var itemSelect = document.getElementsByName('whichitem');
 						var funkSelect = document.getElementsByName('whichitem2');
-						if (funkSelect.length) {
+						if (funkSelect.length) {	// default funk action: flyers + magnet
 							setItem(itemSelect[0], "band flyer");
 							setItem(funkSelect[0], "molybdenum magnet");
+							if (itemSelect[0].options[itemSelect[0].selectedIndex].text.indexOf("band flyers") == -1) { // no flyers? just magnet.
+										setItem(itemSelect[0], "molybdenum magnet");
+								funkSelect[0].selectedIndex = 0; 
+							}
 						} else {
 							setItem(itemSelect[0], "molybdenum magnet");
 						}
@@ -1835,10 +1840,11 @@ function at_fight() {
 		}
 		showYoinks(true);
 	}
-		// post-loss processing:
-	else if (	/You lose.  You slink away,/.test(document.body.innerHTML) || 
-				/You run away, like a sissy/.test(document.body.innerHTML) ||
-				/>Go back to/.test(document.body.innerHTML)) {
+	// post-loss processing:
+	else if (	/>Go back to/.test(document.body.innerHTML) || 
+				/You lose.  You slink away,/.test(document.body.innerHTML) || 
+				/You run away, like a sissy/.test(document.body.innerHTML) 
+				) {
 		SetData("infight","N");
 		SetData("special",0);
 		SetData("square",false);
@@ -1853,7 +1859,7 @@ function at_fight() {
 			var img = imgs[i];
 			if (img.getAttribute("class") != "hand")
 				continue;
-			// toast
+			// nobody cares about toast, dammit
 			if (img.getAttribute("onClick") == "descitem(931984879)")
 				continue;
 
