@@ -1991,9 +1991,10 @@ function at_rats() {
 		SetData("square",a.attr('href'));
 	});
 // add "next square" link when we click on a drink-dropping non-combat square.
-	$('td:contains("You acquire an item")').each(function() {
+	$('td:contains("You acquire an item"):not(:has(table))').each(function() {
 		var tdhtml = $(this).html();
-		if (tdhtml.indexOf("You acquire") != 0) return;	// only select the "innermost" td.
+//		GM_log("tdhtml="+tdhtml);
+//		if (tdhtml.indexOf("You acquire") != 0) return;	// only select the "innermost" td.
 		var square=GetData("square");
 		SetData("square",false);
 		if (tdhtml.indexOf("shiny ring") != -1) return;	// no next square when we shut off the faucet.
