@@ -1,4 +1,4 @@
-// Mr. Script v1.5.4
+// Mr. Script v1.5.5
 //
 // --------------------------------------------------------------------
 // This is a user script.  To install it, you need Greasemonkey 0.8 or
@@ -11,7 +11,7 @@
 // ==UserScript==
 // @name        Mr. Script
 // @namespace   http://www.noblesse-oblige.org/lukifer/scripts/
-// @description Version 1.5.4
+// @description Version 1.5.5
 // @author		Lukifer
 // @contributor	Ohayou
 // @contributor Hellion
@@ -34,7 +34,7 @@ var place = location.pathname.replace(/\/|\.(php|html)$/gi, "").toLowerCase();
 //GM_log("at:" + place);
 
 // n.b. version number should always be a 3-digit number.  If you move to 1.6, call it 1.6.0.  Don't go to 1.5.10 or some such.
-var VERSION = 154;
+var VERSION = 155;
 var MAXLIMIT = 999;
 var ENABLE_QS_REFRESH = 1;
 var DISABLE_ITEM_DB = 0;
@@ -1540,7 +1540,7 @@ function at_game() {
 			html +=
 'Uncompressed</a>&nbsp;&nbsp;&nbsp;&nbsp;<b>OR</b>' +
 '&nbsp;&nbsp;&nbsp;&nbsp;<a href="' + json.url2 +
-'" target="_blank">Minified</a>&nbsp;&nbsp;<span style="font-size:10px;">(Recommended)</span><br />';
+'" target="_blank">Minified</a>&nbsp;&nbsp;<span style="font-size:10px;"></span><br />';
 			else html += 'Update</a><br />';
 			html += (json.desc ?
 			'<p style="margin:0 auto; text-align:left; font-size:10px;">'+
@@ -1578,7 +1578,7 @@ function at_fight() {
 	"a Flaming Samurai":["frigid ninja stars","",1,0],
 	"a giant bee":["tropical orchid","",1,0],
 	"a giant fried egg":["black pepper","",1,0],
-	"a Giant Desktop Globe":["NG","",1,0],
+	"a Giant Desktop Globe":["NG (","",1,0],
 	"an Ice Cube":["hair spray","",1,0],
 	"a malevolent crop circle":["bronzed locust","",1,0],
 	"a possessed pipe-organ":["powdered organs","",1,0],
@@ -1617,7 +1617,7 @@ function at_fight() {
 	
 	// always process the pirate insult book if it's in the combat item list:
 	$('option[value="2947"]').each(function(){
-		var insultsList = GetCharData("insults"); if (insultsList == '') insultsList = "0;0;0;0;0;0;0;0";
+		var insultsList = GetCharData("insults"); if (insultsList == undefined) insultsList = "0;0;0;0;0;0;0;0";
 		var insultsArray = insultsList.split(";");
 		var numInsults = 0;
 		for (var i=0;i<insultsArray.length;i++) {
@@ -1629,6 +1629,7 @@ function at_fight() {
 // PART 1: FIRST-ROUND STUFF
 	if (infight != "Y") {	// first time through this particular fight?
 		SetData("infight","Y");
+		SetData("special",0);	// defensive clearing in case it got left set somehow.
 		var monsterItem = MonsterArray[monsterName];
 		if (monsterItem != undefined && GetPref('lairspoil') != 1 && monsterItem[2] == 1) return;	// found something, spoilers are off, and this is a spoilery monster?
 		if (monsterItem != undefined) {	// let's do something specific with this critter.
@@ -1640,9 +1641,7 @@ function at_fight() {
 				if (dropdown.length) setItem(dropdown[0], monsterItem[1]);
 			}
 			// n.b. we set this in a separate long-term variable so that we can tweak it mid-fight if needed.
-			if (monsterItem[3] != 0) {
-				SetData("special",monsterItem[3]);
-			}
+			SetData("special",monsterItem[3]);
 		}
 	}
 
@@ -1651,10 +1650,10 @@ function at_fight() {
 		switch (GetData("special"))
 		{
 			case 1:	// gremlins 
-				var gremlininfo	= {	"a batwinged gremlin":[182, "hammer", 			"a bombing run over"],
-									"a spider gremlin"	 :[183, "pair of pliers", 	"fibula with its mandibles"],
-									"an erudite gremlin" :[184, "wrench", 			"automatic eyeball-peeler"],
-									"a vegetable gremlin":[185, "screwdriver", 		"off of itself and"],
+				var gremlininfo	= {	"a batwinged gremlin":[182, "whips out a hammer", 			"a bombing run over"],
+									"a spider gremlin"	 :[183, "whips out a pair of pliers", 	"fibula with its mandibles"],
+									"an erudite gremlin" :[184, "whips out a crescent wrench", 	"automatic eyeball-peeler"],
+									"a vegetable gremlin":[185, "whips out a screwdriver", 		"off of itself and"],
 									"an A.M.C. gremlin"  :[186, "blah blah hruugh", "an A.M.C. gremlin"]};
 
 				var zonetext = GetData("square");
@@ -1680,9 +1679,13 @@ function at_fight() {
 						var itemSelect = document.getElementsByName('whichitem');
 						var funkSelect = document.getElementsByName('whichitem2');
 
-						if (funkSelect.length) {
+						if (funkSelect.length) {	// default funk action: flyers + magnet
 							setItem(itemSelect[0], "band flyer");
 							setItem(funkSelect[0], "molybdenum magnet");
+							if (itemSelect[0].options[itemSelect[0].selectedIndex].text.indexOf("band flyers") == -1) { // no flyers? just magnet.
+										setItem(itemSelect[0], "molybdenum magnet");
+								funkSelect[0].selectedIndex = 0; 
+							}
 						} else {
 							setItem(itemSelect[0], "molybdenum magnet");
 						}
@@ -1836,14 +1839,17 @@ function at_fight() {
 			$("p:contains('Go back to')").html('');
 			break;
 		}
-		showYoinks();
+		showYoinks(true);
 	}
-		// post-loss processing:
-	else if (/You lose.  You slink away,/.test(document.body.innerHTML) || /You run away, like a sissy/.test(document.body.innerHTML)) {
+	// post-loss processing:
+	else if (	/>Go back to/.test(document.body.innerHTML) || 
+				/You lose.  You slink away,/.test(document.body.innerHTML) || 
+				/You run away, like a sissy/.test(document.body.innerHTML) 
+				) {
 		SetData("infight","N");
 		SetData("special",0);
 		SetData("square",false);
-		showYoinks();
+		showYoinks(false);
 	}
 // PART 4: ANY-ROUND STUFF	
 	// yoinked-item processing
@@ -1854,7 +1860,7 @@ function at_fight() {
 			var img = imgs[i];
 			if (img.getAttribute("class") != "hand")
 				continue;
-			// toast
+			// nobody cares about toast, dammit
 			if (img.getAttribute("onClick") == "descitem(931984879)")
 				continue;
 
@@ -1871,19 +1877,22 @@ function at_fight() {
 // SHOWYOINKS:  display pickpocketed items.
 // ----------------------------------------
 // Todo: figure out how to specify the correct placement via jquery....
-function showYoinks() {
+function showYoinks(wonCombat) {
 	var yoink = GM_getValue("yoink", "");
 	if (yoink != "") {
 		GM_setValue("yoink", "");
-		
 		var yoinkNode = document.createElement("table");
 		yoinkNode.innerHTML = yoink;
-		var centers = document.body.getElementsByTagName("center");
-		for (var i = 0; i < centers.length; i++) {
-			if (centers[i].innerHTML.indexOf("You win the fight") == 0) {
-				centers[i].insertBefore(yoinkNode, centers[i].childNodes[3]);
-				break;
+		if (wonCombat) {
+			var centers = document.body.getElementsByTagName("center");
+			for (var i = 0; i < centers.length; i++) {
+				if (centers[i].innerHTML.indexOf("You win the fight") == 0) {
+					centers[i].insertBefore(yoinkNode, centers[i].childNodes[3]);
+					break;
+				}
 			}
+		} else {
+			$('a:contains("dventure")').parent().prepend(yoinkNode);
 		}
 	}
 }
@@ -1983,11 +1992,13 @@ function at_rats() {
 		SetData("square",a.attr('href'));
 	});
 // add "next square" link when we click on a drink-dropping non-combat square.
-	$('td:contains("You acquire an item")').each(function() {
-		var td = $(this);
+	$('td:contains("You acquire an item"):not(:has(table))').each(function() {
+		var tdhtml = $(this).html();
+//		GM_log("tdhtml="+tdhtml);
+//		if (tdhtml.indexOf("You acquire") != 0) return;	// only select the "innermost" td.
 		var square=GetData("square");
 		SetData("square",false);
-		if (td.innerHTML.indexOf("shiny ring") != -1) return;	// no next square when we shut off the faucet.
+		if (tdhtml.indexOf("shiny ring") != -1) return;	// no next square when we shut off the faucet.
 		if (square) {
 			var hloc = "rats.php?where=";
 			var thissquare = square.match(/(\d+)/)[1];	// the "22" in "hiddencity.php?which=22" or "rats.php?where=22"
@@ -1995,7 +2006,7 @@ function at_rats() {
 			if (nextsquare < 26) {
 				var myhref = hloc+nextsquare;
 				var clicky = "SetData('square','"+myhref+"')";
-				$('<center><p><a href="'+myhref+'" id="bwahaha">Explore Next Square</a></center>').appendTo($(this).parent().parent());
+				$('<center><p><a href="'+myhref+'" id="bwahaha">Explore Next Square</a></center>').appendTo($(this).parent().parent().parent().parent());
 				$('#bwahaha').click(function() {
 					var a = $(this);
 					SetData("square",a.attr('href'));
@@ -2628,7 +2639,7 @@ function at_inventory()
 		{	bText = document.getElementsByTagName('b')[1];
 			//var item = resultsText.substring(14);
 			var item = bText.textContent;
-
+			GM_log("item="+item);
 			if (item == "continuum transfunctioner")
 				bText.parentNode.appendChild(AppendLink('[8-bit]', 'adventure.php?snarfblat=73'));
 			else if (item == "huge mirror shard")
@@ -2642,7 +2653,7 @@ function at_inventory()
 				bText.parentNode.appendChild(AppendLink('[chalk]', 'inv_use.php?pwd='+
 				pwd + '&which=3&whichitem=1794'));
 			else if (item == "Talisman o' Nam")
-               bText.parentNode.appendChild(AppendLink('[palindome]', 'adventure.php?snarfblat=119'));
+               bText.parentNode.appendChild(AppendLink('[palindome]', 'plains.php'));
 			else if (item == "worm-riding hooks")
                bText.parentNode.appendChild(AppendLink('[drum]', 'inv_use.php?pwd='+
                pwd + '&which=2&whichitem=2328'));
@@ -3493,10 +3504,12 @@ function at_charpane()
 					func += server + "/inv_use.php?which=3&whichitem=1794&pwd="+pwd+"'; return false;";
 					img.setAttribute('oncontextmenu', func); break;
 					
-				case 357:	// absinthe-minded: light up and link on 9/5/1 turns left.
+				case 357:	// absinthe-minded: link to wormwood; light up on 9/5/1 turns left.
 					var abstxt = img.parentNode.nextSibling.textContent;
-					if (/\(9/.test(abstxt) || /\(5/.test(abstxt) || /\(1\)/.test(abstxt))
-						img.parentNode.nextSibling.innerHTML = '<a target=mainpane href=wormwood.php><font color="red"><b>' + img.parentNode.nextSibling.innerHTML + "</b></font></a>";
+					var fontA, fontB;
+					if (/\(9/.test(abstxt) || /\(5/.test(abstxt) || /\(1\)/.test(abstxt)) { fontA = '<font color="red">'; fontB = '</font>'; }
+					else { fontA = ''; fontB = ''; }
+					img.parentNode.nextSibling.innerHTML = '<a target=mainpane href=wormwood.php>' + fontA + '<b>' + img.parentNode.nextSibling.innerHTML + '</b>' + fontB + '</a>';
 					break;
 					
 				case 189: case 190: case 191: case 192: case 193: SetData("phial", effNum);
