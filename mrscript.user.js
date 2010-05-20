@@ -1991,16 +1991,14 @@ function at_rats() {
 		SetData("square",a.attr('href'));
 	});
 // add "next square" link when we click on a drink-dropping non-combat square.
-	$('td:contains("You acquire an item"):not(:has(table))').each(function() {
+	$('td:contains("You acquire an item"):not(:has(table))').each(function() { // only the innermost acquire-an-item TD.
 		var tdhtml = $(this).html();
-//		GM_log("tdhtml="+tdhtml);
-//		if (tdhtml.indexOf("You acquire") != 0) return;	// only select the "innermost" td.
 		var square=GetData("square");
 		SetData("square",false);
 		if (tdhtml.indexOf("shiny ring") != -1) return;	// no next square when we shut off the faucet.
 		if (square) {
 			var hloc = "rats.php?where=";
-			var thissquare = square.match(/(\d+)/)[1];	// the "22" in "hiddencity.php?which=22" or "rats.php?where=22"
+			var thissquare = square.match(/(\d+)/)[1];	// the "22" in "rats.php?where=22"
 			var nextsquare = parseInt(thissquare)+1;
 			if (nextsquare < 26) {
 				var myhref = hloc+nextsquare;
@@ -2029,7 +2027,7 @@ function at_adventure() {
 		var thissquare = square.match(/(\d+)/)[1];	// the "22" in "hiddencity.php?which=22" or "rats.php?where=22"
 		var nextsquare = parseInt(thissquare)+1;
 		if (nextsquare < 25) {
-			var myhref = "hiddencity.php?which="+nextsquare;
+			var myhref = hloc+nextsquare;
 			var clicky = "SetData('square','"+myhref+"')";
 			$('<center><p><a href="'+myhref+'" id="bwahaha">Explore Next Square</a></center>').prependTo($('center:last'));
 			$('#bwahaha').click(function() {
@@ -2780,8 +2778,7 @@ function at_store()
 	var insput = $('input[name=whichstore]');
 	if (insput.length > 0)
 	{	whichstore = insput.attr('value'); noform = 0;
-	} else whichstore = document.location.search
-		.match(/whichstore\=([a-z0-9])/)[1];
+	} else whichstore = document.location.search.match(/whichstore\=([a-z0-9])/)[1];
 
 	// Refresh hash
 	var inphash = $("input[name=phash]");
@@ -3266,6 +3263,8 @@ function at_questlog()
 			}
 			else if (txt.indexOf("By Friar") != -1)
 				b.append(AppendLink('[copse]', 'friars.php'));
+			else if (txt.indexOf("Azazel in Hell") != -1)
+				b.append(AppendLink('[gate (1)]', 'adventure.php?snarfblat=79'));
 			else if (txt.indexOf("Cyrpt") != -1)
 				b.append(AppendLink('[cyrpt]', 'cyrpt.php'));
 			else if (txt.indexOf("Trapper's") != -1)
@@ -3286,7 +3285,9 @@ function at_questlog()
 						}); return false;
 						//event.stopPropagation(); event.preventDefault();
 					});
-				} b.append(AppendLink('[island]', 'island.php'));
+				}
+				b.append(AppendLink('[island]', 'island.php'));
+				b.append(AppendLink('[bookstore]', 'store.php?whichstore=r'));
 			}
 			else if (txt.indexOf("Garbage") != -1)
 				b.append(AppendLink('[beanstalk]', 'beanstalk.php'));
@@ -3295,8 +3296,7 @@ function at_questlog()
 				b.append(AppendLink('[lair]', 'lair.php'));
 			}
 			else if (txt.indexOf("Made of Meat") != -1)
-			{	b.append(AppendLink('[untinker]',
-					'town_right.php?place=untinker'));
+			{	b.append(AppendLink('[untinker]', 'town_right.php?place=untinker'));
 				b.append(AppendLink('[plains]', 'plains.php'));
 			}
 			else if (txt.indexOf("Driven Crazy") != -1
@@ -3307,18 +3307,58 @@ function at_questlog()
 			else if (txt.indexOf("Never Odd") != -1)
 			{	b.append(AppendLink("[o 'nam]", 'inv_equip.php?pwd='+pwd+
 					"&which=2&slot=3&whichitem=486"));
-				b.append(AppendLink('[palindome]',
-					'adventure.php?snarfblat=119'));
-				b.append(AppendLink('[poop deck]',
-					'adventure.php?snarfblat=159'));
-			} else if (txt.indexOf("Worship") != -1)
+				b.append(AppendLink('[palindome (1)]', 'adventure.php?snarfblat=119'));
+				b.append(AppendLink('[poop deck (1)]', 'adventure.php?snarfblat=159'));
+			}
+			else if (txt.indexOf("Worship") != -1)
 				b.append(AppendLink('[hidden city]', 'hiddencity.php'));
 			else if (txt.indexOf("Manor of Spooking") != -1)
-			{	b.append(AppendLink('[ballroom]',
-					'adventure.php?snarfblat=109'));
-				b.append(AppendLink('[wine cellars]',
-					'manor3.php'));
+			{	b.append(AppendLink('[ballroom (1)]', 'adventure.php?snarfblat=109'));
+				b.append(AppendLink('[wine cellars]', 'manor3.php'));
 			}
+			else if (txt.indexOf("Bugbear of a Problem") != -1) {
+				b.append(AppendLink('[bugbear pens (1)]', 'adventure.php?snarfblat=47'));
+				b.append(AppendLink('[barrow (1)]', 'adventure.php?snarfblat=48'));
+				b.append(AppendLink('[shrooms]', 'knoll_mushrooms.php'));
+			}
+			else if (txt.indexOf("Hammer Time") != -1) 
+				b.append(AppendLink('[alley (1)]', 'adventure.php?snarfblat=112'));
+			else if (txt.indexOf("You Rate") != -1) {
+				var derr = AppendLink('[swashbuckle]', "inv_equip.php?action=outfit&which=2&whichoutfit=9");
+				b.append(derr);
+				if (GetPref('backup') != "")
+				{	$(derr).children('*:last')
+					.attr('href', 'javascript:void(0);')
+					.click(function(event)
+					{	GM_get(server + '/inv_equip.php' +
+							'?action=customoutfit&which=2&outfitname=' +
+						GetPref('backup'), function(response)
+						{	parent.frames[2].location = 'http://'+server +
+						"/inv_equip.php?action=outfit&which=2&whichoutfit=9";
+						}); return false;
+						//event.stopPropagation(); event.preventDefault();
+					});
+				}	
+				b.append(AppendLink('[cove]', 'cove.php'));
+			}
+			else if (txt.indexOf("Primordial Fear") != -1)
+				b.append(AppendLink('[soup (1)]', 'adventure.php?snarfblat=204'));
+			else if (txt.indexOf("Hyboria?") != -1)
+				b.append(AppendLink('[jungle (1)]', 'adventure.php?snarfblat=205'));
+			else if (txt.indexOf("Future") != -1)
+				b.append(AppendLink('[future (1)]', 'adventure.php?snarfblat=206'));
+			else if (txt.indexOf("Out of Your Gourd") != -1) {
+				var subtext = $(this).parent().text();
+				GM_log("subtext="+subtext);
+				if (subtext.indexOf("Haunted Pantry") != -1) 
+					b.append(AppendLink('[pantry (1)]', 'adventure.php?snarfblat=113'));
+				else if (subtext.indexOf("Back Alley") != -1)
+					b.append(AppendLink('[alley (1)]', 'adventure.php?snarfblat=112'));
+				else if (subtext.indexOf("Outskirts") != -1)
+					b.append(AppendLink('[outskirts (1)]', 'adventure.php?snarfblat=114'));
+			}
+			else if (txt.indexOf("For His Art") != -1)
+				b.append(AppendLink('[artist]', 'town_wrong.php?place=artist'));
 		});
 	}
 }
