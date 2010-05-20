@@ -1,5 +1,5 @@
-{	"version":"1.5.5",
+{	"version":"1.5.6",
 	"url1":"http://userscripts.org/scripts/source/65705.user.js",
 	"url2":"http://noblesse-oblige.org/hellion/scripts/MrScript.user.js",
-	"desc":"<b>Fixed</b><br />using anti-anti-antidotes via the automatic [use] box in Doc G no longer fails.<br />clicking on a gremlin zone directly after talking to Yossarian correctly identifies the gremlin zone now.<br />removed 'Explore Next Square' after you find the rat faucet.<br />yoinked items now show up when you run away via any means.<br />When faced with the Giant Desktop Globe tower monster, the NG will be correctly selected all the time.<br /><b>New</b><br />incorporated Pirate Insult Tracking from JHunz' script.<br />absinthe-minded now always links to the worm wood (still only lights up on 9/5/1 turns remaining).<br />"
+	"desc":"<b>Fixed</b><br />gremlin detection plays nice with the relay browser.<br />tavern next-square link plays nicer with the relay browser.<br />Pirate insult initialization is more robust.<br /><b>New</b><br />more links for Quest Log.<br />"
 }
