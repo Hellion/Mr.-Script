@@ -1866,7 +1866,9 @@ function at_fight() {
 			var text = img.parentNode.parentNode.parentNode.parentNode.parentNode.innerHTML;
 			text = text.replace(/ acquire /, " yoinked "); 
 			
-			GM_setValue("yoink", GM_getValue("yoink", "") + text);
+			var yoinked = GetCharData("yoink");
+			if (yoinked == undefined) yoinked = "";
+			SetCharData("yoink", yoinked + text);
 			break;
 		}
 	}
@@ -1877,9 +1879,10 @@ function at_fight() {
 // ----------------------------------------
 // Todo: figure out how to specify the correct placement via jquery....
 function showYoinks(wonCombat) {
-	var yoink = GM_getValue("yoink", "");
+	var yoink = GetCharData("yoink");
+	if (yoink == undefined) yoink = "";
 	if (yoink != "") {
-		GM_setValue("yoink", "");
+		SetCharData(yoink, "");
 		var yoinkNode = document.createElement("table");
 		yoinkNode.innerHTML = yoink;
 		if (wonCombat) {
