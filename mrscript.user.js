@@ -73,6 +73,10 @@ jQuery.prototype.toString = function() {
   return "[jQuery:" + this.length + "]";
 };
 
+String.prototype.trim = function () {
+    return this.replace(/^\s*/, "").replace(/\s*$/, "");
+}
+
 var autoclear = GetPref('autoclear');
 var spoilers = GetPref('zonespoil') == 1;
 
@@ -1882,7 +1886,7 @@ function showYoinks(wonCombat) {
 	var yoink = GetCharData("yoink");
 	if (yoink == undefined) yoink = "";
 	if (yoink != "") {
-		SetCharData(yoink, "");
+		SetCharData("yoink", "");
 		var yoinkNode = document.createElement("table");
 		yoinkNode.innerHTML = yoink;
 		if (wonCombat) {
@@ -2052,7 +2056,7 @@ function at_choice() {
 // TOWN_RIGHT: Untinker linker.
 // ----------------------------
 function at_town_right() {
-	var linkloc = GetData("plungeraccess")=="Y" ? "knoll.php?place=smith" :"adventure.php?snarfblat=18"
+	var linkloc = GetData("plungeraccess")=="Y" ? "knoll.php?place=smith" :"adventure.php?snarfblat=18";
 	if (document.location.search == "?place=untinker") {
 		$('p').each(function()
 		{	var p = $(this);
@@ -3773,6 +3777,89 @@ function at_clan_viplounge()
 	}
 }
 
+function at_charsheet()
+{
+	var mystBonus = 0;
+	$('td:contains("Class:"):not(:has(table))').each(function() {
+		var classname = $(this).next().text();
+		switch (classname) {
+		case 	"Pastamancer":
+		case 	"Sauceror":	mystBonus = 5; break;
+		}
+	});
+	if (mystBonus == 0) {
+		var foo = $('b:contains("Statistics")').parent().parent().html();
+		var title = foo.match(/<br>([a-zA-Z ]*)<p><b>Statistics/)[1];
+		title = title.trim();
+		switch(title) {
+			case 	"Dough Acolyte":
+			case 	"Yeast Scholar":
+			case 	"Noodle Neophyte":
+			case 	"Starch Savant":
+			case 	"Carbohydrate Cognoscenti":
+			case 	"Spaghetti Sage":
+			case 	"Macaroni Magician":
+			case 	"Vermicelli Enchanter":
+			case 	"Linguini Thaumaturge":
+			case 	"Ravioli Sorceror":
+			case 	"Manicotti Magus":
+			case 	"Spaghetti Spellbinder":
+			case 	"Cannelloni Conjurer":
+			case 	"Angel-Hair Archmage":
+			case 	"Pastamancer":
+			case 	"Allspice Acolyte":
+			case 	"Cilantro Seer":
+			case 	"Parsley Enchanter":
+			case 	"Sage Sage":
+			case 	"Rosemary Diviner":
+			case 	"Thyme Wizard":
+			case 	"Tarragon Thaumaturge":
+			case 	"Oreganoccultist":
+			case 	"Basillusionist":
+			case 	"Coriander Conjurer":
+			case 	"Bay Leaf Brujo":
+			case 	"Sesame Soothsayer":
+			case 	"Marinara Mage":
+			case 	"Alfredo Archmage":		mystBonus = 5; break;
+		}
+	}
+//	GM_log("Myst Bonus = "+mystBonus);
+		
+	$('td:contains("Protection"):not(:has(table))').each(function() {
+		var pstring = $(this).next().text();
+		var resistance = 0;
+		var ProtNum = 0;
+		var PLevels = ["Very Low","Low","Moderate","Considerable"];
+		for (var j = 0; j < 4; j++) {
+			if (pstring.indexOf(PLevels[j]) != -1) {
+				ProtNum = j+1;
+				resistance = ProtNum * 10;
+				break;
+			}
+		}
+		if (ProtNum == 0) {	// it wasn't any of the easy ones 
+			ProtNum = 5;	// so it must be "(...) High"
+			if (pstring.indexOf("Very") != -1) ProtNum += 1;
+			if (pstring.indexOf("Really") != -1) ProtNum += 1;
+			if (pstring.indexOf("Extremely") != -1) ProtNum += 3;
+			if (pstring.indexOf("Amazingly") != -1) ProtNum += 6;
+			if (pstring.indexOf("Extraordinarily") != -1) ProtNum += 12;
+			if (pstring.indexOf("Incredibly") != -1) ProtNum += 18;
+			if (pstring.indexOf("Staggeringly") != -1) ProtNum += 24;
+			if (pstring.indexOf("Mind-bogglingly") != -1) ProtNum += 30;
+			if (pstring.indexOf("Inconceivably") != -1) ProtNum += 36;
+			if (pstring.indexOf("Unthinkably") != -1) ProtNum += 42;
+			if (pstring.indexOf("Indescribably") != -1) ProtNum += 48;
+			if (pstring.indexOf("Impossibly") != -1) ProtNum += 54;
+//			if (pstring.indexOf("" != -1) ProtNum += 0;
+			resistance = 90 - (50*Math.pow(0.83333333,ProtNum-4));
+		}
+		resistance += mystBonus;
+		resistance += '';	// convert to a string
+		resistance = resistance.substring(0,5);	// and chop to at most 2 decimal places
+		$(this).next().html($(this).next().html()+" (Lvl " + ProtNum + ", "+resistance + "%)");
+	});
+}
 // -------------------------------------------------------
 // THESEA: if the sea is not present, talk to the old man.
 // -------------------------------------------------------
@@ -3873,25 +3960,6 @@ function at_manor3()
 		}
 	});
 	
-// old way: scrape the description every time we change the wine selection.	
-//	$('select:first').change(function()
-//	{	var wine = this.childNodes[this.selectedIndex].value;
-//		if (wine > 0) GM_get(server +
-//			"/desc_item.php?whichitem=" + wineDB[wine],
-//		function(txt)
-//		{	var num = txt.charAt(txt.indexOf("/glyph") + 6);
-//			var glyph = $('#daglyph');
-//			if(glyph.length == 0)
-//			{	$('select:first').parent().parent().append(
-//					$(document.createElement('img')).attr('id', 'daglyph'));
-//				glyph = $('#daglyph');
-//			}
-//			glyph.attr('src',
-//				'http://images.kingdomofloathing.com/' +
-//				'otherimages/manor/glyph'+num+'.gif');
-//		});
-//	});
-	
 // basic spoilers, part 2: link to equip spectacles when needed.
 // this part is all-but-unnecessary, only being needed on someone's first runthrough, but
 // we'll leave it here on the off chance that someone uses Mr. Script that early in their KoL career.
@@ -3980,7 +4048,7 @@ function at_manor3()
 		}
 	}	
 	
-	// convert out array of drop possibilities into a list of corners for display.
+	// convert array of drop possibilities into a list of corners for display.
 	var possibilities = ["","","",""];
 	var cornername = {178:" NW ", 179: " NE ", 180:" SW ", 181:" SE "};
 	for (i=0; i<4; i++) {
