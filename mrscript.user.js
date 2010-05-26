@@ -83,7 +83,7 @@ var spoilers = GetPref('zonespoil') == 1;
 anywhere(); // stuff we always add where we can
 
 // added town_right to cover untinkered results...
-if (/^(adventure|choice|craft|fight|knoll|shore|town_right)$/.test(place)) {
+if (/^(adventure|choice|craft|knoll|shore|town_right)$/.test(place)) {	// removed fight
 	dropped_item();
 }
 // where are we and what do we thus want to do?
@@ -108,9 +108,9 @@ function anywhere() {
 
 // Dropped_Item: Add stuffy-stuff to dropped items.
 function dropped_item() {
-	if ("fight" == place && !/WINWINW/.test(document.body.innerHTML)) {
-		return;
-	}
+//	if ("fight" == place && !/WINWINW/.test(document.body.innerHTML)) {
+//		return;
+//	}
 	$('img').each(function() {
 		var onclick = this.getAttribute("onclick");
 		if (/desc/.test(onclick || "")) {
@@ -1553,8 +1553,8 @@ function at_fight() {
 		var insultsList = GetCharData("insults"); if (insultsList == undefined) insultsList = "0;0;0;0;0;0;0;0";
 		var insultsArray = insultsList.split(";");
 		var numInsults = 0;
-		for (var i=0;i<insultsArray.length;i++) {
-			if (insultsArray[i]==1) numInsults++;
+		for (var i = 0; i < insultsArray.length; i++) {
+			if (insultsArray[i] == 1) numInsults++;
 		}
 		$(this).text("The Big Book of Pirate Insults ("+numInsults+"/8)");
 	});
@@ -1772,6 +1772,7 @@ function at_fight() {
 			break;
 		}
 		showYoinks(true);
+		dropped_item();
 	}
 	// post-loss processing:
 	else if (	/>Go back to/.test(document.body.innerHTML) || 
@@ -3613,18 +3614,24 @@ function at_clan_viplounge()
 // CHARSHEET: decode resistance level text.
 function at_charsheet()
 {
+	// see if the character qualifies for the Myst-Class innate 5% resistance bonus... 
 	var mystBonus = 0;
+	var className = '';
+	// The easy way first: custom-titled characters have a "Class: X" line on their sheet.
 	$('td:contains("Class:"):not(:has(table))').each(function() {
-		var classname = $(this).next().text();
+		classname = $(this).next().text();
 		switch (classname) {
 		case 	"Pastamancer":
 		case 	"Sauceror":	mystBonus = 5; break;
 		}
 	});
-	if (mystBonus == 0) {
-		var foo = $('b:contains("Statistics")').parent().parent().html();
-		var title = foo.match(/<br>([a-zA-Z ]*)<p><b>Statistics/)[1];
+	
+	if (className == '') {	// didn't find it the easy way? find their non-custom title and see if it's a PM or SA title.
+		var title = $('b:contains("Statistics")').parent().parent().contents().filter(function(){return this.nodeType==3}).get(2).data;
+//		var foo = $('b:contains("Statistics")').parent().parent().html();
+//		var title = foo.match(/<br>([a-zA-Z ]*)<p><b>Statistics/)[1];
 		title = title.trim();
+// GM_log("title=["+title+"]");
 		switch(title) {
 			case 	"Dough Acolyte":
 			case 	"Yeast Scholar":
@@ -3654,7 +3661,8 @@ function at_charsheet()
 			case 	"Bay Leaf Brujo":
 			case 	"Sesame Soothsayer":
 			case 	"Marinara Mage":
-			case 	"Alfredo Archmage":		mystBonus = 5; break;
+			case 	"Alfredo Archmage":	
+			case    "Sauceror": mystBonus = 5; break;
 		}
 	}
 //	GM_log("Myst Bonus = "+mystBonus);
