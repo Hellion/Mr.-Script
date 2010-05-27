@@ -83,7 +83,7 @@ var spoilers = GetPref('zonespoil') == 1;
 anywhere(); // stuff we always add where we can
 
 // added town_right to cover untinkered results...
-if (/^(adventure|choice|craft|fight|knoll|shore|town_right)$/.test(place)) {
+if (/^(adventure|choice|craft|knoll|shore|town_right)$/.test(place)) {	// removed fight
 	dropped_item();
 }
 // where are we and what do we thus want to do?
@@ -108,9 +108,9 @@ function anywhere() {
 
 // Dropped_Item: Add stuffy-stuff to dropped items.
 function dropped_item() {
-	if ("fight" == place && !/WINWINW/.test(document.body.innerHTML)) {
-		return;
-	}
+//	if ("fight" == place && !/WINWINW/.test(document.body.innerHTML)) {
+//		return;
+//	}
 	$('img').each(function() {
 		var onclick = this.getAttribute("onclick");
 		if (/desc/.test(onclick || "")) {
@@ -789,7 +789,7 @@ function AddLinks(descId, theItem, formWhere, path) {
 			itemNum = 74; doWhat = 'oneuse'; break;
 
 		case  275: case  191: case  313: case 1244: case 1245:	case 675:		// larva, boss bat bandana, KGKing items, dagon skull,
-		case 2334:																// MacGuffin
+		case 2334: case  199:													// MacGuffin, shiny ring
 			addWhere.append(AppendLink('[council]','council.php')); break;
 			
 		case 454: // rusty screwdriver
@@ -817,6 +817,13 @@ function AddLinks(descId, theItem, formWhere, path) {
 			addWhere.append(AppendLink('[bird]', 'craft.php?mode=combine' +
                                  '&action=craft&a=2050&b=2051&pwd=' + pwd +
                                  '&quantity=1')); GoGoGadgetPlunger(); break;
+								 
+		case 2182: case 2183: 	// Harold's hammer parts
+			addWhere.append(AppendLink('[make hammer]', 'craft.php?mode=combine' +
+								 '&action=craft&a=2182&b=2183&pwd=' + pwd +
+								 '&quantity=1')); GoGoGadgetPlunger(); break;
+		case 2184: 				// harold's hammer
+			addWhere.append(AppendLink('[give to Harold (1)]', 'adventure.php?snarfblat=112')); break;
 		
 		case 1549: // MSG
 			addWhere.append(AppendLink('[bam!]', 'guild.php?place=wok')); break;
@@ -1553,8 +1560,8 @@ function at_fight() {
 		var insultsList = GetCharData("insults"); if (insultsList == undefined) insultsList = "0;0;0;0;0;0;0;0";
 		var insultsArray = insultsList.split(";");
 		var numInsults = 0;
-		for (var i=0;i<insultsArray.length;i++) {
-			if (insultsArray[i]==1) numInsults++;
+		for (var i = 0; i < insultsArray.length; i++) {
+			if (insultsArray[i] == 1) numInsults++;
 		}
 		$(this).text("The Big Book of Pirate Insults ("+numInsults+"/8)");
 	});
@@ -1773,6 +1780,7 @@ function at_fight() {
 			break;
 		}
 		showYoinks(true);
+		dropped_item();
 	}
 	// post-loss processing:
 	else if (	/>Go back to/.test(document.body.innerHTML) || 
@@ -1920,7 +1928,10 @@ function at_rats() {
 		var tdhtml = $(this).html();
 		var square=GetData("square");
 		SetData("square",false);
-		if (tdhtml.indexOf("shiny ring") != -1) return;	// no next square when we shut off the faucet.
+		if (tdhtml.indexOf("shiny ring") != -1) {
+			dropped_item();	// linky linky
+			return;	// no next square when we shut off the faucet.
+		}
 		if (square) {
 			var hloc = "rats.php?where=";
 			var thissquare = square.match(/(\d+)/)[1];	// the "22" in "rats.php?where=22"
@@ -3199,8 +3210,9 @@ function at_questlog()
 			else if (txt.indexOf("Future") != -1)
 				b.append(AppendLink('[future (1)]', 'adventure.php?snarfblat=206'));
 			else if (txt.indexOf("Out of Your Gourd") != -1) {
-				var subtext = $(this).parent().text();
-				GM_log("subtext="+subtext);
+				var subtext = $(this).parent().contents().get(2);
+				subtext = subtext.textContent;
+				GM_log("Gourd subtext="+subtext);
 				if (subtext.indexOf("Haunted Pantry") != -1) 
 					b.append(AppendLink('[pantry (1)]', 'adventure.php?snarfblat=113'));
 				else if (subtext.indexOf("Back Alley") != -1)
@@ -3210,6 +3222,13 @@ function at_questlog()
 			}
 			else if (txt.indexOf("For His Art") != -1)
 				b.append(AppendLink('[artist]', 'town_wrong.php?place=artist'));
+			else if (txt.indexOf("When Rocks Attack") != -1)
+				b.append(AppendLink('[Doc G]', 'galaktik.php'));
+			else if (txt.indexOf("Me and My Nemesis") != -1) {
+				var subtext = $(this).parent().contents().get(2);
+				subtext = subtext.textContent;
+				GM_log("nemesis subtext="+subtext);
+			}
 		});
 	}
 }
@@ -3614,17 +3633,20 @@ function at_clan_viplounge()
 // CHARSHEET: decode resistance level text.
 function at_charsheet()
 {
+	// see if the character qualifies for the Myst-Class innate 5% resistance bonus... 
 	var mystBonus = 0;
+	var className = '';
+	// The easy way first: custom-titled characters have a "Class: X" line on their sheet.
 	$('td:contains("Class:"):not(:has(table))').each(function() {
-		var classname = $(this).next().text();
+		classname = $(this).next().text();
 		switch (classname) {
 		case 	"Pastamancer":
 		case 	"Sauceror":	mystBonus = 5; break;
 		}
 	});
-	if (mystBonus == 0) {
-		var foo = $('b:contains("Statistics")').parent().parent().html();
-		var title = foo.match(/<br>([a-zA-Z ]*)<p><b>Statistics/)[1];
+	
+	if (className == '') {	// didn't find it the easy way? find their non-custom title and see if it's a PM or SA title.
+		var title = $('b:contains("Statistics")').parent().parent().contents().filter(function(){return this.nodeType==3}).get(2).data;
 		title = title.trim();
 		switch(title) {
 			case 	"Dough Acolyte":
@@ -3655,7 +3677,8 @@ function at_charsheet()
 			case 	"Bay Leaf Brujo":
 			case 	"Sesame Soothsayer":
 			case 	"Marinara Mage":
-			case 	"Alfredo Archmage":		mystBonus = 5; break;
+			case 	"Alfredo Archmage":	
+			case    "Sauceror": mystBonus = 5; break;
 		}
 	}
 //	GM_log("Myst Bonus = "+mystBonus);
@@ -3674,18 +3697,20 @@ function at_charsheet()
 		}
 		if (ProtNum == 0) {	// it wasn't any of the easy ones 
 			ProtNum = 5;	// so it must be "(...) High"
+			// additive modifiers
 			if (pstring.indexOf("Very") != -1) ProtNum += 1;
 			if (pstring.indexOf("Really") != -1) ProtNum += 1;
 			if (pstring.indexOf("Extremely") != -1) ProtNum += 3;
+			// exclusive modifiers
 			if (pstring.indexOf("Amazingly") != -1) ProtNum += 6;
-			if (pstring.indexOf("Extraordinarily") != -1) ProtNum += 12;
-			if (pstring.indexOf("Incredibly") != -1) ProtNum += 18;
-			if (pstring.indexOf("Staggeringly") != -1) ProtNum += 24;
-			if (pstring.indexOf("Mind-bogglingly") != -1) ProtNum += 30;
-			if (pstring.indexOf("Inconceivably") != -1) ProtNum += 36;
-			if (pstring.indexOf("Unthinkably") != -1) ProtNum += 42;
-			if (pstring.indexOf("Indescribably") != -1) ProtNum += 48;
-			if (pstring.indexOf("Impossibly") != -1) ProtNum += 54;
+			else if (pstring.indexOf("Extraordinarily") != -1) ProtNum += 12;
+			else if (pstring.indexOf("Incredibly") != -1) ProtNum += 18;
+			else if (pstring.indexOf("Staggeringly") != -1) ProtNum += 24;
+			else if (pstring.indexOf("Mind-bogglingly") != -1) ProtNum += 30;
+			else if (pstring.indexOf("Inconceivably") != -1) ProtNum += 36;
+			else if (pstring.indexOf("Unthinkably") != -1) ProtNum += 42;
+			else if (pstring.indexOf("Indescribably") != -1) ProtNum += 48;
+			else if (pstring.indexOf("Impossibly") != -1) ProtNum += 54;
 //			if (pstring.indexOf("" != -1) ProtNum += 0;
 			resistance = 90 - (50*Math.pow(0.83333333,ProtNum-4));
 		}
