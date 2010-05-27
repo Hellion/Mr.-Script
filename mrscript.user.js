@@ -3210,8 +3210,8 @@ function at_questlog()
 			else if (txt.indexOf("Future") != -1)
 				b.append(AppendLink('[future (1)]', 'adventure.php?snarfblat=206'));
 			else if (txt.indexOf("Out of Your Gourd") != -1) {
-				var subtext = $(this).parent().contents().get(2);
-				subtext = subtext.textContent;
+				var subtext = $(this).parent().contents().get(2).data;
+//				subtext = subtext.textContent;
 				GM_log("Gourd subtext="+subtext);
 				if (subtext.indexOf("Haunted Pantry") != -1) 
 					b.append(AppendLink('[pantry (1)]', 'adventure.php?snarfblat=113'));
@@ -3225,9 +3225,47 @@ function at_questlog()
 			else if (txt.indexOf("When Rocks Attack") != -1)
 				b.append(AppendLink('[Doc G]', 'galaktik.php'));
 			else if (txt.indexOf("Me and My Nemesis") != -1) {
-				var subtext = $(this).parent().contents().get(2);
-				subtext = subtext.textContent;
+				var subtext = $(this).parent().contents().get(2).data;
+//				subtext = subtext.textContent;
 				GM_log("nemesis subtext="+subtext);
+				if (subtext.indexOf("smith an Epic Weapon") != -1) {
+					b.append(AppendLink("[casino]","town_wrong.php?place=casino"));
+					b.append(AppendLink("[hermit]","hermit.php"));
+					b.append(AppendLink("[smith]","craft.php?mode=smith"));
+				} else if (subtext.indexOf("defeat Beelzebobo") != -1) 
+					b.append(AppendLink("[funhouse (1)]","adventure.php?snarfblat=20"));
+				else if (subtext.indexOf("head back to your guild") != -1)
+					b.append(AppendLink("[guild]","guild.php"));
+				else if (subtext.indexOf("map to the secret") != -1)
+					b.append(AppendLink("[poop deck (1)]","adventure.php?snarfblat=159"));
+				else if (subtext.indexOf("arrived at the secret") != -1)
+					b.append(AppendLink("[volcano]","volcano.php"));
+				else if (subtext.indexOf("Well, you defeated") != -1)
+					b.append(AppendLink("[nemesis lair (1)]","adventure.php?snarfblat=??"));
+					
+			}
+			else if (txt.indexOf("Dark and Dank and Sinister") != -1)
+				b.append(AppendLink("[cave]","cave.php"));
+			else if (txt.indexOf("Old Guy and The Ocean") != -1) {
+				b.append(AppendLink("[octopus' garden (1)]","adventure.php?snarfblat=190"));
+				b.append(AppendLink("[wreck (1)]","adventure.php?snarfblat=191"));
+				b.append(AppendLink("[sea monkey castle]","monkeycastle.php"));
+			}
+			else if (txt.indexOf("Sea Monkees") != -1) {
+				b.append(AppendLink("[wreck (1)]","adventure.php?snarfblat=191"));
+				b.append(AppendLink("[sea monkey castle]","monkeycastle.php"));
+			}
+			else if (txt.indexOf("Quest for the Holy MacGuffin") != -1) {
+				var subtext = $(this).parent().contents().get(2).data;
+				GM_log("MacGuffin subtext="+subtext);
+				if (subtext.indexOf("find the Black Market") != -1)
+					b.append(AppendLink("[black forest (1)]","adventure.php?snarfblat=111"));
+				else if (subtext.indexOf("now to hit the Travel Agency") != -1)
+					b.append(AppendLink("[shore]","shore.php"));
+			}
+			else if (txt.indexOf("Make War, Not") != -1) {
+				b.append(AppendLink("[pre-war island]","island.php"));
+				b.append(AppendLink("[post-war island]","bigisland.php"));
 			}
 		});
 	}
