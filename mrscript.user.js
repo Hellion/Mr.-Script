@@ -685,7 +685,7 @@ function AddInvCheck(img)
 				return;
 			}
 			item = DescToItem(this.getAttribute("onclick"));
-			var add = "<br><span class='tiny' id='span" + item[0] + "'></span>";	// was item['itemid']
+			var add = "<br><span class='tiny' id='span" + item[0] + "'></span>";
 			this.parentNode.nextSibling.innerHTML += add;
 
 			GM_get(server+'/js_inv.php?for=MrScript',function(details) {
@@ -1429,6 +1429,7 @@ function at_main_c() {
 	}
 	
 	$('tr:contains("Noob."):eq(1)').append(AppendLink('[Toot]','mtnoob.php?action=toot'));	// fresh from valhalla?  get things rolling.
+	$('tr:contains("responded to a trade offer")').append(AppendLink('[trade]', 'makeoffer.php'));
 	
 	var update = GetData("Update");
 	if (update != '') {
@@ -1969,6 +1970,44 @@ function at_adventure() {
 				SetData("square",a.attr('href'));
 			});
 		}
+	}
+	var NCTitle = $('b:eq(1)');
+	GM_log("NCTtext="+$(NCTitle).text());
+	switch ($(NCTitle).text()) {
+		case "Rotting Matilda":
+			NCTitle.append(AppendLink('[use another dance card]', 'inv_use.php?pwd='+pwd+'&which=3&whichitem=1963&ajax=1'));
+			break;
+		case "It's Always Swordfish":
+			$('<center><p><a href="adventure.php?snarfblat=160>Adventure Belowdecks</a></center>').appendTo($('a:last'));
+			break;
+		case "Mr. Alarm":
+			$('a[href*="snarfblat"]').href("adventure.php?snarfblat=100").text("Adventure in WHITEY'S GROVE");
+			break;
+		case "It's A Sign!":
+			$('<center><a href="adventure.php?snarfblat=100">Adventure Again (Whitey\'s Grove)</a></center>').prependTo($('a:last'));
+			break;
+	}
+}
+
+// GUILD: links for what your guild folks ask you to do
+function at_guild() {
+	var subloc = document.location.search;
+	var td = $('center table tr td center table tr td:first');
+	var tdtext = $(td).text();
+	switch (subloc) {
+		case "?place=paco": 
+			GM_log("tdtext="+tdtext);
+			if (tdtext.indexOf("White Citadel") != -1) {
+				td.append(AppendLink('[Whitey\'s Grove (1)]', "adventure.php?snarfblat=100"));
+				td.append(AppendLink('[Road to WC (1)]', "adventure.php?snarfblat=99"));
+			}
+		break;
+		case "?place=ocg": 
+			GM_log("tdtext="+tdtext);
+		break;
+		case "?place=scg": 
+			GM_log("tdtext="+tdtext);
+		break;
 	}
 }
 
