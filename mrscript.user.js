@@ -1900,6 +1900,7 @@ function at_cove() {
 // 2174=mossy, 2175=smooth, 2176=cracked, 2177=rough.
 // altar 1=yellow, 2=blue, 3=red, 4=green.
 function at_hiddencity() {
+	var square = GetData("square");
 	SetData("square",false);		// if we click on an altar, unmark it.
 	var ball = {1: 1900, 2: 1901, 3: 1904, 4: 1905};	// that's "altar:ID of ball that gives buff at this altar".
 	var altarsrc = $('img:first').attr("src"); 
@@ -1972,10 +1973,11 @@ function at_adventure() {
 		}
 	}
 	var NCTitle = $('b:eq(1)');
-	GM_log("NCTtext="+$(NCTitle).text());
+	GM_log("NCTtext=["+$(NCTitle).text()+"]");
 	switch ($(NCTitle).text()) {
 		case "Rotting Matilda":
-			NCTitle.append(AppendLink('[use another dance card]', 'inv_use.php?pwd='+pwd+'&which=3&whichitem=1963&ajax=1'));
+			NCTitle.append(AppendLink('[use another dance card]', 
+				'inv_use.php?pwd=' + pwd + '&which=3&whichitem=1963&ajax=1&itemquantity=1&quantity=1'));
 			break;
 		case "It's Always Swordfish":
 			$('<center><p><a href="adventure.php?snarfblat=160>Adventure Belowdecks</a></center>').appendTo($('a:last'));
@@ -1984,7 +1986,7 @@ function at_adventure() {
 			$('a[href*="snarfblat"]').href("adventure.php?snarfblat=100").text("Adventure in WHITEY'S GROVE");
 			break;
 		case "It's A Sign!":
-			$('<center><a href="adventure.php?snarfblat=100">Adventure Again (Whitey\'s Grove)</a></center>').prependTo($('a:last'));
+			$('<center><a href="adventure.php?snarfblat=100">Adventure Again (Whitey\'s Grove)</a></center><br />').prependTo($('a:last'));
 			break;
 	}
 }
@@ -2010,6 +2012,23 @@ function at_guild() {
 		break;
 	}
 }
+
+// ARCADE: display # of tokens and tickets on the main arcade screen.
+function at_arcade() {
+	GM_get(server+'/js_inv.php?for=MrScript',function(response) {
+		if (response[0] != '{') {		
+			var i1 = response.split('inventory = ')[1].split(';')[0];	// should get everything from { to }, inclusive.
+			response = i1;
+		}
+		var invcache = eval('('+response+')');
+		var tokens = invcache[4621]; if (tokens === undefined) tokens = 0;
+		var tickets = invcache[4622]; if (tickets === undefined) tickets = 0;
+		var arcadeInfo = document.createElement('div');
+		arcadeInfo.innerHTML = "<center><p>You have "+tokens+" tokens and "+tickets+" tickets.</center>";
+		document.body.appendChild(arcadeInfo);
+	});
+}
+
 
 // CHOICE: clear out "square" since it should never persist outside of the hidden city or the tavern.
 function at_choice() {
@@ -4709,7 +4728,7 @@ function spoil_plains()
 		else if (src.indexOf("funhouse") != -1) ml = '14-20';
 		else if (src.indexOf("knoll1") != -1) ml = '10-13';
 		else if (src.indexOf("cemetary") != -1) ml = '18-20 / 53-59';
-		else if (src.indexOf("palindome") != -1) ml = '116-135';
+		else if (src.indexOf("dome") != -1) ml = '116-135';
 		else if (src.indexOf("garbagegrounds") != -1)
 		{	$(this).wrap('<a href="inv_use.php?pwd=' + pwd +
 				'&which=3&whichitem=186" border="0"></a>');
@@ -5694,7 +5713,13 @@ function autoclear_added_rows()
 // MAINT: Refresh until rollover is over.
 function at_maint()
 {	document.title="KoL Rollover";
-	window.setTimeout('self.location = "http://www.kingdomofloathing.com";',30000);
+	var s = parseInt(GetData("roserver")); 
+	if (s === undefined) s = 0;
+	s++;
+	if (s > 7) s = 1;
+	SetData("roserver",s);
+	var www = (s==1)?"www":"www"+s;
+	window.setTimeout('self.location = "http://'+www+'.kingdomofloathing.com";',60000);
 }
 
 //console.timeEnd("Mr. Script @ " + place);
