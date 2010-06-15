@@ -2035,10 +2035,14 @@ function at_arcade() {
 			response = i1;
 		}
 		var invcache = eval('('+response+')');
-		var tokens = invcache[4621]; if (tokens === undefined) tokens = 0;
-		var tickets = invcache[4622]; if (tickets === undefined) tickets = 0;
+//		var tokens = invcache[4621]; if (tokens === undefined) tokens = 0;
+//		var tickets = invcache[4622]; if (tickets === undefined) tickets = 0;
+		var tokens = (invcache[4621] === undefined)? "no tokens" : invcache[4621] + " token"; 
+		if (parseInt(invcache[4621]) > 1) tokens = tokens + "s";
+		var tickets = (invcache[4622] === undefined)? "no tickets" : invcache[4622] + " ticket";
+		if (parseInt(invcache[4622]) > 1) tickets = tickets + "s";
 		var arcadeInfo = document.createElement('div');
-		arcadeInfo.innerHTML = "<center><p>You have "+tokens+" tokens and "+tickets+" tickets.</center>";
+		arcadeInfo.innerHTML = "<center><p>You have "+tokens+" and "+tickets+".</center>";
 		document.body.appendChild(arcadeInfo);
 	});
 }
@@ -4748,6 +4752,14 @@ function spoil_plains()
 				'&which=3&whichitem=186" border="0"></a>');
 		} if(ml) this.setAttribute('title','ML: '+ml);
 });	}
+
+function spoil_plains2()
+{	$('img').each(function()
+	{	var ml = null; var src=this.getAttribute('src');
+		if (src.indexOf("battlefield") != -1) ml = '30 (in uniform)';
+		if (ml) this.setAttribute('title','ML: '+ml);
+	});
+}
 
 function spoil_knob()
 {	$('img').each(function()
