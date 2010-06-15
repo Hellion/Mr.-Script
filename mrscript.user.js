@@ -801,6 +801,11 @@ function AddLinks(descId, theItem, formWhere, path) {
 		case  535: // bridge
 			addWhere.append(AppendLink('[chasm]','mountains.php?orcs=1&pwd='+pwd)); break;
 			
+		case  602: // Degrassi Knoll shopping list
+			if (getData("plungeraccess") == "Y") addWhere.append(AppendLink('[gnoll store]', "store.php?whichstore=5"));
+			else addWhere.append(AppendLink('[Knoll (1)]', "adventure.php?snarfblat=19"));
+			break;
+			
 		case  727: // Hedge
 			addWhere.append(AppendLink('[maze]', 'hedgepuzzle.php')); break;
 
@@ -1993,6 +1998,11 @@ function at_adventure() {
 
 // GUILD: links for what your guild folks ask you to do
 function at_guild() {
+	$('img').each(function()
+	{	var onclick = this.getAttribute('onclick');
+		if (onclick != undefined && onclick.indexOf("desc") != -1)
+			AddLinks(onclick, this.parentNode.parentNode, null, thePath);
+	});
 	var subloc = document.location.search;
 	var td = $('center table tr td center table tr td:first');
 	var tdtext = $(td).text();
@@ -2002,6 +2012,10 @@ function at_guild() {
 			if (tdtext.indexOf("White Citadel") != -1) {
 				td.append(AppendLink('[Whitey\'s Grove (1)]', "adventure.php?snarfblat=100"));
 				td.append(AppendLink('[Road to WC (1)]', "adventure.php?snarfblat=99"));
+			}
+			else if (tdtext.indexOf("with the meatcar?") != -1) {
+				if (GetData("plungeraccess") == "Y") td.append(AppendLink('[gnoll store]', "store.php?whichstore=5"));
+				else td.append(AppendLink('[Knoll (1)]', "adventure.php?snarfblat=19"));
 			}
 		break;
 		case "?place=ocg": 
