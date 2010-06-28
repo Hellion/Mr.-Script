@@ -1840,7 +1840,7 @@ function showYoinks(wonCombat) {
 				}
 			}
 		} else {
-			$('a:contains("dventure")').parent().prepend(yoinkNode);
+			$('a:contains("dventure"):first').parent().prepend(yoinkNode);
 		}
 	}
 }
@@ -5739,13 +5739,13 @@ function autoclear_added_rows()
 // MAINT: Refresh until rollover is over.
 function at_maint()
 {	document.title="KoL Rollover";
-	var s = parseInt(GetData("roserver")); 
-	if (s === undefined) s = 0;
+	var s = parseInt(GetPref("roserver"),10); 
+	if ((s === undefined) || isNaN(s)) s = 0; //GM_log("s="+s);
 	s++;
 	if (s > 7) s = 1;
-	SetData("roserver",s);
-	var www = (s==1)?"www":"www"+s;
-	window.setTimeout('self.location = "http://'+www+'.kingdomofloathing.com";',60000);
+	SetPref("roserver",s);
+//	var www = (s==1)?"www":"www"+s;  //	GM_log("www="+www);
+	window.setTimeout('self.location = "http://www'+(s==1?'':s)+'.kingdomofloathing.com";',60000);
 }
 
 //console.timeEnd("Mr. Script @ " + place);
