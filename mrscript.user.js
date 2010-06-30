@@ -2054,9 +2054,16 @@ function at_arcade() {
 }
 
 
-// CHOICE: clear out "square" since it should never persist outside of the hidden city or the tavern.
+// CHOICE: clear out "square" since it should never persist outside of the hidden city or the tavern, neither of which have choice adventures.
 function at_choice() {
 	SetData("square",false);
+	var p=document.getElementsByTagName('p');
+	if (p.length) {
+		GM_log("p.length="+p.length);
+		var p0 = p[0];
+		GM_log("p0="+p0.textContent);
+		if (p0.textContent.indexOf("actually a book.") != -1) p0.appendChild(AppendLink('[go ahead, read it already]','inv_use.php?pwd='+pwd+'&which=3&whichitem=818'));
+	}
 }
 
 // TOWN_RIGHT: Untinker linker.
