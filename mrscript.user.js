@@ -1784,6 +1784,16 @@ function at_fight() {
 			$("p:contains('Adventure')").html('<a href="inventory.php?which=2"><font size="4">CLICK HERE TO CHANGE YOUR GEAR</font></a>');
 			$("p:contains('Go back to')").html('');
 			break;
+		case "a dirty thieving brigand":
+			var meatline = $("img[src*='meat.gif']:last").parent().next().text();	// should be "You gain X meat"
+			var meat = parseInt(meatline.match(/You gain (\d+) Meat/)[1],10);
+			var meatSoFar = parseInt(GetCharData("nunmoney"),10); if (meatSoFar == undefined) meatSoFar = 0;
+//			GM_log("meatline="+meatline+", meat="+meat+", meatSoFar="+meatSoFar);
+			meatSoFar += meat;
+			$("img[src*='meat.gif']:last").parent().next().append("<font color='blue'>&nbsp;("+meatSoFar+" collected total).</font>");
+			if (meatSoFar > 100000) meatSoFar = 0;
+			SetCharData("nunmoney",meatSoFar);
+			break;
 		}
 		showYoinks(true);
 		dropped_item();
@@ -1840,7 +1850,7 @@ function showYoinks(wonCombat) {
 				}
 			}
 		} else {
-			$('a:contains("dventure"):first').parent().prepend(yoinkNode);
+			$('a:contains("Adventure Again")').parent().prepend(yoinkNode);
 		}
 	}
 }
@@ -2035,14 +2045,10 @@ function at_arcade() {
 			response = i1;
 		}
 		var invcache = eval('('+response+')');
-//		var tokens = invcache[4621]; if (tokens === undefined) tokens = 0;
-//		var tickets = invcache[4622]; if (tickets === undefined) tickets = 0;
-		var tokens = (invcache[4621] === undefined)? "no tokens" : invcache[4621] + " token"; 
-		if (parseInt(invcache[4621]) > 1) tokens = tokens + "s";
-		var tickets = (invcache[4622] === undefined)? "no tickets" : invcache[4622] + " ticket";
-		if (parseInt(invcache[4622]) > 1) tickets = tickets + "s";
+		var tokens = ((invcache[4621] === undefined) ? "no" : invcache[4621]) + " token" + ((invcache[4621] == 1) ? " " : "s ");
+		var tickets = ((invcache[4622] === undefined) ? "no" : invcache[4622]) + " ticket" + ((invcache[4622] == 1) ? ". " : "s. ");
 		var arcadeInfo = document.createElement('div');
-		arcadeInfo.innerHTML = "<center><p>You have "+tokens+" and "+tickets+".</center>";
+		arcadeInfo.innerHTML = "<center><p>You have "+tokens+" and "+tickets+"</center>";
 		document.body.appendChild(arcadeInfo);
 	});
 }
@@ -2589,7 +2595,12 @@ function at_inventory()
 		{	parent.frames[2].location = 
 				'http://'+ server + '/lair6.php';
 		} 
-		else if (resultsText.indexOf("You discard your Instant Karma") != -1 && 
+		else if (resultsText.indexOf("All items unequipped") != -1 &&
+			document.referrer.indexOf('lair1.php') != -1)	// clicked the 'get nekkid' link at the NS entrance cavern
+		{	parent.frames[2].location = 
+				'http://'+ server + '/lair1.php';
+		}
+ 		else if (resultsText.indexOf("You discard your Instant Karma") != -1 && 
 			document.referrer.indexOf('lair6.php') != -1)	// clicked the 'discard karma' link at the gash
 		{	parent.frames[2].location = 
 				'http://' + server + '/lair6.php';
@@ -4256,51 +4267,63 @@ function at_pyramid()
 // LAIR1: More linkies.
 function at_lair1()
 {
-//	GM_log(document.location);
-	if (document.location.search != "?action=gates") return;
-	for (var i=0; i<3; i++)
-	{	var p = document.getElementsByTagName('p')[i];
-		var ptxt = p.textContent;
-// gate 1: 
-		if (ptxt.indexOf("Suc Rose") != -1) p.appendChild(AppendLink('[sugar rush]',
-			'inv_use.php?pwd='+pwd+'&which=3&whichitem=540'));
-		else if (ptxt.indexOf("Hilarity") != -1) p.appendChild(AppendLink('[gremlin juice]',
-			'inv_use.php?pwd='+pwd+'&which=3&whichitem=2631'));
-		else if (ptxt.indexOf("Humility") != -1) p.appendChild(AppendLink('[wussiness]',
-			'inv_use.php?pwd='+pwd+'&which=3&whichitem=469'));
-		else if (ptxt.indexOf("Morose Morbidity") != -1) p.appendChild(AppendLink('[thin black candle]',
-			'inv_use.php?pwd='+pwd+'&which=3&whichitem=620'));
-		else if (ptxt.indexOf("Slack") != -1) p.appendChild(AppendLink('[mick\'s IVH rub]',
-			'inv_use.php?pwd='+pwd+'&which=3&whichitem=618'));
-		else if (ptxt.indexOf("Spirit") != -1) p.appendChild(AppendLink('[pygmy pygment]',
-			'inv_use.php?pwd='+pwd+'&which=3&whichitem=2242'));
-		else if (ptxt.indexOf("Porcupine") != -1) p.appendChild(AppendLink('[super-spiky hair gel]',
-			'inv_use.php?pwd='+pwd+'&which=3&whichitem=587'));
-		else if (ptxt.indexOf("Viper") != -1) p.appendChild(AppendLink('[adder bladder]',
-			'inv_use.php?pwd='+pwd+'&which=3&whichitem=2056'));
-		else if (ptxt.indexOf("Locked Gate") != -1) p.appendChild(AppendLink('[black no. 2]',
-			'inv_use.php?pwd='+pwd+'&which=3&whichitem=2059'));
-// gate 2:
-			else if (ptxt.indexOf("Machismo") != -1) p.appendChild(AppendLink('[meleegra]',
-			'inv_use.php?pwd='+pwd+'&which=3&whichitem=1158'));
-		else if (ptxt.indexOf("Flame") != -1) p.appendChild(AppendLink('[jabanero gum]',
-			'inv_use.php?pwd='+pwd+'&which=3&whichitem=300'));
-		else if (ptxt.indexOf("Intrigue") != -1) p.appendChild(AppendLink('[handsomeness]',
-			'inv_use.php?pwd='+pwd+'&which=3&whichitem=1162'));
-		else if (ptxt.indexOf("Mystery") != -1) p.appendChild(AppendLink('[pickle gum]',
-			'inv_use.php?pwd='+pwd+'&which=3&whichitem=299'));
-		else if (ptxt.indexOf("the Dead") != -1) p.appendChild(AppendLink('[marzipan skull]',
-			'inv_use.php?pwd='+pwd+'&which=3&whichitem=1163'));
-		else if (ptxt.indexOf("Torment") != -1) p.appendChild(AppendLink('[tamarind gum]',
-			'inv_use.php?pwd='+pwd+'&which=3&whichitem=297'));
-		else if (ptxt.indexOf("Zest") != -1) p.appendChild(AppendLink('[lime & chile gum]',
-			'inv_use.php?pwd='+pwd+'&which=3&whichitem=298'));
-// gate 3:
-		else if (ptxt.indexOf("Hidden") != -1) p.appendChild(AppendLink('[dod potion - object]','multiuse.php'));
-		else if (ptxt.indexOf("Light") != -1) p.appendChild(AppendLink('[dod potion - moxie]','multiuse.php'));
-		else if (ptxt.indexOf("Mind") != -1) p.appendChild(AppendLink('[dod potion - myst]','multiuse.php'));
-		else if (ptxt.indexOf("Ogre") != -1) p.appendChild(AppendLink('[dod potion - muscle]','multiuse.php'));
-		else if (ptxt.indexOf("Not a Gate") != -1) p.appendChild(AppendLink('[dod potion - teleport]','multiuse.php'));
+	if (document.location.search == "?action=mirror") {
+		p = document.getElementsByTagName('p');
+		GM_log("p.length="+p.length);
+		lastptext = p[p.length-1].textContent;
+		if (lastptext.indexOf("Only those comfortable") != -1) {
+			p[p.length-1].appendChild(AppendLink("[get nekkid]","inv_equip.php?pwd="+pwd+"&action=unequipall"));
+		}
+		return;
+	}
+	if (document.location.search == "?action=gates") {
+		for (var i=0; i<3; i++)
+		{	var p = document.getElementsByTagName('p')[i];
+			var ptxt = p.textContent;
+	// gate 1: 
+			if (ptxt.indexOf("Suc Rose") != -1) p.appendChild(AppendLink('[sugar rush]',
+				'inv_use.php?pwd='+pwd+'&which=3&whichitem=540'));
+			else if (ptxt.indexOf("Hilarity") != -1) p.appendChild(AppendLink('[gremlin juice]',
+				'inv_use.php?pwd='+pwd+'&which=3&whichitem=2631'));
+			else if (ptxt.indexOf("Humility") != -1) p.appendChild(AppendLink('[wussiness]',
+				'inv_use.php?pwd='+pwd+'&which=3&whichitem=469'));
+			else if (ptxt.indexOf("Morose Morbidity") != -1) p.appendChild(AppendLink('[thin black candle]',
+				'inv_use.php?pwd='+pwd+'&which=3&whichitem=620'));
+			else if (ptxt.indexOf("Slack") != -1) p.appendChild(AppendLink('[mick\'s IVH rub]',
+				'inv_use.php?pwd='+pwd+'&which=3&whichitem=618'));
+			else if (ptxt.indexOf("Spirit") != -1) p.appendChild(AppendLink('[pygmy pygment]',
+				'inv_use.php?pwd='+pwd+'&which=3&whichitem=2242'));
+			else if (ptxt.indexOf("Porcupine") != -1) p.appendChild(AppendLink('[super-spiky hair gel]',
+				'inv_use.php?pwd='+pwd+'&which=3&whichitem=587'));
+			else if (ptxt.indexOf("Viper") != -1) p.appendChild(AppendLink('[adder bladder]',
+				'inv_use.php?pwd='+pwd+'&which=3&whichitem=2056'));
+			else if (ptxt.indexOf("Locked Gate") != -1) p.appendChild(AppendLink('[black no. 2]',
+				'inv_use.php?pwd='+pwd+'&which=3&whichitem=2059'));
+	// gate 2:
+				else if (ptxt.indexOf("Machismo") != -1) p.appendChild(AppendLink('[meleegra]',
+				'inv_use.php?pwd='+pwd+'&which=3&whichitem=1158'));
+			else if (ptxt.indexOf("Flame") != -1) p.appendChild(AppendLink('[jabanero gum]',
+				'inv_use.php?pwd='+pwd+'&which=3&whichitem=300'));
+			else if (ptxt.indexOf("Intrigue") != -1) p.appendChild(AppendLink('[handsomeness]',
+				'inv_use.php?pwd='+pwd+'&which=3&whichitem=1162'));
+			else if (ptxt.indexOf("Mystery") != -1) p.appendChild(AppendLink('[pickle gum]',
+				'inv_use.php?pwd='+pwd+'&which=3&whichitem=299'));
+			else if (ptxt.indexOf("the Dead") != -1) p.appendChild(AppendLink('[marzipan skull]',
+				'inv_use.php?pwd='+pwd+'&which=3&whichitem=1163'));
+			else if (ptxt.indexOf("Torment") != -1) p.appendChild(AppendLink('[tamarind gum]',
+				'inv_use.php?pwd='+pwd+'&which=3&whichitem=297'));
+			else if (ptxt.indexOf("Zest") != -1) p.appendChild(AppendLink('[lime & chile gum]',
+				'inv_use.php?pwd='+pwd+'&which=3&whichitem=298'));
+	// gate 3:
+			else if (ptxt.indexOf("Hidden") != -1) p.appendChild(AppendLink('[dod potion - object]','multiuse.php'));
+			else if (ptxt.indexOf("Light") != -1) p.appendChild(AppendLink('[dod potion - moxie]','multiuse.php'));
+			else if (ptxt.indexOf("Mind") != -1) p.appendChild(AppendLink('[dod potion - myst]','multiuse.php'));
+			else if (ptxt.indexOf("Ogre") != -1) p.appendChild(AppendLink('[dod potion - muscle]','multiuse.php'));
+			else if (ptxt.indexOf("Not a Gate") != -1) p.appendChild(AppendLink('[dod potion - teleport]','multiuse.php'));
+		}
+		var letsgetnaked = $("p:last").text();
+		if ((letsgetnaked.indexOf("path is now clear") != -1) || (letsgetnaked.indexOf("is clear") != -1))
+			$("p:last").append("<a class='tiny' href='inv_equip.php?pwd="+pwd+"&action=unequipall'>[get nekkid]</a>");
 	}
 }
 
@@ -5741,6 +5764,7 @@ function at_maint()
 {	document.title="KoL Rollover";
 	var s = parseInt(GetPref("roserver"),10); 
 	if ((s === undefined) || isNaN(s)) s = 0; //GM_log("s="+s);
+
 	s++;
 	if (s > 7) s = 1;
 	SetPref("roserver",s);
