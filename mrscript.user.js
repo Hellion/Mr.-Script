@@ -1924,6 +1924,7 @@ function at_hiddencity() {
 		var stone = GetCharData('altar'+altar);
 		if ((stone != undefined) && (stone != '')) {
 			$('option:not([value="'+stone+'"]):not([value="'+ball[altar]+'"])').remove();
+			$('select[name="whichitem"]').attr('style','color:green');
 		} else {
 			$('option:not([value="2174"]):not([value="2175"]):not([value="2176"]):not([value="2177"]):not([value="'+ball[altar]+'"])').remove();
 		}
@@ -2002,6 +2003,7 @@ function at_adventure() {
 			break;
 		case "It's A Sign!":
 			$('<center><a href="adventure.php?snarfblat=100">Adventure Again (Whitey\'s Grove)</a></center><br />').prependTo($('a:last'));
+			$('<center><a href="adventure.php?snarfblat=99">Adventure on the Road to White Citadel</a></center><br />').prependTo($('a:last'));
 			break;
 	}
 }
@@ -3095,7 +3097,7 @@ function at_council()
 				txt.indexOf("slaying") == -1)
 			{	var derr = AppendLink('[disguise]', "inv_equip.php" +
 					"?action=outfit&which=2&whichoutfit=4");
-				p.append(derr);	// was appendChild, which GM complains about for no apparent reason.
+				p.append(derr);	
 				if (GetPref('backup') != "")
 				{	$(derr).children('*:last')
 						.attr('href', 'javascript:void(0);').click(function()
