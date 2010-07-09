@@ -129,7 +129,8 @@ function persist(key, value) {
 }
 
 function integer(n) {
-	return parseInt(n.replace(/^\D+|,/g, ""), 10);
+	if (typeof n == 'string') n.replace(/^\D+|,/g, "");
+	return parseInt(n, 10);
 }
 
 function text(x) {
@@ -190,7 +191,7 @@ function getItemList(callback)
 {	
 	GM_get(ITEMDB_URL,parseItems);
 	function parseItems(itemList) {
-		var currentTime = parseInt(new Date().getTime()/60000);
+		var currentTime = integer(new Date().getTime()/60000);
 		GM_setValue("lastItemUpdate",currentTime);
 		
 		//remove double tabs... or don't, it's commented out where I got this from.  Hellion 11Jan10
@@ -240,7 +241,7 @@ function unstoreItemList(force)
 		break;							// don't waste time counting the whole damn list.
 	}
 	
-	var currentTime = parseInt(new Date().getTime()/60000);	// convert from milliseconds to minutes
+	var currentTime = integer(new Date().getTime()/60000);	// convert from milliseconds to minutes
 	var lastUpdate = GM_getValue("lastItemUpdate",1);
 	
 	//check every week.
@@ -286,7 +287,7 @@ function FindMaxQuantity(item, howMany, deefault, safeLevel)
 	var min, max, avg, result;
 	var hp = 0;
 
-	switch(parseInt(item))
+	switch(integer(item))
 	{
 		case 344: // Knob Goblin Seltzer
 			min = 8; max = 12; break;
@@ -402,12 +403,12 @@ function FindMaxQuantity(item, howMany, deefault, safeLevel)
 		case 1: avg = ((max*2)+min)/3.0; break;
 		case 2: avg = max; break;
 	}
-	if (hp == 1) result = parseInt(GetData("maxHP")-GetData("currentHP"));
-	else		 result = parseInt(GetData("maxMP")-GetData("currentMP"));
+	if (hp == 1) result = integer(GetData("maxHP")-GetData("currentHP"));
+	else		 result = integer(GetData("maxMP")-GetData("currentMP"));
 	if (result == 0) return 0;
 	result = result / avg;
 	if (result > howMany) result = howMany;
-	if (result > 0)	return parseInt(result);
+	if (result > 0)	return integer(result);
 	else		return 1;
 }
 
@@ -599,7 +600,7 @@ function NumberLink(b)
 {
 	var num = b.textContent.split(' ')[0];
 	while(num.indexOf(',') != -1) num = num.split(',')[0] + num.split(',')[1];
-	num = parseInt(num);
+	num = integer(num);
 	if (num < 26)
 	{	var txt = b.textContent.substring(
 			b.textContent.indexOf(' '),b.textContent.length);
@@ -988,7 +989,7 @@ function RightClickMP(event)
 		else if (list['1659']) num = "1659";// Diet Cloaca
 		else if (list['1660']) num = "1660";// Regular Cloaca
 		if (num > 0)
-		{	quant = FindMaxQuantity(parseInt(num), list[num], 0, GetPref("safemax"));
+		{	quant = FindMaxQuantity(integer(num), list[num], 0, GetPref("safemax"));
 //			var url = server + '/skills.php?action=useitem&whichitem='+num+"&itemquantity="+quant+'&pwd='+pwd;
 			var url = server + '/inv_use.php?pwd='+ pwd +
 			    '&action=useitem&bounce=skills.php?action=useditem&itemquantity='+quant+'&whichitem='+num;
@@ -1035,7 +1036,7 @@ function ParseSelectQuantity(selectItem, endToken)
 		if (howMany.charAt(0) == '(') return 999999;
 		howMany = howMany.split("(")[1];
 		howMany = howMany.split(endToken)[0];
-	} return parseInt(howMany);
+	} return integer(howMany);
 }
 
 // MAKEMAXBUTTON: Wrap a "max" button around a text box.
@@ -1090,7 +1091,7 @@ function MakeMaxButton(textField, funktion)
 function SkillUseLimit(skillNum)
 {	var limit = 999999; var min = 0; var max = 0;
 	var safeLevel = GetPref('safemax');
-	switch(parseInt(skillNum))
+	switch(integer(skillNum))
 	{	case 8000: case 8001: case 8002: limit = 3; break;	// 3 Tomes maximum.	
 		case 3012: limit = 1;  break;						// Cannelloni Cocoon
 		case 8200: case 8201: limit = 1; break;				// Grimoires
@@ -1109,9 +1110,9 @@ function SkillUseLimit(skillNum)
 	if (max != 0)
 	{	var hp = GetData("maxHP") - GetData("currentHP");
 		switch(safeLevel)
-		{ 	case 0: limit = parseInt(0.5+hp/((min+max)/2.0)); break;
-			case 1: limit = parseInt(0.5+hp/(((max*2)+min)/3.0)); break;
-			case 2: limit = parseInt(0.5+hp/max); break;
+		{ 	case 0: limit = integer(0.5+hp/((min+max)/2.0)); break;
+			case 1: limit = integer(0.5+hp/(((max*2)+min)/3.0)); break;
+			case 2: limit = integer(0.5+hp/max); break;
 		}	
 	} 
 	return limit;
@@ -1458,8 +1459,8 @@ function at_main() {
 // n.b. game.php is the outermost, non-frame window that contains all the frames.
 // 		as such, the script only sees it exactly once, when you're logging in.
 function at_game() {
-	var lastUpdated = parseInt(GM_getValue('MrScriptLastUpdate', 0));
-	var currentHours = parseInt(new Date().getTime()/3600000);
+	var lastUpdated = integer(GM_getValue('MrScriptLastUpdate', 0));
+	var currentHours = integer(new Date().getTime()/3600000);
 	GetItemDB();
 //	GM_log("currentHours:"+currentHours+", lastUpdate:"+lastUpdated);
 
@@ -1475,9 +1476,9 @@ function at_game() {
 			var vnum = json.version.replace(/\./g, "");	// strip points: 1.4.3 => 143.
 			if(!vnum) return;
 //			GM_log("vnum="+vnum+",VERSION="+VERSION);
-			if(parseInt(vnum) <= VERSION)		// number returned via lookup is not newer than what this script says it is...
+			if(integer(vnum) <= VERSION)		// number returned via lookup is not newer than what this script says it is...
 			{	persist('MrScriptLastUpdate',
-					parseInt(new Date().getTime()/3600000)); return;
+					integer(new Date().getTime()/3600000)); return;
 			}
 			// If we're still here, then we need an update link.
 			var html =
@@ -1604,7 +1605,7 @@ function at_fight() {
 
 				var zonetext = GetData("square");
 //				GM_log("zonetext="+zonetext);
-				var zone = zonetext ? parseInt(zonetext.match(/(\d+)/)[1]) : 0;
+				var zone = zonetext ? integer(zonetext.match(/(\d+)/)[1]) : 0;
 				
 				// if the monster doesn't drop the item in this zone, or we see the "i-don't-have-it" message...
 				if ((zone && (gremlininfo[monsterName][0] != zone)) ||
@@ -1732,7 +1733,7 @@ function at_fight() {
 					hloc = "rats.php?where=";
 					lastsquare=25;
 				}
-				var nextsquare = parseInt(thissquare)+1;
+				var nextsquare = integer(thissquare)+1;
 				if (nextsquare <= lastsquare) {
 					var myhref = hloc+nextsquare;
 					var clicky = "SetData('square','"+myhref+"')";
@@ -1743,7 +1744,7 @@ function at_fight() {
 					});
 				}
 			} else {	// handling adventure.php?snarfblat=X options.
-				var location = parseInt(square.match(/(\d+)/)[1]);	// the 185 in "adventure.php?snarfblat=185"
+				var location = integer(square.match(/(\d+)/)[1]);	// the 185 in "adventure.php?snarfblat=185"
 				switch (location)	{
 				case 182:
 				case 183:
@@ -1786,8 +1787,8 @@ function at_fight() {
 			break;
 		case "a dirty thieving brigand":
 			var meatline = $("img[src*='meat.gif']:last").parent().next().text();	// should be "You gain X meat"
-			var meat = parseInt(meatline.match(/You gain (\d+) Meat/)[1],10);
-			var meatSoFar = parseInt(GetCharData("nunmoney"),10); if (meatSoFar == undefined) meatSoFar = 0;
+			var meat = integer(meatline.match(/You gain (\d+) Meat/)[1]);
+			var meatSoFar = integer(GetCharData("nunmoney")); if (meatSoFar == undefined) meatSoFar = 0;
 //			GM_log("meatline="+meatline+", meat="+meat+", meatSoFar="+meatSoFar);
 			meatSoFar += meat;
 			$("img[src*='meat.gif']:last").parent().next().append("<font color='blue'>&nbsp;("+meatSoFar+" collected total).</font>");
@@ -1920,7 +1921,7 @@ function at_hiddencity() {
 	var ball = {1: 1900, 2: 1901, 3: 1904, 4: 1905};	// that's "altar:ID of ball that gives buff at this altar".
 	var altarsrc = $('img:first').attr("src"); 
 	if (altarsrc) {
-		var altar = parseInt(altarsrc.charAt(altarsrc.indexOf("/altar") + 6));	// This will be a number from 1 to 4 on the right pages.
+		var altar = integer(altarsrc.charAt(altarsrc.indexOf("/altar") + 6));	// This will be a number from 1 to 4 on the right pages.
 		var stone = GetCharData('altar'+altar);
 		if ((stone != undefined) && (stone != '')) {
 			$('option:not([value="'+stone+'"]):not([value="'+ball[altar]+'"])').remove();
@@ -1953,7 +1954,7 @@ function at_rats() {
 		if (square) {
 			var hloc = "rats.php?where=";
 			var thissquare = square.match(/(\d+)/)[1];	// the "22" in "rats.php?where=22"
-			var nextsquare = parseInt(thissquare)+1;
+			var nextsquare = integer(thissquare)+1;
 			if (nextsquare < 26) {
 				var myhref = hloc+nextsquare;
 				var clicky = "SetData('square','"+myhref+"')";
@@ -1977,7 +1978,7 @@ function at_adventure() {
 //		else if (square.indexOf("rats") != -1) hloc = "rats.php?where=";	// I don't believe this can ever happen, actually.
 		if (hloc == '') return;
 		var thissquare = square.match(/(\d+)/)[1];	// the "22" in "hiddencity.php?which=22" or "rats.php?where=22"
-		var nextsquare = parseInt(thissquare)+1;
+		var nextsquare = integer(thissquare)+1;
 		if (nextsquare < 25) {
 			var myhref = hloc+nextsquare;
 			var clicky = "SetData('square','"+myhref+"')";
@@ -2070,19 +2071,21 @@ function at_choice() {
 
 // TOWN_RIGHT: Untinker linker.
 function at_town_right() {
-	var linkloc = GetData("plungeraccess")=="Y" ? "knoll.php?place=smith" :"adventure.php?snarfblat=18";
 	if (document.location.search == "?place=untinker") {
-		$('p').each(function()
-		{	var p = $(this);
+		var plunger = GetData("plungeraccess") == "Y" ? true: false;
+		var linkloc = plunger ? "knoll.php?place=smith" :"adventure.php?snarfblat=18";
+		var linkname = plunger ? "[get it from Innabox]" : "[degrassi knoll (1)]";
+		$('p').each(function()	{	
+			var p = $(this);
 			var txt = p.text();
-			if (txt.indexOf('get it back for me?') != -1) p.append(AppendLink('[get it from innabox]',linkloc));
+			if (txt.indexOf('get it back for me?') != -1) p.append(AppendLink(linkname,linkloc));
 		});
 		foo = document.getElementsByTagName('center');
 		if (foo.length == 0) return;
-		if (foo[1].textContent.indexOf('finding my screwdriver?') != -1)
-		{ foo[1].appendChild(AppendLink('[get it from innabox]',linkloc));
+		if (foo[1].textContent.indexOf('finding my screwdriver?') != -1) {
+			foo[1].appendChild(AppendLink(linkname,linkloc));
 		}
-		if (GetData("plungeraccess")=="Y") $('b:eq(1)').append(AppendLink('[innabox]',linkloc)); 
+		if (plunger) $('b:eq(1)').append(AppendLink('[innabox]',linkloc)); 
 	}
 }
 
@@ -2536,7 +2539,7 @@ function at_inventory()
 						this.setAttribute('previmg',imgtd.firstChild.src);
 					else this.setAttribute('previmg',0);
 
-					var ztype = parseInt(this.getAttribute('name'));
+					var ztype = integer(this.getAttribute('name'));
 					var url = /*'http://'+*/server+"/inv_equip.php?pwd="+
 					pwd+"&which=2&action="+action+"&whichitem="+this.value;
 					if (ztype == 5) url += "&slot=1";
@@ -2771,7 +2774,10 @@ function at_store()
 	// You can thank Mr. Mag for this one...
 	// right-click on the image of the shopkeeper to put on your travoltan trousers without leaving the store.
 	if (whichstore != 'g') {	// can't switch pants in the lab store, and this throws an error if you're in the wrong outfit anyway.
-		$("img[src*=otherimages]:first").attr('id','proprietor').get(0)
+		$("img[src*=otherimages]:first")
+		.attr('title','right-click to equip Travoltan Trousers')
+		.attr('id','proprietor')
+		.get(0)
 		.addEventListener('contextmenu', function(evt)
 		{	GM_get(server+'/inv_equip.php?pwd='+pwd+
 				'&which=2&action=equip&whichitem=1792',
@@ -3021,7 +3027,7 @@ function at_hermit()
 		{	var descId = $('img:first').get(0).getAttribute('onclick');
 			var bText = $('b:eq(1)').attr('valign','baseline');
 			if (bText.text().indexOf("ten-leaf clovers") != -1)
-			{	var num = parseInt(bText.text().split(" ten-leaf")[0]);
+			{	var num = integer(bText.text().split(" ten-leaf")[0]);
 				bText.parent().append(AppendLink('[disassemble]', 'multiuse.php?pwd=' +
 				pwd + '&action=useitem&quantity=' + num + '&whichitem=24'));
 			}
@@ -3155,7 +3161,7 @@ function at_council()
 			else if (txt.indexOf("her Lair") != -1)
 				p.append(AppendLink('[lair]', 'lair.php'));
 			else if (txt.indexOf("Black Forest") != -1)
-				p.append(AppendLink('[forest]', 'adventure.php?snarfblat=111'));
+				p.append(AppendLink('[forest (1)]', 'adventure.php?snarfblat=111'));
 			else if (txt.indexOf("war") != -1 && txt.indexOf("Island") != -1)
 				p.append(AppendLink('[island]', 'island.php'));
 		});
@@ -3375,7 +3381,7 @@ function at_charpane()
 	var compactMode = imgs[0].getAttribute('height') < 60;
 	var bText = document.getElementsByTagName('b');
 	var curHP, maxHP, curMP, maxMP, level, str, advcount, effLink;
-	var oldcount = parseInt(GetData('advcount'));
+	var oldcount = integer(GetData('advcount'));
 	var effectsDB = {
 	'd33505':3,		// confused
 	'cb5404':58,	// teleportitis
@@ -3412,20 +3418,20 @@ function at_charpane()
 			var spl = str.split('/');
 			if(spl.length > 1)
 			{	if (mp == 0)
-				{	curHP = parseInt(spl[0]);
-					maxHP = parseInt(spl[1]); mp++;
+				{	curHP = integer(spl[0]);
+					maxHP = integer(spl[1]); mp++;
 					bText[i].parentNode.previousSibling
 						.addEventListener('contextmenu', RightClickHP,true);
 				}else
-				{	curMP = parseInt(spl[0]);
-					maxMP = parseInt(spl[1]);
+				{	curMP = integer(spl[0]);
+					maxMP = integer(spl[1]);
 					bText[i].parentNode.previousSibling
 						.addEventListener('contextmenu',RightClickMP,true);
 					break;
 				}
 			}
 		}
-		advcount = parseInt($('a:contains(Adv):first').parent().next().text());
+		advcount = integer($('a:contains(Adv):first').parent().next().text());
 
 		var lvlblock = $("center:contains('Lvl.'):first").text();
 		level = lvlblock.match(/Lvl. (\d+)/)[1];
@@ -3433,6 +3439,7 @@ function at_charpane()
 		SetData("currentHP", curHP); SetData("maxHP", maxHP);
 		SetData("currentMP", curMP); SetData("maxMP", maxMP);
 		SetData("level", level);
+		GM_log("compact mode: set level="+level+", curHP="+ curHP+", maxHP="+maxHP+", curMP="+curMP+", maxMP="+maxMP);
 	} else { // Full Mode
 		function parse_cur_and_max(names) {
 			for each (var name in names) {
@@ -3449,7 +3456,7 @@ function at_charpane()
 		var lvlblock = $("td:contains('Level'):first").text();
 		level = lvlblock.match(/Level (\d+)/)[1];
 		SetData("level", level);
-
+		GM_log("full mode: set level="+level);
 		// Change image link for costumes
 		var img = imgs[0];
 		if (GetPref('backup'))
@@ -3474,7 +3481,7 @@ function at_charpane()
 	}
 
 	// Re-hydrate (0)
-	var temphydr = parseInt(GetData('hydrate'));
+	var temphydr = integer(GetData('hydrate'));
 	if(temphydr)
 	{	if(advcount > oldcount)
 		{	temphydr+=(advcount-oldcount);
@@ -3583,7 +3590,7 @@ function at_skills()
 			 || temp == 1007 || temp == 5007 || temp == 3009)
 				json += ('"'+temp+'":1,');
 			if (noDisable > 0 && sel.childNodes[i].getAttribute('disabled') != null)
-			{	switch(parseInt(temp))
+			{	switch(integer(temp))
 				{	case 3: case 16: case 17: case 4006: case 5014: case 3006:
 						break;
 					default: sel.childNodes[i].removeAttribute('disabled');
@@ -3606,7 +3613,7 @@ function at_skills()
 	{	var json = "{"; var opt = vich[0].childNodes;
 		for (i=0, len=opt.length; i<len; i++)
 		{	var optval = opt[i].value; var temp;
-			switch (parseInt(optval))
+			switch (integer(optval))
 			{	case 344: case 1559: case 518: case 1658: case 1659: case 1660: case 2639:
 					if (opt[i].innerHTML.indexOf('(') == -1) temp = 1;
 					else
@@ -3629,8 +3636,8 @@ function at_skills()
 				{	var selectItem = document.getElementsByName('whichskill')[0];
 					var cost = ParseSelectQuantity(selectItem, " ");
 					var limit = SkillUseLimit(selectItem.options[selectItem.selectedIndex].value);
-					var val = parseInt(GetData("currentMP") / cost);
-					if (event.which == 72) val = parseInt(val/2); // half
+					var val = integer(GetData("currentMP") / cost);
+					if (event.which == 72) val = integer(val/2); // half
 					if (val > limit) this.value = limit;
 					else this.value = val;					
 					event.stopPropagation(); event.preventDefault();
@@ -3643,7 +3650,7 @@ function at_skills()
 					var box = document.getElementsByName('quantity')[0];
 					var cost = ParseSelectQuantity(selectItem, " ");
 					var limit = SkillUseLimit(selectItem.options[selectItem.selectedIndex].value);
-					var val = parseInt(GetData("currentMP") / cost);
+					var val = integer(GetData("currentMP") / cost);
 					if (val > limit) box.value = limit;
 					else box.value = val;
 				});
@@ -3660,7 +3667,7 @@ function at_skills()
 			{	if (event.which == 77 || event.which == 88) // 77 = 'm', 88 = 'x'
 				{	var selectItem = document.getElementsByName('whichskill')[1];
 					var cost = ParseSelectQuantity(selectItem, " ");
-					this.value = parseInt(GetData("currentMP") / cost);
+					this.value = integer(GetData("currentMP") / cost);
 					event.stopPropagation(); event.preventDefault();
 				}	
 			}, true);
@@ -3668,7 +3675,7 @@ function at_skills()
 			{	var selectItem = document.getElementsByName('whichskill')[1];
 				var box = document.getElementsByName('bufftimes')[0];
 				var cost = ParseSelectQuantity(selectItem, " ");
-				box.value = parseInt(GetData("currentMP") / cost);
+				box.value = integer(GetData("currentMP") / cost);
 			});
 		}
 
@@ -3680,7 +3687,7 @@ function at_skills()
 					var quant = ParseSelectQuantity(selectItem, ")");
 					var index = selectItem.selectedIndex;
 					var val = FindMaxQuantity(selectItem.options[index].value, quant, 0, GetPref('safemax'));
-					if (event.which == 72) val = parseInt(val/2); // half
+					if (event.which == 72) val = integer(val/2); // half
 					this.value = val;
 					event.stopPropagation(); event.preventDefault();
 				} else if (ENABLE_QS_REFRESH == 1 && event.which == 82) self.location.reload();	// 82 = 'r'
@@ -4147,7 +4154,7 @@ function at_manor3()
 			var glyphids = new Array();
 			if (glimgs[0].getAttribute('src').indexOf('cellar1') != -1) {	// no glyphs?!  You must be missing something.
 				getWinelist.innerHTML = 
-					"You need: Lord Spookyraven's spectacles! <font size='2'><a href=adventure.php?snarfblat=108>[bedroom]</a></font>";
+					"You need: Lord Spookyraven's spectacles! <font size='2'><a href=adventure.php?snarfblat=108>[bedroom (1)]</a></font>";
 				return;
 			} // else...
 			if (atext.indexOf("Nothing more to see here.") == -1) {	// make sure we're not trying this after the chamber has been emptied
@@ -4516,85 +4523,85 @@ function at_campground()
 					'bigisland.php?place=junkyard','island'];
 				else if(gate.indexOf("coiled viper") != -1)
 					snarf = ['adder bladder','bladder',
-					'adventure.php?snarfblat=111','black forest'];
+					'adventure.php?snarfblat=111','black forest (1)'];
 				else if(gate.indexOf("a rose") != -1)
 					snarf = ['Angry Farmer candy','rcandy',
-					'adventure.php?snarfblat=82','castle in the sky'];
+					'adventure.php?snarfblat=82','castle in the sky (1)'];
 				else if(gate.indexOf("glum teenager") != -1)
 					snarf = ['thin black candle','bcandle',
-					'adventure.php?snarfblat=82','castle in the sky'];
+					'adventure.php?snarfblat=82','castle in the sky (1)'];
 				else if(gate.indexOf("hedgehog") != -1)
 					snarf = ['super-spiky hair gel','balm',
-					'adventure.php?snarfblat=81','fantasy airship'];
+					'adventure.php?snarfblat=81','fantasy airship (1)'];
 				else if(gate.indexOf("a raven") != -1)
 					snarf = ['Black No. 2','blackdye',
-					'adventure.php?snarfblat=111','black forest'];
+					'adventure.php?snarfblat=111','black forest (1)'];
 				else if(gate.indexOf("smiling man") != -1)
 					snarf = ['Mick\'s IcyVapoHotness Rub','balm',
-					'adventure.php?snarfblat=82','castle in the sky'];
+					'adventure.php?snarfblat=82','castle in the sky (1)'];
 			} else if(txt.indexOf("baseball bat") != -1)
 				snarf = ['baseball','baseball',
-				'adventure.php?snarfblat=31','guano junction'];
+				'adventure.php?snarfblat=31','guano junction (1)'];
 			else if(txt.indexOf("made of Meat") != -1)
 				snarf = ['meat vortex','vortex',
-				'adventure.php?snarfblat=80','valley'];
+				'adventure.php?snarfblat=80','valley (1)'];
 			else if(txt.indexOf("amber waves") != -1)
 				snarf = ['bronzed locust','locust1',
 				'beach.php','beach'];
 			else if(txt.indexOf("slimy eyestalk") != -1)
 				snarf = ['fancy bath salts','potion4',
-				'adventure.php?snarfblat=107','bathroom'];
+				'adventure.php?snarfblat=107','bathroom (1)'];
 			else if(txt.indexOf("flaming katana") != -1)
 				snarf = ['frigid ninja star','ninjastars',
-				'adventure.php?snarfblat=62','ninja snowmen lair'];
+				'adventure.php?snarfblat=62','ninja snowmen lair (1)'];
 			else if(txt.indexOf("translucent wing") != -1)
 				snarf = ['spider web','web',
-				'adventure.php?snarfblat=112','sleazy back alley'];
+				'adventure.php?snarfblat=112','sleazy back alley (1)'];
 			else if(txt.indexOf("looking tophat") != -1)
 				snarf = ['sonar-in-a-biscuit','biscuit',
-				'adventure.php?snarfblat=31','guano junction'];
+				'adventure.php?snarfblat=31','guano junction (1)'];
 			else if(txt.indexOf("of albumen") != -1)
 				snarf = ['black pepper','blpepper',
-				'adventure.php?snarfblat=111','black forest'];
+				'adventure.php?snarfblat=111','black forest (1)'];
 			else if(txt.indexOf("white ear") != -1)
 				snarf = ['pygmy blowgun','tinyblowgun',
 				'hiddencity.php','hidden city'];
 			else if(txt.indexOf("cowboy hat") != -1)
 				snarf = ['chaos butterfly','butterfly',
-				'adventure.php?snarfblat=82','castle in the sky'];
+				'adventure.php?snarfblat=82','castle in the sky (1)'];
 			else if(txt.indexOf("periscope") != -1)
 				snarf = ['photoprotoneutron torpedo','torpedo',
-				'adventure.php?snarfblat=81','fantasy airship'];
+				'adventure.php?snarfblat=81','fantasy airship (1)'];
 			else if(txt.indexOf("strange shadow") != -1)
 				snarf = ['inkwell','inkwell',
-				'adventure.php?snarfblat=104','haunted library'];
+				'adventure.php?snarfblat=104','haunted library (1)'];
 			else if(txt.indexOf("moonlight reflecting") != -1)
 				snarf = ['hair spray','spraycan',
 				'store.php?whichstore=m','demon market'];
 			else if(txt.indexOf("wooden frame") != -1)
 				snarf = ['disease','disease',
-				'adventure.php?snarfblat=42','knob harem'];
+				'adventure.php?snarfblat=42','knob harem (1)'];
 			else if(txt.indexOf("long coattails") != -1)
 				snarf = ['Knob Goblin firecracker','firecrack',
-				'adventure.php?snarfblat=114','knob outskirts'];
+				'adventure.php?snarfblat=114','knob outskirts (1)'];
 			else if(txt.indexOf("steam shooting") != -1)
 				snarf = ['powdered organs','scpowder',
 				'pyramid.php','pyramid'];
 			else if(txt.indexOf("holding a spatula") != -1)
 				snarf = ['leftovers of indeterminate origin','leftovers',
-				'adventure.php?snarfblat=102','haunted kitchen'];
+				'adventure.php?snarfblat=102','haunted kitchen (1)'];
 			else if(txt.indexOf("bass guitar") != -1)
 				snarf = ['mariachi G-string','string',
-				'adventure.php?snarfblat=45','south of the border'];
+				'adventure.php?snarfblat=45','south of the border (1)'];
 			else if(txt.indexOf("North Pole") != -1)
 				snarf = ['NG','ng',
-				'adventure.php?snarfblat=80','valley'];
+				'adventure.php?snarfblat=80','valley (1)'];
 			else if(txt.indexOf("writing desk") != -1)
 				snarf = ['plot hole','hole',
-				'adventure.php?snarfblat=82','castle in the sky'];
+				'adventure.php?snarfblat=82','castle in the sky (1)'];
 			else if(txt.indexOf("cuticle") != -1)
 				snarf = ['razor-sharp can lid','canlid',
-				'adventure.php?snarfblat=113','haunted pantry'];
+				'adventure.php?snarfblat=113','haunted pantry (1)'];
 			else if(txt.indexOf("formidable stinger") != -1)
 				snarf = ['tropical orchid','troporchid','shore.php','shore'];
 			else if(txt.indexOf("pair of horns") != -1)
@@ -4676,38 +4683,38 @@ function at_basement()
 
 	switch(bimg)
 	{	case "earbeast.gif":
-			//str = "Monster Level: " + parseInt(Math.pow(lvl,1.4));
+			//str = "Monster Level: " + integer(Math.pow(lvl,1.4));
 			break;
 		case "document.gif": lvl = 4.5*Math.pow(lvl,1.4)+8;
-			str = "Hot & Spooky: " + parseInt(lvl*.95) + " to " + parseInt(lvl*1.05) + " Damage";
+			str = "Hot & Spooky: " + integer(lvl*.95) + " to " + integer(lvl*1.05) + " Damage";
 			break;
 		case "coldmarg.gif": lvl = 4.5*Math.pow(lvl,1.4)+8;
-			str = "Cold & Sleaze: " + parseInt(lvl*.95) + " to " + parseInt(lvl*1.05) + " Damage";
+			str = "Cold & Sleaze: " + integer(lvl*.95) + " to " + integer(lvl*1.05) + " Damage";
 			break;
 		case "fratbong.gif": lvl = 4.5*Math.pow(lvl,1.4)+8;
-			str = "Sleaze & Stench: " + parseInt(lvl*.95) + " to " + parseInt(lvl*1.05) + " Damage";
+			str = "Sleaze & Stench: " + integer(lvl*.95) + " to " + integer(lvl*1.05) + " Damage";
 			break;
 		case "onnastick.gif": lvl = 4.5*Math.pow(lvl,1.4)+8;
-			str = "Stench & Hot: " + parseInt(lvl*.95) + " to " + parseInt(lvl*1.05) + " Damage";
+			str = "Stench & Hot: " + integer(lvl*.95) + " to " + integer(lvl*1.05) + " Damage";
 			break;
 		case "snowballbat.gif": lvl = 4.5*Math.pow(lvl,1.4)+8;
-			str = "Spooky & Cold: " + parseInt(lvl*.95) + " to " + parseInt(lvl*1.05) + " Damage";
+			str = "Spooky & Cold: " + integer(lvl*.95) + " to " + integer(lvl*1.05) + " Damage";
 			break;
 		case "sorority.gif": case "bigbaby.gif":
 		case "pooltable.gif": case "goblinaxe.gif": lvl = Math.pow(lvl,1.4);
-			str = "Moxie Needed: " + parseInt(lvl*.94) + " to " + parseInt(lvl*1.06);
+			str = "Moxie Needed: " + integer(lvl*.94) + " to " + integer(lvl*1.06);
 			break;
 		case "mops.gif": case "voodoo.gif": case "darkshards.gif": lvl = Math.pow(lvl,1.4);
-			str = "Mysticality Needed: " + parseInt(lvl*.94) + " to " + parseInt(lvl*1.06);
+			str = "Mysticality Needed: " + integer(lvl*.94) + " to " + integer(lvl*1.06);
 			break;
 		case "typewriters.gif": case "bigstatue.gif": case "bigmallet.gif": lvl = Math.pow(lvl,1.4);
-			str = "Muscle Needed: " + parseInt(lvl*.94) + " to " + parseInt(lvl*1.06);
+			str = "Muscle Needed: " + integer(lvl*.94) + " to " + integer(lvl*1.06);
 			break;
 		case "haiku11.gif": lvl = Math.pow(lvl,1.4) * 10;
-			str = "HP Needed: " + parseInt(lvl*.94) + " to " + parseInt(lvl*1.06) + "(lowered by DA)";
+			str = "HP Needed: " + integer(lvl*.94) + " to " + integer(lvl*1.06) + "(lowered by DA)";
 			break;
 		case "powderbox.gif": lvl = Math.pow(lvl,1.4) * 1.67;
-			str = "MP Needed: " + parseInt(lvl*.94) + " to " + parseInt(lvl*1.06);
+			str = "MP Needed: " + integer(lvl*.94) + " to " + integer(lvl*1.06);
 			break;
 	}
 	if (str != "") bim.parentNode.innerHTML += "<br><span class='small'><b>"+str+"</b></span>";
@@ -5056,7 +5063,7 @@ function at_topmenu()
 
 	// some housekeeping stuff that I want to make sure gets checked regularly and can't think of a better place for...
 	// gotta clear these out when you ascend, which you may do on a different computer occasionally.
-	if (parseInt(GetData('level')) < 11) {
+	if (integer(GetData('level')) < 11) {
 		SetCharData("corner178",0);
 		SetCharData("corner179",0);
 		SetCharData("corner180",0);
@@ -5131,7 +5138,7 @@ function at_topmenu()
 		if (txt == "plains")
 		{	a.after(' <a href="manor.php" target="mainpane">manor</a>');
 
-			if (parseInt(GetData('level')) > 9)
+			if (integer(GetData('level')) > 9)
 				a.after(' <a href="beanstalk.php" target="mainpane">stalk</a>');
 
 			// This is as good a place as any; get span for adding links later.
@@ -5140,7 +5147,7 @@ function at_topmenu()
 		}
 		
 		if (txt == "beach")
-		{	if (parseInt(GetData('level')) > 12) 
+		{	if (integer(GetData('level')) > 12) 
 			a.after(' <a href="thesea.php" target="mainpane">sea</a>');
 		}
 		
@@ -5270,7 +5277,7 @@ function at_topmenu()
 		AddTopLink(toprow1, 'mainpane', 'craft.php?mode=smith', 'smith', 1);
 		AddTopLink(toprow1, 'mainpane', 'council.php', 'council', 1);
 		AddTopLink(toprow1, 'mainpane', 'guild.php', 'guild', 1);
-		if (haveLair == 1 && parseInt(GetData('level')) == 13)
+		if (haveLair == 1 && integer(GetData('level')) == 13)
 			AddTopLink(toprow1, 'mainpane', 'lair2.php?action=door', 'door', 1);
 		a = document.createElement('a'); a.innerHTML = "more"; a.setAttribute('href','#');
 		a.addEventListener('click', function(event)
@@ -5462,7 +5469,7 @@ function at_compactmenu()
 				len += 3;
 			}
 			if (selectItem.options[i].innerHTML.indexOf("Desert Beach") != -1)
-			{	if (parseInt(GetData('level')) > 12) 
+			{	if (integer(GetData('level')) > 12) 
 				{	AddTopOption("The Sea","thesea.php",selectItem, selectItem.options[i+1]);
 					// len++;
 				}
@@ -5671,9 +5678,9 @@ function at_account()
 				{	var uspan = document.getElementsByName('updatespan')[0];
 					var txtsplit = txt.split(',');
 					var versionNumber = txtsplit[0].replace('.','').replace('.','');
-					if (parseInt(versionNumber,10) <= VERSION)
+					if (integer(versionNumber) <= VERSION)
 					{	uspan.innerHTML = "<br>No Update Available.";
-						persist('MrScriptLastUpdate', parseInt(new Date().getTime()/3600000)); return;
+						persist('MrScriptLastUpdate', integer(new Date().getTime()/3600000)); return;
 					} else
 					{	uspan.innerHTML = "<br>Version " + txtsplit[0] + " Available: <a target='_blank' href='" +
 							txtsplit[1] + "'>Update</a>";
@@ -5771,7 +5778,7 @@ function autoclear_added_rows()
 // MAINT: Refresh until rollover is over.
 function at_maint()
 {	document.title="KoL Rollover";
-	var s = parseInt(GetPref("roserver"),10); 
+	var s = integer(GetPref("roserver")); 
 	if ((s === undefined) || isNaN(s)) s = 0; //GM_log("s="+s);
 
 	s++;
