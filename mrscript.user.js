@@ -1187,7 +1187,7 @@ function UnequipUpdate(event)
 }
 
 // EQUIPUPDATE: This is silly, but the alternatives were even sillier.
-function EquipUpdate(txt, itm)
+function EquipUpdate(txt, itm)	// txt = HTML of GM_get() result.  itm = type of item trying to be equipped.
 {	var equipped = '';
 	if(itm == 8) equipped = txt.indexOf(" equips an item:");
 	else
@@ -1216,7 +1216,7 @@ function EquipUpdate(txt, itm)
 		jqtd.children('font,a').remove();
 
 		var pwr = "";
-		if (itm < 5)
+		if (itm < 5) // hat through pants only
 		{
 			pwr = txt.split(zoik)[2].match(/\(Power[^\)]+\)/).toString();
 
@@ -1345,6 +1345,12 @@ function AddTopOption(name, url, select, putBefore)
 }
 
 // MAKEOPTION: Does what it says. Yup.
+// text == label for the option.  (human-readable description)
+// num = number of options to make.  Negative -> create a text input box instead of listbox.
+//		-1: create straight up input box.
+//		-2: create 2 input boxes, first one as label, second as value.
+// pref = name of GM flag that this option is setting.
+// opt1, opt2 = labels of first 2 options to create.  (options beyond 2 must be created manually after calling this routine.)
 function MakeOption(text, num, pref, opt1, opt2)
 {
 	var table = document.createElement('table');
@@ -2000,7 +2006,7 @@ function at_adventure() {
 			$('<center><p><a href="adventure.php?snarfblat=160>Adventure Belowdecks</a></center>').appendTo($('a:last'));
 			break;
 		case "Mr. Alarm":
-			$('a[href*="snarfblat"]').href("adventure.php?snarfblat=100").text("Adventure in WHITEY'S GROVE");
+			$('a[href*="snarfblat"]').attr("href","adventure.php?snarfblat=100").text("Adventure in WHITEY'S GROVE");
 			break;
 		case "It's A Sign!":
 			$('<center><a href="adventure.php?snarfblat=100">Adventure Again (Whitey\'s Grove)</a></center><br />').prependTo($('a:last'));
@@ -2547,6 +2553,7 @@ function at_inventory()
 					else if (ztype == 7) url += "&slot=3";
 
 				// I forget why I had to do this, but I'm sure there was a reason.
+				// probably because ztype is out of scope in the anonymous function.
 					switch(ztype)
 					{	case 0: GM_get(url, function(t){EquipUpdate(t,0);}); break;
 						case 1: GM_get(url, function(t){EquipUpdate(t,1);}); break;
@@ -5138,7 +5145,8 @@ function at_topmenu()
 		if (txt == "plains")
 		{	a.after(' <a href="manor.php" target="mainpane">manor</a>');
 
-			if (integer(GetData('level')) > 9)
+			GM_log("checking level in topmenu: is currently "+integer(GetData('level')));
+			if (integer(GetData('level')) > 9) 
 				a.after(' <a href="beanstalk.php" target="mainpane">stalk</a>');
 
 			// This is as good a place as any; get span for adding links later.
