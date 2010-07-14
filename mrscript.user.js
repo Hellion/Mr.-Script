@@ -1975,6 +1975,7 @@ function at_rats() {
 }
 
 // ADVENTURE: provide "Explore next square" link when we hit a non-combat in the Hidden City.
+// Also provide extra functionality for certain other noncombats.
 function at_adventure() {
 	var square=GetData("square");
 	SetData("square",false);
@@ -1999,8 +2000,9 @@ function at_adventure() {
 	GM_log("NCTtext=["+$(NCTitle).text()+"]");
 	switch ($(NCTitle).text()) {
 		case "Rotting Matilda":
-			NCTitle.append(AppendLink('[use another dance card]', 
-				'inv_use.php?pwd=' + pwd + '&which=3&whichitem=1963&ajax=1&itemquantity=1&quantity=1'));
+			var cardlink = document.createElement('table');
+			cardlink.innerHTML = '<table class="item" style="float: none" rel="id=1963&s=55&q=0&d=1&g=0&t=1&n=1&m=0&u=u"><tr><td><img src="http://images.kingdomofloathing.com/itemimages/guildapp.gif" alt="dance card" title="dance card" class=hand onClick="descitem(223939661)"></td></tr></table>';
+			NCTitle.append(cardlink);
 			break;
 		case "It's Always Swordfish":
 			$('<center><p><a href="adventure.php?snarfblat=160>Adventure Belowdecks</a></center>').appendTo($('a:last'));
