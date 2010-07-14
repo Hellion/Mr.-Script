@@ -1551,6 +1551,11 @@ function at_fight() {
 	"a pygmy assault squad":["--","",0,3],
 	"an ancient protector spirit":["--","",0,3],
 	"a clingy pirate":["cocktail napkin","",0,0],
+	"a sassy pirate":["The Big Book of Pirate Insults","",0,4],
+	"a shady pirate":["The Big Book of Pirate Insults","",0,4],
+	"a shifty pirate":["The Big Book of Pirate Insults","",0,4],
+	"a smarmyy pirate":["The Big Book of Pirate Insults","",0,4],
+	"a swarthy pirate":["The Big Book of Pirate Insults","",0,4],
 	"a tetchy pirate":["The Big Book of Pirate Insults","",0,4],
 	"a toothy pirate":["The Big Book of Pirate Insults","",0,4],
 	"a tipsy pirate":["The Big Book of Pirate Insults","",0,4]
@@ -1597,7 +1602,6 @@ function at_fight() {
 			SetData("special",monsterItem[3]);
 		}
 	}
-
 // PART 2: SPECIAL-PROCESS STUFF
 	if (GetData("special") != 0)	{	// in a fight with something special?
 		switch (GetData("special"))
@@ -1659,9 +1663,9 @@ function at_fight() {
 			break;
 			
 			case 3: // hidden city monsters--look for sphere messages.
-				if (/You hold the \w+ \w+ \w+ up in the air./.test(document.body.innerHTML)) {
+				if (/You hold the \w+ stone sphere/.test(document.body.innerHTML)) {
 					var stone = {"mossy":2174, "smooth":2175, "cracked":2176, "rough":2177};
-					var snRegex = /You hold the (\w+) stone sphere up in the air./g;
+					var snRegex = /You hold the (\w+) stone sphere/g;
 					var scRegex = /It radiates a bright (\w+) light,/g;
 					var sname; 
 					var color; 
@@ -1736,6 +1740,7 @@ function at_fight() {
 					hloc = "hiddencity.php?which=";
 					lastsquare=24;
 				} else {
+				    SetCharData("lastrat",thissquare);	// store for display on the main (pre-quest) tavern page.
 					hloc = "rats.php?where=";
 					lastsquare=25;
 				}
@@ -1780,7 +1785,9 @@ function at_fight() {
 				}
 				// save info about what wines dropped for the wine location solver.
 				if (dropcode != 0) {
-					var corner = "corner" + document.getElementsByTagName('a')[1].href.match(/snarfblat=(\d+)/)[1];
+					var cref = $('a[href*="snarfblat"]').attr("href");
+//					GM_log("cref="+cref);
+					var corner = "corner" + cref.match(/snarfblat=(\d+)/)[1];
 					var winesfound = GetCharData(corner);
 					winesfound |= dropcode;
 					SetCharData(corner, winesfound);
@@ -1794,7 +1801,7 @@ function at_fight() {
 		case "a dirty thieving brigand":
 			var meatline = $("img[src*='meat.gif']:last").parent().next().text();	// should be "You gain X meat"
 			var meat = integer(meatline.match(/You gain (\d+) Meat/)[1]);
-			var meatSoFar = integer(GetCharData("nunmoney")); if (meatSoFar == undefined) meatSoFar = 0;
+			var meatSoFar = integer(GetCharData("nunmoney")); if ((meatSoFar == undefined) || isNaN(meatSoFar)) meatSoFar = 0;
 //			GM_log("meatline="+meatline+", meat="+meat+", meatSoFar="+meatSoFar);
 			meatSoFar += meat;
 			$("img[src*='meat.gif']:last").parent().next().append("<font color='blue'>&nbsp;("+meatSoFar+" collected total).</font>");
@@ -1897,6 +1904,8 @@ function at_valhalla() {
 	SetCharData("altar4",'');
 	// reset pirate insult knowledge
 	SetCharData("insults",'0;0;0;0;0;0;0;0');
+	// clear last-rat info
+	SetCharData("lastrat",0);
 }
 
 // COVE: display pirate insult information
@@ -1931,7 +1940,8 @@ function at_hiddencity() {
 		var stone = GetCharData('altar'+altar);
 		if ((stone != undefined) && (stone != '')) {
 			$('option:not([value="'+stone+'"]):not([value="'+ball[altar]+'"])').remove();
-			$('select[name="whichitem"]').attr('style','color:green');
+			$('select[name="whichitem"]').attr('style','color:green');	// mark as ID'd
+			$('option:[value="'+stone+'"]').attr('selected','selected');// select the right stone
 		} else {
 			$('option:not([value="2174"]):not([value="2175"]):not([value="2176"]):not([value="2177"]):not([value="'+ball[altar]+'"])').remove();
 		}
@@ -1948,6 +1958,13 @@ function at_rats() {
 		var a = $(this);
 		SetData("square",a.attr('href'));
 	});
+	var lastrat = integer(GetCharData("lastrat"));
+	if (isNaN(lastrat)) lastrat = 0;
+	if (lastrat) {
+		var lastratdiv = document.createElement('div');
+		lastratdiv.innerHTML = '<center><font color="blue">Last square clicked:'+lastrat+'</font></center>';
+		document.body.appendChild(lastratdiv);
+	}
 // add "next square" link when we click on a drink-dropping non-combat square.
 	$('td:contains("You acquire an item"):not(:has(table))').each(function() { // only the innermost acquire-an-item TD.
 		var tdhtml = $(this).html();
@@ -1961,6 +1978,7 @@ function at_rats() {
 			var hloc = "rats.php?where=";
 			var thissquare = square.match(/(\d+)/)[1];	// the "22" in "rats.php?where=22"
 			var nextsquare = integer(thissquare)+1;
+			SetCharData("lastrat",thissquare);
 			if (nextsquare < 26) {
 				var myhref = hloc+nextsquare;
 				var clicky = "SetData('square','"+myhref+"')";
@@ -1999,21 +2017,30 @@ function at_adventure() {
 	var NCTitle = $('b:eq(1)');
 	GM_log("NCTtext=["+$(NCTitle).text()+"]");
 	switch ($(NCTitle).text()) {
-		case "Rotting Matilda":
-			var cardlink = document.createElement('table');
-			cardlink.innerHTML = '<table class="item" style="float: none" rel="id=1963&s=55&q=0&d=1&g=0&t=1&n=1&m=0&u=u"><tr><td><img src="http://images.kingdomofloathing.com/itemimages/guildapp.gif" alt="dance card" title="dance card" class=hand onClick="descitem(223939661)"></td></tr></table>';
-			NCTitle.append(cardlink);
-			break;
-		case "It's Always Swordfish":
-			$('<center><p><a href="adventure.php?snarfblat=160>Adventure Belowdecks</a></center>').appendTo($('a:last'));
-			break;
-		case "Mr. Alarm":
-			$('a[href*="snarfblat"]').attr("href","adventure.php?snarfblat=100").text("Adventure in WHITEY'S GROVE");
-			break;
-		case "It's A Sign!":
-			$('<center><a href="adventure.php?snarfblat=100">Adventure Again (Whitey\'s Grove)</a></center><br />').prependTo($('a:last'));
-			$('<center><a href="adventure.php?snarfblat=99">Adventure on the Road to White Citadel</a></center><br />').prependTo($('a:last'));
-			break;
+	case "Rotting Matilda":
+		var cardlink = document.createElement('table');
+		cardlink.innerHTML = '<table class="item" style="float: none" rel="id=1963&s=55&q=0&d=1&g=0&t=1&n=1&m=0&u=u"><tr><td><img src="http://images.kingdomofloathing.com/itemimages/guildapp.gif" alt="dance card" title="dance card" class=hand onClick="descitem(223939661)"></td></tr></table>';
+		NCTitle.append(cardlink);
+		break;
+	case "It's Always Swordfish":
+		$('<center><p><a href="adventure.php?snarfblat=160>Adventure Belowdecks</a></center>').appendTo($('a:last'));
+		break;
+	case "Mr. Alarm":
+		$('a[href*="snarfblat"]').attr("href","adventure.php?snarfblat=100").text("Adventure in WHITEY'S GROVE");
+		break;
+	case "It's A Sign!":
+		$('<center><a href="adventure.php?snarfblat=100">Adventure Again (Whitey\'s Grove)</a></center><br />').prependTo($('a:last'));
+		$('<center><a href="adventure.php?snarfblat=99">Adventure on the Road to White Citadel</a></center><br />').prependTo($('a:last'));
+		break;
+	case "":	// got a "You shouldn't be here" or other reject message...
+		$('center table tr td').each(function(){
+			GM_log($(this).text());
+		});
+		GM_log("srch="+document.location.search);
+		if (document.location.search=="?snarfblat=100") {
+			top.document.getElementsByName('mainpane')[0].contentDocument.location.pathname="guild.php?place=paco";
+		}
+		break;
 	}
 }
 
@@ -3448,7 +3475,7 @@ function at_charpane()
 		SetData("currentHP", curHP); SetData("maxHP", maxHP);
 		SetData("currentMP", curMP); SetData("maxMP", maxMP);
 		SetData("level", level);
-		GM_log("compact mode: set level="+level+", curHP="+ curHP+", maxHP="+maxHP+", curMP="+curMP+", maxMP="+maxMP);
+//		GM_log("compact mode: set level="+level+", curHP="+ curHP+", maxHP="+maxHP+", curMP="+curMP+", maxMP="+maxMP);
 	} else { // Full Mode
 		function parse_cur_and_max(names) {
 			for each (var name in names) {
@@ -3465,7 +3492,7 @@ function at_charpane()
 		var lvlblock = $("td:contains('Level'):first").text();
 		level = lvlblock.match(/Level (\d+)/)[1];
 		SetData("level", level);
-		GM_log("full mode: set level="+level);
+//		GM_log("full mode: set level="+level);
 		// Change image link for costumes
 		var img = imgs[0];
 		if (GetPref('backup'))
