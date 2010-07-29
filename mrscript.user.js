@@ -808,7 +808,7 @@ function AddLinks(descId, theItem, formWhere, path) {
 			addWhere.append(AppendLink('[chasm]','mountains.php?orcs=1&pwd='+pwd)); break;
 			
 		case  602: // Degrassi Knoll shopping list
-			if (getCharData("plungeraccess") == "Y") addWhere.append(AppendLink('[gnoll store]', "store.php?whichstore=5"));
+			if (GetCharData("plungeraccess") == "Y") addWhere.append(AppendLink('[gnoll store]', "store.php?whichstore=5"));
 			else addWhere.append(AppendLink('[Knoll (1)]', "adventure.php?snarfblat=19"));
 			break;
 			
@@ -934,6 +934,9 @@ function AddLinks(descId, theItem, formWhere, path) {
 
 		case 2064: // Forged documents
 			addWhere.append(AppendLink('[shore]','shore.php')); break;
+			
+		case 4621: // Game Grid Token
+			addWhere.append(AppendLink('[arcade]','arcade.php')); break;
 	}
 
   switch (doWhat) {
@@ -1447,6 +1450,7 @@ function at_main_c() {
 	
 	$('tr:contains("Noob."):eq(1)').append(AppendLink('[Toot]','mtnoob.php?action=toot'));	// fresh from valhalla?  get things rolling.
 	$('tr:contains("responded to a trade offer")').append(AppendLink('[trade]', 'makeoffer.php'));
+	$('tr:contains("new clan announcement")').append(AppendLink('[go read it]', 'clan_hall.php'));
 	
 	var update = GetData("Update");
 	if (update != '') {
@@ -3534,7 +3538,9 @@ function at_charpane()
 	// Re-hydrate (0)
 	var temphydr = integer(GetCharData('hydrate'));
 	if(temphydr)
-	{	if(advcount > oldcount)
+	{	
+//		GM_log("hydrate="+temphydr+", advcount="+advcount+", oldcount="+oldcount);
+		if(advcount > oldcount)
 		{	temphydr+=(advcount-oldcount);
 			SetCharData('hydrate', temphydr);
 		}
