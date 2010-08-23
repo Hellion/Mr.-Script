@@ -1450,7 +1450,7 @@ function at_main_c() {
 	
 	$('tr:contains("Noob."):eq(1)').append(AppendLink('[Toot]','mtnoob.php?action=toot'));	// fresh from valhalla?  get things rolling.
 	$('tr:contains("responded to a trade offer")').append(AppendLink('[trade]', 'makeoffer.php'));
-	$('tr:contains("new clan announcement")').append(AppendLink('[go read it]', 'clan_hall.php'));
+	$('tr:contains("new announcement")').append(AppendLink('[go read it]', 'clan_hall.php'));
 	
 	var update = GetData("Update");
 	if (update != '') {
@@ -1580,6 +1580,10 @@ function at_fight() {
 				break;
 			}
 		}
+	}
+	// fix the ugly new Hell Ion image...
+	if (monsterName == "a Hellion") {
+		$('#monpic').attr("src","http://images.kingdomofloathing.com/otherimages/customavatars/250730.gif").attr("width",60).attr("height",100);
 	}
 	
 	// always process the pirate insult book if it's in the combat item list:
