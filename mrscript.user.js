@@ -1448,9 +1448,10 @@ function at_main_c() {
 		});
 	}
 	
+	// n.b. the :eq(1) below is important because of the nested-table layout.  only select the inner TR.
 	$('tr:contains("Noob."):eq(1)').append(AppendLink('[Toot]','mtnoob.php?action=toot'));	// fresh from valhalla?  get things rolling.
-	$('tr:contains("responded to a trade offer")').append(AppendLink('[trade]', 'makeoffer.php'));
-	$('tr:contains("new announcement")').append(AppendLink('[go read it]', 'clan_hall.php'));
+	$('tr:contains("responded to a trade offer"):eq(1)').append(AppendLink('[trade]', 'makeoffer.php'));
+	$('tr:contains("new announcement"):eq(1)').append(AppendLink('[go read it]', 'clan_hall.php'));
 	
 	var update = GetData("Update");
 	if (update != '') {
@@ -4340,6 +4341,45 @@ function at_pyramid()
     }
 // end de-ratter
 }
+
+// AT_CAVE: spoil that nemesis quest.
+function at_cave() 
+{
+	var dooritem = {"/mus_door1.gif":[37,"a viking helmet"],
+					"/mys_door1.gif":[560,"a stalk of asparagus"],
+					"/mox_door1.gif":[565,"a pair of dirty hobo gloves"],
+					"/mus_door2.gif":[316,"an insanely spicy bean burrito"],
+					"/mys_door2.gif":[319,"an insanely spicy enchanted bean burrito"],
+					"/mox_door2.gif":[1256,"an insanely spicy jumping bean burrito"],
+					"/sc_door3.gif":[2478,"a clown whip"],
+					"/tt_door3.gif":[2477,"a clownskin buckler"],
+					"/sa_door3.gif":[420,"some boring spaghetti"],
+					"/pm_door3.gif":[579,"a tomato juice of powerful power"],
+					"/db_door3.gif":[9999,"any of the 12 'normal' Advanced Cocktailcrafting drinks"],
+					"/at_door3.gif":[9999,"the 'Polka of Plenty' buff"]
+					};
+	var subloc = document.location.search;
+//	GM_log("subloc="+subloc);
+	if (subloc.indexOf("action=door") != -1) {
+		doorpicname = $('img:first').attr('src');
+		var door = doorpicname.slice(doorpicname.lastIndexOf('/'));
+//		GM_log("door="+door+", item="+dooritems[door][0]);
+		if (dooritem[door]) {	// item is in our list
+			var descid = $('option:[value="'+dooritem[door][0]+'"]').attr('descid');
+			if (descid) { 	// item is in the selection list
+				$('select[name="whichitem"]').attr('style','color:green');	// mark as selected
+				$('option:[value="'+dooritem[door][0]+'"]').attr('selected','selected');// select the right item
+				
+			} else {
+				$('select[name="whichitem"]')
+					.attr('style','color:red')
+					.parent().append("<center><p><font color='blue'>You need "+dooritem[door][1]+" to proceed.</font></center>");	
+				if (door == '/db_door3.gif') $('select[name="whichitem"]').attr('style','color=black');		// un-red it if it's the DB door.
+			}
+		}
+	}
+}
+
 
 // LAIR1: More linkies.
 function at_lair1()
