@@ -1295,6 +1295,7 @@ function Defaults(revert)
 //		if (GetPref('eatagain') == undefined) 	SetPref('eatagain', 0);
 		if (GetPref('lairspoil') == undefined)	SetPref('lairspoil', 1);
 		if (GetPref('moonslink') == undefined)  SetPref('moonslink', 1);
+		if (GetPref('malllink') == undefined)   SetPref('malllink', 1);
 		
 		if (GetPref('ascension_list') == undefined) SetPref('ascension_list','cooked key pies, exploded chef, exploded bartender, discarded karma, bought a skill');
 
@@ -2195,6 +2196,13 @@ function at_bhh() {
 // function at_searchmall() 
 // {	at_mallstore();			// I need to make a unique function for this....  05Jan10 Hellion
 // }
+function at_searchmall() {
+	$('center table tr td center table:first').prepend('<tr><td><center><a href=managestore.php>Manage your Store</a><br /><br /></center></td></tr>');
+}
+
+function at_managestore() {
+	$('center table tr td center table:first').prepend('<tr><td><center><a href=searchmall.php>Search the Mall</a><br /><br /></center></td></tr>');
+}
 
 // MALLSTORE: add fun links to (some of) the things you buy!
 function at_mallstore()
@@ -5222,6 +5230,9 @@ function at_topmenu()
 		// shorten things up to make some room for our other additions
 		if (txt == "campground") a.html("camp");
 		if (txt == "mountains") a.html("mtns");
+		
+		// change default mall link
+		if ((txt == "mall") && GetPref("malllink") == 1) a.attr("href","searchmall.php");
 
 		// Lair
 		if (txt == "lair") haveLair = 1;
@@ -5663,6 +5674,7 @@ function at_account()
 			select.options[3].innerHTML = "Saved";
 			select.options[4].innerHTML = "PvP";
 			prefSpan.appendChild(choice);
+			prefSpan.appendChild(MakeOption("Mall Link -> Search", 2, 'malllink', "Off", "On"));
 
 			prefSpan.appendChild(MakeOption("Monster Level Spoiler: ", 2, 'zonespoil', "Off", "On"));
 			prefSpan.appendChild(MakeOption("Never Grey Out Skills: ", 2, 'nodisable', "Off", "On"));
