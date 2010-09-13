@@ -841,6 +841,9 @@ function AddLinks(descId, theItem, formWhere, path) {
 			
 		case 2441: // KG encryption key
 			addWhere.append(AppendLink('[use map]','inv_use.php?pwd=' + pwd + '&which=3&whichitem=2442')); break;
+			
+		case 2277: // Fern's key
+			addWhere.append(AppendLink("[Tower Ruins (1)]",'adventure.php?snarfblat=22')); break;
 
 		case   23: // gum
 			if (document.referrer.indexOf('sewer') != -1 && path == "/store.php") 
@@ -4364,14 +4367,12 @@ function at_cave()
 					"/sa_door3.gif":[420,"some boring spaghetti"],
 					"/pm_door3.gif":[579,"a tomato juice of powerful power"],
 					"/db_door3.gif":[9999,"any of the 12 'normal' Advanced Cocktailcrafting drinks"],
-					"/at_door3.gif":[9999,"the 'Polka of Plenty' buff"]
+					"/at_door3.gif":[9999,"at least 15 turns of the 'Polka of Plenty' buff"]
 					};
 	var subloc = document.location.search;
-//	GM_log("subloc="+subloc);
 	if (subloc.indexOf("action=door") != -1) {
 		doorpicname = $('img:first').attr('src');
 		var door = doorpicname.slice(doorpicname.lastIndexOf('/'));
-//		GM_log("door="+door+", item="+dooritems[door][0]);
 		if (dooritem[door]) {	// item is in our list
 			var descid = $('option:[value="'+dooritem[door][0]+'"]').attr('descid');
 			if (descid) { 	// item is in the selection list
@@ -4379,10 +4380,19 @@ function at_cave()
 				$('option:[value="'+dooritem[door][0]+'"]').attr('selected','selected');// select the right item
 				
 			} else {
+				var failnote = "<center><p><font color='blue'>You need "+dooritem[door][1]+" to proceed.</font></center>";
 				$('select[name="whichitem"]')
 					.attr('style','color:red')
-					.parent().append("<center><p><font color='blue'>You need "+dooritem[door][1]+" to proceed.</font></center>");	
-				if (door == '/db_door3.gif') $('select[name="whichitem"]').attr('style','color=black');		// un-red it if it's the DB door.
+					.parent().append(failnote);	
+				if (door == '/db_door3.gif') {	// if it's the DB door 3, un-red it and add a little note.
+					$('select[name="whichitem"]')
+						.attr('style','color=black')		
+						.parent().append('<center><p><font color="blue">(Go ahead, pick one from the list if you have one.)</font></center>');
+				} else if (door == '/at_door3.gif') {	// if it's the AT door 3, do a couple of specific failure checks:
+					if ($('p:eq(2)').text().indexOf("stops and slides closed again") != -1) {	// less than 15 turns of polka shows a failure message.
+						$('p:eq(2)').append(failnote);
+					} else 	$('p:eq(3)').append(failnote);										// no turns of polka shows a different one.
+				}
 			}
 		}
 	}
