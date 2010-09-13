@@ -1,4 +1,4 @@
-// Mr. Script v1.5.7
+// Mr. Script v1.5.8
 //
 // --------------------------------------------------------------------
 // This is a user script.  To install it, you need Greasemonkey 0.8 or
@@ -11,7 +11,7 @@
 // ==UserScript==
 // @name        Mr. Script
 // @namespace   http://www.noblesse-oblige.org/lukifer/scripts/
-// @description Version 1.5.7
+// @description Version 1.5.8
 // @author		Lukifer
 // @contributor	Ohayou
 // @contributor Hellion
@@ -34,7 +34,7 @@ var place = location.pathname.replace(/\/|\.(php|html)$/gi, "").toLowerCase();
 //GM_log("at:" + place);
 
 // n.b. version number should always be a 3-digit number.  If you move to 1.6, call it 1.6.0.  Don't go to 1.5.10 or some such.
-var VERSION = 157;
+var VERSION = 158;
 var MAXLIMIT = 999;
 var ENABLE_QS_REFRESH = 1;
 var DISABLE_ITEM_DB = 0;
@@ -5527,12 +5527,13 @@ function at_compactmenu()
 
 	// Camera One!
 	if (GetPref('shortlinks') % 2 > 0 || GetPref('splitinv') == 1)
-	{	selectItem = document.getElementsByTagName('select')[0];
+	{	
+		selectItem = document.getElementsByTagName('select')[0];
 		//selectItem.setAttribute('style','font-size: 9pt;');
 		selectItem.parentNode.parentNode.setAttribute('nowrap','nowrap');
-		for (i=0; i<selectItem.options.length; i++)
-		{	if (GetPref('splitinv') == 1 && selectItem.options[i].innerHTML == "Inventory")
-			{	selectItem.options[i].innerHTML = "Consumables";
+		for (i=0; i<selectItem.options.length; i++)	{	
+			if (GetPref('splitinv') == 1 && selectItem.options[i].innerHTML == "Inventory") {	
+				selectItem.options[i].innerHTML = "Consumables";
 				selectItem.options[i].value = "inventory.php?which=1";
 				AddTopOption("Equipment", "inventory.php?which=2", selectItem, selectItem.options[i+1]);
 				AddTopOption("Miscellaneous", "inventory.php?which=3", selectItem, selectItem.options[i+2]);
@@ -5541,15 +5542,16 @@ function at_compactmenu()
 			}
 // if splitquest pref is set, make Quests go to Current Quests and add a Notes entry.
 // otherwise Quests always goes to the Notes page.
-			if (selectItem.options[i].innerHTML == "Quests")
-			{	if (GetPref('splitquest')) {
+			if (selectItem.options[i].innerHTML == "Quests") {	
+				if (GetPref('splitquest')) {
 					AddTopOption("Notes","questlog.php?which=4", selectItem, selectItem.options[i+1]);
 					selectItem.options[i].value="questlog.php?which=1";
 				}
 				else selectItem.options[i].value="questlog.php?which=4";
 			}
-			if (selectItem.options[i].innerHTML == "Account Menu")
-			{	AddTopOption("-", "nothing", selectItem, selectItem.options[i+1]);
+
+			if (selectItem.options[i].innerHTML == "Account Menu") {	
+				AddTopOption("-", "nothing", selectItem, selectItem.options[i+1]);
 				AddTopOption("Multi-Use", "multiuse.php", selectItem, selectItem.options[i+2]);
 				AddTopOption("Combine", "craft.php?mode=combine", selectItem, selectItem.options[i+3]);
 				AddTopOption("Sell Items", "sellstuff.php", selectItem, selectItem.options[i+4]);
@@ -5558,16 +5560,16 @@ function at_compactmenu()
 				AddTopOption("Smith/Smash", "craft.php?mode=smith", selectItem, selectItem.options[i+7]);
 				AddTopOption("Closet", "closet.php", selectItem, selectItem.options[i+8]);
 				AddTopOption("-", "nothing", selectItem, selectItem.options[i+9]);
-				GM_get(server + "/knoll.php",function(response)
-				{	if (response == "") return;
+				GM_get(server + "/knoll.php",function(response)	{	
+					if (response == "") return;
 					var s = document.getElementsByTagName('select')[0];
-					for (var i=0; i<s.options.length; i++)
-					{	if (s.options[i].value == "craft.php?mode=combine")
+					for (var i=0; i<s.options.length; i++) {
+						if (s.options[i].value == "craft.php?mode=combine")
 						{	s.options[i].value = "knoll.php?place=paster"; break;
 				}	}	});
 			}
-			if (GetPref('logout') == 1 && selectItem.options[i].innerHTML == "Log Out")
-			{	selectItem.options[i].value = "logout";
+			if (GetPref('logout') == 1 && selectItem.options[i].innerHTML == "Log Out") {
+				selectItem.options[i].value = "logout";
 				selectItem.setAttribute('onchange', 'if (document.navform1.loc.value!="logout") goloc(); ' +
 					'else if (confirm("Log out?")) parent.frames[2].location = "logout.php"; ' +
 					'else this.selectedIndex=0;');
@@ -5584,6 +5586,9 @@ function at_compactmenu()
 				AddTopOption("Spookyraven Manor", "manor.php", selectItem, selectItem.options[i+2]);
 				len += 2;	// extend loop to cover new options just added.
 			}	
+			if (GetPref('malllink') == 1 && selectItem.options[i].innerHTML == "The Mall") {
+				selectItem.options[i].value = "searchmall.php";
+			}
 			if (selectItem.options[i].innerHTML.indexOf("Seaside Town") != -1)
 			{
 				AddTopOption("Town: Wrong side","town_wrong.php", selectItem, selectItem.options[i+1]);

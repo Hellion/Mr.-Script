@@ -1,5 +1,14 @@
-{	"version":"1.5.7",
+{	"version":"1.5.8",
 	"url1":"http://userscripts.org/scripts/source/65705.user.js",
 	"url2":"http://noblesse-oblige.org/hellion/scripts/MrScript.user.js",
-	"desc":"<b>Fixed:</b><br />yoinked items are now stored per-character, so running multiple browser windows simultaneously won't cause apparent cross-yoinking.<br />When you yoink and run away, the yoinked item displays on the runaway page rather than being stored for your next won combat.<br />KoLMafia and hidden city stone detection get along better now.<br />KoLMafia and Wine Cellar wine detection get along better now.<br />Insults gained from Pre-outfit pirates should be recorded properly.<br />All links that go directly to an adventure zone now have a '(1)' appended to them.<br /><b>Added:</b><br />more shortcut links.<br />character sheet shows elemental resistance levels as numbers in addition to the names (Low, High, Amazingly High, etc.).<br />Even more quest log links.<br />Mr. Alarm adventure links directly to Whitey's Grove; if Whitey's grove isn't open, sends you to your guild guy ('paco').<br />Stone balls in the Hidden City now have a visual cue that they are positively ID'd for the altar (and are selected automatically).<br />Meat tracking for the Nuns.<br />Game Grid Arcade main screen shows you your token and ticket count.<br />Link to read your Plus-Sign after you have a Major Consultation with the Oracle.<br />Rollover check migrates amongst servers.<br />Rotting Matilda has a link to use another dance card on the page.  (n.b. you must have RCM enabled, and 'default use/eat/drink/equip' selected, for this to work.)<br />"
+	"desc":"<b>Fixed:</b>
+	<br />fixed typo on Knoll shopping list
+	<br />changed most server-based settings to name-based settings
+	<br />all Mr. Script-added links that may use an adventure should include a (1) now
+	<br /><b>Added:</b>
+	<br />Nemesis Cave spoilers: automatically select proper items for each cave, or tell you what you're missing
+	<br />clan announcement notification includes a link to the clan page
+	<br />topmenu mall link goes directly to mall search (this behavior may be enabled/disabled in the Optionarium)
+	<br />mall search page and store management page link to each other
+	<br />"
 }
