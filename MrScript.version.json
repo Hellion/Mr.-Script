@@ -1,14 +1,4 @@
 {	"version":"1.5.8",
 	"url1":"http://userscripts.org/scripts/source/65705.user.js",
 	"url2":"http://noblesse-oblige.org/hellion/scripts/MrScript.user.js",
-	"desc":"<b>Fixed:</b>
-	<br />fixed typo on Knoll shopping list
-	<br />changed most server-based settings to name-based settings
-	<br />all Mr. Script-added links that may use an adventure should include a (1) now
-	<br /><b>Added:</b>
-	<br />Nemesis Cave spoilers: automatically select proper items for each cave, or tell you what you're missing
-	<br />clan announcement notification includes a link to the clan page
-	<br />topmenu mall link goes directly to mall search (this behavior may be enabled/disabled in the Optionarium)
-	<br />mall search page and store management page link to each other
-	<br />"
-}
+	"desc":"<b>Fixed:</b><br />fixed typo on Knoll shopping list<br />changed most server-based settings to name-based settings<br />all Mr. Script-added links that may use an adventure should include a (1) now<br /><b>Added:</b><br />Nemesis Cave spoilers: automatically select proper items for each cave, or tell you what you're missing<br />clan announcement notification includes a link to the clan page<br />topmenu mall link goes directly to mall search (this behavior may be enabled/disabled in the Optionarium)<br />mall search page and store management page link to each other<br />"}
