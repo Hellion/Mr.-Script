@@ -710,7 +710,7 @@ function AddInvCheck(img)
 				var addText = "";
 				if (itemid == 1605) // catalysts
 				{	var reagents = invcache[346]; if (reagents === undefined) reagents = 0;
-					var solutions = invcache[1635]; if (solutions === undefined) solutions == 0;
+					var solutions = invcache[1635]; if (solutions === undefined) solutions = 0;
 					addText = "(" + reagents + " reagent"; if (reagents != 1) addText += "s";
 					addText += ", " + itemqty + " catalyst"; if (itemqty != 1) addText += "s";
 					addText += " and " + solutions + " scrummie"; if (solutions != 1) addText += "s";
@@ -841,9 +841,13 @@ function AddLinks(descId, theItem, formWhere, path) {
 			
 		case 2441: // KG encryption key
 			addWhere.append(AppendLink('[use map]','inv_use.php?pwd=' + pwd + '&which=3&whichitem=2442')); break;
+	
+// this needs a different solution; as is, it appends the link to the key when you find it, which is when you need to take it back to the guild.	
+//		case 2277: // Fern's key
+//			addWhere.append(AppendLink("[Tower Ruins]",'fernruin.php')); break;
 			
-		case 2277: // Fern's key
-			addWhere.append(AppendLink("[Tower Ruins (1)]",'adventure.php?snarfblat=22')); break;
+		case 3000: // Caronch's dentures
+			addWhere.append(AppendLink("[equip swashbuckling pants]",'inv_equip.php?pwd='+pwd+'&which=2&action=equip&whichitem=402')); break;
 
 		case   23: // gum
 			if (document.referrer.indexOf('sewer') != -1 && path == "/store.php") 
@@ -2050,6 +2054,14 @@ function at_adventure() {
 		$('<center><a href="adventure.php?snarfblat=100">Adventure Again (Whitey\'s Grove)</a></center><br />').prependTo($('a:last'));
 		$('<center><a href="adventure.php?snarfblat=99">Adventure on the Road to White Citadel</a></center><br />').prependTo($('a:last'));
 		break;
+	case "F-F-Fantastic!":
+		$('<center><a href="adventure.php?snarfblat=82">Adventure in the Castle in the Clouds in the Sky</a></center><br />').prependTo($('a:last'));
+		break;
+	case "We'll All Be Flat":
+		$('<center><a href="manor3.php">Head to the Wine Cellar</a></center><br />').prependTo($('a:last'));
+		break;
+	case "Whee!":
+		$('<center><a href="adventure.php?snarfblat=125">Adventure in the Middle Chamber</a></center><br />').prependTo($('a:last'));
 	case "":	// got a "You shouldn't be here" or other reject message...
 		$('center table tr td').each(function(){
 			GM_log($(this).text());
@@ -2089,6 +2101,13 @@ function at_guild() {
 		break;
 		case "?place=scg": 
 			GM_log("tdtext="+tdtext);
+			if ((tdtext.indexOf("where your Nemesis is holed up.") != -1) || (tdtext.indexOf("Haven't beat your Nemesis yet, eh?") != -1)) {
+				td.append(AppendLink('[nemesis cave]','cave.php'));
+			} else if ((tdtext.indexOf("Got this hat,") != -1) || (tdtext.indexOf("be the first to know") != -1)) {
+				td.append('<p><font color="blue">(Come back after you get the Secret Tropical Volcano Lair map from a nemesis assassin.)</font>');
+			} else if (tdtext.indexOf("I was hoping you could lend me one") != -1) {
+				// link to equip fledges and to the poop deck
+			}
 		break;
 	}
 }
@@ -2113,12 +2132,21 @@ function at_arcade() {
 // CHOICE: clear out "square" since it should never persist outside of the hidden city or the tavern, neither of which have choice adventures.
 function at_choice() {
 	SetCharData("square",false);
+	var usemap = 0;
+	var choicetext = $('body').text();
+	GM_log("choice text="+choicetext);
+	if (choicetext.indexOf("Procrastination Giant's turn to guard") != -1) usemap = 1;
 	var p=document.getElementsByTagName('p');
 	if (p.length) {
 		GM_log("p.length="+p.length);
 		var p0 = p[0];
 		GM_log("p0="+p0.textContent);
 		if (p0.textContent.indexOf("actually a book.") != -1) p0.appendChild(AppendLink('[go ahead, read it already]','inv_use.php?pwd='+pwd+'&which=3&whichitem=818'));
+		else if (p0.textContent.indexOf("a new pledge") != -1) {	// Orcish Frat House Blueprints adventure
+			$('a [href="adventure.php?snarfblat=27"]').attr('href','adventure.php?snarfblat=157').text("Adventure in BARRRNEY'S BARRR");
+		} else if (usemap == 1) {
+			p0.appendChild(AppendLink('[use giant castle map]',"inv_use.php?pwd="+pwd+"&which=3&whichitem=667"));
+		}
 	}
 }
 
@@ -2195,6 +2223,29 @@ function at_bhh() {
 	});
 }
 
+function at_trapper() {
+	var traptext = $('body').text();
+	GM_log("traptext="+traptext);
+	SetCharData("oretype","");
+	if (traptext.indexOf("Thanks for yer help, Adventurer.") != -1) {
+		// quest done.
+	} else if (traptext.indexOf("some kind of protection") != -1) {
+		// need elemental resistance.
+	} else if (traptext.indexOf("get us some provisions for the trip") != -1) {
+		$('p:contains("6 chunks of goat cheese")').append(AppendLink('[Goatlet (1)]','adventure.php?snarfblat=60'));
+	} else if (traptext.indexOf("I reckon 3 chunks of") != -1) {
+//		GM_log("foo!");
+		var oretype = traptext.match(/3 chunks of (\w+)/)[1];
+		SetCharData("oretype",oretype);
+		SetCharData("orenumber",oretype=="linoleum"?363:oretype=="asbestos"?364:365);
+		SetCharData("ore365",0);
+		SetCharData("ore364",0);
+		SetCharData("ore363",0);
+		$('p:contains("I reckon 3 chunks of")').append(AppendLink('[Itznotyerzitz Mine (1)]','adventure.php?snarfblat=61'));
+		GM_log("ore type="+oretype);
+	} 
+}
+
 // SEARCHMALL: the new, improved mall search/buy page.
 // function at_searchmall() 
 // {	at_mallstore();			// I need to make a unique function for this....  05Jan10 Hellion
@@ -2250,7 +2301,9 @@ function at_beerpong()
 		if(val == 0) sel.prepend($(document.createElement('option'))
 			.attr('selected','selected').attr('value','0')
 			.html(' '));
-}	}
+	}	
+	$('a[href="cove.php"]').prepend("<center><a href=adventure.php?snarfblat=158>Adventure in the F'c'le</a></center><br />");
+}
 
 // INVENTORY: Add shortcuts when equipping outfits
 function at_inventory()
@@ -2703,6 +2756,8 @@ function at_inventory()
                pwd + '&which=2&whichitem=2328'));
 			else if (item.indexOf("spectacles") != -1 && document.referrer.indexOf('manor3') != -1)
 				top.document.getElementsByName('mainpane')[0].contentDocument.location.pathname = '/manor3.php';
+			else if ((item == "swashbuckling pants") && (document.referrer.indexOf("choice.php") != -1))
+				bText.parentNode.appendChild(AppendLink('[visit Caronch (1)]','adventure.php?snarfblat=157'));
 		}
 		else if (resultsText.indexOf("Outfit:") != -1)
 		{
@@ -4595,6 +4650,28 @@ function at_mining()
 // Image courtesy of Picklish's Mining Helper script.
 	var staticSparkleImg = "data:image/gif;base64,R0lGODlhMgAyAOMPAP39/dvb2zc3NycnJ5qams3NzQUFBRAQEGtra6enp7W1te3t7UZGRldXV319ff///yH/C05FVFNDQVBFMi4wAwEAAAAh+QQJAQAPACwAAAAAMgAyAAAEW/DJSau9OOvNu/9gKI5kaZ5oqq5s675wLM90bd94ru8rg/AUR+AAfBwCgd/OMFA4GguEQXcEJAQEQGM3ECAAUSIwkJgWn0WJwZxuu9/wuHxOr9vv+Lx+z+/77xEAIfkECQEADwAsAAAAADIAMgAABGvwyUmrvTjrzbv/YCiOZGmeaKqubOu+cCzPdG3feM4Jhm4FA18lIRBSEgzjpKDoGRmLAsJAddYaBEJAMQB4AYqbIKuILhwCRlAXWKyNWaVEKn8kEHVCo36w1v+AgYKDhIWGh4iJiouMjY4kEQAh+QQJAQAPACwAAAAAMgAyAAAEl/DJSau9OOvNu/9gKI5kaZ5oqq5s675wLLeHMXNHYd/aAAy83i+YMRQERMwhgEhefA6npQFISCmGQEJ3NTAUhYMCYRM0CMCYoYEoAAi1Adi9OMoGhXwgIDAcHAsJDEE7Bgl8eQM7TkYACotXVA1XFD6DlBIDC2mYRpyUOUiYD56jpAWXowqfpq2ur7CxsrO0tba3uLm6GhEAIfkECQEADwAsAAAAADIAMgAABGvwyUmrvTjrzbv/YCiOZGmeaKqubOu+cCzPdG3feM4Jhm4FA18lIRBSEgzjpKDoGRmLAsJAddYaBEJAMQB4AYqbIKuILhwCRlAXWKyNWaVEKn8kEHVCo36w1v+AgYKDhIWGh4iJiouMjY4kEQAh+QQJAQAPACwAAAAAMgAyAAAEW/DJSau9OOvNu/9gKI5kaZ5oqq5s675wLM90bd94ru8rg/AUR+AAfBwCgd/OMFA4GguEQXcEJAQEQGM3ECAAUSIwkJgWn0WJwZxuu9/wuHxOr9vv+Lx+z+/77xEAOw==";
 	$("img[src*=wallsparkle]").attr("src",staticSparkleImg);
+	if (document.location.search.indexOf("mine=1") != -1) {
+		GM_log("mining for dwarves!");
+		var oretype = GetCharData("oretype");
+		var orenumber = GetCharData("orenumber");
+		if (oretype == '') return;
+		GM_log("ore type="+oretype);
+		var founditem = $('.item').attr("rel")
+		var foundamount = 0;
+		if (founditem) { 
+			founditem = parseInt(founditem.match(/id=(\d+)/)[1],10);
+			GM_log("found item:" +founditem);
+			if (founditem >= 363) {
+				foundamount = GetCharData("ore"+founditem);
+				foundamount++;
+				SetCharData("ore"+founditem,foundamount);
+			}
+		}
+		var msg = "You need 3 "+oretype+" ores.";
+		foundamount = GetCharData("ore"+orenumber);
+		if (foundamount) msg +=" (You've found "+foundamount+" so far.)";
+		$('b:contains("Itznotyerzitz")').parent().append('<tr><td><center><font color="white">'+msg+'</font></center></td></tr>');
+	}
 }
 
 // OCEAN: Lat/Long spoilers.
