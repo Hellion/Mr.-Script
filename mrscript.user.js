@@ -2048,20 +2048,20 @@ function at_adventure() {
 		$('<center><p><a href="adventure.php?snarfblat=160>Adventure Belowdecks</a></center>').appendTo($('a:last'));
 		break;
 	case "Mr. Alarm":
-		$('a[href*="snarfblat"]').attr("href","adventure.php?snarfblat=100").text("Adventure in WHITEY'S GROVE");
+		$('<center><p><a href="adventure.php?snarfblat=100">Adventure in WHITEY\'S GROVE</a></center><br />').prependTo($('a:last'));
 		break;
 	case "It's A Sign!":
-		$('<center><a href="adventure.php?snarfblat=100">Adventure Again (Whitey\'s Grove)</a></center><br />').prependTo($('a:last'));
-		$('<center><a href="adventure.php?snarfblat=99">Adventure on the Road to White Citadel</a></center><br />').prependTo($('a:last'));
+		$('<center><p><a href="adventure.php?snarfblat=100">Adventure Again (Whitey\'s Grove)</a></center><br />').prependTo($('a:last'));
+		$('<center><p><a href="adventure.php?snarfblat=99">Adventure on the Road to White Citadel</a></center><br />').prependTo($('a:last'));
 		break;
 	case "F-F-Fantastic!":
-		$('<center><a href="adventure.php?snarfblat=82">Adventure in the Castle in the Clouds in the Sky</a></center><br />').prependTo($('a:last'));
+		$('<center><p><a href="adventure.php?snarfblat=82">Adventure in the Castle in the Clouds in the Sky</a></center><br />').prependTo($('a:last'));
 		break;
 	case "We'll All Be Flat":
-		$('<center><a href="manor3.php">Head to the Wine Cellar</a></center><br />').prependTo($('a:last'));
+		$('<center><p><a href="manor3.php">Head to the Wine Cellar</a></center><br />').prependTo($('a:last'));
 		break;
 	case "Whee!":
-		$('<center><a href="adventure.php?snarfblat=125">Adventure in the Middle Chamber</a></center><br />').prependTo($('a:last'));
+		$('<center><p><a href="adventure.php?snarfblat=125">Adventure in the Middle Chamber</a></center><br />').prependTo($('a:last'));
 	case "":	// got a "You shouldn't be here" or other reject message...
 		$('center table tr td').each(function(){
 			GM_log($(this).text());
