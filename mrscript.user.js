@@ -20,7 +20,7 @@
 // @contributor BeingEaten
 // @contributor Picklish
 // @include     http://127.0.0.1:60*/*
-// @include     http://*.kingdomofloathing.com/*
+// @include     http://*kingdomofloathing.com/*
 // @exclude     http://images.kingdomofloathing.com/*
 // @exclude     http://forums.kingdomofloathing.com/*
 // @require     http://ecmanaut.googlecode.com/svn/trunk/lib/gm/$x$X.js
@@ -4419,8 +4419,8 @@ function at_cave()
 					"/mox_door2.gif":[1256,"an insanely spicy jumping bean burrito"],
 					"/sc_door3.gif":[2478,"a clown whip"],
 					"/tt_door3.gif":[2477,"a clownskin buckler"],
-					"/sa_door3.gif":[420,"some boring spaghetti"],
-					"/pm_door3.gif":[579,"a tomato juice of powerful power"],
+					"/sa_door3.gif":[420,"a tomato juice of powerful power"],
+					"/pm_door3.gif":[579,"a bowl of boring spaghetti"],
 					"/db_door3.gif":[9999,"any of the 12 'normal' Advanced Cocktailcrafting drinks"],
 					"/at_door3.gif":[9999,"at least 15 turns of the 'Polka of Plenty' buff"]
 					};
@@ -4443,10 +4443,10 @@ function at_cave()
 					$('select[name="whichitem"]')
 						.attr('style','color=black')		
 						.parent().append('<center><p><font color="blue">(Go ahead, pick one from the list if you have one.)</font></center>');
-				} else if (door == '/at_door3.gif') {	// if it's the AT door 3, do a couple of specific failure checks:
-					if ($('p:eq(2)').text().indexOf("stops and slides closed again") != -1) {	// less than 15 turns of polka shows a failure message.
-						$('p:eq(2)').append(failnote);
-					} else 	$('p:eq(3)').append(failnote);										// no turns of polka shows a different one.
+				} else if (door == '/at_door3.gif') {	// if it's the AT door 3, check for success.
+					if ($('p:eq(2)').text().indexOf("could really use a regular") == -1) {	// if we don't see success, display failure info.
+						$('p:eq(2)').append(failnote);										
+					}
 				}
 			}
 		}
