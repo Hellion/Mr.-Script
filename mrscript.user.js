@@ -853,7 +853,7 @@ function AddLinks(descId, theItem, formWhere, path) {
 			if (document.referrer.indexOf('sewer') != -1 && path == "/store.php") 
 			{	top.document.getElementsByName('mainpane')[0].contentDocument.location.pathname = '/sewer.php';
 			} else 
-			{	addWhere.append(AppendLink('[sewer]', 'sewer.php'));
+			{	addWhere.append(AppendLink('[use]', 'inv_use.php?pwd='+pwd+'&which=3&whichitem=23'));
 			}
 			break;
 
@@ -2045,23 +2045,23 @@ function at_adventure() {
 		NCTitle.append(cardlink);
 		break;
 	case "It's Always Swordfish":
-		$('<center><p><a href="adventure.php?snarfblat=160>Adventure Belowdecks</a></center>').appendTo($('a:last'));
+		$('<center><a href="adventure.php?snarfblat=160>Adventure Belowdecks</a></center>').appendTo($('a:last').parent());
 		break;
 	case "Mr. Alarm":
-		$('<center><p><a href="adventure.php?snarfblat=100">Adventure in WHITEY\'S GROVE</a></center><br />').prependTo($('a:last'));
+		$('<center><a href="adventure.php?snarfblat=100">Adventure in WHITEY\'S GROVE</a></center><br />').prependTo($('a:last').parent());
 		break;
 	case "It's A Sign!":
-		$('<center><p><a href="adventure.php?snarfblat=100">Adventure Again (Whitey\'s Grove)</a></center><br />').prependTo($('a:last'));
-		$('<center><p><a href="adventure.php?snarfblat=99">Adventure on the Road to White Citadel</a></center><br />').prependTo($('a:last'));
+		$('<center><a href="adventure.php?snarfblat=100">Adventure Again (Whitey\'s Grove)</a></center><br />').prependTo($('a:last').parent());
+		$('<center><a href="adventure.php?snarfblat=99">Adventure on the Road to White Citadel</a></center><br />').prependTo($('a:last').parent());
 		break;
 	case "F-F-Fantastic!":
-		$('<center><p><a href="adventure.php?snarfblat=82">Adventure in the Castle in the Clouds in the Sky</a></center><br />').prependTo($('a:last'));
+		$('<center><a href="adventure.php?snarfblat=82">Adventure in the Castle in the Clouds in the Sky</a></center><br />').prependTo($('a:last').parent());
 		break;
 	case "We'll All Be Flat":
-		$('<center><p><a href="manor3.php">Head to the Wine Cellar</a></center><br />').prependTo($('a:last'));
+		$('<center><a href="manor3.php">Head to the Wine Cellar</a></center><br />').prependTo($('a:last').parent());
 		break;
 	case "Whee!":
-		$('<center><p><a href="adventure.php?snarfblat=125">Adventure in the Middle Chamber</a></center><br />').prependTo($('a:last'));
+		$('<center><a href="adventure.php?snarfblat=125">Adventure in the Middle Chamber</a></center><br />').prependTo($('a:last').parent());
 	case "":	// got a "You shouldn't be here" or other reject message...
 		$('center table tr td').each(function(){
 			GM_log($(this).text());
@@ -2731,6 +2731,11 @@ function at_inventory()
 		{	parent.frames[2].location = 
 				'http://' + server + '/lair6.php';
 		}
+		else if (resultsText.indexOf("worthless") != -1)	// acquire a worthless item from chewing-gum-on-a-string
+		{	
+			bText = document.getElementsByTagName('b')[1];
+			bText.parentNode.appendChild(AppendLink('[hermit]','hermit.php'));
+		}
 // and this is where we add all the nifty little links after equipping something.
 		else if (resultsText.indexOf("You equip an item") != -1)
 		{	bText = document.getElementsByTagName('b')[1];
@@ -3131,12 +3136,15 @@ function at_hermit()
 		}
 	});
 	if (GetPref('shortlinks') > 1)
-	{	var p = $('p:first');
-		var txt = p.text();
-		if (txt.indexOf("the Toot Oriole flies down") != -1)			// no permit
-			p.append('<br><br>' + AppendBuyBox(42, 'm', 'Buy Permits', 0));
+	{	
+		var p = $('p:first');
+		var txt = $('body').text();
+		if (txt.indexOf("out of Permits") != -1) {			// no permit
+			var a = $('a[href*=mountains]');
+			a.parent().prepend('<br>' + AppendBuyBox(42, 'm', 'Buy Permits', 0)+'<br>');
+		}
 		else if (txt.indexOf("disappointed") != -1)						// no trinkets
-			p.append('<br><br><center><a href="sewer.php">Visit Sewer</a></center>');
+			p.append('<br><br><center><a href="inv_use.php?pwd='+pwd+'&which=3&whichitem=23">Use some sewer gum</a></center>');
 
 		var tr = $('table:first tr:contains(Results)');
 		if (tr.next().text().indexOf("You acquire") != -1)
