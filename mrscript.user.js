@@ -5521,22 +5521,19 @@ function at_topmenu()
 	}
 
 	// Move Quick-Skills
-	if (moveqs > 0)
-	{	weBuildHere.setAttribute('id','menus2');
-		var assy = document.getElementsByName('assy')[0];
-		var iframe = document.getElementsByName('skillpane')[0];
-		iframe.removeAttribute('style');
-		assy.setAttribute('style','display: none;');
-		if (moveqs == 1)
-		{	var tr = document.getElementsByTagName('tr')[0];
-			tr.insertBefore(assy.parentNode, swordGuy.parentNode);
-		} assy.parentNode.appendChild(iframe.parentNode);
-		iframe.parentNode.parentNode.setAttribute('style', 'padding-top: 2px;');
-//		iframe.parentNode.parentNode.setAttribute('style', 'padding-top: 4px; width: 300px;');
-		//iframe.setAttribute('width', 300);
-		// I'm open to suggestions on a better way to do this. EDIT: this, maybe?
+	if (moveqs > 0)	{	
+		weBuildHere.setAttribute('id','menus2');
+
+		var if1 = $('#skillpane');
+		var if2 = if1.clone(true);
+		if1.remove();
+		if (moveqs == 1) { 
+			$('#swordguy').parent().parent().prepend(if2).wrap('<td />');
+		}
+		else if (moveqs == 2) {
+			$('#themoons').parent().parent().append(if2).wrap('<td />');
+		}
 		document.location = document.links[1];
-		//iframe.contentWindow.setTimeout('self.location = "skills.php?tiny=1";',200);
 	}
 }
 
