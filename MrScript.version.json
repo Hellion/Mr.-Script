@@ -1,4 +1,4 @@
-{	"version":"1.5.9",
+{	"version":"1.6.0",
 	"url1":"http://userscripts.org/scripts/source/65705.user.js",
 	"url2":"http://noblesse-oblige.org/hellion/scripts/MrScript.user.js",
-	"desc":"<b>Fixed:</b><br />Fixed QuickSkills placement on modified topmenu<br />fixed Nemesis AT door 3 detection and PM/SA door 2 item spoiler text reversal<br />Tweaked a couple of the links that get added to certain Non-Combats<br /><b>Added:</b><br />experimental feature for tracking how you are progressing with mining ore for the tr4pz0r<br />"}
+	"desc":"<b>Fixed:</b><br />Links to and in Mt. Noob had URL change<br />changed links on Dramatic Range and Queue du Coq to be [use] instead of [craft]<br />repair a gross oversight on added-link DOM positioning for certain non-combats<br />Update hermit gum & permit-buying configuration"}
