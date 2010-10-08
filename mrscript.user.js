@@ -1,4 +1,4 @@
-// Mr. Script v1.5.9
+// Mr. Script v1.6.0
 //
 // --------------------------------------------------------------------
 // This is a user script.  To install it, you need Greasemonkey 0.8 or
@@ -11,7 +11,7 @@
 // ==UserScript==
 // @name        Mr. Script
 // @namespace   http://www.noblesse-oblige.org/lukifer/scripts/
-// @description Version 1.5.9
+// @description Version 1.6.0
 // @author		Lukifer
 // @contributor	Ohayou
 // @contributor Hellion
@@ -33,8 +33,8 @@ var place = location.pathname.replace(/\/|\.(php|html)$/gi, "").toLowerCase();
 //console.time("Mr. Script @ " + place);
 //GM_log("at:" + place);
 
-// n.b. version number should always be a 3-digit number.  If you move to 1.6, call it 1.6.0.  Don't go to 1.5.10 or some such.
-var VERSION = 159;
+// n.b. version number should always be a 3-digit number.  If you move to 1.9, call it 1.9.0.  Don't go to 1.8.10 or some such.
+var VERSION = 160;
 var MAXLIMIT = 999;
 var ENABLE_QS_REFRESH = 1;
 var DISABLE_ITEM_DB = 0;
@@ -883,7 +883,7 @@ function AddLinks(descId, theItem, formWhere, path) {
 			if (document.referrer.indexOf('craft') != -1 && path == "/store.php")
 			{	top.document.getElementsByName('mainpane')[0].contentDocument.location.pathname = '/craft.php?mode=cocktail';
 			} else
-			{	doWhat = 'cocktail';
+			{	doWhat = 'oneuse';
 			}
 			break;
 
@@ -891,7 +891,7 @@ function AddLinks(descId, theItem, formWhere, path) {
 			if (document.referrer.indexOf('craft') != -1 && path == "/store.php")
 			{	top.document.getElementsByName('mainpane')[0].contentDocument.location.pathname = '/craft.php?mode=cook';
 			} else
-			{	doWhat = 'cook';
+			{	doWhat = 'oneuse';
 			}
 			break;
 
@@ -1457,7 +1457,7 @@ function at_main_c() {
 	}
 	
 	// n.b. the :eq(1) below is important because of the nested-table layout.  only select the inner TR.
-	$('tr:contains("Noob."):eq(1)').append(AppendLink('[Toot]','mtnoob.php?action=toot'));	// fresh from valhalla?  get things rolling.
+	$('tr:contains("Noob."):eq(1)').append(AppendLink('[Toot]','tutorial.php?action=toot'));	// fresh from valhalla?  get things rolling.
 	$('tr:contains("responded to a trade offer"):eq(1)').append(AppendLink('[trade]', 'makeoffer.php'));
 	$('tr:contains("new announcement"):eq(1)').append(AppendLink('[go read it]', 'clan_hall.php'));
 	
@@ -2230,6 +2230,7 @@ function at_trapper() {
 	if (traptext.indexOf("Thanks for yer help, Adventurer.") != -1) {
 		// quest done.
 	} else if (traptext.indexOf("some kind of protection") != -1) {
+		$('p:contains("Ninja Snowmen")').parent().append('<center><p><font color="blue">You need some Cold Resistance.</font></center>');
 		// need elemental resistance.
 	} else if (traptext.indexOf("get us some provisions for the trip") != -1) {
 		$('p:contains("6 chunks of goat cheese")').append(AppendLink('[Goatlet (1)]','adventure.php?snarfblat=60'));
@@ -2255,7 +2256,8 @@ function at_searchmall() {
 }
 
 function at_managestore() {
-	$('center table tr td center table:first').prepend('<tr><td><center><a href=searchmall.php>Search the Mall</a><br /><br /></center></td></tr>');
+	$('a[href="storelog.php"]').parent().append('<br /><br /><a href=searchmall.php>Search the Mall</a><br />');
+//	$('center table tr td center table:first').prepend('<tr><td><center><a href=searchmall.php>Search the Mall</a><br /><br /></center></td></tr>');
 }
 
 // MALLSTORE: add fun links to (some of) the things you buy!
@@ -3144,7 +3146,7 @@ function at_hermit()
 			a.parent().prepend('<br>' + AppendBuyBox(42, 'm', 'Buy Permits', 0)+'<br>');
 		}
 		else if (txt.indexOf("disappointed") != -1)						// no trinkets
-			p.append('<br><br><center><a href="inv_use.php?pwd='+pwd+'&which=3&whichitem=23">Use some sewer gum</a></center>');
+			p.append('<br><br><center><a href="inv_use.php?pwd='+pwd+'&which=3&whichitem=23">Use some chewing gum</a></center>');
 
 		var tr = $('table:first tr:contains(Results)');
 		if (tr.next().text().indexOf("You acquire") != -1)
@@ -5217,7 +5219,7 @@ function spoil_wormwood()
 });	}
 
 // MTNOOB: Open letter! Yay!
-function at_mtnoob()
+function at_tutorial()
 {	if (location.search.indexOf("toot") == -1) return;
 	$('b:contains(Ralph)').append(
 		AppendLink('[read]', 'inv_use.php?pwd='+
@@ -5248,6 +5250,10 @@ function linkKOLWiki() {
   b.wrap('<a href="http://kol.coldfront.net/thekolwiki/index.php/'+
 	 'Special:Search?search='+ b.text().replace(/\s/g, '+') +'&go=Go" '+
 	 'target="_blank"></a>');
+}
+
+function at_iconmenu() {
+	GM_log("icon menu detected.");
 }
 
 // TOPMENU: Add some new links to the top pane.
@@ -5285,10 +5291,24 @@ function at_topmenu()
 		at_compactmenu();
 		return;
 	}
+	var iconmode = document.getElementsByClassName('menuitem').length;
+	if (iconmode > 0) {
+		at_iconmenu();
+		return;
+	}
+
 	// Test if quickskills is present. TODO: Find a cleaner way to do this.
 	var quickSkills = 0, moveqs = 0;
 	if ($('center:first').html().indexOf("javascript:skillsoff();") != -1)
-	{	quickSkills = 1; moveqs = GetPref('moveqs');
+	{	
+		quickSkills = 1; 
+		moveqs = GetPref('moveqs');
+		// tweak the topmenu frame size if quickskills is present.
+		var topframeset = top.document.getElementsByTagName && top.document.getElementsByTagName("frameset");
+		if (topframeset && topframeset[1] && topframeset[1].rows) { 
+//			GM_log("tweaking!"); 
+			topframeset[1].rows = "56,*"; 
+		}
 	}
 
 	// Set defaults if needed
