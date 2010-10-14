@@ -20,6 +20,7 @@
 // @contributor BeingEaten
 // @contributor Picklish
 // @include     http://127.0.0.1:60*/*
+// @include		http://*localhost:*/*
 // @include     http://*kingdomofloathing.com/*
 // @exclude     http://images.kingdomofloathing.com/*
 // @exclude     http://forums.kingdomofloathing.com/*
@@ -845,6 +846,9 @@ function AddLinks(descId, theItem, formWhere, path) {
 // this needs a different solution; as is, it appends the link to the key when you find it, which is when you need to take it back to the guild.	
 //		case 2277: // Fern's key
 //			addWhere.append(AppendLink("[Tower Ruins]",'fernruin.php')); break;
+
+		case 2297: // Dusty Old Book
+			addWhere.append(AppendLink('[take back to guild]','guild.php?place=ocg')); break;
 			
 		case 3000: // Caronch's dentures
 			addWhere.append(AppendLink("[equip swashbuckling pants]",'inv_equip.php?pwd='+pwd+'&which=2&action=equip&whichitem=402')); break;
@@ -881,7 +885,7 @@ function AddLinks(descId, theItem, formWhere, path) {
 
 		case  236: // cocktail
 			if (document.referrer.indexOf('craft') != -1 && path == "/store.php")
-			{	top.document.getElementsByName('mainpane')[0].contentDocument.location.pathname = '/craft.php?mode=cocktail';
+			{	top.document.getElementsByName('mainpane')[0].contentDocument.location.pathname = '/inv_use.php?pwd='+pwd+'&whichitem=236&bounce=craft.php?a=1';
 			} else
 			{	doWhat = 'oneuse';
 			}
@@ -889,7 +893,7 @@ function AddLinks(descId, theItem, formWhere, path) {
 
 		case  157: // E-Z
 			if (document.referrer.indexOf('craft') != -1 && path == "/store.php")
-			{	top.document.getElementsByName('mainpane')[0].contentDocument.location.pathname = '/craft.php?mode=cook';
+			{	top.document.getElementsByName('mainpane')[0].contentDocument.location.pathname = '/inv_use.php?pwd='+pwd+'&whichitem=157&bounce=craft.php?a=1';
 			} else
 			{	doWhat = 'oneuse';
 			}
@@ -2017,6 +2021,7 @@ function at_rats() {
 // ADVENTURE: provide "Explore next square" link when we hit a non-combat in the Hidden City.
 // Also provide extra functionality for certain other noncombats.
 function at_adventure() {
+	dropped_item();	// linky linky for things that go clinky.
 	var square=GetCharData("square");
 	SetCharData("square",false);
 	if (square) {
@@ -2045,7 +2050,7 @@ function at_adventure() {
 		NCTitle.append(cardlink);
 		break;
 	case "It's Always Swordfish":
-		$('<center><a href="adventure.php?snarfblat=160>Adventure Belowdecks</a></center>').appendTo($('a:last').parent());
+		$('<center><br /><a href="adventure.php?snarfblat=160>Adventure Belowdecks</a></center>').appendTo($('a:last').parent());
 		break;
 	case "Mr. Alarm":
 		$('<center><a href="adventure.php?snarfblat=100">Adventure in WHITEY\'S GROVE</a></center><br />').prependTo($('a:last').parent());
@@ -2098,10 +2103,15 @@ function at_guild() {
 		break;
 		case "?place=ocg": 
 			GM_log("tdtext="+tdtext);
+			if (tdtext.indexOf("Fernswarthy's key") != -1) {
+				$('b:eq(1)').append(AppendLink('[Fun House (1)]','adventure.php?snarfblat=20'));
+			}
 		break;
 		case "?place=scg": 
 			GM_log("tdtext="+tdtext);
 			if ((tdtext.indexOf("where your Nemesis is holed up.") != -1) || (tdtext.indexOf("Haven't beat your Nemesis yet, eh?") != -1)) {
+				td.append(AppendLink('[nemesis cave]','cave.php'));
+			} else if (tdtext.indexOf('cause undue stress') != -1) {
 				td.append(AppendLink('[nemesis cave]','cave.php'));
 			} else if ((tdtext.indexOf("Got this hat,") != -1) || (tdtext.indexOf("be the first to know") != -1)) {
 				td.append('<p><font color="blue">(Come back after you get the Secret Tropical Volcano Lair map from a nemesis assassin.)</font>');
@@ -2304,7 +2314,7 @@ function at_beerpong()
 			.attr('selected','selected').attr('value','0')
 			.html(' '));
 	}	
-	$('a[href="cove.php"]').prepend("<center><a href=adventure.php?snarfblat=158>Adventure in the F'c'le</a></center><br />");
+	$('a[href="cove.php"]').parent().prepend("<center><a href=adventure.php?snarfblat=158>Adventure in the F'c'le</a></center><br />");
 }
 
 // INVENTORY: Add shortcuts when equipping outfits
@@ -2316,11 +2326,11 @@ function at_inventory()
 	var searchString = document.location.search;
 	if (searchString.indexOf("which=2") != -1) gearpage = 1;
 
-	// Misc: Blackbird
+	// Miscellaneous messages that always route you back to inventory:
 	else if (searchString.indexOf("action=message") != -1)
 	{	var fimg = $('img:first');
 		var src = fimg.attr('src');
-		if(src.indexOf('blackbird1') != -1)
+		if(src.indexOf('blackbird1') != -1)									// blackbird
 		{	var fly = document.createElement('a');
 			fly.innerHTML = '[fly, fly, fly]';
 			fly.setAttribute('href', 'javascript:void(0);');
@@ -2328,14 +2338,15 @@ function at_inventory()
 			fimg.after(fly)
 				.after(document.createElement('br'));
 		}
-		else if(src.indexOf('scroll1.gif') != -1)
+		else if(src.indexOf('scroll1.gif') != -1)							// 31337 scroll
 		{	var clov = $('b:lt(5):contains(clover)');
 			if(clov.length > 0)
 			{	var quant = clov.text().match(/^[0-9]*/);
 				if(!quant) quant = 1;
 				clov.append(AppendLink('[disassemble]','multiuse.php?pwd='+
 				pwd+'&action=useitem&quantity='+quant+'&whichitem=24'));
-		}	}
+			}	
+		}
 	}
 
 	// Equipment page only
@@ -2877,6 +2888,8 @@ function at_bigisland()
 function at_store()
 {	var firstTable = $('table:first tbody');		// we're interested in this when it's the "Results:" box from buying something.
 	var whichstore; var noform = 1;
+	
+	GM_log("in at_store");
 
 	var insput = $('input[name=whichstore]');
 	if (insput.length > 0)
@@ -3037,47 +3050,72 @@ function at_casino()
 function at_craft()
 {
 	var mode = document.location.search.match(/mode=[a-z]+/), mlink, store;
+	var itemNeeded = 0, desc = "";
 	if(mode) mode = mode.toString().split('=')[1];
+	GM_log("at_craft: mode="+mode);
+
+// sadly for some of our efforts, the "?mode=X" part is often left off after you submit an action.  So we may be left to our own devices 
+// to determine what we were actually trying to do.
+	
+	mlink = $('b:contains("Results:")');
+	ilink = $('a[href*="inv_use"]');	// link to install an already-owned campground item.  If it exists, we won't put up our buy button.
+	var tbltext = mlink.parents('table:first').text();
+	if (tbltext.indexOf("more advanced cooking appliance") != -1) { itemNeeded = 157; desc = "Buy & Install a Dramatic Range"; }
+	else if (tbltext.indexOf("cocktail set is not advanced") != -1) { itemNeeded = 236; desc = "Buy & Install a Queue du Coq kit"; }
+	else if (tbltext.indexOf("haven't got a hammer") != -1) { itemNeeded = 338; desc = "Buy a tenderizing hammer"; }
+	if (GetPref('shortlinks') > 1 && mlink.length > 0 && ilink.length == 0 && itemNeeded > 0)
+	{	mlink.parent().parent().parent().find('center:first').after('<span id="buyspan"></span>');
+		GM_get(server + '/heydeze.php', function(txt)
+		{	if(txt != '') store = 'y';
+			else if (itemNeeded = 338) store = 's';
+			else store = 'm';
+			$('#buyspan').html(AppendBuyBox(itemNeeded, store, desc, 1));
+		});
+	}
+	
 	switch(mode)
 	{
 		case 'combine':
 			break;
 
-		case 'cook':
-			mlink = $('a[href$="store.php?whichstore=m"]');
-			if (GetPref('shortlinks') > 1 && mlink.length > 0)
-			{	mlink.parent().before('<span id="buyspan"></span>');
-				GM_get(server + '/heydeze.php', function(txt)
-				{	if(txt != '') store = 'y';
-					else store = 'm';
-					$('#buyspan').before(
-						AppendBuyBox(157, store, 'Buy Oven', 1));
-				});
-			} break;
+//		case 'cook':
+//			mlink = $('b:contains("Results:")');
+//			var tbltext = mlink.parents('table:first').text();
+//			GM_log("text="+tbltext);
+//			
+//			if (GetPref('shortlinks') > 1 && mlink.length > 0 && (tbltext.indexOf("more advanced cooking appliance") != -1))
+//			{	mlink.parent().parent().parent().find('center:first').after('<span id="buyspan"></span>');
+//				GM_get(server + '/heydeze.php', function(txt)
+//				{	if(txt != '') store = 'y';
+//					else store = 'm';
+//					$('#buyspan').before(
+//						AppendBuyBox(157, store, 'Buy a Dramatic Range', 1));
+//				});
+//			} break;
 
-		case 'cocktail':
-			mlink = $('a[href$="store.php?whichstore=m"]');
-			if (GetPref('shortlinks') > 1 && mlink.length > 0)
-			{	mlink.parent().before('<span id="buyspan"></span>');
-				GM_get(server + '/heydeze.php', function(txt)
-				{	if(txt != '') store = 'y';
-					else store = 'm';
-					$('#buyspan').before(
-						AppendBuyBox(236, store, 'Buy Cocktailcrafting Kit', 1));
-				});
-			} break;
+//		case 'cocktail':
+//			mlink = $('a[href$="store.php?whichstore=m"]');
+//			if (GetPref('shortlinks') > 1 && mlink.length > 0)
+//			{	mlink.parent().before('<span id="buyspan"></span>');
+//				GM_get(server + '/heydeze.php', function(txt)
+//				{	if(txt != '') store = 'y';
+//					else store = 'm';
+//					$('#buyspan').before(
+//						AppendBuyBox(236, store, 'Buy a Queue du Coq Kit', 1));
+//				});
+//			} break;
 
 		case 'smith':
-			mlink = $('a[href$="store.php?whichstore=s"]');
-			if (GetPref('shortlinks') > 1 && mlink.length > 0)
-			{	mlink.parent().before('<span id="buyspan"></span>');
-				GM_get(server + '/heydeze.php', function(txt)
-				{	if(txt != '') store = 'y';
-					else store = 's';
-					$('#buyspan').before(
-						AppendBuyBox(338, store, 'Buy Hammer', 1));
-				});
-			}
+//			mlink = $('a[href$="store.php?whichstore=s"]');
+//			if (GetPref('shortlinks') > 1 && mlink.length > 0)
+//			{	mlink.parent().before('<span id="buyspan"></span>');
+//				GM_get(server + '/heydeze.php', function(txt)
+//				{	if(txt != '') store = 'y';
+//					else store = 's';
+//					$('#buyspan').before(
+//						AppendBuyBox(338, store, 'Buy Hammer', 1));
+//				});
+//			}
 
 			// Needs layout fix
 			var box = $('form[name=pulverize] input[name=qty]');
@@ -3145,8 +3183,10 @@ function at_hermit()
 			var a = $('a[href*=mountains]');
 			a.parent().prepend('<br>' + AppendBuyBox(42, 'm', 'Buy Permits', 0)+'<br>');
 		}
-		else if (txt.indexOf("disappointed") != -1)						// no trinkets
+		else if (txt.indexOf("disappointed") != -1)			{			// no trinkets
+			p.get(0).innerHTML += '<br><br>' + AppendBuyBox(23, 'm', 'Buy Gum', 0);
 			p.append('<br><br><center><a href="inv_use.php?pwd='+pwd+'&which=3&whichitem=23">Use some chewing gum</a></center>');
+		}
 
 		var tr = $('table:first tr:contains(Results)');
 		if (tr.next().text().indexOf("You acquire") != -1)
@@ -3163,7 +3203,7 @@ function at_hermit()
 }
 
 // COMBINE: Auto-make meat paste.
-function at_craft()
+function at_craft_old()
 {	if (location.search == "") return;
 	var txt = document.body.textContent;
 	if (txt.indexOf("have any meat paste") != -1 && txt.indexOf("You acquire") == -1)
