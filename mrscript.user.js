@@ -3077,46 +3077,8 @@ function at_craft()
 	{
 		case 'combine':
 			break;
-
-//		case 'cook':
-//			mlink = $('b:contains("Results:")');
-//			var tbltext = mlink.parents('table:first').text();
-//			GM_log("text="+tbltext);
-//			
-//			if (GetPref('shortlinks') > 1 && mlink.length > 0 && (tbltext.indexOf("more advanced cooking appliance") != -1))
-//			{	mlink.parent().parent().parent().find('center:first').after('<span id="buyspan"></span>');
-//				GM_get(server + '/heydeze.php', function(txt)
-//				{	if(txt != '') store = 'y';
-//					else store = 'm';
-//					$('#buyspan').before(
-//						AppendBuyBox(157, store, 'Buy a Dramatic Range', 1));
-//				});
-//			} break;
-
-//		case 'cocktail':
-//			mlink = $('a[href$="store.php?whichstore=m"]');
-//			if (GetPref('shortlinks') > 1 && mlink.length > 0)
-//			{	mlink.parent().before('<span id="buyspan"></span>');
-//				GM_get(server + '/heydeze.php', function(txt)
-//				{	if(txt != '') store = 'y';
-//					else store = 'm';
-//					$('#buyspan').before(
-//						AppendBuyBox(236, store, 'Buy a Queue du Coq Kit', 1));
-//				});
-//			} break;
-
+			
 		case 'smith':
-//			mlink = $('a[href$="store.php?whichstore=s"]');
-//			if (GetPref('shortlinks') > 1 && mlink.length > 0)
-//			{	mlink.parent().before('<span id="buyspan"></span>');
-//				GM_get(server + '/heydeze.php', function(txt)
-//				{	if(txt != '') store = 'y';
-//					else store = 's';
-//					$('#buyspan').before(
-//						AppendBuyBox(338, store, 'Buy Hammer', 1));
-//				});
-//			}
-
 			// Needs layout fix
 			var box = $('form[name=pulverize] input[name=qty]');
 			if(box.length > 0)
@@ -3199,26 +3161,6 @@ function at_hermit()
 			}
 			else AddLinks(descId, bText.parent().parent().get(0), p, thePath);
 		}
-	}	
-}
-
-// COMBINE: Auto-make meat paste.
-function at_craft_old()
-{	if (location.search == "") return;
-	var txt = document.body.textContent;
-	if (txt.indexOf("have any meat paste") != -1 && txt.indexOf("You acquire") == -1)
-	{	var quant = document.location.search.substr(
-			document.location.search.lastIndexOf("ty=")+3);
-		SetCharData('urlstorage',document.location.search);
-		GM_get(server+"/craft.php?mode=combine&action=makepaste&quantity="+quant,
-		function(result)
-		{	if (result.indexOf("enough Meat") == -1)
-			{	var url = GetCharData('urlstorage'); SetCharData('urlstorage',0);
-				GM_get(server+"/craft.php"+url,function(result2)
-				{	document.body.innerHTML = result2;
-				});
-			}
-		});
 	}	
 }
 
