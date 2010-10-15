@@ -2314,7 +2314,9 @@ function at_beerpong()
 			.attr('selected','selected').attr('value','0')
 			.html(' '));
 	}	
-	$('a[href="cove.php"]').parent().prepend("<center><a href=adventure.php?snarfblat=158>Adventure in the F'c'le</a></center><br />");
+	if ($('p:first').text().indexOf("You laugh as Ricket") != -1) {		// insert only upon beerpong success.
+		$('a[href="cove.php"]').parent().prepend("<center><a href=adventure.php?snarfblat=158>Adventure in the F'c'le</a></center><br />");
+	}
 }
 
 // INVENTORY: Add shortcuts when equipping outfits
@@ -3067,7 +3069,7 @@ function at_craft()
 	{	mlink.parent().parent().parent().find('center:first').after('<span id="buyspan"></span>');
 		GM_get(server + '/heydeze.php', function(txt)
 		{	if(txt != '') store = 'y';
-			else if (itemNeeded = 338) store = 's';
+			else if (itemNeeded == 338) store = 's';
 			else store = 'm';
 			$('#buyspan').html(AppendBuyBox(itemNeeded, store, desc, 1));
 		});
