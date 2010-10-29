@@ -2103,7 +2103,9 @@ function at_guild() {
 		break;
 		case "?place=ocg": 
 			GM_log("tdtext="+tdtext);
-			if (tdtext.indexOf("Fernswarthy's key") != -1) {
+			if (tdtext.indexOf("You acquire an item: Fernswarthy's key") != -1) {
+				$('b:eq(1)').append(AppendLink("Fern's Tower",'fernruin.php'));
+			} else if (tdtext.indexOf("Fernswarthy's key") != -1) {
 				$('b:eq(1)').append(AppendLink('[Fun House (1)]','adventure.php?snarfblat=20'));
 			}
 		break;
@@ -3554,6 +3556,7 @@ function at_charpane()
 		advcount = integer($('a:contains(Adv):first').parent().next().text());
 
 		var lvlblock = $("center:contains('Lvl.'):first").text();
+//		GM_log("lvlblock="+lvlblock);
 		level = lvlblock.match(/Lvl. (\d+)/)[1];
 
 		SetCharData("currentHP", curHP); SetCharData("maxHP", maxHP);
@@ -3574,9 +3577,35 @@ function at_charpane()
 		advcount = integer(data.shift());
 
 		var lvlblock = $("td:contains('Level'):first").text();
+//		GM_log("lvlblock="+lvlblock);
 		level = lvlblock.match(/Level (\d+)/)[1];
 		SetCharData("level", level);
-//		GM_log("full mode: set level="+level);
+		
+		var levelbar = $('table[title]:first').get(0);
+		var mainstatProgBarCount = parseInt(levelbar.title.match(/\d+/)[0]);
+		var charclass = $('table center').contents().filter(function() {if (this.nodeType == 3) return true;}).get(1).data; 
+		// should return the "class" part of "<table><center><tr><td><b>name</b><br>level X<br>class<blah...>" 
+		GM_log("charclass="+charclass);
+		var statbars = $('td[align="left"]');
+		var mainstatbar = false;
+		if ((charclass == "Turtle Tamer") || (charclass == "Seal Clubber")) mainstatbar = statbars.get(0);
+		if ((charclass == "Pastamancer") || (charclass == "Sauceror")) mainstatbar = statbars.get(1);
+		if ((charclass == "Disco Bandit") || (charclass == "Accordion Thief")) mainstatbar = statbars.get(2);
+		if (mainstatbar) {
+			GM_log("statbarcontent =" +mainstatbar.textContent);
+			var statval = mainstatbar.textContent.match(/(\d+)/g);	// could be "11" or " 11 (9)", for example.
+			statval = parseInt(statval[1] || statval[0]);			// pick the unbuffed value if buffed value is present.
+			var substatProgBarCount = parseInt(mainstatbar.childNodes[1].title.match(/\d+/)[0]);
+			var mainstatBase = Math.pow(level - 1, 2) + 4;
+			var substatCurrent = Math.pow(mainstatProgBarCount, 2) + 2 * mainstatBase * mainstatProgBarCount + substatProgBarCount;
+			var substatNext = 4 * Math.pow(level, 3) - 6 * Math.pow(level, 2) + 20 * level - 9;
+			levelbar.title = substatCurrent +' / '+ substatNext;
+			var blackWidth = Math.floor((substatCurrent / substatNext) * 100);
+			var whiteWidth = 100 - blackWidth;
+			levelbar.firstChild.firstChild.firstChild.width = blackWidth;
+			levelbar.firstChild.firstChild.lastChild.width = whiteWidth;
+		}
+		
 		// Change image link for costumes
 		var img = imgs[0];
 		if (GetPref('backup'))
@@ -5709,6 +5738,251 @@ function at_compactmenu()
 	}
 }
 
+function at_options()
+{	var choice, select;
+	var bigSpan = document.createElement('span');
+	var prefSpan = document.createElement('span');
+	bigSpan.setAttribute('id','scriptpref');
+//	bigSpan.setAttribute('style','display: none');
+	bigSpan.appendChild(document.createElement('hr'));
+
+	var spanSpan = document.createElement('span');
+	var clicky1 = 'javascript:getObj("scriptpref1").setAttribute("style","");' +
+	'javascript:getObj("scriptpref2").setAttribute("style","display:none;");' +
+	'javascript:getObj("scriptpref3").setAttribute("style","display:none;");';
+	var clicky2 = 'javascript:getObj("scriptpref1").setAttribute("style","display:none;");' +
+	'javascript:getObj("scriptpref2").setAttribute("style","");' +
+	'javascript:getObj("scriptpref3").setAttribute("style","display:none;");';
+	var clicky3 = 'javascript:getObj("scriptpref1").setAttribute("style","display:none;");' +
+	'javascript:getObj("scriptpref2").setAttribute("style","display:none;");' +
+	'javascript:getObj("scriptpref3").setAttribute("style","");';
+	var clicky4 = 'javascript:getObj("scriptpref1").setAttribute("style","display:none;");' +
+	'javascript:getObj("scriptpref2").setAttribute("style","display:none;");' +
+	'javascript:getObj("scriptpref3").setAttribute("style","display:none;");';
+	spanSpan.innerHTML = "Toggles: <a href='" + clicky1 +
+	"'>[tweak]</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Customize Links: " +
+	"<a href='" + clicky2 + "'>[one]</a> - <a href='" + clicky3 + "'>[two]</a>";
+	spanSpan.setAttribute('style','font-size:12px;text-align:center;');
+	bigSpan.appendChild(spanSpan);
+	bigSpan.appendChild(document.createElement('hr'));
+
+	prefSpan.setAttribute('id','scriptpref1');
+	bigSpan.appendChild(prefSpan);
+
+	choice = MakeOption("Clicking Number Boxes: ", 3, 'autoclear', "Does Zilch", "Clears");
+	select = choice.firstChild.cells[1].firstChild;
+	select.options[2].innerHTML = "Highlights";
+	prefSpan.appendChild(choice);
+
+	choice = MakeOption("Max HP/MP Calculation: ", 3, 'safemax', "Average", "Safe");
+	select = choice.firstChild.cells[1].firstChild;
+	select.options[2].innerHTML = "Really Safe";
+	prefSpan.appendChild(choice);
+
+	choice = MakeOption("Extra Shortcut Links: ", 4, 'shortlinks', "Off", "Top Only");
+	select = choice.firstChild.cells[1].firstChild;
+	select.options[2].innerHTML = "Main Only";
+	select.options[3].innerHTML = "On";
+	prefSpan.appendChild(choice);
+
+	choice = MakeOption("Omnipresent Quick-Skills: ", 3, 'moveqs', "Off", "On (Left)");
+	select = choice.firstChild.cells[1].firstChild;
+	select.options[2].innerHTML = "On (Right)";
+	prefSpan.appendChild(choice);
+
+	prefSpan.appendChild(MakeOption("Quick-Equip: ", 2, 'quickequip', "Off", "On"));
+	prefSpan.appendChild(MakeOption("Split Inventory Link: ", 2, 'splitinv', "Off", "On"));
+	prefSpan.appendChild(MakeOption("Split Quest Link: ", 2, 'splitquest', "Off", "On"));
+	choice = MakeOption("Split Messages Link: ", 5, 'splitmsg', "Off", "New Message");
+	select = choice.firstChild.cells[1].firstChild;
+	select.options[2].innerHTML = "Outbox";
+	select.options[3].innerHTML = "Saved";
+	select.options[4].innerHTML = "PvP";
+	prefSpan.appendChild(choice);
+	prefSpan.appendChild(MakeOption("Mall Link -> Search", 2, 'malllink', "Off", "On"));
+
+	prefSpan.appendChild(MakeOption("Monster Level Spoiler: ", 2, 'zonespoil', "Off", "On"));
+	prefSpan.appendChild(MakeOption("Never Grey Out Skills: ", 2, 'nodisable', "Off", "On"));
+	prefSpan.appendChild(MakeOption("1-Klick Klaw: ", 2, 'klaw', "Off", "On"));
+	prefSpan.appendChild(MakeOption("Logout Confirmation: ", 2, 'logout', "Off", "On"));
+	prefSpan.appendChild(MakeOption("Telescope Spoilers: ", 2, 'telescope', "Off", "On"));
+//			prefSpan.appendChild(MakeOption("Eat/Drink Again: ", 2, 'eatagain', "Off", "On"));
+	prefSpan.appendChild(MakeOption("Lair Spoilers: ", 2, 'lairspoil', "Off", "On"));
+	prefSpan.appendChild(MakeOption("Moons link to NO Calendar: ", 2, 'moonslink', "Off", "On"));
+	prefSpan.appendChild(MakeOption("Sword-Guy Link: ", -1, 'swordguy', 0, 0));
+	prefSpan.appendChild(MakeOption("Backup Outfit Name: ", -1, 'backup', 0, 0));
+	prefSpan.appendChild(MakeOption("Ascension Checklist: ", -1, 'ascension_list', 0, 0));
+
+	var menu1Span = document.createElement('span');
+	var menu2Span = document.createElement('span');
+	menu1Span.setAttribute('id','scriptpref2');
+//	menu1Span.setAttribute('style','display: none');
+	menu2Span.setAttribute('id','scriptpref3');
+//	menu2Span.setAttribute('style','display: none');
+
+	// Customized Links, Take 1
+	for (var j=0; j<10; j++)
+	{	var menutxt = GetPref('menu1link'+j);
+		if (menutxt != undefined) menutxt = menutxt.split(';')[0];
+		else menutxt = "";
+		menu1Span.appendChild(MakeOption(menutxt, -2, 'menu1link'+j), 0, 0);
+	}
+	select = document.createElement('a');
+	select.innerHTML = 'Restore Defaults'; select.href = '#';
+	select.setAttribute('class','tiny');
+	select.addEventListener('click',function(event)
+	{	event.stopPropagation(); event.preventDefault();
+		if (confirm("Restore default menu options? (Just double-checking.)") == false) return;
+		Defaults(1);
+		for (var i=0; i<10; i++)
+		{	var tag = document.getElementsByName('menu1link'+i+'tag')[0];
+			var link = document.getElementsByName('menu1link'+i)[0];
+			tag.value = GetPref('menu1link'+i).split(';')[0];
+			if (tag.value == "undefined") tag.value = "";
+			link.value = GetPref('menu1link'+i).split(';')[1];
+			if (link.value == "undefined") link.value = "";
+		} top.frames[0].location.reload();
+	}, true);
+	choice = document.createElement('input');
+	choice.type = 'submit'; choice.setAttribute('class','button');
+	choice.value = 'Apply'; choice.href = '#';
+	choice.addEventListener('click',function(event)
+	{	event.stopPropagation(); event.preventDefault();
+		for (var i=0; i<10; i++)
+		{	var tag = document.getElementsByName('menu1link'+i+'tag')[0].value;
+			var link = document.getElementsByName('menu1link'+i)[0].value;
+			if (tag != undefined && link != undefined && tag != "")
+				SetPref('menu1link'+i,tag+';'+link);
+			else SetPref('menu1link'+i,';');
+		} top.frames[0].location.reload();
+	}, true);
+	menu1Span.appendChild(document.createElement('center'));
+	menu1Span.lastChild.appendChild(select);
+	menu1Span.lastChild.appendChild(document.createElement('br'));
+	menu1Span.lastChild.appendChild(document.createElement('br'));
+	menu1Span.lastChild.appendChild(choice);
+
+	// Customized Links, Take 2
+	for (var j=0; j<10; j++)
+	{	var menutxt = GetPref('menu2link'+j);
+		if (menutxt != undefined) menutxt = menutxt.split(';')[0];
+		else menutxt = "";
+		menu2Span.appendChild(MakeOption(menutxt, -2, 'menu2link'+j), 0, 0);
+	}
+	select = document.createElement('a');
+	select.innerHTML = 'Restore Defaults'; select.href = '#';
+	select.setAttribute('class','tiny');
+	select.addEventListener('click',function(event)
+	{	event.stopPropagation(); event.preventDefault();
+		if (confirm("Restore default menu options? (Just double-checking.)") == false) return;
+		Defaults(2);
+		for (var i=0; i<10; i++)
+		{	var tag = document.getElementsByName('menu2link'+i+'tag')[0];
+			var link = document.getElementsByName('menu2link'+i)[0];
+			tag.value = GetPref('menu2link'+i).split(';')[0];
+			if (tag.value == "undefined") tag.value = "";
+			link.value = GetPref('menu2link'+i).split(';')[1];
+			if (link.value == "undefined") link.value = "";
+		} top.frames[0].location.reload();
+	}, true);
+	choice = document.createElement('input');
+	choice.type = 'submit'; choice.setAttribute('class','button');
+	choice.value = 'Apply'; choice.href = '#';
+	choice.addEventListener('click',function(event)
+	{	for (var i=0; i<10; i++)
+		{	var tag = document.getElementsByName('menu2link'+i+'tag')[0].value;
+			var link = document.getElementsByName('menu2link'+i)[0].value;
+			if (tag != undefined && link != undefined && tag != "")
+				SetPref('menu2link'+i,tag+';'+link);
+			else SetPref('menu2link'+i,';');
+		} top.frames[0].location.reload(); event.stopPropagation(); event.preventDefault();
+	}, true);
+	menu2Span.appendChild(document.createElement('center'));
+	menu2Span.lastChild.appendChild(select);
+	menu2Span.lastChild.appendChild(document.createElement('br'));
+	menu2Span.lastChild.appendChild(document.createElement('br'));
+	menu2Span.lastChild.appendChild(choice);
+
+	// Put it all together (-ish.)
+	bigSpan.appendChild(menu1Span);
+	bigSpan.appendChild(menu2Span);
+	bigSpan.appendChild(document.createElement('hr'));
+
+	var ul = document.createElement('a');
+	var ulspan = document.createElement('div');
+	ul.setAttribute('href','#');
+	ul.innerHTML = "Check For Update";
+	ul.addEventListener('click',function(event)
+	{	GM_get("noblesse-oblige.org/hellion/scripts/MrScript.version.txt", function(txt)
+		{	var uspan = document.getElementsByName('updatespan')[0];
+			var txtsplit = txt.split(',');
+			var versionNumber = txtsplit[0].replace('.','').replace('.','');
+			if (integer(versionNumber) <= VERSION)
+			{	uspan.innerHTML = "<br>No Update Available.";
+				persist('MrScriptLastUpdate', integer(new Date().getTime()/3600000)); return;
+			} else
+			{	uspan.innerHTML = "<br>Version " + txtsplit[0] + " Available: <a target='_blank' href='" +
+					txtsplit[1] + "'>Update</a>";
+		}	}); event.stopPropagation(); event.preventDefault();
+	}, true);
+	var ul2 = document.createElement('a');
+	ul2.setAttribute('href','javascript:void(0);');
+	ul2.innerHTML = "Update Item DB";
+	ul2.addEventListener('click',function(event)
+	{	if (confirm("Are you sure? You should only perform this action if Mr. Script is not functioning properly."))
+		{	UpdateItemDB(0); alert("Database will attempt to update. Please contact Hellion if the problem persists.");
+	}	}, true);
+//			var ul3 = document.createElement('a');
+//			ul3.setAttribute('target', '_blank');
+//			ul3.setAttribute('href','https://www.paypal.com/cgi-bin/webscr?'+
+//'cmd=_donations&business=lukifer%40mail%2ecom&item_name=Mr%2e%20Script&page_style=PayPal&no_shipping=1&cn=Comments&tax=0&currency_code=USD&lc=US&bn=PP%2dDonationsBF&charset=UTF%2d8');
+//			ul3.innerHTML = 'Say Thanks With Money!';
+	var ul4 = document.createElement('a');
+	ul4.setAttribute('href','javascript:void(0);');
+	ul4.innerHTML = "Renew Password Hash";
+	ul4.setAttribute('id','hashrenew');
+	ul4.addEventListener('click',function(event)
+	{	this.innerHTML = 'Working...';
+		GM_get(server + '/store.php?whichstore=m', function(txt)
+		{	var nupwd = txt.match(/phash\svalue\=\"([a-z0-9]+)\"/)[1];
+			if(nupwd) { $("#hashrenew").html('Done'); SetPwd(nupwd); }
+			else $("#hashrenew").html('Fail!');
+	});	}, true);
+	ulspan.setAttribute('class','tiny');
+	ulspan.setAttribute('name','updatespan');
+	var centre = document.createElement('center');
+	centre.appendChild(ulspan);
+	ulspan.appendChild(ul);
+	ulspan.appendChild(document.createTextNode(' - '));
+	ulspan.appendChild(ul2);
+	ulspan.appendChild(document.createTextNode(' - '));
+	ulspan.appendChild(ul4);
+	ulspan.appendChild(document.createElement('br'));
+//			ulspan.appendChild(document.createElement('br'));
+//			ulspan.appendChild(document.createTextNode('Like Mr. Script? '));
+//			ulspan.appendChild(ul3);
+	bigSpan.appendChild(centre);
+
+	var prefLink = document.createElement('a');
+	prefLink.innerHTML = "Mr. Script's Choicetastic Optionarium";
+	prefLink.setAttribute('href','javascript:toggle("scriptpref");');
+	prefLink.setAttribute('onclick','if (document.getElementById("scriptpref").getAttribute("style").indexOf("none") != -1)' +
+			' window.setTimeout("self.location.hash=\'opt\';",50)');
+	var prefAnchor = document.createElement('a');
+	prefAnchor.setAttribute('name','opt'); prefAnchor.innerHTML = " ";
+	var pDiddy = document.createElement('p');
+	pDiddy.appendChild(prefAnchor);
+	pDiddy.appendChild(prefLink);
+	pDiddy.appendChild(bigSpan);
+
+	// Look at all these children. Tables get *around*, man.
+//	var addHere = tables[i].rows[1].firstChild.firstChild.firstChild.firstChild.firstChild.firstChild;
+	var addHere = $('#opt_flag_noquestnudge').parent().get(0);
+	GM_log("addhere="+addHere);
+	addHere.appendChild(pDiddy); 
+}
+
+
 // ACCOUNT: Preference-Type Thing-Thing.
 function at_account()
 {	Defaults(0);
@@ -5719,7 +5993,7 @@ function at_account()
 			var bigSpan = document.createElement('span');
 			var prefSpan = document.createElement('span');
 			bigSpan.setAttribute('id','scriptpref');
-			bigSpan.setAttribute('style','display: none');
+//			bigSpan.setAttribute('style','display: none');
 			bigSpan.appendChild(document.createElement('hr'));
 
 			var spanSpan = document.createElement('span');
@@ -5954,7 +6228,9 @@ function at_account()
 			// Look at all these children. Tables get *around*, man.
 			var addHere = tables[i].rows[1].firstChild.firstChild.firstChild.firstChild.firstChild.firstChild;
 			addHere.appendChild(pDiddy); break;
-}	}	}
+		}	
+	}	
+}
 
 // HAGNK'S/MANAGESTORE/STASH: Support autoclear for added rows
 function managestore() {
