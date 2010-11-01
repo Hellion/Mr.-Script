@@ -948,6 +948,9 @@ function AddLinks(descId, theItem, formWhere, path) {
 			
 		case 4621: // Game Grid Token
 			addWhere.append(AppendLink('[arcade]','arcade.php')); break;
+			
+		case 450: 	case 451: 	case 1258:	// Pretentious artist's stuff
+			addWhere.append(AppendLink('[artiste]','town_wrong.php?place=artist')); break;
 	}
 
   switch (doWhat) {
@@ -2021,7 +2024,7 @@ function at_rats() {
 // ADVENTURE: provide "Explore next square" link when we hit a non-combat in the Hidden City.
 // Also provide extra functionality for certain other noncombats.
 function at_adventure() {
-	dropped_item();	// linky linky for things that go clinky.
+//	dropped_item();	// linky linky for things that go clinky.  Already handled up at the top, silly Hellion.
 	var square=GetCharData("square");
 	SetCharData("square",false);
 	if (square) {
@@ -2162,8 +2165,8 @@ function at_choice() {
 	}
 }
 
-// TOWN_RIGHT: Untinker linker.
-function at_town_right() {
+// Forest Village: Untinker linker.
+function at_forestvillage() {
 	if (document.location.search == "?place=untinker") {
 		var plunger = GetCharData("plungeraccess") == "Y" ? true: false;
 		var linkloc = plunger ? "knoll.php?place=smith" :"adventure.php?snarfblat=18";
@@ -2179,6 +2182,18 @@ function at_town_right() {
 			foo[1].appendChild(AppendLink(linkname,linkloc));
 		}
 		if (plunger) $('b:eq(1)').append(AppendLink('[innabox]',linkloc)); 
+	}
+}
+
+function at_town_wrong() {
+	if (document.location.search == "?place=artist") {
+		$('p').each(function()	{	
+			var p = $(this);
+			var txt = p.text();
+			if (txt.indexOf('Knob Goblin') != -1) p.append(AppendLink('[Knob outskirts (1)]','adventure.php?snarfblat=114'));
+			if (txt.indexOf('Haunted Pantry') != -1) p.append(AppendLink('[Pantry (1)]','adventure.php?snarfblat=113'));
+			if (txt.indexOf('Back Alley') != -1) p.append(AppendLink('[Alley (1)]','adventure.php?snarfblat=112'));
+		});
 	}
 }
 
