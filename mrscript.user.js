@@ -1761,18 +1761,18 @@ function at_fight() {
 		SetCharData("square",false);
 		if (square) {
 //			GM_log("square="+square);
-			if (square.indexOf("hiddencity") != -1 || square.indexOf("rats.php") != -1) {	
+			if (square.indexOf("hiddencity") != -1) {  // || square.indexOf("rats.php") != -1) {	
 				var thissquare = square.match(/(\d+)/)[1];	// break the "22" off of "rats.php?where=22", for example.
 				var hloc = '';
-				var lastsquare = 0;
-				if (square.indexOf("hiddencity") != -1) {
-					hloc = "hiddencity.php?which=";
-					lastsquare=24;
-				} else {
-				    SetCharData("lastrat",thissquare);	// store for display on the main (pre-quest) tavern page.
-					hloc = "rats.php?where=";
-					lastsquare=25;
-				}
+				var lastsquare = 24;
+//				if (square.indexOf("hiddencity") != -1) {
+				hloc = "hiddencity.php?which=";
+//				lastsquare=24;
+//				} else {
+//				    SetCharData("lastrat",thissquare);	// store for display on the main (pre-quest) tavern page.
+//					hloc = "rats.php?where=";
+//					lastsquare=25;
+//				}
 				var nextsquare = integer(thissquare)+1;
 				if (nextsquare <= lastsquare) {
 					var myhref = hloc+nextsquare;
@@ -1982,44 +1982,44 @@ function at_hiddencity() {
 }
 
 // RATS: track what square we clicked in order to provide "Explore Next Square" link.
-function at_rats() {
-	$('a').click(function() {	
-		var a = $(this);
-		SetCharData("square",a.attr('href'));
-	});
-	var lastrat = integer(GetCharData("lastrat"));
-	if (isNaN(lastrat)) lastrat = 0;
-	if (lastrat) {
-		var lastratdiv = document.createElement('div');
-		lastratdiv.innerHTML = '<center><font color="blue">Last square clicked:'+lastrat+'</font></center>';
-		document.body.appendChild(lastratdiv);
-	}
-// add "next square" link when we click on a drink-dropping non-combat square.
-	$('td:contains("You acquire an item"):not(:has(table))').each(function() { // only the innermost acquire-an-item TD.
-		var tdhtml = $(this).html();
-		var square=GetCharData("square");
-		SetCharData("square",false);
-		if (tdhtml.indexOf("shiny ring") != -1) {
-			dropped_item();	// linky linky
-			return;	// no next square when we shut off the faucet.
-		}
-		if (square) {
-			var hloc = "rats.php?where=";
-			var thissquare = square.match(/(\d+)/)[1];	// the "22" in "rats.php?where=22"
-			var nextsquare = integer(thissquare)+1;
-			SetCharData("lastrat",thissquare);
-			if (nextsquare < 26) {
-				var myhref = hloc+nextsquare;
-				var clicky = "SetCharData('square','"+myhref+"')";
-				$('<center><p><a href="'+myhref+'" id="bwahaha">Explore Next Square</a></center>').appendTo($(this).parent().parent().parent().parent());
-				$('#bwahaha').click(function() {
-					var a = $(this);
-					SetCharData("square",a.attr('href'));
-				});
-			}
-		}	
-	});
-}
+//function at_rats() {
+//	$('a').click(function() {	
+//		var a = $(this);
+//		SetCharData("square",a.attr('href'));
+//	});
+//	var lastrat = integer(GetCharData("lastrat"));
+//	if (isNaN(lastrat)) lastrat = 0;
+//	if (lastrat) {
+//		var lastratdiv = document.createElement('div');
+//		lastratdiv.innerHTML = '<center><font color="blue">Last square clicked:'+lastrat+'</font></center>';
+//		document.body.appendChild(lastratdiv);
+//	}
+//// add "next square" link when we click on a drink-dropping non-combat square.
+//	$('td:contains("You acquire an item"):not(:has(table))').each(function() { // only the innermost acquire-an-item TD.
+//		var tdhtml = $(this).html();
+//		var square=GetCharData("square");
+//		SetCharData("square",false);
+//		if (tdhtml.indexOf("shiny ring") != -1) {
+//			dropped_item();	// linky linky
+//			return;	// no next square when we shut off the faucet.
+//		}
+//		if (square) {
+//			var hloc = "rats.php?where=";
+//			var thissquare = square.match(/(\d+)/)[1];	// the "22" in "rats.php?where=22"
+//			var nextsquare = integer(thissquare)+1;
+//			SetCharData("lastrat",thissquare);
+//			if (nextsquare < 26) {
+//				var myhref = hloc+nextsquare;
+//				var clicky = "SetCharData('square','"+myhref+"')";
+//				$('<center><p><a href="'+myhref+'" id="bwahaha">Explore Next Square</a></center>').appendTo($(this).parent().parent().parent().parent());
+//				$('#bwahaha').click(function() {
+//					var a = $(this);
+//					SetCharData("square",a.attr('href'));
+//				});
+//			}
+//		}	
+//	});
+//}
 
 // ADVENTURE: provide "Explore next square" link when we hit a non-combat in the Hidden City.
 // Also provide extra functionality for certain other noncombats.
@@ -3326,7 +3326,7 @@ function at_questlog()
 			else if (txt.indexOf("Larva") != -1 || txt.indexOf("White Citadel") != -1)
 				b.append(AppendLink('[woods]', 'woods.php'));
 			else if (txt.indexOf("Smell a Rat") != -1)
-				b.append(AppendLink('[tavern]', 'rats.php'));
+				b.append(AppendLink('[tavern]', 'cellar.php'));
 			else if (txt.indexOf("Smell a Bat") != -1)
 				b.append(AppendLink('[bat hole]', 'bathole.php'));
 			else if (txt.indexOf("Wouldn't Be King") != -1 && txt.indexOf("slaying") == -1)
