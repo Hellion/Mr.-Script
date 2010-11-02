@@ -796,7 +796,7 @@ function AddLinks(descId, theItem, formWhere, path) {
 			itemNum = 74; doWhat = 'oneuse'; break;
 
 		case  275: case  191: case  313: case 1244: case 1245:	case 675:		// larva, boss bat bandana, KGKing items, dagon skull,
-		case 2334: case  199:													// MacGuffin, shiny ring
+		case 2334: 																// MacGuffin
 			addWhere.append(AppendLink('[council]','council.php')); break;
 			
 		case 454: // rusty screwdriver
@@ -2159,9 +2159,11 @@ function at_choice() {
 		if (p0.textContent.indexOf("actually a book.") != -1) p0.appendChild(AppendLink('[go ahead, read it already]','inv_use.php?pwd='+pwd+'&which=3&whichitem=818'));
 		else if (p0.textContent.indexOf("a new pledge") != -1) {	// Orcish Frat House Blueprints adventure
 			$('a [href="adventure.php?snarfblat=27"]').attr('href','adventure.php?snarfblat=157').text("Adventure in BARRRNEY'S BARRR");
+		} else if (p0.textContent.indexOf("go tell Bart") != -1) {
+			p0.appendChild(AppendLink('[go on already]','tavern.php?place=barkeep'));
 		} else if (usemap == 1) {
 			p0.appendChild(AppendLink('[use giant castle map]',"inv_use.php?pwd="+pwd+"&which=3&whichitem=667"));
-		}
+		} 
 	}
 }
 
@@ -3506,6 +3508,64 @@ function at_questlog()
 	}
 }
 
+function fix_progressbar(totalWidth, level)
+{
+	var levelbar = $('table[title]:first').get(0);
+	var mainstatProgBarCount = parseInt(levelbar.title.match(/\d+/)[0]); // = how many stat points into this level we are
+	var charclass = $('table center').contents().filter(function() {if (this.nodeType == 3) return true;}).get(1);
+	if (charclass) charclass = charclass.data; 
+	// should return the "class" part of "<table><center><tr><td><b>name</b><br>level X<br>class<blah...>" in full mode.
+	GM_log("charclass="+charclass);
+	var statbars = $('td[align="left"]');
+	var mainstatbar = false;
+	if ((charclass == "Turtle Tamer") || (charclass == "Seal Clubber")) mainstatbar = statbars.get(0);
+	if ((charclass == "Pastamancer") || (charclass == "Sauceror")) mainstatbar = statbars.get(1);
+	if ((charclass == "Disco Bandit") || (charclass == "Accordion Thief")) mainstatbar = statbars.get(2);
+	if (!mainstatbar) {	// couldn't find a class name.  fall back to highest stat.
+		var curstat = 0;
+		var minstat = ((level-1)*(level-1))+4;
+		if (level == 1) minstat = 0;
+		var musval = statbars.get(0).textContent.match(/(\d+)/g);
+		musval = parseInt(musval[1] || musval[0]);
+		if ((minstat <= musval)) { mainstatbar = statbars.get(0); curstat = musval; }	
+		var mysval = statbars.get(1).textContent.match(/(\d+)/g);
+		mysval = parseInt(mysval[1] || mysval[0]);
+		if ((minstat <= mysval) && (curstat <= mysval)) { mainstatbar = statbars.get(1); curstat = mysval; }
+		var moxval = statbars.get(2).textContent.match(/(\d+)/g);
+		moxval = parseInt(moxval[1] || moxval[0]);
+		if ((minstat <= moxval && curstat <= moxval)) { mainstatbar = statbars.get(2); curstat = moxval; }
+//		GM_log("curstat="+curstat+", minstat="+minstat+", musval="+musval+", mysval="+mysval+", moxval="+moxval+", mainstatbar="+mainstatbar);
+	}
+	if (mainstatbar) {
+//			GM_log("statbarcontent =" +mainstatbar.textContent);
+		var statval = mainstatbar.textContent.match(/(\d+)/g);	// could be "11" or " 11 (9)", for example.
+		statval = parseInt(statval[1] || statval[0]);			// pick the unbuffed value if buffed value is present.
+		var substatProgBarCount;
+		if (totalWidth == 100) { 
+			substatProgBarCount = parseInt(mainstatbar.childNodes[1].title.match(/\d+/)[0]); // = how many substats into this stat point we are
+		} else {	// if (fullWidth == 60), compact mode.  feh.
+			substatProgBarCount = parseInt(mainstatbar.parentNode.nextSibling.childNodes[1].firstChild.title.match(/\d+/)[0]);
+		}
+		var substatNext = (4 * level*level*level) - (6 * level*level) + (20 * level) - 9; // = substats to go from level to level+1
+		var mainstatBase = Math.pow(level - 1, 2) + 4;										// = lowest mainstat to be level X
+		if (mainstatBase == 4) { // i.e. if we're currently level 1, and the formulas don't work, fudge it:
+			mainstatBase = 0;
+			mainstatProgBarCount = mainstatProgBarCount + 3;	// don't go below 3 mainstat, please, folks.
+			substatNext = 25;
+		}
+		var substatCurrent = Math.pow(mainstatProgBarCount, 2) + 2 * mainstatBase * mainstatProgBarCount + substatProgBarCount;
+								// = how many substats into the level we are.  yay.
+		levelbar.title = substatCurrent +' / '+ substatNext;
+		var blackWidth = Math.floor((substatCurrent / substatNext) * totalWidth);
+		var whiteWidth = totalWidth - blackWidth;
+		levelbar.firstChild.firstChild.firstChild.width = blackWidth;
+		levelbar.firstChild.firstChild.lastChild.width = whiteWidth;
+//			GM_log("statval="+statval+", substatProgBarCount="+substatProgBarCount+", mainstatbase="+mainstatBase+", substatCurrent="+substatCurrent);
+//			GM_log("level="+level+", substatNext="+substatNext+", blackwidth="+blackWidth+", mainstatProgBarCount="+mainstatProgBarCount);
+	}
+}
+
+
 // CHARPANE: Find HP, MP, do effects stuff.
 function at_charpane()
 {	// var centerThing = document.getElementsByTagName('center');
@@ -3569,6 +3629,7 @@ function at_charpane()
 		var lvlblock = $("center:contains('Lvl.'):first").text();
 //		GM_log("lvlblock="+lvlblock);
 		level = lvlblock.match(/Lvl. (\d+)/)[1];
+		fix_progressbar(60, level);
 
 		SetCharData("currentHP", curHP); SetCharData("maxHP", maxHP);
 		SetCharData("currentMP", curMP); SetCharData("maxMP", maxMP);
@@ -3592,39 +3653,7 @@ function at_charpane()
 		level = lvlblock.match(/Level (\d+)/)[1];
 		SetCharData("level", level);
 		
-		var levelbar = $('table[title]:first').get(0);
-		var mainstatProgBarCount = parseInt(levelbar.title.match(/\d+/)[0]); // = how many stat points into this level we are
-		var charclass = $('table center').contents().filter(function() {if (this.nodeType == 3) return true;}).get(1).data; 
-		// should return the "class" part of "<table><center><tr><td><b>name</b><br>level X<br>class<blah...>" 
-		GM_log("charclass="+charclass);
-		var statbars = $('td[align="left"]');
-		var mainstatbar = false;
-		if ((charclass == "Turtle Tamer") || (charclass == "Seal Clubber")) mainstatbar = statbars.get(0);
-		if ((charclass == "Pastamancer") || (charclass == "Sauceror")) mainstatbar = statbars.get(1);
-		if ((charclass == "Disco Bandit") || (charclass == "Accordion Thief")) mainstatbar = statbars.get(2);
-		if (mainstatbar) {
-//			GM_log("statbarcontent =" +mainstatbar.textContent);
-			var statval = mainstatbar.textContent.match(/(\d+)/g);	// could be "11" or " 11 (9)", for example.
-			statval = parseInt(statval[1] || statval[0]);			// pick the unbuffed value if buffed value is present.
-			var substatProgBarCount = parseInt(mainstatbar.childNodes[1].title.match(/\d+/)[0]); // = how many substats into this stat point we are
-
-			var substatNext = 4 * Math.pow(level, 3) - 6 * Math.pow(level, 2) + 20 * level - 9; // = substats to go from level to level+1
-			var mainstatBase = Math.pow(level - 1, 2) + 4;										// = lowest mainstat to be level X
-			if (mainstatBase == 4) { // i.e. if we're currently level 1, and the formulas don't work, fudge it:
-				mainstatBase = 0;
-				mainstatProgBarCount = mainstatProgBarCount + 3;	// don't go below 3 mainstat, please, folks.
-				substatNext = 25;
-			}
-			var substatCurrent = Math.pow(mainstatProgBarCount, 2) + 2 * mainstatBase * mainstatProgBarCount + substatProgBarCount;
-									// = how many substats into the level we are.  yay.
-			levelbar.title = substatCurrent +' / '+ substatNext;
-			var blackWidth = Math.floor((substatCurrent / substatNext) * 100);
-			var whiteWidth = 100 - blackWidth;
-			levelbar.firstChild.firstChild.firstChild.width = blackWidth;
-			levelbar.firstChild.firstChild.lastChild.width = whiteWidth;
-//			GM_log("statval="+statval+", substatProgBarCount="+substatProgBarCount+", mainstatbase="+mainstatBase+", substatCurrent="+substatCurrent);
-//			GM_log("level="+level+", substatNext="+substatNext+", blackwidth="+blackWidth+", mainstatProgBarCount="+mainstatProgBarCount);
-		}
+		fix_progressbar(100, level);
 		
 		// Change image link for costumes
 		var img = imgs[0];
