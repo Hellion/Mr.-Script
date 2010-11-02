@@ -2274,17 +2274,12 @@ function at_trapper() {
 	} 
 }
 
-// SEARCHMALL: the new, improved mall search/buy page.
-// function at_searchmall() 
-// {	at_mallstore();			// I need to make a unique function for this....  05Jan10 Hellion
-// }
 function at_searchmall() {
 	$('center table tr td center table:first').prepend('<tr><td><center><a href=managestore.php>Manage your Store</a><br /><br /></center></td></tr>');
 }
 
 function at_managestore() {
 	$('a[href="storelog.php"]').parent().append('<br /><br /><a href=searchmall.php>Search the Mall</a><br />');
-//	$('center table tr td center table:first').prepend('<tr><td><center><a href=searchmall.php>Search the Mall</a><br /><br /></center></td></tr>');
 }
 
 // MALLSTORE: add fun links to (some of) the things you buy!
@@ -3221,7 +3216,8 @@ function at_council()
 			else if (txt.indexOf("larva") != -1 && txt.indexOf("Thanks") == -1)
 				p.append(AppendLink('[woods]', 'woods.php'));
 			else if (txt.indexOf("Typical Tavern") != -1)
-				p.append(AppendLink('[tavern]', 'rats.php'));
+				p.append(AppendLink('[Bart Ender]','tavern.php?place=barkeep'));
+//				p.append(AppendLink('[tavern]', 'rats.php'));
 			else if (txt.indexOf("Boss Bat") != -1)
 				p.append(AppendLink('[bat hole]', 'bathole.php'));
 			else if (txt.indexOf("Guild") != -1)
@@ -3597,7 +3593,7 @@ function at_charpane()
 		SetCharData("level", level);
 		
 		var levelbar = $('table[title]:first').get(0);
-		var mainstatProgBarCount = parseInt(levelbar.title.match(/\d+/)[0]);
+		var mainstatProgBarCount = parseInt(levelbar.title.match(/\d+/)[0]); // = how many stat points into this level we are
 		var charclass = $('table center').contents().filter(function() {if (this.nodeType == 3) return true;}).get(1).data; 
 		// should return the "class" part of "<table><center><tr><td><b>name</b><br>level X<br>class<blah...>" 
 		GM_log("charclass="+charclass);
@@ -3607,18 +3603,27 @@ function at_charpane()
 		if ((charclass == "Pastamancer") || (charclass == "Sauceror")) mainstatbar = statbars.get(1);
 		if ((charclass == "Disco Bandit") || (charclass == "Accordion Thief")) mainstatbar = statbars.get(2);
 		if (mainstatbar) {
-			GM_log("statbarcontent =" +mainstatbar.textContent);
+//			GM_log("statbarcontent =" +mainstatbar.textContent);
 			var statval = mainstatbar.textContent.match(/(\d+)/g);	// could be "11" or " 11 (9)", for example.
 			statval = parseInt(statval[1] || statval[0]);			// pick the unbuffed value if buffed value is present.
-			var substatProgBarCount = parseInt(mainstatbar.childNodes[1].title.match(/\d+/)[0]);
-			var mainstatBase = Math.pow(level - 1, 2) + 4;
+			var substatProgBarCount = parseInt(mainstatbar.childNodes[1].title.match(/\d+/)[0]); // = how many substats into this stat point we are
+
+			var substatNext = 4 * Math.pow(level, 3) - 6 * Math.pow(level, 2) + 20 * level - 9; // = substats to go from level to level+1
+			var mainstatBase = Math.pow(level - 1, 2) + 4;										// = lowest mainstat to be level X
+			if (mainstatBase == 4) { // i.e. if we're currently level 1, and the formulas don't work, fudge it:
+				mainstatBase = 0;
+				mainstatProgBarCount = mainstatProgBarCount + 3;	// don't go below 3 mainstat, please, folks.
+				substatNext = 25;
+			}
 			var substatCurrent = Math.pow(mainstatProgBarCount, 2) + 2 * mainstatBase * mainstatProgBarCount + substatProgBarCount;
-			var substatNext = 4 * Math.pow(level, 3) - 6 * Math.pow(level, 2) + 20 * level - 9;
+									// = how many substats into the level we are.  yay.
 			levelbar.title = substatCurrent +' / '+ substatNext;
 			var blackWidth = Math.floor((substatCurrent / substatNext) * 100);
 			var whiteWidth = 100 - blackWidth;
 			levelbar.firstChild.firstChild.firstChild.width = blackWidth;
 			levelbar.firstChild.firstChild.lastChild.width = whiteWidth;
+//			GM_log("statval="+statval+", substatProgBarCount="+substatProgBarCount+", mainstatbase="+mainstatBase+", substatCurrent="+substatCurrent);
+//			GM_log("level="+level+", substatNext="+substatNext+", blackwidth="+blackWidth+", mainstatProgBarCount="+mainstatProgBarCount);
 		}
 		
 		// Change image link for costumes
