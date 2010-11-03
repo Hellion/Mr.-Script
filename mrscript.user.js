@@ -83,8 +83,8 @@ var spoilers = GetPref('zonespoil') == 1;
 
 anywhere(); // stuff we always add where we can
 
-// added town_right to cover untinkered results...
-if (/^(adventure|choice|craft|knoll|shore|town_right)$/.test(place)) {	// removed fight
+// town_right to cover gourds, and forestvillage for untinkered results...
+if (/^(adventure|choice|craft|knoll|shore|town_right|forestvillage)$/.test(place)) {	// removed fight
 	dropped_item();
 }
 // where are we and what do we thus want to do?
@@ -803,7 +803,7 @@ function AddLinks(descId, theItem, formWhere, path) {
 			addWhere.append(AppendLink('[take to guild]','guild.php?place=scg')); break; 
 			
 		case 454: // rusty screwdriver
-			addWhere.append(AppendLink('[untinker]','town_right.php?place=untinker')); break;
+			addWhere.append(AppendLink('[untinker]','forestvillage.php?place=untinker')); break;
 			
 		case 134: // bitchin' meatcar
 			addWhere.append(AppendLink('[guild]','guild.php?place=paco')); break;
@@ -1314,7 +1314,7 @@ function Defaults(revert)
 
 		if (GetPref('menu1link0') == undefined) SetPref('menu1link0', 'market;town_market.php');
 		if (GetPref('menu1link1') == undefined) SetPref('menu1link1', 'hermit;hermit.php');
-		if (GetPref('menu1link2') == undefined) SetPref('menu1link2', 'untinker;town_right.php?place=untinker');
+		if (GetPref('menu1link2') == undefined) SetPref('menu1link2', 'untinker;forestvillage.php?place=untinker');
 		if (GetPref('menu1link3') == undefined) SetPref('menu1link3', 'mystic;mystic.php');
 		if (GetPref('menu1link4') == undefined) SetPref('menu1link4', 'hunter;bhh.php');
 		if (GetPref('menu1link5') == undefined) SetPref('menu1link5', 'guildstore');
@@ -1337,7 +1337,7 @@ function Defaults(revert)
 	else if (revert==1) // I'm definitely going to hell.
 	{	SetPref('menu1link0', 'market;town_market.php');
 		SetPref('menu1link1', 'hermit;hermit.php');
-		SetPref('menu1link2', 'untinker;town_right.php?place=untinker');
+		SetPref('menu1link2', 'untinker;forestvillage.php?place=untinker');
 		SetPref('menu1link3', 'mystic;mystic.php');
 		SetPref('menu1link4', 'hunter;bhh.php');
 		SetPref('menu1link5', 'guildstore');
@@ -2978,7 +2978,7 @@ function at_store()
 				break;
 			case 'r':		// pirate store: untinker the dictionary.
 				if (acquireString.indexOf('dictionary') != -1)
-					bText.parent().append(AppendLink('[untinker]', 'town_right.php?place=untinker'));
+					bText.parent().append(AppendLink('[untinker]', 'forestvillage.php?place=untinker'));
 				break;
 		}
 
@@ -3390,7 +3390,7 @@ function at_questlog()
 				b.append(AppendLink('[lair]', 'lair.php'));
 			}
 			else if (txt.indexOf("Made of Meat") != -1)
-			{	b.append(AppendLink('[untinker]', 'town_right.php?place=untinker'));
+			{	b.append(AppendLink('[untinker]', 'forestvillage.php?place=untinker'));
 				b.append(AppendLink('[plains]', 'plains.php'));
 			}
 			else if (txt.indexOf("Driven Crazy") != -1
@@ -5116,7 +5116,7 @@ function spoil_woods()
 		else if (src.indexOf("barrow") != -1) ml = '56-65';
 		else if (src.indexOf("pen.") != -1) ml = '13-20';
 		else if (src.indexOf("grove") != -1) ml = '34-36';
-		else if (src.indexOf("tavern") != -1) ml = '10';
+//		else if (src.indexOf("tavern") != -1) ml = '10';
 		if(ml) this.setAttribute('title','ML: '+ml);
 });	}
 
@@ -5788,7 +5788,7 @@ function at_compactmenu()
 		AddTopOption("Class Guild", "guild.php", selectItem, 0);
 		AddTopOption("Market Square", "town_market.php", selectItem, 0);
 		AddTopOption("Hermitage", "hermit.php", selectItem, 0);
-		AddTopOption("Untinker", "town_right.php?place=untinker", selectItem, 0);
+		AddTopOption("Untinker", "forestvillage.php?place=untinker", selectItem, 0);
 		AddTopOption("Mystic Crackpot", "mystic.php", selectItem, 0);
 		AddTopOption("Bounty Hunter", "bhh.php", selectItem, 0);
 		AddTopOption("Gouda's Grocery", "store.php?whichstore=2", selectItem, 0);
