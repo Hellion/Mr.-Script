@@ -845,8 +845,13 @@ function AddLinks(descId, theItem, formWhere, path) {
 			
 		case 2441: // KG encryption key
 			addWhere.append(AppendLink('[use map]','inv_use.php?pwd=' + pwd + '&which=3&whichitem=2442')); break;
+			
+		case 2277: // Fernswarthy's key
+			if (place == 'adventure') addWhere.append(AppendLink('[visit guild]','guild.php?place=ocg'));
+			else addWhere.append(AppendLink('[go to ruins]','fernruin.php'));
+			break;
 
-		case 2297: // Dusty Old Book
+		case 2279: // Dusty Old Book
 			addWhere.append(AppendLink('[take back to guild]','guild.php?place=ocg')); break;
 			
 		case 3000: // Caronch's dentures
@@ -2107,9 +2112,13 @@ function at_guild() {
 		break;
 		case "?place=ocg": 
 			GM_log("tdtext="+tdtext);
-			if (tdtext.indexOf("You acquire an item: Fernswarthy's key") != -1) {
-				$('b:eq(1)').append(AppendLink("[Fern's Tower]",'fernruin.php'));
-			} else if (tdtext.indexOf("brought me Fernswarthy's key") != -1) {
+//			if (tdtext.indexOf("You acquire an item: Fernswarthy's key") != -1) {
+//				$('b:eq(1)').append(AppendLink("[Fern's Tower]",'fernruin.php'));
+//			} else 
+			if  ((tdtext.indexOf("brought me Fernswarthy's key") != -1) || 	// AT
+						(tdtext.indexOf("Misspelled Cemetary") != -1) || 	// SC/TT
+						(tdtext.indexOf("brought the key to") != -1) ||		// PM/SA
+						(tdtext.indexOf("haven't got Fern") != -1)) {		// DB		whew.  stupid flavor text.
 				td.append(AppendLink('[Misspelled Cemetary (1)]','adventure.php?snarfblat=21'));
 			} else if (tdtext.indexOf("searching the ruins") != -1) {
 				td.append(AppendLink('[Tower Ruins (1)]','adventure.php?snarfblat=22'));
@@ -2117,11 +2126,17 @@ function at_guild() {
 		break;
 		case "?place=scg": 
 			GM_log("tdtext="+tdtext);
-			if (tdtext.indexOf("restore the Legendary") != -1) {
+			if ((tdtext.indexOf("restore the Legendary") != -1) || 
+				(tdtext.indexOf("acquire the Legendary") != -1) || 
+				(tdtext.indexOf("with that Legendary") != -1))
+			{
 				td.append(AppendLink('[Fun House (1)]','adventure.php?snarfblat=20'));
-			} else if ((tdtext.indexOf("where your Nemesis is holed up.") != -1) || (tdtext.indexOf("Haven't beat your Nemesis yet, eh?") != -1)) {
-				td.append(AppendLink('[nemesis cave]','cave.php'));
-			} else if (tdtext.indexOf('cause undue stress') != -1) {
+			} else if ((tdtext.indexOf("where your Nemesis is holed up.") != -1) || 
+					   (tdtext.indexOf("Haven't beat your Nemesis yet, eh?") != -1) ||
+					   (tdtext.indexOf("need you to defeat") != -1) ||
+					   (tdtext.indexOf('cause undue stress') != -1) || 
+					   (tdtext.indexOf("defeated your Nemesis yet") != -1))
+			{
 				td.append(AppendLink('[nemesis cave]','cave.php'));
 			} else if ((tdtext.indexOf("Got this hat,") != -1) || (tdtext.indexOf("be the first to know") != -1)) {
 				td.append('<p><font color="blue">(Come back after you get the Secret Tropical Volcano Lair map from a nemesis assassin.)</font>');
