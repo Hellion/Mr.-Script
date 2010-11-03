@@ -799,6 +799,9 @@ function AddLinks(descId, theItem, formWhere, path) {
 		case 2334: 																// MacGuffin
 			addWhere.append(AppendLink('[council]','council.php')); break;
 			
+		case 2556: case 2557: case 2558: case 2559: case 2560: case 2561: 		// LEWs
+			addWhere.append(AppendLink('[take to guild]','guild.php?place=scg')); break; 
+			
 		case 454: // rusty screwdriver
 			addWhere.append(AppendLink('[untinker]','town_right.php?place=untinker')); break;
 			
@@ -842,10 +845,6 @@ function AddLinks(descId, theItem, formWhere, path) {
 			
 		case 2441: // KG encryption key
 			addWhere.append(AppendLink('[use map]','inv_use.php?pwd=' + pwd + '&which=3&whichitem=2442')); break;
-	
-// this needs a different solution; as is, it appends the link to the key when you find it, which is when you need to take it back to the guild.	
-//		case 2277: // Fern's key
-//			addWhere.append(AppendLink("[Tower Ruins]",'fernruin.php')); break;
 
 		case 2297: // Dusty Old Book
 			addWhere.append(AppendLink('[take back to guild]','guild.php?place=ocg')); break;
@@ -1935,6 +1934,8 @@ function at_valhalla() {
 	SetCharData("insults",'0;0;0;0;0;0;0;0');
 	// clear last-rat info
 	SetCharData("lastrat",0);
+	// reset nun counter, just in case
+	SetCharData("nunmoney",0);
 }
 
 // COVE: display pirate insult information
@@ -2099,7 +2100,7 @@ function at_guild() {
 				td.append(AppendLink('[Whitey\'s Grove (1)]', "adventure.php?snarfblat=100"));
 				td.append(AppendLink('[Road to WC (1)]', "adventure.php?snarfblat=99"));
 			}
-			else if (tdtext.indexOf("with the meatcar?") != -1) {
+			else if ((tdtext.indexOf("with the meatcar?") != -1) || (tdtext.indexOf("meatcar parts") != -1)) {
 				if (GetCharData("plungeraccess") == "Y") td.append(AppendLink('[gnoll store]', "store.php?whichstore=5"));
 				else td.append(AppendLink('[Knoll (1)]', "adventure.php?snarfblat=19"));
 			}
@@ -2107,14 +2108,18 @@ function at_guild() {
 		case "?place=ocg": 
 			GM_log("tdtext="+tdtext);
 			if (tdtext.indexOf("You acquire an item: Fernswarthy's key") != -1) {
-				$('b:eq(1)').append(AppendLink("Fern's Tower",'fernruin.php'));
-			} else if (tdtext.indexOf("Fernswarthy's key") != -1) {
-				$('b:eq(1)').append(AppendLink('[Fun House (1)]','adventure.php?snarfblat=20'));
+				$('b:eq(1)').append(AppendLink("[Fern's Tower]",'fernruin.php'));
+			} else if (tdtext.indexOf("brought me Fernswarthy's key") != -1) {
+				td.append(AppendLink('[Misspelled Cemetary (1)]','adventure.php?snarfblat=21'));
+			} else if (tdtext.indexOf("searching the ruins") != -1) {
+				td.append(AppendLink('[Tower Ruins (1)]','adventure.php?snarfblat=22'));
 			}
 		break;
 		case "?place=scg": 
 			GM_log("tdtext="+tdtext);
-			if ((tdtext.indexOf("where your Nemesis is holed up.") != -1) || (tdtext.indexOf("Haven't beat your Nemesis yet, eh?") != -1)) {
+			if (tdtext.indexOf("restore the Legendary") != -1) {
+				td.append(AppendLink('[Fun House (1)]','adventure.php?snarfblat=20'));
+			} else if ((tdtext.indexOf("where your Nemesis is holed up.") != -1) || (tdtext.indexOf("Haven't beat your Nemesis yet, eh?") != -1)) {
 				td.append(AppendLink('[nemesis cave]','cave.php'));
 			} else if (tdtext.indexOf('cause undue stress') != -1) {
 				td.append(AppendLink('[nemesis cave]','cave.php'));
@@ -5115,6 +5120,15 @@ function spoil_woods()
 		if(ml) this.setAttribute('title','ML: '+ml);
 });	}
 
+function spoil_tavern()
+{	$('area').each(function()
+	{	var ml = null; var src = this.getAttribute('title');
+		if (src.indexOf("A Barroom Brawl") != -1) ml = '6-10';
+		else if (src.indexOf("Tavern Cellar") != -1) ml = '10';
+		if (ml) this.setAttribute('title','ML: '+ml);
+	});
+}
+
 function spoil_island()
 {	$('img').each(function()
 	{	var ml = null; var src = this.getAttribute('src');
@@ -5335,7 +5349,7 @@ function at_topmenu()
 
 	// some housekeeping stuff that I want to make sure gets checked regularly and can't think of a better place for...
 	// gotta clear these out when you ascend, which you may do on a different computer occasionally.
-	if (integer(GetCharData('level')) < 11) {
+	if (integer(GetCharData('level')) < 10) {
 		SetCharData("corner178",0);
 		SetCharData("corner179",0);
 		SetCharData("corner180",0);
@@ -5347,6 +5361,7 @@ function at_topmenu()
 		SetCharData("altar2",'');
 		SetCharData("altar3",'');
 		SetCharData("altar4",'');
+		SetCharData("nunmoney",0);
 	}
 	var compactmode = document.getElementsByName('loc').length; // compact mode has a dropdown listbox called 'loc', full mode doesn't.
 	if (compactmode > 0) {	
