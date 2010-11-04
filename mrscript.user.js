@@ -2136,22 +2136,27 @@ function at_guild() {
 				} else {												// interstitial uses naked <td>.  feh.
 					td.append(AppendLink('[hermit]','hermit.php')).append(AppendLink('[casino]','casino.php'));
 				}
-			} else if ((tdtext.indexOf("restore the Legendary") != -1) || 
-				(tdtext.indexOf("acquire the Legendary") != -1) || 
-				(tdtext.indexOf("with that Legendary") != -1))
+			} else if (
+				(tdtext.indexOf("Beelzebozo") != -1) ||						// EW->LEW assignment, all classes.
+				(tdtext.indexOf("restore the Legendary") != -1) || 			// EW->LEW muscle inter
+				(tdtext.indexOf("acquire the Legendary") != -1) || 			// EW->LEW myst inter
+				(tdtext.indexOf("with that Legendary") != -1))				// EW-LEW mox inter
 			{
-				td.append(AppendLink('[Fun House (1)]','adventure.php?snarfblat=20'));
-			} else if ((tdtext.indexOf("where your Nemesis is holed up.") != -1) || 
-					   (tdtext.indexOf("Haven't beat your Nemesis yet, eh?") != -1) ||
-					   (tdtext.indexOf("need you to defeat") != -1) ||
-					   (tdtext.indexOf('cause undue stress') != -1) || 
-					   (tdtext.indexOf("defeated your Nemesis yet") != -1))
+				if ($('p').length) $('p:last').append(AppendLink('[Fun House (1)]','adventure.php?snarfblat=20'));
+				else td.append(AppendLink('[Fun House (1)]','adventure.php?snarfblat=20'));
+			} else if (
+				(tdtext.indexOf("on your map") != -1) ||					// Cave assignment, all classes
+				(tdtext.indexOf("defeated your Nemesis yet") != -1) ||		// Muscle inter
+				(tdtext.indexOf("need you to defeat") != -1) ||				// Myst inter
+				(tdtext.indexOf("beat your Nemesis yet, eh?") != -1))		// Moxie inter
+				)
 			{
 				td.append(AppendLink('[nemesis cave]','cave.php'));
-			} else if ((tdtext.indexOf("Got this hat,") != -1) || (tdtext.indexOf("be the first to know") != -1)) {
+			} else if (tdtext.indexOf("volcano lair or something") != -1) {	// all classes: start of assassin encounters
 				td.append('<p><font color="blue">(Come back after you get the Secret Tropical Volcano Lair map from a nemesis assassin.)</font>');
-			} else if (tdtext.indexOf("I was hoping you could lend me one") != -1) {
-				// link to equip fledges and to the poop deck
+			} else if (tdtext.indexOf("I was hoping you could lend me one") != -1) {	// all classes: island openable
+				$('p:last').append(AppendLink('[equip fledges]','inv_equip.php?pwd='+pwd+'which=2&action=equip&whichitem=3033&slot=3'))
+						   .append(AppendLink('[Poop Deck (1)]','adventure.php?snarfblat=159'));
 			}
 		break;
 	}
