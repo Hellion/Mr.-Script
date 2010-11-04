@@ -2116,9 +2116,10 @@ function at_guild() {
 //				$('b:eq(1)').append(AppendLink("[Fern's Tower]",'fernruin.php'));
 //			} else 
 			if  ((tdtext.indexOf("brought me Fernswarthy's key") != -1) || 	// AT
-						(tdtext.indexOf("Misspelled Cemetary") != -1) || 	// SC/TT
-						(tdtext.indexOf("brought the key to") != -1) ||		// PM/SA
-						(tdtext.indexOf("haven't got Fern") != -1)) {		// DB		whew.  stupid flavor text.
+				 (tdtext.indexOf("Misspelled Cemetary") != -1) || 			// SC/TT
+				 (tdtext.indexOf("brought the key to") != -1) ||			// PM/SA
+				 (tdtext.indexOf("haven't got Fern") != -1)) 				// DB		whew.  stupid flavor text.
+			{		
 				td.append(AppendLink('[Misspelled Cemetary (1)]','adventure.php?snarfblat=21'));
 			} else if (tdtext.indexOf("searching the ruins") != -1) {
 				td.append(AppendLink('[Tower Ruins (1)]','adventure.php?snarfblat=22'));
@@ -2126,7 +2127,16 @@ function at_guild() {
 		break;
 		case "?place=scg": 
 			GM_log("tdtext="+tdtext);
-			if ((tdtext.indexOf("restore the Legendary") != -1) || 
+			if ((tdtext.indexOf("the two oldest and wisest") != -1) || 	// common opening phrase, yay.
+				(tdtext.indexOf("completed your Epic") != -1) ||		// Mus/Mys interstitial
+				(tdtext.indexOf("delay on that epic") != -1))			// Mox interstitial
+			{
+				if ($('p').length) {									// opening uses <p> tags
+					$('p:last').append(AppendLink('[hermit]','hermit.php')).append(AppendLink('[casino]','casino.php'));
+				} else {												// interstitial uses naked <td>.  feh.
+					td.append(AppendLink('[hermit]','hermit.php')).append(AppendLink('[casino]','casino.php'));
+				}
+			} else if ((tdtext.indexOf("restore the Legendary") != -1) || 
 				(tdtext.indexOf("acquire the Legendary") != -1) || 
 				(tdtext.indexOf("with that Legendary") != -1))
 			{
