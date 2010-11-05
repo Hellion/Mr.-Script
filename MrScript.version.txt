@@ -1,1 +1,1 @@
-1.6.0,http://userscripts.org/scripts/source/65705.user.js,Update Now,,,
+1.6.1,http://userscripts.org/scripts/source/65705.user.js,Update Now,,,
