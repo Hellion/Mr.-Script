@@ -800,6 +800,7 @@ function AddLinks(descId, theItem, formWhere, path) {
 			addWhere.append(AppendLink('[council]','council.php')); break;
 			
 		case 2556: case 2557: case 2558: case 2559: case 2560: case 2561: 		// LEWs
+		case  150: case  151: case  152: case  153: case  154: case  155:		// Epic Hats
 			addWhere.append(AppendLink('[take to guild]','guild.php?place=scg')); break; 
 			
 		case 454: // rusty screwdriver
@@ -1835,7 +1836,7 @@ function at_fight() {
 			var meatline = $("img[src*='meat.gif']:last").parent().next().text();	// should be "You gain X meat"
 			var meat = integer(meatline.match(/You gain (\d+) Meat/)[1]);
 			var meatSoFar = integer(GetCharData("nunmoney")); if ((meatSoFar == undefined) || isNaN(meatSoFar)) meatSoFar = 0;
-//			GM_log("meatline="+meatline+", meat="+meat+", meatSoFar="+meatSoFar);
+			GM_log("meatline=["+meatline+"], meat="+meat+", meatSoFar="+meatSoFar);
 			meatSoFar += meat;
 			$("img[src*='meat.gif']:last").parent().next().append("<font color='blue'>&nbsp;("+meatSoFar+" collected total).</font>");
 			if (meatSoFar > 100000) meatSoFar = 0;
@@ -2115,14 +2116,16 @@ function at_guild() {
 //			if (tdtext.indexOf("You acquire an item: Fernswarthy's key") != -1) {
 //				$('b:eq(1)').append(AppendLink("[Fern's Tower]",'fernruin.php'));
 //			} else 
-			if  ((tdtext.indexOf("brought me Fernswarthy's key") != -1) || 	// ?  stupid wiki, lacking data.
-				 (tdtext.indexOf("Misspelled Cemetary") != -1) || 			// SC/TT?
-				 (tdtext.indexOf("haven't got Fern") != -1) ||				// AT	
-				 (tdtext.indexOf("brought the key to") != -1))				// PM/SA?
-			{		
+			if (tdtext.indexOf("Misspelled Cemetary") != -1) {	// common opening phrase to find F's key.
+				$('p:last').append(AppendLink('[Misspelled Cemetary (1)]','adventure.php?snarfblat=21'));
+			} else if  ((tdtext.indexOf("brought me Fernswarthy's key") != -1) || 	// mus inter for finding F's key
+				 (tdtext.indexOf("brought the key to") != -1) ||					// mys inter	
+				 (tdtext.indexOf("haven't got Fern") != -1))						// mox inter
+			{
 				td.append(AppendLink('[Misspelled Cemetary (1)]','adventure.php?snarfblat=21'));
-			} else if ((tdtext.indexOf("searching the ruins") != -1) ||		// other?
-				 (tdtext.indexOf("searching the tower") != -1))				// DB
+			} else if ((tdtext.indexOf("searching the ruins") != -1) ||		// mus post-key/pre-dusty book
+				 (tdtext.indexOf("a very busy man") != -1) ||				// mys 
+				 (tdtext.indexOf("searching the tower") != -1))				// mox
 			{
 				td.append(AppendLink('[Tower Ruins (1)]','adventure.php?snarfblat=22'));
 			}
@@ -2135,21 +2138,22 @@ function at_guild() {
 			} else if ((tdtext.indexOf("completed your Epic") != -1) ||		// Mus/Mys interstitial
 					   (tdtext.indexOf("delay on that epic") != -1))			// Mox interstitial
 			{															
-				td.append(AppendLink('[hermit]','hermit.php')).append(AppendLink('[casino]','casino.php')); // interstitial uses naked <td>.  feh.
+				td.append(AppendLink('[hermit]','hermit.php')).append(AppendLink('[casino]','casino.php')); 
 			} else if (tdtext.indexOf("Beelzebozo") != -1) 						// EW->LEW assignment, all classes.
 			{
 				$('p:last').append(AppendLink('[Fun House (1)]','adventure.php?snarfblat=20'));
-			} else if ((tdtext.indexOf("restore the Legendary") != -1) || 			// EW->LEW muscle inter
-					   (tdtext.indexOf("acquire the Legendary") != -1) || 			// EW->LEW myst inter
-					   (tdtext.indexOf("with that Legendary") != -1))				// EW-LEW mox inter
+			} else if ((tdtext.indexOf("restore the Legendary") != -1) || 			// mus inter
+					   (tdtext.indexOf("acquire the Legendary") != -1) || 			// mys inter
+					   (tdtext.indexOf("with that Legendary") != -1))				// mox inter
 			{
 				td.append(AppendLink('[Fun House (1)]','adventure.php?snarfblat=20'));
 			} else if (tdtext.indexOf("on your map") != -1) 				// Cave assignment, all classes
 			{
-				$('p:last').append(AppendLink('[nemesis cave]','cave.php'));
-			} else if ((tdtext.indexOf("defeated your Nemesis yet") != -1) ||		// Muscle inter
-				(tdtext.indexOf("need you to defeat") != -1) ||						// Myst inter
-				(tdtext.indexOf("beat your Nemesis yet, eh?") != -1))				// Moxie inter
+				if ($('p').length) $('p:last').append(AppendLink('[nemesis cave]','cave.php'));
+				else td.append(AppendLink('[nemesis cave]','cave.php'));
+			} else if ((tdtext.indexOf("defeated your Nemesis yet") != -1) ||		// Mus inter
+				(tdtext.indexOf("need you to defeat") != -1) ||						// Mys inter
+				(tdtext.indexOf("beat your Nemesis yet, eh?") != -1))				// Mox inter
 			{
 				td.append(AppendLink('[nemesis cave]','cave.php'));
 			} else if (tdtext.indexOf("volcano lair or something") != -1) {	// all classes: start of assassin encounters
@@ -3549,7 +3553,7 @@ function fix_progressbar(totalWidth, level)
 	if (!levelbar.length) return;	// if there's no level progress bar, we have nothing to do here.
 	levelbar = levelbar.get(0);
 	var statbars = $('td[align="left"]');
-	if (!statbar.length) return;	// can't do the right thing without the stat bars...
+	if (!statbars.length) return;	// can't do the right thing without the stat bars...
 	var mainstatProgBarCount = parseInt(levelbar.title.match(/\d+/)[0]); // = how many stat points into this level we are
 	var charclass = $('table center').contents().filter(function() {if (this.nodeType == 3) return true;}).get(1);
 	if (charclass) charclass = charclass.data; 
@@ -3742,6 +3746,7 @@ function at_charpane()
 	for (i=0,len=imgs.length; i<len; i++)
 	{	var img = imgs[i], imgClick = img.getAttribute('onclick');
 		var imgSrc = img.src.substr(img.src.lastIndexOf('/')+1);
+		GM_log("imgSrc="+imgSrc);
 		if (imgSrc == 'mp.gif')
 			img.addEventListener('contextmenu', RightClickMP, false);
 		else if (imgSrc == 'hp.gif')
@@ -3750,7 +3755,9 @@ function at_charpane()
 		var effName = (compactMode ? img.getAttribute('title') : img.parentNode.nextSibling.firstChild.innerHTML);
 
 		if (imgSrc == 'poison.gif')
-		{	img.parentNode.parentNode.setAttribute('name','poison');
+		{	
+			GM_log("poison!")
+			img.parentNode.parentNode.setAttribute('name','poison');
 			img.addEventListener('contextmenu', function(event)
 			{	document.getElementsByName('poison')[0].childNodes[1].innerHTML = "<i><span style='font-size:10px;'>Un-un-unpoisoning...</span></i>";
 				GM_get(server+'/galaktik.php?howmany=1&action=buyitem&whichitem=829&pwd='+pwd,
