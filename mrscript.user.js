@@ -1,4 +1,4 @@
-// Mr. Script v1.6.0
+// Mr. Script v1.6.1
 //
 // --------------------------------------------------------------------
 // This is a user script.  To install it, you need Greasemonkey 0.8 or
@@ -11,7 +11,7 @@
 // ==UserScript==
 // @name        Mr. Script
 // @namespace   http://www.noblesse-oblige.org/lukifer/scripts/
-// @description Version 1.6.0
+// @description Version 1.6.1
 // @author		Lukifer
 // @contributor	Ohayou
 // @contributor Hellion
@@ -35,7 +35,7 @@ var place = location.pathname.replace(/\/|\.(php|html)$/gi, "").toLowerCase();
 //GM_log("at:" + place);
 
 // n.b. version number should always be a 3-digit number.  If you move to 1.9, call it 1.9.0.  Don't go to 1.8.10 or some such.
-var VERSION = 160;
+var VERSION = 161;
 var MAXLIMIT = 999;
 var ENABLE_QS_REFRESH = 1;
 var DISABLE_ITEM_DB = 0;
@@ -2052,7 +2052,7 @@ function at_adventure() {
 		}
 	}
 	var NCTitle = $('b:eq(1)');
-	GM_log("NCTtext=["+$(NCTitle).text()+"]");
+//	GM_log("NCTtext=["+$(NCTitle).text()+"]");
 	switch ($(NCTitle).text()) {
 	case "Rotting Matilda":
 		var cardlink = document.createElement('table');
@@ -2081,8 +2081,8 @@ function at_adventure() {
 		$('center table tr td').each(function(){
 			GM_log($(this).text());
 		});
-		GM_log("srch="+document.location.search);
-		if (document.location.search=="?snarfblat=100") {
+//		GM_log("srch="+document.location.search);
+		if (document.location.search=="?snarfblat=100") {	// we were trying for Whitey's Grove; go get the quest from the guild.
 			top.document.getElementsByName('mainpane')[0].contentDocument.location.pathname="guild.php?place=paco";
 		}
 		break;
@@ -2101,7 +2101,7 @@ function at_guild() {
 	var tdtext = $(td).text();
 	switch (subloc) {
 		case "?place=paco": 
-			GM_log("tdtext="+tdtext);
+//			GM_log("tdtext="+tdtext);
 			if (tdtext.indexOf("White Citadel") != -1) {
 				td.append(AppendLink('[Whitey\'s Grove (1)]', "adventure.php?snarfblat=100"));
 				td.append(AppendLink('[Road to WC (1)]', "adventure.php?snarfblat=99"));
@@ -2112,8 +2112,8 @@ function at_guild() {
 			}
 		break;
 		case "?place=ocg": 
-			GM_log("tdtext="+tdtext);
-//			if (tdtext.indexOf("You acquire an item: Fernswarthy's key") != -1) {
+//			GM_log("tdtext="+tdtext);
+//			if (tdtext.indexOf("You acquire an item: Fernswarthy's key") != -1) { // this part is now done in AddLinks().
 //				$('b:eq(1)').append(AppendLink("[Fern's Tower]",'fernruin.php'));
 //			} else 
 			if (tdtext.indexOf("Misspelled Cemetary") != -1) {	// common opening phrase to find F's key.
@@ -2131,7 +2131,7 @@ function at_guild() {
 			}
 		break;
 		case "?place=scg": 
-			GM_log("tdtext="+tdtext);
+//			GM_log("tdtext="+tdtext);
 			if (tdtext.indexOf("the two oldest and wisest") != -1) 		// common opening phrase, yay.
 			{
 				$('p:last').append(AppendLink('[hermit]','hermit.php')).append(AppendLink('[casino]','casino.php'));
@@ -2188,13 +2188,13 @@ function at_choice() {
 	SetCharData("square",false);
 	var usemap = 0;
 	var choicetext = $('body').text();
-	GM_log("choice text="+choicetext);
+//	GM_log("choice text="+choicetext);
 	if (choicetext.indexOf("Procrastination Giant's turn to guard") != -1) usemap = 1;
 	var p=document.getElementsByTagName('p');
 	if (p.length) {
-		GM_log("p.length="+p.length);
+//		GM_log("p.length="+p.length);
 		var p0 = p[0];
-		GM_log("p0="+p0.textContent);
+//		GM_log("p0="+p0.textContent);
 		if (p0.textContent.indexOf("actually a book.") != -1) p0.appendChild(AppendLink('[go ahead, read it already]','inv_use.php?pwd='+pwd+'&which=3&whichitem=818'));
 		else if (p0.textContent.indexOf("a new pledge") != -1) {	// Orcish Frat House Blueprints adventure
 			$('a [href="adventure.php?snarfblat=27"]').attr('href','adventure.php?snarfblat=157').text("Adventure in BARRRNEY'S BARRR");
@@ -2311,7 +2311,7 @@ function at_trapper() {
 		SetCharData("ore364",0);
 		SetCharData("ore363",0);
 		$('p:contains("I reckon 3 chunks of")').append(AppendLink('[Itznotyerzitz Mine (1)]','adventure.php?snarfblat=61'));
-		GM_log("ore type="+oretype);
+//		GM_log("ore type="+oretype);
 	} 
 }
 
@@ -2809,7 +2809,7 @@ function at_inventory()
 		{	bText = document.getElementsByTagName('b')[1];
 			//var item = resultsText.substring(14);
 			var item = bText.textContent;
-			GM_log("item="+item);
+//			GM_log("item="+item);
 			if (item == "continuum transfunctioner")
 				bText.parentNode.appendChild(AppendLink('[8-bit]', 'adventure.php?snarfblat=73'));
 			else if (item == "huge mirror shard")
@@ -2944,8 +2944,6 @@ function at_store()
 {	var firstTable = $('table:first tbody');		// we're interested in this when it's the "Results:" box from buying something.
 	var whichstore; var noform = 1;
 	
-	GM_log("in at_store");
-
 	var insput = $('input[name=whichstore]');
 	if (insput.length > 0)
 	{	whichstore = insput.attr('value'); noform = 0;
@@ -3107,7 +3105,7 @@ function at_craft()
 	var mode = document.location.search.match(/mode=[a-z]+/), mlink, store;
 	var itemNeeded = 0, desc = "";
 	if(mode) mode = mode.toString().split('=')[1];
-	GM_log("at_craft: mode="+mode);
+//	GM_log("at_craft: mode="+mode);
 
 // sadly for some of our efforts, the "?mode=X" part is often left off after you submit an action.  So we may be left to our own devices 
 // to determine what we were actually trying to do.
@@ -3436,7 +3434,7 @@ function at_questlog()
 			{	
 				var subtext = $(this).parent().contents().get(2).data;
 //				subtext = subtext.textContent;
-				GM_log("Palindome subtext="+subtext);
+//				GM_log("Palindome subtext="+subtext);
 				if (subtext.indexOf("get into the Palindome.") != -1) {  // swash, cove.
 				} else if (subtext.indexOf("discovered the fabulous Palindome") != -1) { // talisman, palindome
 				} else if (subtext.indexOf("but then you lost it again") != -1) { // lab
@@ -3488,7 +3486,7 @@ function at_questlog()
 			else if (txt.indexOf("Out of Your Gourd") != -1) {
 				var subtext = $(this).parent().contents().get(2).data;
 //				subtext = subtext.textContent;
-				GM_log("Gourd subtext="+subtext);
+//				GM_log("Gourd subtext="+subtext);
 				if (subtext.indexOf("Haunted Pantry") != -1) 
 					b.append(AppendLink('[pantry (1)]', 'adventure.php?snarfblat=113'));
 				else if (subtext.indexOf("Back Alley") != -1)
@@ -3503,7 +3501,7 @@ function at_questlog()
 			else if (txt.indexOf("Me and My Nemesis") != -1) {
 				var subtext = $(this).parent().contents().get(2).data;
 //				subtext = subtext.textContent;
-				GM_log("nemesis subtext="+subtext);
+//				GM_log("nemesis subtext="+subtext);
 				if (subtext.indexOf("smith an Epic Weapon") != -1) {
 					b.append(AppendLink("[casino]","town_wrong.php?place=casino"));
 					b.append(AppendLink("[hermit]","hermit.php"));
@@ -3533,7 +3531,7 @@ function at_questlog()
 			}
 			else if (txt.indexOf("Quest for the Holy MacGuffin") != -1) {
 				var subtext = $(this).parent().contents().get(2).data;
-				GM_log("MacGuffin subtext="+subtext);
+//				GM_log("MacGuffin subtext="+subtext);
 				if (subtext.indexOf("find the Black Market") != -1)
 					b.append(AppendLink("[black forest (1)]","adventure.php?snarfblat=111"));
 				else if (subtext.indexOf("now to hit the Travel Agency") != -1)
@@ -3558,7 +3556,7 @@ function fix_progressbar(totalWidth, level)
 	var charclass = $('table center').contents().filter(function() {if (this.nodeType == 3) return true;}).get(1);
 	if (charclass) charclass = charclass.data; 
 	// should return the "class" part of "<table><center><tr><td><b>name</b><br>level X<br>class<blah...>" in full mode.
-	GM_log("charclass="+charclass);
+//	GM_log("charclass="+charclass);
 	var mainstatbar = false;
 	if ((charclass == "Turtle Tamer") || (charclass == "Seal Clubber")) mainstatbar = statbars.get(0);
 	if ((charclass == "Pastamancer") || (charclass == "Sauceror")) mainstatbar = statbars.get(1);
@@ -3746,7 +3744,6 @@ function at_charpane()
 	for (i=0,len=imgs.length; i<len; i++)
 	{	var img = imgs[i], imgClick = img.getAttribute('onclick');
 		var imgSrc = img.src.substr(img.src.lastIndexOf('/')+1);
-		GM_log("imgSrc="+imgSrc);
 		if (imgSrc == 'mp.gif')
 			img.addEventListener('contextmenu', RightClickMP, false);
 		else if (imgSrc == 'hp.gif')
@@ -3756,7 +3753,6 @@ function at_charpane()
 
 		if (imgSrc == 'poison.gif')
 		{	
-			GM_log("poison!")
 			img.parentNode.parentNode.setAttribute('name','poison');
 			img.addEventListener('contextmenu', function(event)
 			{	document.getElementsByName('poison')[0].childNodes[1].innerHTML = "<i><span style='font-size:10px;'>Un-un-unpoisoning...</span></i>";
@@ -4575,12 +4571,7 @@ function at_cave()
 function at_lair1()
 {
 	if (document.location.search == "?action=mirror") {
-		p = document.getElementsByTagName('p');
-		GM_log("p.length="+p.length);
-		lastptext = p[p.length-1].textContent;
-		if (lastptext.indexOf("Only those comfortable") != -1) {
-			p[p.length-1].appendChild(AppendLink("[get nekkid]","inv_equip.php?pwd="+pwd+"&action=unequipall"));
-		}
+		$('p:last:contains("Only those comfortable")').append(AppendLink("[get nekkid]","inv_equip.php?pwd="+pwd+"&action=unequipall"));
 		return;
 	}
 	if (document.location.search == "?action=gates") {
@@ -4768,16 +4759,16 @@ function at_mining()
 	var staticSparkleImg = "data:image/gif;base64,R0lGODlhMgAyAOMPAP39/dvb2zc3NycnJ5qams3NzQUFBRAQEGtra6enp7W1te3t7UZGRldXV319ff///yH/C05FVFNDQVBFMi4wAwEAAAAh+QQJAQAPACwAAAAAMgAyAAAEW/DJSau9OOvNu/9gKI5kaZ5oqq5s675wLM90bd94ru8rg/AUR+AAfBwCgd/OMFA4GguEQXcEJAQEQGM3ECAAUSIwkJgWn0WJwZxuu9/wuHxOr9vv+Lx+z+/77xEAIfkECQEADwAsAAAAADIAMgAABGvwyUmrvTjrzbv/YCiOZGmeaKqubOu+cCzPdG3feM4Jhm4FA18lIRBSEgzjpKDoGRmLAsJAddYaBEJAMQB4AYqbIKuILhwCRlAXWKyNWaVEKn8kEHVCo36w1v+AgYKDhIWGh4iJiouMjY4kEQAh+QQJAQAPACwAAAAAMgAyAAAEl/DJSau9OOvNu/9gKI5kaZ5oqq5s675wLLeHMXNHYd/aAAy83i+YMRQERMwhgEhefA6npQFISCmGQEJ3NTAUhYMCYRM0CMCYoYEoAAi1Adi9OMoGhXwgIDAcHAsJDEE7Bgl8eQM7TkYACotXVA1XFD6DlBIDC2mYRpyUOUiYD56jpAWXowqfpq2ur7CxsrO0tba3uLm6GhEAIfkECQEADwAsAAAAADIAMgAABGvwyUmrvTjrzbv/YCiOZGmeaKqubOu+cCzPdG3feM4Jhm4FA18lIRBSEgzjpKDoGRmLAsJAddYaBEJAMQB4AYqbIKuILhwCRlAXWKyNWaVEKn8kEHVCo36w1v+AgYKDhIWGh4iJiouMjY4kEQAh+QQJAQAPACwAAAAAMgAyAAAEW/DJSau9OOvNu/9gKI5kaZ5oqq5s675wLM90bd94ru8rg/AUR+AAfBwCgd/OMFA4GguEQXcEJAQEQGM3ECAAUSIwkJgWn0WJwZxuu9/wuHxOr9vv+Lx+z+/77xEAOw==";
 	$("img[src*=wallsparkle]").attr("src",staticSparkleImg);
 	if (document.location.search.indexOf("mine=1") != -1) {
-		GM_log("mining for dwarves!");
+//		GM_log("mining for dwarves!");
 		var oretype = GetCharData("oretype");
 		var orenumber = GetCharData("orenumber");
 		if (oretype == '') return;
-		GM_log("ore type="+oretype);
+//		GM_log("ore type="+oretype);
 		var founditem = $('.item').attr("rel")
 		var foundamount = 0;
 		if (founditem) { 
 			founditem = parseInt(founditem.match(/id=(\d+)/)[1],10);
-			GM_log("found item:" +founditem);
+//			GM_log("found item:" +founditem);
 			if (founditem >= 363) {
 				foundamount = GetCharData("ore"+founditem);
 				foundamount++;
@@ -5368,8 +5359,9 @@ function linkKOLWiki() {
 	 'target="_blank"></a>');
 }
 
+// ICONMENU:  maybe one day we'll do something to make this travesty of a menu more useful, but I don't know how right now.
 function at_iconmenu() {
-	GM_log("icon menu detected.");
+//	GM_log("icon menu detected.");
 }
 
 // TOPMENU: Add some new links to the top pane.
@@ -5482,7 +5474,7 @@ function at_topmenu()
 		if (txt == "plains")
 		{	a.after(' <a href="manor.php" target="mainpane">manor</a>');
 
-			GM_log("checking level in topmenu: is currently "+integer(GetCharData('level')));
+//			GM_log("checking level in topmenu: is currently "+integer(GetCharData('level')));
 			if (integer(GetCharData('level')) > 9) 
 				a.after(' <a href="beanstalk.php" target="mainpane">stalk</a>');
 
@@ -6082,7 +6074,7 @@ function at_options()
 	// Look at all these children. Tables get *around*, man.
 //	var addHere = tables[i].rows[1].firstChild.firstChild.firstChild.firstChild.firstChild.firstChild;
 	var addHere = $('#opt_flag_noquestnudge').parent().get(0);
-	GM_log("addhere="+addHere);
+//	GM_log("addhere="+addHere);
 	addHere.appendChild(pDiddy); 
 }
 
