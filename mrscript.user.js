@@ -25,7 +25,7 @@
 // @exclude     http://images.kingdomofloathing.com/*
 // @exclude     http://forums.kingdomofloathing.com/*
 // @contributor     http://ecmanaut.googlecode.com/svn/trunk/lib/gm/$x$X.js
-// @require     http://ecmanaut.googlecode.com/svn/trunk/lib/gm/node.js
+// @contributor     http://ecmanaut.googlecode.com/svn/trunk/lib/gm/node.js
 // @require     http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js
 // @unwrap
 // ==/UserScript==
@@ -3545,7 +3545,7 @@ function at_questlog()
 	}
 }
 
-function fix_progressbar(totalWidth, level)
+function fix_progressbar(totalWidth, level) {
 	var levelbar = $('table[title]:first');
 	if (!levelbar.length) return;	// if there's no level progress bar, we have nothing to do here.
 	levelbar = levelbar.get(0);
