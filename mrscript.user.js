@@ -2159,7 +2159,7 @@ function at_guild() {
 			} else if (tdtext.indexOf("volcano lair or something") != -1) {	// all classes: start of assassin encounters
 				td.append('<p><font color="blue">(Come back after you get the Secret Tropical Volcano Lair map from a nemesis assassin.)</font>');
 			} else if (tdtext.indexOf("I was hoping you could lend me one") != -1) {	// all classes: island openable
-				$('p:last').append(AppendLink('[equip fledges]','inv_equip.php?pwd='+pwd+'which=2&action=equip&whichitem=3033&slot=3'))
+				$('p:last').append(AppendLink('[equip fledges]','inv_equip.php?pwd='+pwd+'&which=2&action=equip&whichitem=3033&slot=3'))
 						   .append(AppendLink('[Poop Deck (1)]','adventure.php?snarfblat=159'));
 			}
 		break;
@@ -3546,13 +3546,17 @@ function at_questlog()
 }
 
 function fix_progressbar(totalWidth, level)
-{
+{	
 	var levelbar = $('table[title]:first');
 	if (!levelbar.length) return;	// if there's no level progress bar, we have nothing to do here.
 	levelbar = levelbar.get(0);
 	var statbars = $('td[align="left"]');
 	if (!statbars.length) return;	// can't do the right thing without the stat bars...
 	var mainstatProgBarCount = parseInt(levelbar.title.match(/\d+/)[0]); // = how many stat points into this level we are
+	if (level == -1) {
+		level = (parseInt(levelbar.title.match(/\d+/)[1]) + 1) / 2;
+		SetCharData('level',level);
+	}
 	var charclass = $('table center').contents().filter(function() {if (this.nodeType == 3) return true;}).get(1);
 	if (charclass) charclass = charclass.data; 
 	// should return the "class" part of "<table><center><tr><td><b>name</b><br>level X<br>class<blah...>" in full mode.
@@ -3690,10 +3694,15 @@ function at_charpane()
 
 		var lvlblock = $("td:contains('Level'):first").text();
 //		GM_log("lvlblock="+lvlblock);
-		level = lvlblock.match(/Level (\d+)/)[1];
-		SetCharData("level", level);
-		
-		fix_progressbar(100, level);
+		if (lvlblock) 
+		{
+			level = lvlblock.match(/Level (\d+)/)[1];
+			SetCharData("level", level);
+			fix_progressbar(100, level);
+		} else {
+			SetCharData("level",13);		// failsafe setting if we couldn't find the level block, generally due to a custom title.
+			fix_progressbar(100, -1);		// -1 is a flag value to calculate the level from within the function.
+		}
 		
 		// Change image link for costumes
 		var img = imgs[0];
