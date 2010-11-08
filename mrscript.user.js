@@ -24,7 +24,7 @@
 // @include     http://*kingdomofloathing.com/*
 // @exclude     http://images.kingdomofloathing.com/*
 // @exclude     http://forums.kingdomofloathing.com/*
-// @require     http://ecmanaut.googlecode.com/svn/trunk/lib/gm/$x$X.js
+// @contributor     http://ecmanaut.googlecode.com/svn/trunk/lib/gm/$x$X.js
 // @require     http://ecmanaut.googlecode.com/svn/trunk/lib/gm/node.js
 // @require     http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js
 // @unwrap
@@ -3546,17 +3546,16 @@ function at_questlog()
 }
 
 function fix_progressbar(totalWidth, level)
-{	
 	var levelbar = $('table[title]:first');
 	if (!levelbar.length) return;	// if there's no level progress bar, we have nothing to do here.
 	levelbar = levelbar.get(0);
+	if (level == 0) {												// couldn't read "Level X" directly in charpane; calculate from the levelbar.
+		level = (parseInt(levelbar.title.match(/(\d+)/g)[1])+1)/2; 	// Y in (X / Y) of levelbar title, which always equals (2N-1) where N = level.
+		SetCharData("level",level);
+	}
 	var statbars = $('td[align="left"]');
 	if (!statbars.length) return;	// can't do the right thing without the stat bars...
 	var mainstatProgBarCount = parseInt(levelbar.title.match(/\d+/)[0]); // = how many stat points into this level we are
-	if (level == -1) {
-		level = (parseInt(levelbar.title.match(/\d+/)[1]) + 1) / 2;
-		SetCharData('level',level);
-	}
 	var charclass = $('table center').contents().filter(function() {if (this.nodeType == 3) return true;}).get(1);
 	if (charclass) charclass = charclass.data; 
 	// should return the "class" part of "<table><center><tr><td><b>name</b><br>level X<br>class<blah...>" in full mode.
@@ -3693,7 +3692,6 @@ function at_charpane()
 		advcount = integer(data.shift());
 
 		var lvlblock = $("td:contains('Level'):first").text();
-//		GM_log("lvlblock="+lvlblock);
 		if (lvlblock) 
 		{
 			level = lvlblock.match(/Level (\d+)/)[1];
@@ -3701,7 +3699,7 @@ function at_charpane()
 			fix_progressbar(100, level);
 		} else {
 			SetCharData("level",13);		// failsafe setting if we couldn't find the level block, generally due to a custom title.
-			fix_progressbar(100, -1);		// -1 is a flag value to calculate the level from within the function.
+			fix_progressbar(100, 0);		// 0 is a flag value to calculate the level from within the function.
 		}
 		
 		// Change image link for costumes
