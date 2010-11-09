@@ -3545,14 +3545,13 @@ function at_questlog()
 	}
 }
 
-function fix_progressbar(totalWidth, level) {
+function fix_progressbar(totalWidth) {
 	var levelbar = $('table[title]:first');
-	if (!levelbar.length) return;	// if there's no level progress bar, we have nothing to do here.
+	if (!levelbar.length) return 0;	// if there's no level progress bar, we have nothing to do here.
 	levelbar = levelbar.get(0);
-	if (level == 0) {												// couldn't read "Level X" directly in charpane; calculate from the levelbar.
-		level = (parseInt(levelbar.title.match(/(\d+)/g)[1])+1)/2; 	// Y in (X / Y) of levelbar title, which always equals (2N-1) where N = level.
-		SetCharData("level",level);
-	}
+	var level = (parseInt(levelbar.title.match(/(\d+)/g)[1])+1)/2; 	// Y in (X / Y) of levelbar title, which always equals (2N-1) where N = level.
+	SetCharData("level",level);
+//	GM_log("level set in FPB to " + level);
 	var statbars = $('td[align="left"]');
 	if (!statbars.length) return;	// can't do the right thing without the stat bars...
 	var mainstatProgBarCount = parseInt(levelbar.title.match(/\d+/)[0]); // = how many stat points into this level we are
@@ -3605,6 +3604,7 @@ function fix_progressbar(totalWidth, level) {
 		levelbar.firstChild.firstChild.lastChild.width = whiteWidth;
 //			GM_log("statval="+statval+", substatProgBarCount="+substatProgBarCount+", mainstatbase="+mainstatBase+", substatCurrent="+substatCurrent);
 //			GM_log("level="+level+", substatNext="+substatNext+", blackwidth="+blackWidth+", mainstatProgBarCount="+mainstatProgBarCount);
+		return level;
 	}
 }
 
@@ -3669,14 +3669,17 @@ function at_charpane()
 		}
 		advcount = integer($('a:contains(Adv):first').parent().next().text());
 
-		var lvlblock = $("center:contains('Lvl.'):first").text();
-//		GM_log("lvlblock="+lvlblock);
-		level = lvlblock.match(/Lvl. (\d+)/)[1];
-		fix_progressbar(60, level);
+		level = fix_progressbar(60);
+		if (level == 0) {		// level not deduced while tweaking progress bar?
+			var lvlblock = $("center:contains('Lvl.'):first").text();	// this text is always present in compact mode
+//			GM_log("lvlblock="+lvlblock);
+			level = lvlblock.match(/Lvl. (\d+)/)[1];
+			SetCharData("level", level);
+			GM_log("level set in compactmode to "+level);
+		}
 
 		SetCharData("currentHP", curHP); SetCharData("maxHP", maxHP);
 		SetCharData("currentMP", curMP); SetCharData("maxMP", maxMP);
-		SetCharData("level", level);
 //		GM_log("compact mode: set level="+level+", curHP="+ curHP+", maxHP="+maxHP+", curMP="+curMP+", maxMP="+maxMP);
 	} else { // Full Mode
 		function parse_cur_and_max(names) {
@@ -3686,22 +3689,26 @@ function at_charpane()
 				SetCharData("max"    + name, cur_max[1]);
 			}
 		}
+		level = fix_progressbar(100);
+		if (level == 0) {		// couldn't figure out level from the progressbar?  Do it the old way.
+			var lvlblock = $("td:contains('Level'):first").text();	
+			if (lvlblock) 
+			{
+				level = lvlblock.match(/Level (\d+)/)[1];
+				SetCharData("level", level);
+				GM_log("Level set in fullmode to "+level);
+			} else {
+				SetCharData("level",13);		// failsafe setting if we couldn't find the level block, generally due to a custom title.
+				level = 13;
+				GM_log("level defaulted in fullmode to 13");
+			}
+		}
+
 		var data = $.makeArray($('td[align="center"]').slice(0, 4)).map(text);
 		parse_cur_and_max(["HP", "MP"]);
 		data.shift(); // meat
 		advcount = integer(data.shift());
 
-		var lvlblock = $("td:contains('Level'):first").text();
-		if (lvlblock) 
-		{
-			level = lvlblock.match(/Level (\d+)/)[1];
-			SetCharData("level", level);
-			fix_progressbar(100, level);
-		} else {
-			SetCharData("level",13);		// failsafe setting if we couldn't find the level block, generally due to a custom title.
-			fix_progressbar(100, 0);		// 0 is a flag value to calculate the level from within the function.
-		}
-		
 		// Change image link for costumes
 		var img = imgs[0];
 		if (GetPref('backup'))
