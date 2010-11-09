@@ -1,4 +1,4 @@
-// Mr. Script v1.6.1
+// Mr. Script v1.6.2
 //
 // --------------------------------------------------------------------
 // This is a user script.  To install it, you need Greasemonkey 0.8 or
@@ -11,7 +11,7 @@
 // ==UserScript==
 // @name        Mr. Script
 // @namespace   http://www.noblesse-oblige.org/lukifer/scripts/
-// @description Version 1.6.1
+// @description Version 1.6.2
 // @author		Lukifer
 // @contributor	Ohayou
 // @contributor Hellion
@@ -35,7 +35,7 @@ var place = location.pathname.replace(/\/|\.(php|html)$/gi, "").toLowerCase();
 //GM_log("at:" + place);
 
 // n.b. version number should always be a 3-digit number.  If you move to 1.9, call it 1.9.0.  Don't go to 1.8.10 or some such.
-var VERSION = 161;
+var VERSION = 162;
 var MAXLIMIT = 999;
 var ENABLE_QS_REFRESH = 1;
 var DISABLE_ITEM_DB = 0;
@@ -3584,9 +3584,9 @@ function fix_progressbar(totalWidth) {
 		statval = parseInt(statval[1] || statval[0]);			// pick the unbuffed value if buffed value is present.
 		var substatProgBarCount;
 		if (totalWidth == 100) { 
-			substatProgBarCount = parseInt(mainstatbar.childNodes[1].title.match(/\d+/)[0]); // = how many substats into this stat point we are
+			substatProgBarCount = parseInt(mainstatbar.childNodes[1].title.match(/\d+/)[0].replace(/,/g,'')); // = how many substats into this stat point we are
 		} else {	// if (fullWidth == 60), compact mode.  feh.
-			substatProgBarCount = parseInt(mainstatbar.parentNode.nextSibling.childNodes[1].firstChild.title.match(/\d+/)[0]);
+			substatProgBarCount = parseInt(mainstatbar.parentNode.nextSibling.childNodes[1].firstChild.title.match(/\d+/)[0].replace(/,/g,''));
 		}
 		var substatNext = (4 * level*level*level) - (6 * level*level) + (20 * level) - 9; // = substats to go from level to level+1
 		var mainstatBase = Math.pow(level - 1, 2) + 4;										// = lowest mainstat to be level X
