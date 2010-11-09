@@ -2768,7 +2768,7 @@ function at_inventory()
 //		GM_log("resultsText:"+resultsText);
 //		GM_log("referrer:"+document.referrer);
 // this is where we go back to a useful location if we've done/used something elsewhere that caused the inventory page to load.
-		if (resultsText.indexOf("tumbling rocks") != -1 &&
+		if (resultsText.indexOf("ladder into the Bat Hole") != -1 &&
 			document.referrer.indexOf('bathole.php') != -1)	// used a sonar at the bathole
 			parent.frames[2].location =
 				'http://' + server + '/bathole.php';
@@ -5094,7 +5094,21 @@ function spoil_bathole()
 		else if (src.indexOf("batrock") != -1)
 			this.parentNode.href = "inv_use.php?pwd=" + pwd + "&which=3&whichitem=563";
 		if(ml) this.setAttribute('title','ML: '+ml);
-});	}
+	});	
+	$('area').each(function()
+	{	var ml = null;
+		var alt = this.getAttribute('alt');
+		GM_log("alt="+alt);
+		if (alt.indexOf('Entryway') != -1) ml = '11-16';
+		else if (alt.indexOf('Guano') != -1) ml = '14-18';
+		else if (alt.indexOf('Batrat') != -1) ml = '23-25';
+		else if (alt.indexOf('Beanbat') != -1) ml = '22';
+		else if (alt.indexOf('Boss Bat') != -1) ml = '26-35';
+		else if (alt.indexOf('Blocked') != -1) 
+			this.href = "inv_use.php?pwd=" + pwd + "&which=3&whichitem=563";
+		if (ml) this.setAttribute('title','ML: '+ml);
+	});
+}
 
 function spoil_plains()
 {	$('img').each(function()
