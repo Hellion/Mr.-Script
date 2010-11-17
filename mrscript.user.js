@@ -814,7 +814,7 @@ function AddLinks(descId, theItem, formWhere, path) {
 			
 		case  602: // Degrassi Knoll shopping list
 			if (GetCharData("plungeraccess") == "Y") addWhere.append(AppendLink('[gnoll store]', "store.php?whichstore=5"));
-			else addWhere.append(AppendLink('[Knoll (1)]', "adventure.php?snarfblat=19"));
+			else addWhere.append(AppendLink('[Knoll (1)]', "adventure.php?snarfblat=18"));
 			break;
 			
 		case  727: // Hedge
@@ -859,8 +859,9 @@ function AddLinks(descId, theItem, formWhere, path) {
 			addWhere.append(AppendLink("[equip swashbuckling pants]",'inv_equip.php?pwd='+pwd+'&which=2&action=equip&whichitem=402')); break;
 
 		case   23: // gum
-			if (document.referrer.indexOf('sewer') != -1 && path == "/store.php") 
-			{	top.document.getElementsByName('mainpane')[0].contentDocument.location.pathname = '/sewer.php';
+			if (document.referrer.indexOf('hermit') != -1 && path == "/store.php") 	// came to the store directly from the hermit?  use it automatically.
+			{	top.document.getElementsByName('mainpane')[0].contentDocument.location.pathname = 'inv_use.php?pwd='+pwd+'&which=3&whichitem=23';
+				//top.document.getElementsByName('mainpane')[0].contentDocument.location.pathname = '/sewer.php';
 			} else 
 			{	addWhere.append(AppendLink('[use]', 'inv_use.php?pwd='+pwd+'&which=3&whichitem=23'));
 			}
@@ -2108,7 +2109,7 @@ function at_guild() {
 			}
 			else if ((tdtext.indexOf("with the meatcar?") != -1) || (tdtext.indexOf("meatcar parts") != -1)) {
 				if (GetCharData("plungeraccess") == "Y") td.append(AppendLink('[gnoll store]', "store.php?whichstore=5"));
-				else td.append(AppendLink('[Knoll (1)]', "adventure.php?snarfblat=19"));
+				else td.append(AppendLink('[Knoll (1)]', "adventure.php?snarfblat=18"));
 			}
 		break;
 		case "?place=ocg": 
@@ -3251,7 +3252,7 @@ function at_council()
 			var txt = p.text();
 
 			if (txt.indexOf("Toot") != -1)
-				p.append(AppendLink('[toot]', 'mtnoob.php?action=toot'));
+				p.append(AppendLink('[toot]', 'tutorial.php?action=toot'));
 			else if (txt.indexOf("larva") != -1 && txt.indexOf("Thanks") == -1)
 				p.append(AppendLink('[woods]', 'woods.php'));
 			else if (txt.indexOf("Typical Tavern") != -1)
@@ -3361,7 +3362,7 @@ function at_questlog()
 			var txt = b.text();
 
 			if (txt.indexOf("Toot") != -1)
-				b.append(AppendLink('[toot]', 'mtnoob.php?action=toot'));
+				b.append(AppendLink('[toot]', 'tutorial.php?action=toot'));
 			else if (txt.indexOf("Larva") != -1 || txt.indexOf("White Citadel") != -1)
 				b.append(AppendLink('[woods]', 'woods.php'));
 			else if (txt.indexOf("Smell a Rat") != -1)
@@ -3549,9 +3550,9 @@ function fix_progressbar(totalWidth) {
 	var levelbar = $('table[title]:first');
 	if (!levelbar.length) return 0;	// if there's no level progress bar, we have nothing to do here.
 	levelbar = levelbar.get(0);
-	var level = (parseInt(levelbar.title.match(/(\d+)/g)[1])+1)/2; 	// Y in (X / Y) of levelbar title, which always equals (2N-1) where N = level.
+	var level = parseInt(levelbar.title.match(/(\d+)/g)[1]);	// grab the Y part of the (X / Y) [stats gained out of stats needed to advance]
+	if (level == 2) level = 1; else level = (level + 1)/2;		// stats needed is ((2*level)-1), which means level=(stats+1)/2, except at level 1. 
 	SetCharData("level",level);
-//	GM_log("level set in FPB to " + level);
 	var statbars = $('td[align="left"]');
 	if (!statbars.length) return;	// can't do the right thing without the stat bars...
 	var mainstatProgBarCount = parseInt(levelbar.title.match(/\d+/)[0]); // = how many stat points into this level we are
@@ -3564,6 +3565,7 @@ function fix_progressbar(totalWidth) {
 	if ((charclass == "Pastamancer") || (charclass == "Sauceror")) mainstatbar = statbars.get(1);
 	if ((charclass == "Disco Bandit") || (charclass == "Accordion Thief")) mainstatbar = statbars.get(2);
 	if (!mainstatbar) {	// couldn't find a class name.  fall back to highest stat.
+//		GM_log("no class found.")
 		var curstat = 0;
 		var minstat = ((level-1)*(level-1))+4;
 		if (level == 1) minstat = 0;
@@ -3572,10 +3574,10 @@ function fix_progressbar(totalWidth) {
 		if ((minstat <= musval)) { mainstatbar = statbars.get(0); curstat = musval; }	
 		var mysval = statbars.get(1).textContent.match(/(\d+)/g);
 		mysval = parseInt(mysval[1] || mysval[0]);
-		if ((minstat <= mysval) && (curstat <= mysval)) { mainstatbar = statbars.get(1); curstat = mysval; }
+		if ((minstat <= mysval) && (curstat <= mysval)) { mainstatbar = statbars.get(1); curstat = mysval;  }
 		var moxval = statbars.get(2).textContent.match(/(\d+)/g);
 		moxval = parseInt(moxval[1] || moxval[0]);
-		if ((minstat <= moxval && curstat <= moxval)) { mainstatbar = statbars.get(2); curstat = moxval; }
+		if ((minstat <= moxval && curstat <= moxval)) { mainstatbar = statbars.get(2); curstat = moxval;  }
 //		GM_log("curstat="+curstat+", minstat="+minstat+", musval="+musval+", mysval="+mysval+", moxval="+moxval+", mainstatbar="+mainstatbar);
 	}
 	if (mainstatbar) {
@@ -5613,13 +5615,13 @@ function at_topmenu()
 			{	AddTopLink(toprow1, 'mainpane', 'fnord', '', 1);
 				AddTopLink(toprow1, 'mainpane', 'smeg', '', 1);
 				GM_get(server+'/store.php?whichstore=2', function(t)
-				{	if(t.length>10 && t.indexOf('Only Pastamancers') == -1)
+				{	if(t.length>10 && t.indexOf("You don't belong") == -1)
 						$('a[href=fnord]')
 						.attr('href', 'store.php?whichstore=2')
 						.html('gouda');
 				});
 				GM_get(server+'/store.php?whichstore=3', function(t)
-				{	if(t.length>10 && t.indexOf('Only Seal C') == -1)
+				{	if(t.length>10 && t.indexOf("You don't belong") == -1)
 						$('a[href=smeg]')
 						.attr('href', 'store.php?whichstore=3')
 						.html('smack');
