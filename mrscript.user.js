@@ -1501,8 +1501,11 @@ function at_game() {
 	GetItemDB();
 //	GM_log("currentHours:"+currentHours+", lastUpdate:"+lastUpdated);
 
+	// reload topmenu exactly once after charpane has finished processing:
+	setTimeout('top.frames[0].location.reload();',2000);	
+	
 	// If over X hours, check for updates
-	if ((currentHours - lastUpdated) > 0)
+	if ((currentHours - lastUpdated) > 6)
 	{
 	GM_get("noblesse-oblige.org/hellion/scripts/MrScript.version.json",
 		function(txt)
@@ -1957,11 +1960,15 @@ function at_cove() {
 	var iColor={0:"red",1:"red",2:"red",3:"red",4:"red",5:"maroon",6:"blue",7:"green",8:"green"}; 
 
 	//Create the page element
-	var newElement = document.createElement('tr');
-	newElement.innerHTML = '<tr><td><div style="color: '+iColor[numInsults]+';font-size: 80%;width: 40%;text-align:left;">' + 'Insult tracking: ' + numInsults + '\/8</div></td></tr>';
+	var InsultDisplay = document.createElement('tr');
+	InsultDisplay.innerHTML = '<tr><td><div style="color: '+iColor[numInsults]+';font-size: 80%;width: 40%;text-align:left;">' + 'Insult tracking: ' + numInsults + '\/8</div></td></tr>';
+	var resetLink = document.createElement('tr');
+	resetLink.innerHTML = '<font size=1><a id=H_insultreset href=#>[reset insult tracking]</a></font>';
 	//Insert it at the top of the page
 	var element = document.getElementsByTagName("tr")[0];
-	element.parentNode.insertBefore(newElement,element);
+	element.parentNode.insertBefore(InsultDisplay,element);
+	element.parentNode.insertBefore(resetLink,InsultDisplay);
+	$('#H_insultreset').click(function(){SetCharData("insults","0;0;0;0;0;0;0;0");window.location = "cove.php";});
 }
 
 // HIDDENCITY: remove non-useful spherical objects from the dropdown list.
@@ -2217,6 +2224,7 @@ function at_forestvillage() {
 			var p = $(this);
 			var txt = p.text();
 			if (txt.indexOf('get it back for me?') != -1) p.append(AppendLink(linkname,linkloc));
+			if (txt.indexOf('New Area Unlocked') != -1) p.append(AppendLink(linkname,linkloc));
 		});
 		foo = document.getElementsByTagName('center');
 		if (foo.length == 0) return;
@@ -2729,7 +2737,8 @@ function at_inventory()
 					else if (ztype == 7) url += "&slot=3";
 
 				// I forget why I had to do this, but I'm sure there was a reason.
-				// probably because ztype is out of scope in the anonymous function.
+				// perhaps because ztype is out of scope in the anonymous function,
+				// or because we'd need a closure here in order to make it work right?
 					switch(ztype)
 					{	case 0: GM_get(url, function(t){EquipUpdate(t,0);}); break;
 						case 1: GM_get(url, function(t){EquipUpdate(t,1);}); break;
@@ -2936,6 +2945,14 @@ function at_bigisland()
 		$('a:lt(4)').click(function() {
 		var a = $(this);
 		SetCharData("square",a.attr('href'));
+		});
+	}
+	if (document.location.search.indexOf("?place=nunnery") != -1) {
+		GM_log("dls="+document.location.search);
+		// check initial text for "be ever so grateful if".  If present, set nunmoney to 0.  Sadly, it turns out this won't work.
+		// otherwise display current nunmoney value.
+		$('p').each(function() {
+			GM_log("p="+$(this).text());
 		});
 	}
 }
@@ -5504,7 +5521,7 @@ function at_topmenu()
 		if (txt == "plains")
 		{	a.after(' <a href="manor.php" target="mainpane">manor</a>');
 
-//			GM_log("checking level in topmenu: is currently "+integer(GetCharData('level')));
+			GM_log("checking level in topmenu: is currently "+integer(GetCharData('level')));
 			if (integer(GetCharData('level')) > 9) 
 				a.after(' <a href="beanstalk.php" target="mainpane">stalk</a>');
 
@@ -6390,6 +6407,20 @@ function autoclear_added_rows()
 			});
 		});
 	});
+}
+
+function at_adminmail()
+{
+	function showBRform() {
+		$('table:first').attr('style','display:inline');
+	}
+	
+	var msg = 	"<div><center><font size=4 color='blue'><p>You currently have Greasemonkey enabled and at least 1 script active.</p>" +
+				"<p>Before reporting a bug, please make sure that you can reproduce " +
+				"the issue with Greasemonkey disabled.</p></font><center><a id='H_MRS_BR1' href=#'>[click to continue]</a><br /></center></div>";
+	$('body').prepend(msg);
+	$('table:first').attr('style','display:none');
+	$('#H_MRS_BR1').click(showBRform);
 }
 
 // MAINT: Refresh until rollover is over.
