@@ -799,6 +799,7 @@ function AddLinks(descId, theItem, formWhere, path) {
 		case 2334: 																// MacGuffin
 			addWhere.append(AppendLink('[council]','council.php')); break;
 			
+		case   32: case   50: case   54: case   57: case   60: case   68: 		// EWs
 		case 2556: case 2557: case 2558: case 2559: case 2560: case 2561: 		// LEWs
 		case  150: case  151: case  152: case  153: case  154: case  155:		// Epic Hats
 			addWhere.append(AppendLink('[take to guild]','guild.php?place=scg')); break; 
@@ -808,6 +809,9 @@ function AddLinks(descId, theItem, formWhere, path) {
 			
 		case 134: // bitchin' meatcar
 			addWhere.append(AppendLink('[guild]','guild.php?place=paco')); break;
+			
+		case  459: case  460: case  461: case  462: case  463:					// pixels
+			addWhere.append(AppendLink('[mystic]','mystic.php')); break;
 			
 		case  535: // bridge
 			addWhere.append(AppendLink('[chasm]','mountains.php?orcs=1&pwd='+pwd)); break;
@@ -2143,7 +2147,8 @@ function at_guild() {
 			if (tdtext.indexOf("the two oldest and wisest") != -1) 		// common opening phrase, yay.
 			{
 				$('p:last').append(AppendLink('[hermit]','hermit.php')).append(AppendLink('[casino]','casino.php'));
-			} else if ((tdtext.indexOf("completed your Epic") != -1) ||		// Mus/Mys interstitial
+			} else if ((tdtext.indexOf("not completed your Epic") != -1) ||		// Mus interstitial
+					   (tdtext.indexOf("not yet completed your Epic") != -1) || // Mys interstitial
 					   (tdtext.indexOf("delay on that epic") != -1))			// Mox interstitial
 			{															
 				td.append(AppendLink('[hermit]','hermit.php')).append(AppendLink('[casino]','casino.php')); 
@@ -2223,6 +2228,7 @@ function at_forestvillage() {
 		$('p').each(function()	{	
 			var p = $(this);
 			var txt = p.text();
+			GM_log("p text="+txt);
 			if (txt.indexOf('get it back for me?') != -1) p.append(AppendLink(linkname,linkloc));
 			if (txt.indexOf('New Area Unlocked') != -1) p.append(AppendLink(linkname,linkloc));
 		});
