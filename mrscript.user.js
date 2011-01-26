@@ -30,6 +30,8 @@
 // @unwrap
 // ==/UserScript==
 
+// This is the latest checkin
+
 var place = location.pathname.replace(/\/|\.(php|html)$/gi, "").toLowerCase();
 //console.time("Mr. Script @ " + place);
 //GM_log("at:" + place);
@@ -776,10 +778,14 @@ function AddLinks(descId, theItem, formWhere, path) {
 		case  486: case 1916:													// talisman o' nam, spookyraven's specs.
 			doWhat = 'equipacc'; break;
 
-		case   69: case  146: case  438: case  440: case  678: case  829:		// various items and campground gear... RCM again?
+		case   69: case  438: case  440: case  678: case  829:		// various items and campground gear... RCM again?
 		case 1274: case 1622: case 1650: case 1794: case 1963: case 2258:
 		case 2344: case 2345: case 2346: case 2655: case 2660: case 2950:
 		case 2963: case 2964: case 2965: case 3353:
+			doWhat = 'oneuse'; break;
+
+			case  146: 																// dinghy plans
+			SetCharData("insults","0;0;0;0;0;0;0;0");
 			doWhat = 'oneuse'; break;
 
 		case   55: case 1445: case 1446: case 1447: case 1448: case 1449:		// pepper and nuggets.
@@ -2274,7 +2280,7 @@ function at_bhh() {
 		["balls of white lint","[Whitey's Grove (1)]","100"],
 		["worthless pieces of yellow glass","[Dungeons of Doom (1)]","39"],
 		["billy idols","[Goatlet (1)]","60"],
-		["burned out arcanodiodes","[Airship (1)]","81"],
+		["burned-out arcanodiodes","[Airship (1)]","81"],
 		["coal buttons","[Ninja Snowmen (1)]","62"],
 		["discarded pacifiers","[Castle (1)]","82"],
 		["disintegrating corks","[Wine Cellar (1)]","178"],
