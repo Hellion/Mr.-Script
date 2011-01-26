@@ -5254,6 +5254,17 @@ function spoil_friars()
 		if(ml) this.setAttribute('title','ML: '+ml);
 });	}
 
+function spoil_pandamonium()
+{	$('area').each(function()
+	{	var ml = null;
+		var alt = this.getAttribute('alt');
+		if (alt.indexOf('Slums') != -1) ml = '40-52';
+		else if (alt.indexOf('Go Inside') != -1) ml = '60-66';
+		else if (alt.indexOf('Go Backstage') != -1) ml = '55-60';
+		if (ml) this.setAttribute('title','ML: '+ml);
+	});
+}
+
 function spoil_beanstalk()
 {	$('img').each(function()
 	{	var ml = null; var src = this.getAttribute('src');
