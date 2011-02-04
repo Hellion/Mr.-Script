@@ -1,4 +1,4 @@
-{	"version":"1.6.2",
+{	"version":"1.6.3",
 	"url1":"http://userscripts.org/scripts/source/65705.user.js",
 	"url2":"http://noblesse-oblige.org/hellion/scripts/MrScript.user.js",
-	"desc":"<b>Fixed:</b>Better level detection on Progress Bar substat display<br />click-on-the-rubble sonar shortcut works in new bat hole<br />zone spoilers work in new bat hole too<br />"}
+	"desc":"<b>Fixed:</b><br />typo on mech bounty<br />TT EW-complete detection at guild<br /><b>New:</b><br />link to clear pirate insult info<br />spoilers for Pandamonium<br />update for new Options menu<br />"}
