@@ -867,6 +867,9 @@ function AddLinks(descId, theItem, formWhere, path) {
 			
 		case 3000: // Caronch's dentures
 			addWhere.append(AppendLink("[equip swashbuckling pants]",'inv_equip.php?pwd='+pwd+'&which=2&action=equip&whichitem=402')); break;
+			
+		case 4668: // observational glasses
+			addWhere.append(AppendLink("[visit Mourn]","pandamonium.php?action=mourn")); break;
 
 		case   23: // gum
 			if (document.referrer.indexOf('hermit') != -1 && path == "/store.php") 	// came to the store directly from the hermit?  use it automatically.
@@ -1956,6 +1959,8 @@ function at_valhalla() {
 	SetCharData("lastrat",0);
 	// reset nun counter, just in case
 	SetCharData("nunmoney",0);
+	// reset pandamonium arena solution marker
+	SetCharData("pandabandsolved",false);
 }
 
 // COVE: display pirate insult information
@@ -2070,7 +2075,7 @@ function at_adventure() {
 		}
 	}
 	var NCTitle = $('b:eq(1)');
-//	GM_log("NCTtext=["+$(NCTitle).text()+"]");
+	GM_log("NCTtext=["+$(NCTitle).text()+"]");
 	switch ($(NCTitle).text()) {
 	case "Rotting Matilda":
 		var cardlink = document.createElement('table');
@@ -2095,6 +2100,15 @@ function at_adventure() {
 		break;
 	case "Whee!":
 		$('<center><a href="adventure.php?snarfblat=125">Adventure in the Middle Chamber</a></center><br />').prependTo($('a:last').parent());
+		break;
+	case "Entour Rage":
+	case "A Pertinent Imp":
+	case "Primo Donno":
+	case "Your Bassist Impulses":
+	case "Suckubus? You Hardly Know Us!":
+	case "A Dicey Situation":
+		$('<center><a href="pandamonium.php?action=sven">Check with Sven</a></center><br />').prependTo($('a:last').parent());
+		break;
 	case "":	// got a "You shouldn't be here" or other reject message...
 		$('center table tr td').each(function(){
 			GM_log($(this).text());
@@ -3578,7 +3592,7 @@ function at_questlog()
 function fix_progressbar(totalWidth) {
 	var levelbar = $('table[title]:first');
 	if (!levelbar.length) return 0;	// if there's no level progress bar, we have nothing to do here.
-	levelbar = levelbar.get(0);
+	levelbar = levelbar.get(0);		// convert from jquery object to DOM object
 	var level = parseInt(levelbar.title.match(/(\d+)/g)[1]);	// grab the Y part of the (X / Y) [stats gained out of stats needed to advance]
 	if (level == 2) level = 1; else level = (level + 1)/2;		// stats needed is ((2*level)-1), which means level=(stats+1)/2, except at level 1. 
 	SetCharData("level",level);
@@ -3607,10 +3621,10 @@ function fix_progressbar(totalWidth) {
 		var moxval = statbars.get(2).textContent.match(/(\d+)/g);
 		moxval = parseInt(moxval[1] || moxval[0]);
 		if ((minstat <= moxval && curstat <= moxval)) { mainstatbar = statbars.get(2); curstat = moxval;  }
-//		GM_log("curstat="+curstat+", minstat="+minstat+", musval="+musval+", mysval="+mysval+", moxval="+moxval+", mainstatbar="+mainstatbar);
+		GM_log("level="+level+", curstat="+curstat+", minstat="+minstat+", musval="+musval+", mysval="+mysval+", moxval="+moxval+", mainstatbar="+mainstatbar);
 	}
 	if (mainstatbar) {
-//			GM_log("statbarcontent =" +mainstatbar.textContent);
+			GM_log("statbarcontent =" +mainstatbar.textContent);
 		var statval = mainstatbar.textContent.match(/(\d+)/g);	// could be "11" or " 11 (9)", for example.
 		statval = parseInt(statval[1] || statval[0]);			// pick the unbuffed value if buffed value is present.
 		var substatProgBarCount;
@@ -3633,8 +3647,8 @@ function fix_progressbar(totalWidth) {
 		var whiteWidth = totalWidth - blackWidth;
 		levelbar.firstChild.firstChild.firstChild.width = blackWidth;
 		levelbar.firstChild.firstChild.lastChild.width = whiteWidth;
-//			GM_log("statval="+statval+", substatProgBarCount="+substatProgBarCount+", mainstatbase="+mainstatBase+", substatCurrent="+substatCurrent);
-//			GM_log("level="+level+", substatNext="+substatNext+", blackwidth="+blackWidth+", mainstatProgBarCount="+mainstatProgBarCount);
+			GM_log("statval="+statval+", substatProgBarCount="+substatProgBarCount+", mainstatbase="+mainstatBase+", substatCurrent="+substatCurrent);
+			GM_log("level="+level+", substatNext="+substatNext+", blackwidth="+blackWidth+", mainstatProgBarCount="+mainstatProgBarCount);
 		return level;
 	}
 }
@@ -4495,7 +4509,8 @@ function at_manor3()
 
 // PALINSHELVES: fill in the correct choices to summon Dr. Awkward.
 function at_palinshelves()
-{	for (var i=0,len=document.images.length; i<len; i++)
+{	
+	for (var i=0,len=document.images.length; i<len; i++)
 	{	var img = document.images[i];
 		var onclick = img.getAttribute("onclick");
 		if (onclick != undefined && onclick.indexOf("desc") != -1)
@@ -4504,7 +4519,82 @@ function at_palinshelves()
 	if (sels.length > 0)
 	{	sels[0].value = 2259; sels[1].value = 2260;
 		sels[2].value = 493; sels[3].value = 2261;
-}	}
+	}	
+}
+
+function at_pandamonium()
+{
+	var gotitem = $('.effect > b').text();
+	GM_log("gotitem="+gotitem);
+	if (gotitem == "Azazel's unicorn") SetCharData("pandabandsolved",false);
+	if (document.location.search=='?action=sven')	{
+		var bognort = 0, stinkface = 0, flargwurm = 0, jim = 0;
+		var pandasolved = GetCharData("pandabandsolved");
+		if ((pandasolved == false) || (pandasolved == undefined)) {	// no solution found yet?	
+			GM_log("solving...");
+			var itemlist = $('select[name=togive]');
+			var set1 = 0, set2 = 0;
+			var bear = false, paper = false, marsh = false;
+			var cake = false, cherry = false, pillow = false;
+			itemlist.children().each(function(){
+				var myval = parseInt(this.value,10);
+				switch (myval) {
+					case 4670: set1++; bear = true; break;
+					case 4673: set1++; marsh = true; break;
+					case 4675: set1++; paper = true; break;
+					case 4671: set2++; cherry = true; break;
+					case 4672: set2++; pillow = true; break;
+					case 4674: set2++; cake = true; break;
+					default: break;
+				}			
+			});
+			GM_log("set1="+set1+", set2="+set2);
+			if ((set1 < 2) || (set2 < 2)) {
+				$('form[name=bandcamp]').prepend('<p><font color="blue">No solution available yet.</font></p>');
+				$('select').attr('style','color:red');
+			} else {	// >=2 of each set available-- solve it!
+				if (marsh) bognort = 4673; // "marshmallow"; //4673; 
+				else bognort = 4675; // "blotter paper"; // 4675;
+				if (bear) stinkface = 4670; // "bear"; // 4670; 
+				else stinkface = 4675; // "blotter paper"; // 4675;
+				if (cherry) flargwurm = 4671; // "cherry"; // 4671; 
+				else flargwurm = 4674; // "cake"; // 4674;
+				if (pillow) jim = 4672; // "pillow"; // 4672; 
+				else jim = 4674; // "cake"; // 4674;
+				SetCharData("bognort",bognort);
+				SetCharData("stinkface",stinkface);
+				SetCharData("flargwurm",flargwurm);
+				SetCharData("jim",jim);
+				SetCharData("pandabandsolved",true);
+				at_pandamonium();	// process and present our new solution, I hope
+			}
+		}
+		else {	// time to implement the solution!
+			GM_log("solved!");
+			bognort = GetCharData("bognort");
+			stinkface = GetCharData("stinkface");
+			flargwurm = GetCharData("flargwurm");
+			jim = GetCharData("jim");
+			$('form[name=bandcamp]').prepend('<p><font color="blue">Solution found!  Click [Give It]!</font></p>');
+			var members = $('select[name=bandmember]');
+			var items = $('select[name=togive]').get(0);
+// this is ugly-looking, but solid.
+			members.val("Bognort");	
+			if (members.val()=="Bognort") { items.value = bognort; members.attr('style','color:green'); items.setAttribute('style','color:green'); }
+			else { 
+				members.val("Stinkface");
+				if (members.val() == "Stinkface") { items.value = stinkface; members.attr('style','color:green'); items.setAttribute('style','color:green'); }
+				else { 
+					members.val("Flargwurm");
+					if (members.val() == "Flargwurm") { items.value = flargwurm; members.attr('style','color:green'); items.setAttribute('style','color:green'); }
+					else { 
+						members.val("Jim"); items.value = jim; members.attr('style','color:green'); items.setAttribute('style','color:green');
+					}
+				}
+			}
+		}
+	}
+}
 
 // PYRAMID: Display ratchets and other goodies.
 function at_pyramid()
