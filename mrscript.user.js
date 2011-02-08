@@ -3714,14 +3714,14 @@ function at_charpane()
 		}
 		advcount = integer($('a:contains(Adv):first').parent().next().text());
 
-		level = fix_progressbar(60);
-		if (level == 0) {		// level not deduced while tweaking progress bar?
+//		level = fix_progressbar(60);
+//		if (level == 0) {		// level not deduced while tweaking progress bar?
 			var lvlblock = $("center:contains('Lvl.'):first").text();	// this text is always present in compact mode
 //			GM_log("lvlblock="+lvlblock);
 			level = lvlblock.match(/Lvl. (\d+)/)[1];
 			SetCharData("level", level);
 			GM_log("level set in compactmode to "+level);
-		}
+//		}
 
 		SetCharData("currentHP", curHP); SetCharData("maxHP", maxHP);
 		SetCharData("currentMP", curMP); SetCharData("maxMP", maxMP);
@@ -3734,8 +3734,8 @@ function at_charpane()
 				SetCharData("max"    + name, cur_max[1]);
 			}
 		}
-		level = fix_progressbar(100);
-		if (level == 0) {		// couldn't figure out level from the progressbar?  Do it the old way.
+//		level = fix_progressbar(100);
+//		if (level == 0) {		// couldn't figure out level from the progressbar?  Do it the old way.
 			var lvlblock = $("td:contains('Level'):first").text();	
 			if (lvlblock) 
 			{
@@ -3747,7 +3747,7 @@ function at_charpane()
 				level = 13;
 				GM_log("level defaulted in fullmode to 13");
 			}
-		}
+//		}
 
 		var data = $.makeArray($('td[align="center"]').slice(0, 4)).map(text);
 		parse_cur_and_max(["HP", "MP"]);
