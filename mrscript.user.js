@@ -5921,7 +5921,7 @@ function at_compactmenu()
 				else selectItem.options[i].value="questlog.php?which=4";
 			}
 
-			if (selectItem.options[i].innerHTML == "Options") {	
+			if (selectItem.options[i].innerHTML == "Options") { // Account Menu") {	
 				AddTopOption("-", "nothing", selectItem, selectItem.options[i+1]);
 				AddTopOption("Multi-Use", "multiuse.php", selectItem, selectItem.options[i+2]);
 				AddTopOption("Combine", "craft.php?mode=combine", selectItem, selectItem.options[i+3]);
@@ -6042,33 +6042,44 @@ function buildPrefs()
     function buildSettings()
     {
         //build our settings and return them for appending
-        var guts = document.body.appendChild(document.createElement('div'));
+        var guts = document.createElement("div"); 
         guts.id = scriptID;
-        var subhead = guts.appendChild(document.createElement('div'));
+		var subhead = document.createElement("div");
+		guts.appendChild(subhead);
+		subhead.className = "subhead";
+		subhead.textContent = "Mr. Script's Choicetastic Optionarium";
 		
 		var choice, select;
+		var outerdiv = document.createElement('div');
+		outerdiv.setAttribute('id','MrDiv');
+		outerdiv.style["border"] = "1px solid blue";
+		outerdiv.style["width"] = "95%";
 		var bigSpan = document.createElement('span');
+		outerdiv.appendChild(bigSpan);
 		var prefSpan = document.createElement('span');
 		bigSpan.setAttribute('id','scriptpref');
-//	bigSpan.setAttribute('style','display: none');
-		bigSpan.appendChild(document.createElement('hr'));
+		bigSpan.style["margin"] = "0 auto";
+		bigSpan.style["display"] = "table-cell";
+		bigSpan.style["overflowX"] = "hidden";
+		bigSpan.style["overfloyY"] = "auto"; 
+		bigSpan.style["textalign"] = "left";
+		bigSpan.style["lineHeight"] = "2em";
+		bigSpan.style["padding"] = "5px";
 
 		var spanSpan = document.createElement('span');
-		var clicky1 = 'javascript:getObj("scriptpref1").setAttribute("style","");' +
-		'javascript:getObj("scriptpref2").setAttribute("style","display:none;");' +
-		'javascript:getObj("scriptpref3").setAttribute("style","display:none;");';
-		var clicky2 = 'javascript:getObj("scriptpref1").setAttribute("style","display:none;");' +
-		'javascript:getObj("scriptpref2").setAttribute("style","");' +
-		'javascript:getObj("scriptpref3").setAttribute("style","display:none;");';
-		var clicky3 = 'javascript:getObj("scriptpref1").setAttribute("style","display:none;");' +
-		'javascript:getObj("scriptpref2").setAttribute("style","display:none;");' +
-		'javascript:getObj("scriptpref3").setAttribute("style","");';
-		var clicky4 = 'javascript:getObj("scriptpref1").setAttribute("style","display:none;");' +
-		'javascript:getObj("scriptpref2").setAttribute("style","display:none;");' +
-		'javascript:getObj("scriptpref3").setAttribute("style","display:none;");';
-		spanSpan.innerHTML = "Toggles: <a href='" + clicky1 +
-		"'>[tweak]</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Customize Links: " +
-		"<a href='" + clicky2 + "'>[one]</a> - <a href='" + clicky3 + "'>[two]</a>";
+		var clicky1 = 'javascript:document.getElementById("scriptpref1").setAttribute("style","");' +
+		'javascript:document.getElementById("scriptpref2").setAttribute("style","display:none;");' +
+		'javascript:document.getElementById("scriptpref3").setAttribute("style","display:none;");';
+		var clicky2 = 'javascript:document.getElementById("scriptpref1").setAttribute("style","display:none;");' +
+		'javascript:document.getElementById("scriptpref2").setAttribute("style","");' +
+		'javascript:document.getElementById("scriptpref3").setAttribute("style","display:none;");';
+		var clicky3 = 'javascript:document.getElementById("scriptpref1").setAttribute("style","display:none;");' +
+		'javascript:document.getElementById("scriptpref2").setAttribute("style","display:none;");' +
+		'javascript:document.getElementById("scriptpref3").setAttribute("style","");';
+
+		spanSpan.innerHTML = "<a href='" + clicky1 +
+		"'>[Settings]</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; " +
+		"<a href='" + clicky2 + "'>[Custom Links 1]</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href='" + clicky3 + "'>[Custom Links 2]</a>";
 		spanSpan.setAttribute('style','font-size:12px;text-align:center;');
 		bigSpan.appendChild(spanSpan);
 		bigSpan.appendChild(document.createElement('hr'));
@@ -6123,9 +6134,9 @@ function buildPrefs()
 		var menu1Span = document.createElement('span');
 		var menu2Span = document.createElement('span');
 		menu1Span.setAttribute('id','scriptpref2');
-//	menu1Span.setAttribute('style','display: none');
+		menu1Span.setAttribute('style','display: none');
 		menu2Span.setAttribute('id','scriptpref3');
-//	menu2Span.setAttribute('style','display: none');
+		menu2Span.setAttribute('style','display: none');
 
 		// Customized Links, Take 1
 		for (var j=0; j<10; j++)
@@ -6239,11 +6250,7 @@ function buildPrefs()
 		{	if (confirm("Are you sure? You should only perform this action if Mr. Script is not functioning properly."))
 			{	UpdateItemDB(0); alert("Database will attempt to update. Please contact Hellion if the problem persists.");
 		}	}, true);
-//			var ul3 = document.createElement('a');
-//			ul3.setAttribute('target', '_blank');
-//			ul3.setAttribute('href','https://www.paypal.com/cgi-bin/webscr?'+
-//'cmd=_donations&business=lukifer%40mail%2ecom&item_name=Mr%2e%20Script&page_style=PayPal&no_shipping=1&cn=Comments&tax=0&currency_code=USD&lc=US&bn=PP%2dDonationsBF&charset=UTF%2d8');
-//			ul3.innerHTML = 'Say Thanks With Money!';
+
 		var ul4 = document.createElement('a');
 		ul4.setAttribute('href','javascript:void(0);');
 		ul4.innerHTML = "Renew Password Hash";
@@ -6265,24 +6272,10 @@ function buildPrefs()
 		ulspan.appendChild(document.createTextNode(' - '));
 		ulspan.appendChild(ul4);
 		ulspan.appendChild(document.createElement('br'));
-//			ulspan.appendChild(document.createElement('br'));
-//			ulspan.appendChild(document.createTextNode('Like Mr. Script? '));
-//			ulspan.appendChild(ul3);
+
 		bigSpan.appendChild(centre);
 
-		var prefLink = document.createElement('p');
-		prefLink.innerHTML = "<b>Mr. Script's Choicetastic Optionarium</b>";
-//		prefLink.setAttribute('href','javascript:toggle("scriptpref");');
-//		prefLink.setAttribute('onclick','if (document.getElementById("scriptpref").getAttribute("style").indexOf("none") != -1)' +
-//				' window.setTimeout("self.location.hash=\'opt\';",50)');
-		var prefAnchor = document.createElement('a');
-		prefAnchor.setAttribute('name','opt'); prefAnchor.innerHTML = " ";
-		var pDiddy = document.createElement('p');
-		pDiddy.appendChild(prefAnchor);
-		pDiddy.appendChild(prefLink);
-		pDiddy.appendChild(bigSpan);
-
-		guts.appendChild(pDiddy);
+		guts.appendChild(outerdiv); 
         return guts;
     }
 }
