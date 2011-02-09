@@ -6038,57 +6038,10 @@ function buildPrefs()
 //            document.querySelector('#' + scriptID).addEventListener('click', changeSettings, false);
         }, false);
     }
-    
-    function buildSettings()
-    {
-        //build our settings and return them for appending
-        var guts = document.createElement("div"); 
-        guts.id = scriptID;
-		var subhead = document.createElement("div");
-		guts.appendChild(subhead);
-		subhead.className = "subhead";
-		subhead.textContent = "Mr. Script's Choicetastic Optionarium";
-		
-		var choice, select;
-		var outerdiv = document.createElement('div');
-		outerdiv.setAttribute('id','MrDiv');
-		outerdiv.style["border"] = "1px solid blue";
-		outerdiv.style["width"] = "95%";
-		var bigSpan = document.createElement('span');
-		outerdiv.appendChild(bigSpan);
-		var prefSpan = document.createElement('span');
-		bigSpan.setAttribute('id','scriptpref');
-		bigSpan.style["margin"] = "0 auto";
-		bigSpan.style["display"] = "table-cell";
-		bigSpan.style["overflowX"] = "hidden";
-		bigSpan.style["overfloyY"] = "auto"; 
-		bigSpan.style["textalign"] = "left";
-		bigSpan.style["lineHeight"] = "2em";
-		bigSpan.style["padding"] = "5px";
-
-		var spanSpan = document.createElement('span');
-		var clicky1 = 'javascript:document.getElementById("scriptpref1").setAttribute("style","");' +
-		'javascript:document.getElementById("scriptpref2").setAttribute("style","display:none;");' +
-		'javascript:document.getElementById("scriptpref3").setAttribute("style","display:none;");';
-		var clicky2 = 'javascript:document.getElementById("scriptpref1").setAttribute("style","display:none;");' +
-		'javascript:document.getElementById("scriptpref2").setAttribute("style","");' +
-		'javascript:document.getElementById("scriptpref3").setAttribute("style","display:none;");';
-		var clicky3 = 'javascript:document.getElementById("scriptpref1").setAttribute("style","display:none;");' +
-		'javascript:document.getElementById("scriptpref2").setAttribute("style","display:none;");' +
-		'javascript:document.getElementById("scriptpref3").setAttribute("style","");';
-
-		spanSpan.innerHTML = "<a href='" + clicky1 +
-		"'>[Settings]</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; " +
-		"<a href='" + clicky2 + "'>[Custom Links 1]</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href='" + clicky3 + "'>[Custom Links 2]</a>";
-		spanSpan.setAttribute('style','font-size:12px;text-align:center;');
-		bigSpan.appendChild(spanSpan);
-		bigSpan.appendChild(document.createElement('hr'));
-
-		prefSpan.setAttribute('id','scriptpref1');
-		bigSpan.appendChild(prefSpan);
-
-		choice = MakeOption("Clicking Number Boxes: ", 3, 'autoclear', "Does Zilch", "Clears");
-		select = choice.firstChild.cells[1].firstChild;
+	
+	function createPrefPage(prefSpan) {
+		var choice = MakeOption("Clicking Number Boxes: ", 3, 'autoclear', "Does Zilch", "Clears");
+		var select = choice.firstChild.cells[1].firstChild;
 		select.options[2].innerHTML = "Highlights";
 		prefSpan.appendChild(choice);
 
@@ -6130,14 +6083,9 @@ function buildPrefs()
 		prefSpan.appendChild(MakeOption("Sword-Guy Link: ", -1, 'swordguy', 0, 0));
 		prefSpan.appendChild(MakeOption("Backup Outfit Name: ", -1, 'backup', 0, 0));
 		prefSpan.appendChild(MakeOption("Ascension Checklist: ", -1, 'ascension_list', 0, 0));
-
-		var menu1Span = document.createElement('span');
-		var menu2Span = document.createElement('span');
-		menu1Span.setAttribute('id','scriptpref2');
-		menu1Span.setAttribute('style','display: none');
-		menu2Span.setAttribute('id','scriptpref3');
-		menu2Span.setAttribute('style','display: none');
-
+	}
+	
+	function createMenu1(menu1Span) {
 		// Customized Links, Take 1
 		for (var j=0; j<10; j++)
 		{	var menutxt = GetPref('menu1link'+j);
@@ -6145,7 +6093,7 @@ function buildPrefs()
 			else menutxt = "";
 			menu1Span.appendChild(MakeOption(menutxt, -2, 'menu1link'+j), 0, 0);
 		}
-		select = document.createElement('a');
+		var select = document.createElement('a');
 		select.innerHTML = 'Restore Defaults'; select.href = '#';
 		select.setAttribute('class','tiny');
 		select.addEventListener('click',function(event)
@@ -6161,7 +6109,7 @@ function buildPrefs()
 				if (link.value == "undefined") link.value = "";
 			} top.frames[0].location.reload();
 		}, true);
-		choice = document.createElement('input');
+		var choice = document.createElement('input');
 		choice.type = 'submit'; choice.setAttribute('class','button');
 		choice.value = 'Apply'; choice.href = '#';
 		choice.addEventListener('click',function(event)
@@ -6179,7 +6127,9 @@ function buildPrefs()
 		menu1Span.lastChild.appendChild(document.createElement('br'));
 		menu1Span.lastChild.appendChild(document.createElement('br'));
 		menu1Span.lastChild.appendChild(choice);
-
+	}
+	
+	function createMenu2(menu2Span) {
 		// Customized Links, Take 2
 		for (var j=0; j<10; j++)
 		{	var menutxt = GetPref('menu2link'+j);
@@ -6187,7 +6137,7 @@ function buildPrefs()
 			else menutxt = "";
 			menu2Span.appendChild(MakeOption(menutxt, -2, 'menu2link'+j), 0, 0);
 		}
-		select = document.createElement('a');
+		var select = document.createElement('a');
 		select.innerHTML = 'Restore Defaults'; select.href = '#';
 		select.setAttribute('class','tiny');
 		select.addEventListener('click',function(event)
@@ -6203,7 +6153,7 @@ function buildPrefs()
 				if (link.value == "undefined") link.value = "";
 			} top.frames[0].location.reload();
 		}, true);
-		choice = document.createElement('input');
+		var choice = document.createElement('input');
 		choice.type = 'submit'; choice.setAttribute('class','button');
 		choice.value = 'Apply'; choice.href = '#';
 		choice.addEventListener('click',function(event)
@@ -6220,14 +6170,11 @@ function buildPrefs()
 		menu2Span.lastChild.appendChild(document.createElement('br'));
 		menu2Span.lastChild.appendChild(document.createElement('br'));
 		menu2Span.lastChild.appendChild(choice);
-
-		// Put it all together (-ish.)
-		bigSpan.appendChild(menu1Span);
-		bigSpan.appendChild(menu2Span);
-		bigSpan.appendChild(document.createElement('hr'));
-
-		var ul = document.createElement('a');
+	}	
+	
+	function createBottomBar(centeredlinks) {
 		var ulspan = document.createElement('div');
+		var ul = document.createElement('a');
 		ul.setAttribute('href','#');
 		ul.innerHTML = "Check For Update";
 		ul.addEventListener('click',function(event)
@@ -6264,17 +6211,85 @@ function buildPrefs()
 		});	}, true);
 		ulspan.setAttribute('class','tiny');
 		ulspan.setAttribute('name','updatespan');
-		var centre = document.createElement('center');
-		centre.appendChild(ulspan);
 		ulspan.appendChild(ul);
 		ulspan.appendChild(document.createTextNode(' - '));
 		ulspan.appendChild(ul2);
 		ulspan.appendChild(document.createTextNode(' - '));
 		ulspan.appendChild(ul4);
 		ulspan.appendChild(document.createElement('br'));
+		centeredlinks.appendChild(ulspan);
+	}
 
-		bigSpan.appendChild(centre);
+    function buildSettings()
+    {
+        //build our settings and return them for appending
+        var guts = document.createElement("div"); 
+        guts.id = scriptID;
+		var subhead = document.createElement("div");
+		guts.appendChild(subhead);
+		subhead.className = "subhead";
+		subhead.textContent = "Mr. Script's Choicetastic Optionarium";
 
+		var outerdiv = document.createElement('div');
+		outerdiv.setAttribute('id','MrDiv');
+		outerdiv.style["border"] = "1px solid blue";
+		outerdiv.style["width"] = "95%";
+		var bigSpan = document.createElement('span');
+		bigSpan.setAttribute('id','scriptpref');
+		bigSpan.style["margin"] = "0 auto";
+		bigSpan.style["display"] = "table-cell";
+		bigSpan.style["overflowX"] = "hidden";
+		bigSpan.style["overflowY"] = "auto"; 
+		bigSpan.style["textalign"] = "left";
+		bigSpan.style["lineHeight"] = "2em";
+		bigSpan.style["padding"] = "5px";
+
+		var spanSpan = document.createElement('span');
+		var clicky1 = 'javascript:document.getElementById("scriptpref1").setAttribute("style","");' +
+		'javascript:document.getElementById("scriptpref2").setAttribute("style","display:none;");' +
+		'javascript:document.getElementById("scriptpref3").setAttribute("style","display:none;");';
+		var clicky2 = 'javascript:document.getElementById("scriptpref1").setAttribute("style","display:none;");' +
+		'javascript:document.getElementById("scriptpref2").setAttribute("style","");' +
+		'javascript:document.getElementById("scriptpref3").setAttribute("style","display:none;");';
+		var clicky3 = 'javascript:document.getElementById("scriptpref1").setAttribute("style","display:none;");' +
+		'javascript:document.getElementById("scriptpref2").setAttribute("style","display:none;");' +
+		'javascript:document.getElementById("scriptpref3").setAttribute("style","");';
+
+		spanSpan.innerHTML = "<a href='" + clicky1 + "'>[Settings]</a>" + 
+			"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; " +
+			"<a href='" + clicky2 + "'>[Custom Links 1]</a>" + 
+			"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; " + 
+			"<a href='" + clicky3 + "'>[Custom Links 2]</a>";
+		spanSpan.setAttribute('style','font-size:12px;text-align:center;');
+		var prefSpan = document.createElement('span');
+		prefSpan.setAttribute('id','scriptpref1');
+		
+		createPrefPage(prefSpan);
+
+		var menu1Span = document.createElement('span');
+		var menu2Span = document.createElement('span');
+		menu1Span.setAttribute('id','scriptpref2');
+		menu1Span.setAttribute('style','display: none');
+		menu2Span.setAttribute('id','scriptpref3');
+		menu2Span.setAttribute('style','display: none');
+		
+		createMenu1(menu1Span);
+		createMenu2(menu2Span);
+	
+		var centeredlinks = document.createElement('center');
+		createBottomBar(centeredlinks);
+
+		// Put it all together
+		bigSpan.appendChild(spanSpan);
+		bigSpan.appendChild(document.createElement('hr'));
+		bigSpan.appendChild(prefSpan);
+		bigSpan.appendChild(menu1Span);
+		bigSpan.appendChild(menu2Span);
+		bigSpan.appendChild(document.createElement('hr'));
+		bigSpan.appendChild(centeredlinks);
+
+		outerdiv.appendChild(bigSpan);
+		
 		guts.appendChild(outerdiv); 
         return guts;
     }
