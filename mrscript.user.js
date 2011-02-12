@@ -4076,52 +4076,10 @@ function at_charsheet()
 {
 	// see if the character qualifies for the Myst-Class innate 5% resistance bonus... 
 	var mystBonus = 0;
-	var className = '';
-	// The easy way first: custom-titled characters have a "Class: X" line on their sheet.
-	$('td:contains("Class:"):not(:has(table))').each(function() {
-		classname = $(this).next().text();
-		switch (classname) {
-		case 	"Pastamancer":
-		case 	"Sauceror":	mystBonus = 5; break;
-		}
-	});
-	
-	if (className == '') {	// didn't find it the easy way? find their non-custom title and see if it's a PM or SA title.
-		var title = $('b:contains("Statistics")').parent().parent().contents().filter(function(){return this.nodeType==3}).get(2).data;
-		title = title.trim();
-		switch(title) {
-			case 	"Dough Acolyte":
-			case 	"Yeast Scholar":
-			case 	"Noodle Neophyte":
-			case 	"Starch Savant":
-			case 	"Carbohydrate Cognoscenti":
-			case 	"Spaghetti Sage":
-			case 	"Macaroni Magician":
-			case 	"Vermicelli Enchanter":
-			case 	"Linguini Thaumaturge":
-			case 	"Ravioli Sorceror":
-			case 	"Manicotti Magus":
-			case 	"Spaghetti Spellbinder":
-			case 	"Cannelloni Conjurer":
-			case 	"Angel-Hair Archmage":
-			case 	"Pastamancer":
-			case 	"Allspice Acolyte":
-			case 	"Cilantro Seer":
-			case 	"Parsley Enchanter":
-			case 	"Sage Sage":
-			case 	"Rosemary Diviner":
-			case 	"Thyme Wizard":
-			case 	"Tarragon Thaumaturge":
-			case 	"Oreganoccultist":
-			case 	"Basillusionist":
-			case 	"Coriander Conjurer":
-			case 	"Bay Leaf Brujo":
-			case 	"Sesame Soothsayer":
-			case 	"Marinara Mage":
-			case 	"Alfredo Archmage":	
-			case    "Sauceror": mystBonus = 5; break;
-		}
-	}
+	var HPMPstats = $("table table table td:lt(10)").text();
+//	GM_log("text="+HPMPstats);
+	if (HPMPstats.indexOf("Mana Points") != -1) mystBonus = 5;
+
 //	GM_log("Myst Bonus = "+mystBonus);
 		
 	$('td:contains("Protection"):not(:has(table))').each(function() {
