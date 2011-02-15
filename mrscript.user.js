@@ -1,4 +1,4 @@
-// Mr. Script v1.6.3
+// Mr. Script v1.6.4
 //
 // --------------------------------------------------------------------
 // This is a user script.  To install it, you need Greasemonkey 0.8 or
@@ -12,7 +12,7 @@
 // @name        Mr. Script
 // @namespace   http://www.noblesse-oblige.org/lukifer/scripts/
 // @description	interface overhauler for KingdomofLoathing.com
-// @version		1.6.3
+// @version		1.6.4
 // @author		Lukifer
 // @contributor	Ohayou
 // @contributor Hellion
@@ -37,7 +37,7 @@ var place = location.pathname.replace(/\/|\.(php|html)$/gi, "").toLowerCase();
 //GM_log("at:" + place);
 
 // n.b. version number should always be a 3-digit number.  If you move to 1.9, call it 1.9.0.  Don't go to 1.8.10 or some such.
-var VERSION = 163;
+var VERSION = 164;
 var MAXLIMIT = 999;
 var ENABLE_QS_REFRESH = 1;
 var DISABLE_ITEM_DB = 0;
@@ -223,9 +223,9 @@ function getItemList(callback)
 				}
 			}
 		}
-		/*var itemsLength=0;
-		for(a in items)itemsLength++;
-		GM_log('parsed '+itemsLength+' items');*/
+//		var itemsLength=0;
+//		for(a in items)itemsLength++;
+//		GM_log('parsed '+itemsLength+' items');
 
 		GM_setValue('storedItemList',items.toSource());	// storedItemList should now be of the form array[descid]=[itemid,itemname].
 		if( typeof callback=='function' ){
@@ -1340,7 +1340,7 @@ function Defaults(revert)
 		if (GetPref('menu1link5') == undefined) SetPref('menu1link5', 'guildstore');
 		if (GetPref('menu1link6') == undefined) SetPref('menu1link6', 'demon;store.php?whichstore=m');
 		if (GetPref('menu1link7') == undefined) SetPref('menu1link7', 'doc;galaktik.php');
-		if (GetPref('menu1link8') == undefined) SetPref('menu1link8', 'lab;store.php?whichstore=g');
+		if (GetPref('menu1link8') == undefined) SetPref('menu1link8', 'lab;cobbsknob.php?action=dispensary'); // store.php?whichstore=g');
 		if (GetPref('menu1link9') == undefined) SetPref('menu1link9', 'fruit;store.php?whichstore=h');
 
 		if (GetPref('menu2link0') == undefined) SetPref('menu2link0', 'buy;searchmall.php');
@@ -1363,7 +1363,7 @@ function Defaults(revert)
 		SetPref('menu1link5', 'guildstore');
 		SetPref('menu1link6', 'demon;store.php?whichstore=m');
 		SetPref('menu1link7', 'doc;galaktik.php');
-		SetPref('menu1link8', 'lab;store.php?whichstore=g');
+		SetPref('menu1link8', 'lab;cobbsknob.php?action=dispensary'); // store.php?whichstore=g');
 		SetPref('menu1link9', 'fruit;store.php?whichstore=h');
 	} else if (revert==2)
 	{	SetPref('menu2link0', 'buy;searchmall.php');
@@ -1853,7 +1853,7 @@ function at_fight() {
 			var meatline = $("img[src*='meat.gif']:last").parent().next().text();	// should be "You gain X meat"
 			var meat = integer(meatline.match(/You gain (\d+) Meat/)[1]);
 			var meatSoFar = integer(GetCharData("nunmoney")); if ((meatSoFar == undefined) || isNaN(meatSoFar)) meatSoFar = 0;
-			GM_log("meatline=["+meatline+"], meat="+meat+", meatSoFar="+meatSoFar);
+//			GM_log("meatline=["+meatline+"], meat="+meat+", meatSoFar="+meatSoFar);
 			meatSoFar += meat;
 			$("img[src*='meat.gif']:last").parent().next().append("<font color='blue'>&nbsp;("+meatSoFar+" collected total).</font>");
 			if (meatSoFar > 100000) meatSoFar = 0;
@@ -2075,7 +2075,7 @@ function at_adventure() {
 		}
 	}
 	var NCTitle = $('b:eq(1)');
-	GM_log("NCTtext=["+$(NCTitle).text()+"]");
+//	GM_log("NCTtext=["+$(NCTitle).text()+"]");
 	switch ($(NCTitle).text()) {
 	case "Rotting Matilda":
 		var cardlink = document.createElement('table');
@@ -2248,7 +2248,7 @@ function at_forestvillage() {
 		$('p').each(function()	{	
 			var p = $(this);
 			var txt = p.text();
-			GM_log("p text="+txt);
+//			GM_log("p text="+txt);
 			if (txt.indexOf('get it back for me?') != -1) p.append(AppendLink(linkname,linkloc));
 			if (txt.indexOf('New Area Unlocked') != -1) p.append(AppendLink(linkname,linkloc));
 		});
@@ -2328,7 +2328,7 @@ function at_bhh() {
 
 function at_trapper() {
 	var traptext = $('body').text();
-	GM_log("traptext="+traptext);
+//	GM_log("traptext="+traptext);
 	SetCharData("oretype","");
 	if (traptext.indexOf("Thanks for yer help, Adventurer.") != -1) {
 		// quest done.
@@ -2892,11 +2892,11 @@ function at_inventory()
 			}
 			else if (outfit.indexOf("Mining Gear") != -1)
 				equipText.appendChild(AppendLink('[mine]', 'mining.php?mine=1'));
-			else if (outfit.indexOf("Elite Guard") != -1)
-			{	if (document.referrer.indexOf('store.php') != -1)
-					parent.frames[2].location = 'http://' + server + '/store.php?whichstore=g';
-				else equipText.appendChild(AppendLink('[lab]', 'store.php?whichstore=g'));
-			}
+//			else if (outfit.indexOf("Elite Guard") != -1)
+//			{	if (document.referrer.indexOf('store.php') != -1)
+//					parent.frames[2].location = 'http://' + server + '/store.php?whichstore=g';
+//				else equipText.appendChild(AppendLink('[lab]', 'cobbsknob.php?action=dispensary')); // was: 'store.php?whichstore=g'));
+//			}
 			else if (outfit.indexOf("Bugbear") != -1)
 			{	if (document.referrer.indexOf('store.php') != -1)
 					parent.frames[2].location = 'http://' + server + '/store.php?whichstore=b';
@@ -2973,14 +2973,11 @@ function at_bigisland()
 		SetCharData("square",a.attr('href'));
 		});
 	}
-	if (document.location.search.indexOf("?place=nunnery") != -1) {
-		GM_log("dls="+document.location.search);
-		// check initial text for "be ever so grateful if".  If present, set nunmoney to 0.  Sadly, it turns out this won't work.
-		// otherwise display current nunmoney value.
-		$('p').each(function() {
-			GM_log("p="+$(this).text());
-		});
-	}
+//	if (document.location.search.indexOf("?place=nunnery") != -1) {
+//		$('p').each(function() {
+//			GM_log("p="+$(this).text());
+//		});
+//	}
 }
 
 // STORE: Add use boxes and links as appropriate
@@ -3624,7 +3621,7 @@ function fix_progressbar(totalWidth) {
 		GM_log("level="+level+", curstat="+curstat+", minstat="+minstat+", musval="+musval+", mysval="+mysval+", moxval="+moxval+", mainstatbar="+mainstatbar);
 	}
 	if (mainstatbar) {
-			GM_log("statbarcontent =" +mainstatbar.textContent);
+//			GM_log("statbarcontent =" +mainstatbar.textContent);
 		var statval = mainstatbar.textContent.match(/(\d+)/g);	// could be "11" or " 11 (9)", for example.
 		statval = parseInt(statval[1] || statval[0]);			// pick the unbuffed value if buffed value is present.
 		var substatProgBarCount;
@@ -3647,8 +3644,8 @@ function fix_progressbar(totalWidth) {
 		var whiteWidth = totalWidth - blackWidth;
 		levelbar.firstChild.firstChild.firstChild.width = blackWidth;
 		levelbar.firstChild.firstChild.lastChild.width = whiteWidth;
-			GM_log("statval="+statval+", substatProgBarCount="+substatProgBarCount+", mainstatbase="+mainstatBase+", substatCurrent="+substatCurrent);
-			GM_log("level="+level+", substatNext="+substatNext+", blackwidth="+blackWidth+", mainstatProgBarCount="+mainstatProgBarCount);
+//			GM_log("statval="+statval+", substatProgBarCount="+substatProgBarCount+", mainstatbase="+mainstatBase+", substatCurrent="+substatCurrent);
+//			GM_log("level="+level+", substatNext="+substatNext+", blackwidth="+blackWidth+", mainstatProgBarCount="+mainstatProgBarCount);
 		return level;
 	}
 }
@@ -3720,7 +3717,7 @@ function at_charpane()
 //			GM_log("lvlblock="+lvlblock);
 			level = lvlblock.match(/Lvl. (\d+)/)[1];
 			SetCharData("level", level);
-			GM_log("level set in compactmode to "+level);
+//			GM_log("level set in compactmode to "+level);
 //		}
 
 		SetCharData("currentHP", curHP); SetCharData("maxHP", maxHP);
@@ -3741,7 +3738,7 @@ function at_charpane()
 			{
 				level = lvlblock.match(/Level (\d+)/)[1];
 				SetCharData("level", level);
-				GM_log("Level set in fullmode to "+level);
+//				GM_log("Level set in fullmode to "+level);
 			} else {
 				SetCharData("level",13);		// failsafe setting if we couldn't find the level block, generally due to a custom title.
 				level = 13;
@@ -4483,13 +4480,13 @@ function at_palinshelves()
 function at_pandamonium()
 {
 	var gotitem = $('.effect > b').text();
-	GM_log("gotitem="+gotitem);
+//	GM_log("gotitem="+gotitem);
 	if (gotitem == "Azazel's unicorn") SetCharData("pandabandsolved",false);
 	if (document.location.search=='?action=sven')	{
 		var bognort = 0, stinkface = 0, flargwurm = 0, jim = 0;
 		var pandasolved = GetCharData("pandabandsolved");
 		if ((pandasolved == false) || (pandasolved == undefined)) {	// no solution found yet?	
-			GM_log("solving...");
+//			GM_log("solving...");
 			var itemlist = $('select[name=togive]');
 			var set1 = 0, set2 = 0;
 			var bear = false, paper = false, marsh = false;
@@ -4506,7 +4503,7 @@ function at_pandamonium()
 					default: break;
 				}			
 			});
-			GM_log("set1="+set1+", set2="+set2);
+//			GM_log("set1="+set1+", set2="+set2);
 			if ((set1 < 2) || (set2 < 2)) {
 				$('form[name=bandcamp]').prepend('<p><font color="blue">No solution available yet.</font></p>');
 				$('select').attr('style','color:red');
@@ -4528,7 +4525,7 @@ function at_pandamonium()
 			}
 		}
 		else {	// time to implement the solution!
-			GM_log("solved!");
+//			GM_log("solved!");
 			bognort = GetCharData("bognort");
 			stinkface = GetCharData("stinkface");
 			flargwurm = GetCharData("flargwurm");
@@ -5177,7 +5174,7 @@ function spoil_bathole()
 	$('area').each(function()
 	{	var ml = null;
 		var alt = this.getAttribute('alt');
-		GM_log("alt="+alt);
+//		GM_log("alt="+alt);
 		if (alt.indexOf('Entryway') != -1) ml = '11-16';
 		else if (alt.indexOf('Guano') != -1) ml = '14-18';
 		else if (alt.indexOf('Batrat') != -1) ml = '23-25';
@@ -5238,7 +5235,7 @@ function spoil_cobbsknob()
 	$('area').each(function()
 	{
 		var ml = null; var alt = this.getAttribute('alt');
-		GM_log("alt="+alt);
+//		GM_log("alt="+alt);
 		if (alt.indexOf('Outskirts') != -1) ml = '1-2';
 		else if (alt.indexOf('Barracks') != -1) ml = '22-30';
 		else if (alt.indexOf('Kitchens') != -1) ml = '20-23';
@@ -5968,7 +5965,7 @@ function at_compactmenu()
 		AddTopOption("Smacketeria", "store.php?whichstore=3", selectItem, 0);
 		AddTopOption("Demon Market", "store.php?whichstore=m", selectItem, 0);
 		AddTopOption("Doc Galaktik", "galaktik.php", selectItem, 0);
-		AddTopOption("Laboratory", "store.php?whichstore=g", selectItem, 0);
+		AddTopOption("Laboratory", "cobbsknob.php?action=dispensary", selectItem, 0); // was "store.php?whichstore=g", selectItem, 0);
 		AddTopOption("Hippy Store", "store.php?whichstore=h", selectItem, 0);
 		AddTopOption("Display Case", "managecollection.php", selectItem, 0);
 		AddTopOption("Hagnk","storage.php",selectItem,0);
