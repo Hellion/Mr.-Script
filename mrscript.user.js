@@ -5233,6 +5233,29 @@ function spoil_knob2()
 		if(ml) this.setAttribute('title','ML: '+ml);
 });	}
 
+function spoil_cobbsknob()
+{
+	$('area').each(function()
+	{
+		var ml = null; var alt = this.getAttribute('alt');
+		GM_log("alt="+alt);
+		if (alt.indexOf('Outskirts') != -1) ml = '1-2';
+		else if (alt.indexOf('Barracks') != -1) ml = '22-30';
+		else if (alt.indexOf('Kitchens') != -1) ml = '20-23';
+		else if (alt.indexOf('Harem') != -1) ml = '25-30';
+		else if (alt.indexOf('Treasury') != -1) ml = '21-25';
+		else if (alt.indexOf('Throne') != -1) ml = '57';
+		else if (alt.indexOf('Laboratory') != -1) ml = '38-45';
+		else if (alt.indexOf('Knob Shaft') != -1) ml = '30';
+		else if (alt.indexOf('Menagerie Level 1') != -1) ml = '50-56';
+		else if (alt.indexOf('Menagerie Level 2') != -1) ml = '60-66';
+		else if (alt.indexOf('Menagerie Level 3') != -1) ml = '70-76';
+		
+		if (ml) this.setAttribute('title','ML: '+ml);
+	});
+}
+
+
 function spoil_cyrpt()
 {	$('img').each(function()
 	{	var ml = null; var src = this.getAttribute('src');
