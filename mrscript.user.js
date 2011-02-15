@@ -1632,7 +1632,9 @@ function at_fight() {
 		for (var i = 0; i < insultsArray.length; i++) {
 			if (insultsArray[i] == 1) numInsults++;
 		}
-		$(this).text("The Big Book of Pirate Insults ("+numInsults+"/8)");
+		var bookname = $(this).text();
+		bookname = bookname.replace("Insults","Insults["+numInsults+"/8]");
+		$(this).text(bookname);
 	});
 	
 // PART 1: FIRST-ROUND STUFF
@@ -3003,25 +3005,25 @@ function at_store()
 
 	// You can thank Mr. Mag for this one...
 	// right-click on the image of the shopkeeper to put on your travoltan trousers without leaving the store.
-	if (whichstore != 'g') {	// can't switch pants in the lab store, and this throws an error if you're in the wrong outfit anyway.
-		$("img[src*=otherimages]:first")
-		.attr('title','right-click to equip Travoltan Trousers')
-		.attr('id','proprietor')
-		.get(0)
-		.addEventListener('contextmenu', function(evt)
-		{	GM_get(server+'/inv_equip.php?pwd='+pwd+
-				'&which=2&action=equip&whichitem=1792',
-			function(txt)
-			{	var pimg = document.getElementById('proprietor');
-				pimg.removeAttribute('id');
-				pimg.parentNode.nextSibling.innerHTML +=
-				'<br /><div class="tiny">' +
-				(txt.indexOf('You equip') != -1 ?
-				'Travoltan Trousers Equipped' :
-				'Travoltan Trousers Could Not Be Equipped') + '</span>';
-			}); evt.stopPropagation(); evt.preventDefault();
-		}, true);
-	}
+//	if (whichstore != 'g') {	// can't switch pants in the lab store, and this throws an error if you're in the wrong outfit anyway.
+	$("img[src*=otherimages]:first")
+	.attr('title','right-click to equip Travoltan Trousers')
+	.attr('id','proprietor')
+	.get(0)
+	.addEventListener('contextmenu', function(evt)
+	{	GM_get(server+'/inv_equip.php?pwd='+pwd+
+			'&which=2&action=equip&whichitem=1792',
+		function(txt)
+		{	var pimg = document.getElementById('proprietor');
+			pimg.removeAttribute('id');
+			pimg.parentNode.nextSibling.innerHTML +=
+			'<br /><div class="tiny">' +
+			(txt.indexOf('You equip') != -1 ?
+			'Travoltan Trousers Equipped' :
+			'Travoltan Trousers Could Not Be Equipped') + '</span>';
+		}); evt.stopPropagation(); evt.preventDefault();
+	}, true);
+//	}
 
 	if (GetPref('shortlinks') > 1 && firstTable != undefined &&
 		firstTable.children('tr:first').text() == "Market Results:" &&
