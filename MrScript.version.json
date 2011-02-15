@@ -1,4 +1,4 @@
-{	"version":"1.6.3",
+{	"version":"1.6.4",
 	"url1":"http://userscripts.org/scripts/source/65705.user.js",
 	"url2":"http://noblesse-oblige.org/hellion/scripts/MrScript.user.js",
-	"desc":"<b>Fixed:</b><br />typo on mech bounty<br />TT EW-complete detection at guild<br /><b>New:</b><br />link to clear pirate insult info<br />spoilers for Pandamonium<br />update for new Options menu<br />"}
+	"desc":"<b>Fixed:</b><br/>better detection of myst classes for resistance-decoding<br/>Preferences display is much cleaner<br/>Progress-bar changer removed; use the new Options->Interface->Progress Bars->Show substats per level instead of stats setting<br/><b>New:</b><br/>Pandamonium Arena logic puzzle solver<br/>Spoilers for the new, improved Knob<br/><b>Note!</b><br/>To make the Lab store link work properly again, you need to go to the Optionarium, select [Custom Links 1], and choose Restore Defaults.<br/>"}
