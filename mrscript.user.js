@@ -434,7 +434,10 @@ function FindMaxQuantity(item, howMany, deefault, safeLevel)
 
 // GM_GET: Stolen gleefully from OneTonTomato. Tee-hee!
 function GM_get(dest, callback, errCallback)
-{	GM_xmlhttpRequest({
+{	
+	
+//	GM_log("GM_get: dest="+dest);	
+	GM_xmlhttpRequest({
 	  method: 'GET',
 	  url: 'http://' + dest,
 	  	onerror:function(error)
@@ -694,7 +697,7 @@ function AddInvCheck(img)
 			var add = "<br><span class='tiny' id='span" + item[0] + "'></span>";
 			this.parentNode.nextSibling.innerHTML += add;
 
-			GM_get(server+'/js_inv.php?for=MrScript',function(details) {
+			GM_get(server+'/api.php?what=inventory&for=MrScript',function(details) {
 				// this call will either get us the raw invcache data in the form of {"id":"qty","id":"qty",etc}
 				// or a full HTML page containing the javascript that eventually says 'var inventory = {"id":"qty","id":"qty",etc};'
 				// so if we don't get something that starts with the { character, assume we got the full javascript source
@@ -707,9 +710,9 @@ function AddInvCheck(img)
 				var invcache = eval('('+details+')');
 				var itemid = item[0];		
 				var itemqty = invcache[itemid];	if (itemqty === undefined) itemqty = 0;
-//				GM_log("details="+details);
-//				GM_log("itemid="+itemid);
-//				GM_log("d[i]="+invcache[itemid]);
+				GM_log("details="+details);
+				GM_log("itemid="+itemid);
+				GM_log("d[i]="+invcache[itemid]);
 				var addText = "";
 				if (itemid == 1605) // catalysts
 				{	var reagents = invcache[346]; if (reagents === undefined) reagents = 0;
@@ -748,13 +751,18 @@ function AddTopLink(putWhere, target, href, html, space)
 
 // ADDLINKS: Extra links, etc. for items, independently of where they are.
 function AddLinks(descId, theItem, formWhere, path) {
-  // Special thanks to CMeister for the item database and much of this code
-	var daitm = DescToItem(descId);
-	if(!daitm) 
+	// Special thanks to CMeister for the item database and much of this code
+	var itemNum = parseInt($(theItem).parents('.item').attr('rel').match(/id=(\d+)/)[1],10);	// yay for CDM putting item numbers where we can get 'em easily
+	GM_log("itemNum=["+itemNum+"], typeof="+typeof(itemNum));
+	if (!itemNum) {
+		itemNum = parseInt(DescToItem(descId)[0],10);
+		GM_log("old way:itemNum="+itemNum);
+	}
+	if (!itemNum) 
 	{	GM_log("null description in AddLinks()");
 		return '';
 	}
-	var itemNum = daitm[0];	
+//	var itemNum = daitm; //[0];	
 	AddInvCheck(theItem.firstChild.firstChild);
 
 	var doWhat, addWhere = $(theItem).children().eq(1);
@@ -970,6 +978,9 @@ function AddLinks(descId, theItem, formWhere, path) {
 			
 		case 450: 	case 451: 	case 1258:	// Pretentious artist's stuff
 			addWhere.append(AppendLink('[artiste]','town_wrong.php?place=artist')); break;
+			
+		case 4961:  case 4948: 	case 4949: 	case 4950:	// subject 37 file, GOTO, weremoose spit, abominable blubber
+			addWhere.append(AppendLink('[visit 37]','cobbsknob.php?level=3&action=cell37')); break;
 	}
 
   switch (doWhat) {
@@ -1481,7 +1492,10 @@ function at_main_c() {
 			}
 		});
 	}
-	
+	GM_get(server+"/api.php?what=status&for=MrScript", function(response) {	// ?pwd="+pwd+"&what=status&for=MrScript
+		GM_log("response:"+response);
+	});
+
 	// n.b. the :eq(1) below is important because of the nested-table layout.  only select the inner TR.
 	$('tr:contains("Noob."):eq(1)').append(AppendLink('[Toot]','tutorial.php?action=toot'));	// fresh from valhalla?  get things rolling.
 	$('tr:contains("responded to a trade offer"):eq(1)').append(AppendLink('[trade]', 'makeoffer.php'));
@@ -2053,6 +2067,19 @@ function at_hiddencity() {
 //	});
 //}
 
+function at_cobbsknob() {
+	$('p').each(function() {
+		var txt = $(this).text();
+		GM_log("p text="+txt);
+		if ((txt.indexOf("them on Menagerie level 1") != -1) ||
+			(txt.indexOf("First, I'll need") != -1)) $(this).append(AppendLink('[menagerie-1 (1)]','adventure.php?snarfblat=51'));
+		else if ((txt.indexOf("Okay, the next thing") != -1) ||
+			(txt.indexOf("flartble") != -1)) $(this).append(AppendLink('[menagerie-2 (1)]','adventure.php?snarfblat=52'));
+		else if ((txt.indexOf("even grosser than the weremoose") != -1) ||
+			(txt.indexOf("be right back") != -1)) $(this).append(AppendLink('[menagerie-3 (1)]','adventure.php?snarfblat=53'));
+	});
+}
+
 // ADVENTURE: provide "Explore next square" link when we hit a non-combat in the Hidden City.
 // Also provide extra functionality for certain other noncombats.
 function at_adventure() {
@@ -2113,7 +2140,7 @@ function at_adventure() {
 		break;
 	case "":	// got a "You shouldn't be here" or other reject message...
 		$('center table tr td').each(function(){
-			GM_log($(this).text());
+			GM_log("NCTitle check:"+$(this).text());
 		});
 //		GM_log("srch="+document.location.search);
 		if (document.location.search=="?snarfblat=100") {	// we were trying for Whitey's Grove; go get the quest from the guild.
@@ -2201,13 +2228,15 @@ function at_guild() {
 	}
 }
 
+
 // ARCADE: display # of tokens and tickets on the main arcade screen.
 function at_arcade() {
-	GM_get(server+'/js_inv.php?for=MrScript',function(response) {
+	GM_get(server+'/api.php?what=inventory&for=MrScript',function(response) {
 		if (response[0] != '{') {		
 			var i1 = response.split('inventory = ')[1].split(';')[0];	// should get everything from { to }, inclusive.
 			response = i1;
 		}
+		GM_log("arcade: response="+response);
 		var invcache = eval('('+response+')');
 		var tokens = ((invcache[4621] === undefined) ? "no" : invcache[4621]) + " token" + ((invcache[4621] == 1) ? " " : "s ");
 		var tickets = ((invcache[4622] === undefined) ? "no" : invcache[4622]) + " ticket" + ((invcache[4622] == 1) ? ". " : "s. ");
@@ -2230,14 +2259,17 @@ function at_choice() {
 //		GM_log("p.length="+p.length);
 		var p0 = p[0];
 //		GM_log("p0="+p0.textContent);
-		if (p0.textContent.indexOf("actually a book.") != -1) p0.appendChild(AppendLink('[go ahead, read it already]','inv_use.php?pwd='+pwd+'&which=3&whichitem=818'));
-		else if (p0.textContent.indexOf("a new pledge") != -1) {	// Orcish Frat House Blueprints adventure
+		if (p0.textContent.indexOf("actually a book.") != -1) {	// The Oracle
+			p0.appendChild(AppendLink('[go ahead, read it already]','inv_use.php?pwd='+pwd+'&which=3&whichitem=818'));
+		} else if (p0.textContent.indexOf("a new pledge") != -1) {	// Orcish Frat House Blueprints adventure
 			$('a [href="adventure.php?snarfblat=27"]').attr('href','adventure.php?snarfblat=157').text("Adventure in BARRRNEY'S BARRR");
-		} else if (p0.textContent.indexOf("go tell Bart") != -1) {
+		} else if (p0.textContent.indexOf("go tell Bart") != -1) {  // the Tavern Faucet
 			p0.appendChild(AppendLink('[go on already]','tavern.php?place=barkeep'));
-		} else if (usemap == 1) {
+		} else if (usemap == 1) {	// castle wheel ready for giant castle map
 			p0.appendChild(AppendLink('[use giant castle map]',"inv_use.php?pwd="+pwd+"&which=3&whichitem=667"));
-		} 
+		} else if (p0.textContent.indexOf("You step up behind the man") != -1) {	// found Mr. Alarm
+			$('<center><a href="adventure.php?snarfblat=100">Adventure in WHITEY\'S GROVE</a></center><br />').prependTo($('a:last').parent());
+		}
 	}
 }
 
@@ -2925,8 +2957,10 @@ function at_galaktik()
 		txt = row.text();
 		if (txt.indexOf("an item:") == -1)
 			num = $('b:eq(1)').text().split(" ")[0];
-		var docG = DescToItem($('img:first')
-			.get(0).getAttribute('onclick'))[0];	// was ['itemid']
+		var docG = parseInt($('table.item').attr('rel').match(/id=(\d+)/)[1],10);
+//		var docG = DescToItem($('img:first')
+//			.get(0).getAttribute('onclick'))[0];	// was ['itemid']
+//		GM_log("docG="+docG);
 
 		if (GetPref('docuse') == 1 && docG < 233)	// 231=unguent, 232=ointment.  we can auto-use those.
 		{	var sanitycheck = FindMaxQuantity(docG, num, 0, 0) + 1;
@@ -4338,7 +4372,7 @@ function at_manor3()
 	// helper function 2: check player inventory for quantity of wines.
 	function countWines(wl, needs) {	
 	// wl is an array of bInfo's from the scrape() function; needs is an array of the wine IDs that are required for the altar.
-		GM_get(server+'/js_inv.php?for=MrScript',function(response) {
+		GM_get(server+'/api.php?what=inventory&for=MrScript',function(response) {	// was: js_inv.php?for=MrScript
 			if (response[0] != '{') {		
 				var i1 = response.split('inventory = ')[1].split(';')[0];	// should get everything from { to }, inclusive.
 				response = i1;
@@ -4565,7 +4599,7 @@ function at_pyramid()
 	checkInv.setAttribute('href', '#');
 	checkInv.addEventListener('click', function(evt)
 	{	checkInv.innerHTML = '<font size="2">[checking...]</font>';
-		GM_get(server+'/js_inv.php?for=MrScript',function(response) {
+		GM_get(server+'/api.php?what=inventory&for=MrScript',function(response) { // was: js_inv.php?for=MrScript
 			if (response[0] != '{') {		
 				var i1 = response.split('inventory = ')[1].split(';')[0];	// should get everything from { to }, inclusive.
 				response = i1;
@@ -5631,8 +5665,8 @@ function at_topmenu()
 		if (txt == "town")
 		{
 			a.html("town:");
-			a.after(' <a href="dungeons.php" target="mainpane">dungeons)</a>');
-			a.after(' <a href="town_right.php" target="mainpane">R</a>');
+			a.after(' <a href="dungeons.php" target="mainpane">dungeons</a>');
+			a.after(' <a href="town_right.php" target="mainpane">R)</a>');
 			a.after(' <a href="town_wrong.php" target="mainpane">(W</a>');
 		}
 
