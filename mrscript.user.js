@@ -3276,8 +3276,17 @@ function at_hermit()
 			a.parent().prepend('<br>' + AppendBuyBox(42, 'm', 'Buy Permits', 0)+'<br>');
 		}
 		else if (txt.indexOf("disappointed") != -1)			{			// no trinkets
-			p.get(0).innerHTML += '<br><br>' + AppendBuyBox(23, 'm', 'Buy Gum', 0);
-			p.append('<br><br><center><a href="inv_use.php?pwd='+pwd+'&which=3&whichitem=23">Use some chewing gum</a></center>');
+			GM_get(server+'/api.php?what=inventory&for=MrScript',function(response) {			// see if we have some anti-anti-antidote onhand
+				var invcache = eval('('+response+')');
+				var gum = invcache[23]; if (gum === undefined) gum = 0;
+				var hpermit = invcache[42]; if (hpermit === undefined) hpermit = 0;
+				
+				if (gum == 0) { 
+					p.get(0).innerHTML += '<br><br>' + AppendBuyBox(23, 'm', 'Buy Gum', 0);
+				}
+				p.append('<br><br><center><font color="blue">You have '+(gum==0?" no ":gum)+(gum!=1?" gums ":" gum ")+" and "+(hpermit==0?" no ":hpermit)+(hpermit!=1?" permits ":" permit ")+"in inventory.</font></center><br>");
+				p.append('<br><center><a href="inv_use.php?pwd='+pwd+'&which=3&whichitem=23">Use some chewing gum</a></center>');
+			});
 		}
 
 		var tr = $('table:first tr:contains(Results)');
@@ -3848,13 +3857,30 @@ function at_charpane()
 			img.parentNode.parentNode.setAttribute('name','poison');
 			img.addEventListener('contextmenu', function(event)
 			{	document.getElementsByName('poison')[0].childNodes[1].innerHTML = "<i><span style='font-size:10px;'>Un-un-unpoisoning...</span></i>";
-				GM_get(server+'/galaktik.php?howmany=1&action=buyitem&whichitem=829&pwd='+pwd,
-				function(result)
-				{	
-					if (result.indexOf('acquire') != -1)
-						GM_get(server+'/inv_use.php?which=1&whichitem=829&pwd='+pwd,function(event)
+				GM_get(server+'/api.php?what=inventory&for=MrScript',function(response) {			// see if we have some anti-anti-antidote onhand
+					var invcache = eval('('+response+')');
+					var antianti = invcache[829]; if (antianti === undefined) antianti = 0;
+					if (antianti > 0) {
+						GM_get(server+'/inv_use.php?which=1&whichitem=829&pwd='+pwd,function(event)	// yes: use it.
 						{	top.frames[1].location.reload(); });
-				}); event.stopPropagation(); event.preventDefault();
+					}
+					else {																			// no: buy it
+						GM_get(server+'/galaktik.php?howmany=1&action=buyitem&whichitem=829&pwd='+pwd,
+						function(result)
+						{	
+							if (result.indexOf('acquire') != -1)									// buy success: use it.
+								GM_get(server+'/inv_use.php?which=1&whichitem=829&pwd='+pwd,function(event)
+								{	top.frames[1].location.reload(); });
+						});
+					}
+				}); event.stopPropagation(); event.preventDefault();					
+//				GM_get(server+'/galaktik.php?howmany=1&action=buyitem&whichitem=829&pwd='+pwd,
+//				function(result)
+//				{	
+//					if (result.indexOf('acquire') != -1)
+//						GM_get(server+'/inv_use.php?which=1&whichitem=829&pwd='+pwd,function(event)
+//						{	top.frames[1].location.reload(); });
+//				}); event.stopPropagation(); event.preventDefault();
 			}, false);
 		}
 		else if (img.getAttribute('oncontextmenu') == null)
