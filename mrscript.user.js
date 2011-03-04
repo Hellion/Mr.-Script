@@ -2130,6 +2130,10 @@ function at_adventure() {
 	case "Whee!":
 		$('<center><a href="adventure.php?snarfblat=125">Adventure in the Middle Chamber</a></center><br />').prependTo($('a:last').parent());
 		break;
+	case "Polo Tombstone":
+		$('a[href="adventure.php?snarfblat=103"]').remove();		// don't need to adventure again once we have the key.
+		$('<center><a href="adventure.php?snarfblat=106">Adventure in the Haunted Gallery</a></center><br />').prependTo($('a:last').parent());
+		break;
 	case "Entour Rage":
 	case "A Pertinent Imp":
 	case "Primo Donno":
