@@ -2071,11 +2071,13 @@ function at_cobbsknob() {
 	$('p').each(function() {
 		var txt = $(this).text();
 		GM_log("p text="+txt);
+		if ((txt.indexOf("I'll give it a shot") != -1) ||
+			(txt.indexOf("I'll get right on it") != -1)) $(this).append(AppendLink('[lab (1)]','adventure.php?snarfblat=50'));
 		if ((txt.indexOf("them on Menagerie level 1") != -1) ||
-			(txt.indexOf("First, I'll need") != -1)) $(this).append(AppendLink('[menagerie-1 (1)]','adventure.php?snarfblat=51'));
+			(txt.indexOf("First, I'm going to need") != -1)) $(this).append(AppendLink('[menagerie-1 (1)]','adventure.php?snarfblat=51'));
 		else if ((txt.indexOf("Okay, the next thing") != -1) ||
 			(txt.indexOf("flartble") != -1)) $(this).append(AppendLink('[menagerie-2 (1)]','adventure.php?snarfblat=52'));
-		else if ((txt.indexOf("even grosser than the weremoose") != -1) ||
+		else if ((txt.indexOf("This is the last thing I need") != -1) ||
 			(txt.indexOf("be right back") != -1)) $(this).append(AppendLink('[menagerie-3 (1)]','adventure.php?snarfblat=53'));
 	});
 }
@@ -2279,7 +2281,7 @@ function at_choice() {
 
 // Forest Village: Untinker linker.
 function at_forestvillage() {
-	if (document.location.search == "?place=untinker") {
+//	if (document.location.search == "?place=untinker") {
 		var plunger = GetCharData("plungeraccess") == "Y" ? true: false;
 		var linkloc = plunger ? "knoll.php?place=smith" :"adventure.php?snarfblat=18";
 		var linkname = plunger ? "[get it from Innabox]" : "[degrassi knoll (1)]";
@@ -2295,8 +2297,8 @@ function at_forestvillage() {
 		if (foo[1].textContent.indexOf('finding my screwdriver?') != -1) {
 			foo[1].appendChild(AppendLink(linkname,linkloc));
 		}
-		if (plunger) $('b:eq(1)').append(AppendLink('[innabox]',linkloc)); 
-	}
+		if (plunger) $('b:contains("Untinker")').append(AppendLink('[innabox]',linkloc)); 
+//	}
 }
 
 function at_town_wrong() {
