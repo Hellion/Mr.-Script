@@ -1,4 +1,4 @@
-// Mr. Script v1.6.4
+// Mr. Script v1.6.5
 //
 // --------------------------------------------------------------------
 // This is a user script.  To install it, you need Greasemonkey 0.8 or
@@ -12,7 +12,7 @@
 // @name        Mr. Script
 // @namespace   http://www.noblesse-oblige.org/lukifer/scripts/
 // @description	interface overhauler for KingdomofLoathing.com
-// @version		1.6.4
+// @version		1.6.5
 // @author		Lukifer
 // @contributor	Ohayou
 // @contributor Hellion
@@ -37,7 +37,7 @@ var place = location.pathname.replace(/\/|\.(php|html)$/gi, "").toLowerCase();
 //GM_log("at:" + place);
 
 // n.b. version number should always be a 3-digit number.  If you move to 1.9, call it 1.9.0.  Don't go to 1.8.10 or some such.
-var VERSION = 164;
+var VERSION = 165;
 var MAXLIMIT = 999;
 var ENABLE_QS_REFRESH = 1;
 var DISABLE_ITEM_DB = 0;
@@ -710,9 +710,9 @@ function AddInvCheck(img)
 				var invcache = eval('('+details+')');
 				var itemid = item[0];		
 				var itemqty = invcache[itemid];	if (itemqty === undefined) itemqty = 0;
-				GM_log("details="+details);
-				GM_log("itemid="+itemid);
-				GM_log("d[i]="+invcache[itemid]);
+//				GM_log("details="+details);
+//				GM_log("itemid="+itemid);
+//				GM_log("d[i]="+invcache[itemid]);
 				var addText = "";
 				if (itemid == 1605) // catalysts
 				{	var reagents = invcache[346]; if (reagents === undefined) reagents = 0;
@@ -753,10 +753,10 @@ function AddTopLink(putWhere, target, href, html, space)
 function AddLinks(descId, theItem, formWhere, path) {
 	// Special thanks to CMeister for the item database and much of this code
 	var itemNum = parseInt($(theItem).parents('.item').attr('rel').match(/id=(\d+)/)[1],10);	// yay for CDM putting item numbers where we can get 'em easily
-	GM_log("itemNum=["+itemNum+"], typeof="+typeof(itemNum));
+//	GM_log("itemNum=["+itemNum+"], typeof="+typeof(itemNum));
 	if (!itemNum) {
 		itemNum = parseInt(DescToItem(descId)[0],10);
-		GM_log("old way:itemNum="+itemNum);
+//		GM_log("old way:itemNum="+itemNum);
 	}
 	if (!itemNum) 
 	{	GM_log("null description in AddLinks()");
@@ -1492,9 +1492,9 @@ function at_main_c() {
 			}
 		});
 	}
-	GM_get(server+"/api.php?what=status&for=MrScript", function(response) {	// ?pwd="+pwd+"&what=status&for=MrScript
-		GM_log("response:"+response);
-	});
+//	GM_get(server+"/api.php?what=status&for=MrScript", function(response) {	// ?pwd="+pwd+"&what=status&for=MrScript
+//		GM_log("response:"+response);
+//	});
 
 	// n.b. the :eq(1) below is important because of the nested-table layout.  only select the inner TR.
 	$('tr:contains("Noob."):eq(1)').append(AppendLink('[Toot]','tutorial.php?action=toot'));	// fresh from valhalla?  get things rolling.
@@ -2070,7 +2070,7 @@ function at_hiddencity() {
 function at_cobbsknob() {
 	$('p').each(function() {
 		var txt = $(this).text();
-		GM_log("p text="+txt);
+//		GM_log("p text="+txt);
 		if ((txt.indexOf("I'll give it a shot") != -1) ||
 			(txt.indexOf("I'll get right on it") != -1)) $(this).append(AppendLink('[lab (1)]','adventure.php?snarfblat=50'));
 		if ((txt.indexOf("them on Menagerie level 1") != -1) ||
@@ -2080,6 +2080,8 @@ function at_cobbsknob() {
 		else if ((txt.indexOf("This is the last thing I need") != -1) ||
 			(txt.indexOf("be right back") != -1)) $(this).append(AppendLink('[menagerie-3 (1)]','adventure.php?snarfblat=53'));
 	});
+	// stupid not-<p>-tagged option... >:(
+	$("td:contains('How embarrassing.'):last").append(AppendLink('[menagerie-2 (1)]','adventure.php?snarfblat=52'));
 }
 
 // ADVENTURE: provide "Explore next square" link when we hit a non-combat in the Hidden City.
@@ -2242,7 +2244,7 @@ function at_arcade() {
 			var i1 = response.split('inventory = ')[1].split(';')[0];	// should get everything from { to }, inclusive.
 			response = i1;
 		}
-		GM_log("arcade: response="+response);
+//		GM_log("arcade: response="+response);
 		var invcache = eval('('+response+')');
 		var tokens = ((invcache[4621] === undefined) ? "no" : invcache[4621]) + " token" + ((invcache[4621] == 1) ? " " : "s ");
 		var tickets = ((invcache[4622] === undefined) ? "no" : invcache[4622]) + " ticket" + ((invcache[4622] == 1) ? ". " : "s. ");
@@ -2285,18 +2287,21 @@ function at_forestvillage() {
 		var plunger = GetCharData("plungeraccess") == "Y" ? true: false;
 		var linkloc = plunger ? "knoll.php?place=smith" :"adventure.php?snarfblat=18";
 		var linkname = plunger ? "[get it from Innabox]" : "[degrassi knoll (1)]";
-		$('p').each(function()	{	
-			var p = $(this);
-			var txt = p.text();
+//		$('p').each(function()	{	
+//			var p = $(this);
+//			var txt = p.text();
 //			GM_log("p text="+txt);
-			if (txt.indexOf('get it back for me?') != -1) p.append(AppendLink(linkname,linkloc));
-			if (txt.indexOf('New Area Unlocked') != -1) p.append(AppendLink(linkname,linkloc));
-		});
-		foo = document.getElementsByTagName('center');
-		if (foo.length == 0) return;
-		if (foo[1].textContent.indexOf('finding my screwdriver?') != -1) {
-			foo[1].appendChild(AppendLink(linkname,linkloc));
-		}
+//			if (txt.indexOf('get it back for me?') != -1) p.append(AppendLink(linkname,linkloc));
+//			if (txt.indexOf('New Area Unlocked') != -1) p.append(AppendLink(linkname,linkloc));
+//		});
+		$('td:contains("just lost without my"):last').append(AppendLink(linkname,linkloc));
+		$('td:contains("luck finding my screw"):last').append(AppendLink(linkname,linkloc));
+		
+//		foo = document.getElementsByTagName('center');
+//		if (foo.length == 0) return;
+//		if (foo[1].textContent.indexOf('finding my screwdriver?') != -1) {
+//			foo[1].appendChild(AppendLink(linkname,linkloc));
+//		}
 		if (plunger) $('b:contains("Untinker")').append(AppendLink('[innabox]',linkloc)); 
 //	}
 }
@@ -3669,7 +3674,7 @@ function fix_progressbar(totalWidth) {
 		var moxval = statbars.get(2).textContent.match(/(\d+)/g);
 		moxval = parseInt(moxval[1] || moxval[0]);
 		if ((minstat <= moxval && curstat <= moxval)) { mainstatbar = statbars.get(2); curstat = moxval;  }
-		GM_log("level="+level+", curstat="+curstat+", minstat="+minstat+", musval="+musval+", mysval="+mysval+", moxval="+moxval+", mainstatbar="+mainstatbar);
+//		GM_log("level="+level+", curstat="+curstat+", minstat="+minstat+", musval="+musval+", mysval="+mysval+", moxval="+moxval+", mainstatbar="+mainstatbar);
 	}
 	if (mainstatbar) {
 //			GM_log("statbarcontent =" +mainstatbar.textContent);
@@ -5680,7 +5685,7 @@ function at_topmenu()
 		if (txt == "plains")
 		{	a.after(' <a href="manor.php" target="mainpane">manor</a>');
 
-			GM_log("checking level in topmenu: is currently "+integer(GetCharData('level')));
+//			GM_log("checking level in topmenu: is currently "+integer(GetCharData('level')));
 			if (integer(GetCharData('level')) > 9) 
 				a.after(' <a href="beanstalk.php" target="mainpane">stalk</a>');
 

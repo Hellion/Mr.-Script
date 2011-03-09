@@ -1,4 +1,4 @@
-{	"version":"1.6.4",
+{	"version":"1.6.5",
 	"url1":"http://userscripts.org/scripts/source/65705.user.js",
 	"url2":"http://noblesse-oblige.org/hellion/scripts/MrScript.user.js",
-	"desc":"<b>Fixed:</b><br/>better detection of myst classes for resistance-decoding<br/>Preferences display is much cleaner<br/>Progress-bar changer removed; use the new Options->Interface->Progress Bars->Show substats per level instead of stats setting<br/><b>New:</b><br/>Pandamonium Arena logic puzzle solver<br/>Spoilers for the new, improved Knob<br/><b>Note!</b><br/>To make the Lab store link work properly again, you need to go to the Optionarium, select [Custom Links 1], and choose Restore Defaults.<br/>"}
+	"desc":"<b>Fixed:</b><br/>Pirate Insult Counter no longer borks CAB display<br/>Travoltan Trousers enabled for new Lab Store<br />Conservatory's Gallery key acquisition adventure links to Gallery instead of Adventure-Again<br/>Untinker quest assignment links to Innabox properly for muscle signs<br/><b>New:</b><br/>Spoilers for Subject 37 Quest<br/>Hermit displays gum/permit count when he turns you away<br/>un-un-unpoisoning only buys anti-anti-antidote if you don't already have some<br/>"}
