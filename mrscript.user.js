@@ -2244,7 +2244,7 @@ function at_arcade() {
 			var i1 = response.split('inventory = ')[1].split(';')[0];	// should get everything from { to }, inclusive.
 			response = i1;
 		}
-//		GM_log("arcade: response="+response);
+		GM_log("arcade: response="+response);
 		var invcache = eval('('+response+')');
 		var tokens = ((invcache[4621] === undefined) ? "no" : invcache[4621]) + " token" + ((invcache[4621] == 1) ? " " : "s ");
 		var tickets = ((invcache[4622] === undefined) ? "no" : invcache[4622]) + " ticket" + ((invcache[4622] == 1) ? ". " : "s. ");
@@ -3360,7 +3360,7 @@ function at_council()
 				p.append(AppendLink('[guild]', 'guild.php'));
 			else if (txt.indexOf("Goblin King") != -1 &&
 				txt.indexOf("slaying") == -1)
-			{	var derr = AppendLink('[disguise]', "inv_equip.php" +
+			{	var derr = AppendLink('[harem outfit]', "inv_equip.php" +
 					"?action=outfit&which=2&whichoutfit=4");
 				p.append(derr);	
 				if (GetPref('backup') != "")
@@ -3376,9 +3376,25 @@ function at_council()
 						//event.stopPropagation(); event.preventDefault();
 					});
 				}
+				var derr = AppendLink('[guard outfit]', "inv_equip.php" +
+					"?action=outfit&which=2&whichoutfit=5");
+				p.append(derr);	
+				if (GetPref('backup') != "")
+				{	$(derr).children('*:last')
+						.attr('href', 'javascript:void(0);').click(function()
+					//bink.addEventListener('click',function(event)
+					{	GM_get(server + '/inv_equip.php' +
+							'?action=customoutfit&which=2&outfitname=' +
+						GetPref('backup'), function(response)
+						{	parent.frames[2].location = 'http://' + server
+						+  "/inv_equip.php?action=outfit&which=2&whichoutfit=5";
+						}); return false;
+						//event.stopPropagation(); event.preventDefault();
+					});
+				}
 				p.append(AppendLink('[perfume]', 'inv_use.php?pwd=' +
 					pwd + '&which=3&whichitem=307'));
-				p.append(AppendLink('[knob]', 'knob.php'));
+				p.append(AppendLink('[knob]', 'cobbsknob.php'));
 			}
 			else if (txt.indexOf("the Outskirts") != -1)
 				p.append(AppendLink('[use map+key]','inv_use.php?pwd=' + pwd + '&which=3&whichitem=2442'));
@@ -4138,6 +4154,22 @@ function at_clan_viplounge()
 				'/clan_viplounge.php?action=klaw";',500);
 			}
 		}
+	}
+	else if (document.location.search == "?action=shower") 
+	{
+		$('option').each(function(){
+			var tt = $(this).text();
+			var addme;
+			switch (this.value) {
+				case "1": addme = ' (3-4 shards of double ice)'	; break;
+				case "2": addme = ' (50 turns of +5% moxie)'	; break;
+				case "3": addme = ' (50 turns of +5% myst)'		; break;
+				case "4": addme = ' (50 turns of +5% muscle)'	; break;
+				case "5": addme = ' (+1000 MP, chance of a recipe)'	; break;
+				default: addme = ' (???)'						; break;
+			}
+			$(this).text(tt + addme);
+		});
 	}
 }
 
@@ -5703,6 +5735,8 @@ function at_topmenu()
 		{
 			a.html("town:");
 			a.after(' <a href="dungeons.php" target="mainpane">dungeons</a>');
+//			a.after(' <a href="forestvillage.php" target="mainpane">F-ville</a>');
+			a.after(' <a href="bordertown.php" target="mainpane">B-town</a>');
 			a.after(' <a href="town_right.php" target="mainpane">R)</a>');
 			a.after(' <a href="town_wrong.php" target="mainpane">(W</a>');
 		}
