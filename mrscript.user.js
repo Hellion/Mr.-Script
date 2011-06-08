@@ -451,10 +451,10 @@ function GM_get(dest, callback, errCallback)
 }	}	});	}
 
 // DESCTOITEM: Convert description ID to item entry from database.
-function DescToItem(zeedesc)
-{	GetItemDB();
-	return itemDB[zeedesc.match(/[0-9]{6,10}/)];
-}
+//function DescToItem(zeedesc)
+//{	GetItemDB();
+//	return itemDB[zeedesc.match(/[0-9]{6,10}/)];
+//}
 
 // APPENDLINK: Create link and return pointer to span
 function AppendLink(linkString, linkURL)
@@ -686,15 +686,23 @@ function AddInvCheck(img)
 																// (thank you, CDMoyer, for this idea!)
 		img.addEventListener('contextmenu', function(event)
 		{	if (this.getAttribute("done")) return;
-			GetItemDB(); 
-			if (itemDB == null) 
-			{	GM_log("null itemDB in AddInvCheck()");
-				return;
+// don't need ItemDB with the new way of finding item numbers.
+//			GetItemDB(); 
+//			if (itemDB == null) 
+//			{	GM_log("null itemDB in AddInvCheck()");
+//				return;
+//			}
+			item = this.parentNode.previousSibling.firstChild.getAttribute("value");
+			if (item === null) { GM_log("null... trying again:"); 
+				item = this.parentNode.previousSibling.firstChild.nextSibling.getAttribute("value");
 			}
+//			GM_log("this.P.P.fc.fc.attr(value)="+item);
+			if (item && item.length > 4) item = item.substring(0,item.length-9); // correct for price mods in the mall
+//			GM_log("item="+item);
 //			GM_log("desc="+this.getAttribute("onclick"));
-			item = DescToItem(this.getAttribute("onclick"));
+//			item = DescToItem(this.getAttribute("onclick"));
 //			GM_log("id="+item[0]+", name="+item[1]);
-			var add = "<br><span class='tiny' id='span" + item[0] + "'></span>";
+			var add = "<br><span class='tiny' id='span" + item + "'></span>"; // was item[0]
 			this.parentNode.nextSibling.innerHTML += add;
 
 			GM_get(server+'/api.php?what=inventory&for=MrScript',function(details) {
@@ -708,13 +716,13 @@ function AddInvCheck(img)
 					details = i1;
 				}
 				var invcache = eval('('+details+')');
-				var itemid = item[0];		
-				var itemqty = invcache[itemid];	if (itemqty === undefined) itemqty = 0;
+//				var itemid = item[0];		
+				var itemqty = invcache[item];	if (itemqty === undefined) itemqty = 0;
 //				GM_log("details="+details);
 //				GM_log("itemid="+itemid);
 //				GM_log("d[i]="+invcache[itemid]);
 				var addText = "";
-				if (itemid == 1605) // catalysts
+				if (item == 1605) // catalysts
 				{	var reagents = invcache[346]; if (reagents === undefined) reagents = 0;
 					var solutions = invcache[1635]; if (solutions === undefined) solutions = 0;
 					addText = "(" + reagents + " reagent"; if (reagents != 1) addText += "s";
@@ -722,14 +730,14 @@ function AddInvCheck(img)
 					addText += " and " + solutions + " scrummie"; if (solutions != 1) addText += "s";
 					addText += " in inventory)";
 				}
-				else if (itemid == 1549) // MSG
+				else if (item == 1549) // MSG
 				{	var noodles = invcache[304]; if (noodles === undefined) noodles = 0;
 					addText = "(" + noodles + " noodle"; if (noodles != 1) addText += "s";
 					addText += " and " + itemqty + " MSG"; if (itemqty != 1) addText += "s";
 					addText += " in inventory)";
 				}
 				else addText = '('+itemqty+' in inventory)';
-				document.getElementById('span'+item[0]).innerHTML += addText;	
+				document.getElementById('span'+item).innerHTML += addText;	
 			});
 			this.setAttribute("done","done"); event.stopPropagation(); event.preventDefault();
 		}, true);
@@ -754,10 +762,11 @@ function AddLinks(descId, theItem, formWhere, path) {
 	// Special thanks to CMeister for the item database and much of this code
 	var itemNum = parseInt($(theItem).parents('.item').attr('rel').match(/id=(\d+)/)[1],10);	// yay for CDM putting item numbers where we can get 'em easily
 //	GM_log("itemNum=["+itemNum+"], typeof="+typeof(itemNum));
-	if (!itemNum) {
-		itemNum = parseInt(DescToItem(descId)[0],10);
+// --remove our backup call, we're trying to eliminate DescToItem calls.
+//	if (!itemNum) {
+//		itemNum = parseInt(DescToItem(descId)[0],10);
 //		GM_log("old way:itemNum="+itemNum);
-	}
+//	}
 	if (!itemNum) 
 	{	GM_log("null description in AddLinks()");
 		return '';
@@ -1525,7 +1534,7 @@ function at_main() {
 function at_game() {
 	var lastUpdated = integer(GM_getValue('MrScriptLastUpdate', 0));
 	var currentHours = integer(new Date().getTime()/3600000);
-	GetItemDB();
+//	GetItemDB();	05-Jun-2011
 //	GM_log("currentHours:"+currentHours+", lastUpdate:"+lastUpdated);
 
 	// reload topmenu exactly once after charpane has finished processing:
@@ -1950,6 +1959,10 @@ function at_login() {
   SetCharData("plungeraccess",'');
 }
 
+// AFTERLIFE: what they're calling Valhalla after the revamp.
+function at_afterlife() {
+	at_valhalla();
+}
 // VALHALLA: clear things that may change when you ascend.
 function at_valhalla() {
 	// door code resets
@@ -2130,6 +2143,17 @@ function at_adventure() {
 		break;
 	case "We'll All Be Flat":
 		$('<center><a href="manor3.php">Head to the Wine Cellar</a></center><br />').prependTo($('a:last').parent());
+		SetCharData("corner178",0);
+		SetCharData("corner179",0);
+		SetCharData("corner180",0);
+		SetCharData("corner181",0);
+		SetCharData("winelist",'');
+		SetCharData("wineHTML",'');
+		SetCharData("winesNeeded",'');
+		SetCharData("altar1",'');
+		SetCharData("altar2",'');
+		SetCharData("altar3",'');
+		SetCharData("altar4",'');
 		break;
 	case "Whee!":
 		$('<center><a href="adventure.php?snarfblat=125">Adventure in the Middle Chamber</a></center><br />').prependTo($('a:last').parent());
@@ -2146,7 +2170,7 @@ function at_adventure() {
 	case "A Dicey Situation":
 		$('<center><a href="pandamonium.php?action=sven">Check with Sven</a></center><br />').prependTo($('a:last').parent());
 		break;
-	case "":	// got a "You shouldn't be here" or other reject message...
+	case "":	// got a "You shouldn't be here" or other reject message... (or an untitled Limerick Dungeon adventure, sigh)
 		$('center table tr td').each(function(){
 			GM_log("NCTitle check:"+$(this).text());
 		});
@@ -2504,7 +2528,7 @@ function at_inventory()
 				if (lnk.text == "[unequip all]"
 				 || lnk.text == "Manage your Custom Outfits")
 				{
-					if(!didQElink)
+					if(!didQElink && 0) // added && 0 to disable 5-Jun-2011
 					{	var qelnk = document.createElement('a');
 						qelnk.setAttribute('href','javascript:void(0);');
 						qelnk.setAttribute('style', 'color:white;' +
@@ -2590,7 +2614,7 @@ function at_inventory()
 			}	
 		}
 
-		if(quickequip > 0)
+		if(quickequip > 10) // was > 0; we're disabling this for now.
 		{
 			var shelfToNum =
 			{"Hats:":0,"Shirts:":1,"Melee Weapons:":2,"Ranged Weapons:":2,"Mysticality Weapons:":2,
@@ -2610,10 +2634,11 @@ function at_inventory()
 
 			var equips = []; var pics = []; var selects = []; var curgear = [];
 			var curgearnum = []; var hands = 1;
-			GetItemDB();
+//			GetItemDB();	// 05-Jun-2011
 
 			// First pass: Get currently equipped items
-			var gearList = selecty.parentNode.previousSibling.firstChild;
+//			var gearList = selecty.parentNode.previousSibling.firstChild;
+			var gearList = document.getElementById('curequip');
 			len = gearList.childNodes.length;
 			for (var i=0, len=gearList.childNodes.length; i<len; i++)
 			{	var tr = gearList.childNodes[i];
@@ -3329,6 +3354,11 @@ function at_mountains()
 	}
 }
 
+function at_mystic()
+{
+	$('<center><br /><a href="adventure.php?snarfblat=73>Adventure in the 8-Bit Realm</a></center>').appendTo($('a:last').parent());
+}
+
 // BARREL: add links to the results of your barrel droppings.
 function at_barrel()
 {	$('img').each(function()
@@ -3428,8 +3458,7 @@ function at_council()
 			else if (txt.indexOf("garbage") != -1
 				&& txt.indexOf("Thanks") == -1)
 			{	if (txt.indexOf("sky") != -1)
-				{	p.append(AppendLink('[plant bean]', 'inv_use.php?pwd=' +
-						pwd + "&which=3&whichitem=186"));
+				{	p.append(AppendLink('[plant bean]', 'plains.php?place=grounds'));
 					top.frames[0].location.reload();
 				} else p.append(AppendLink('[beanstalk]', 'beanstalk.php'));
 			}
@@ -4500,12 +4529,14 @@ function at_manor3()
 	var wineHTML = GetCharData("wineHTML");
 	var winesneeded;
 	if (wineHTML != undefined && wineHTML.length > 0) {	// If we already did this the long way, just display the saved results.
+GM_log("wine info the quick way!");
 		wineDisplay.innerHTML = wineHTML;
 		winelist = eval('('+GetCharData("winelist")+')');
 		winesneeded = eval('('+GetCharData("winesNeeded")+')');
 		document.body.appendChild(wineDisplay);
 		countWines(winelist, winesneeded); 
 	} else {											// No saved results: Better do it the long way.... 
+GM_log("wine info the hard way...");
 		GM_get(server+"/manor3.php?place=goblet", function (atext) {	// check the altar for the glyphs we need
 			var pdiv = document.createElement('div');
 //			GM_log("place=goblet text:"+atext);
@@ -5299,10 +5330,11 @@ function spoil_plains()
 		else if (src.indexOf("knoll1") != -1) ml = '10-13';
 		else if (src.indexOf("cemetary") != -1) ml = '18-20 / 53-59';
 		else if (src.indexOf("dome") != -1) ml = '116-135';
-		else if (src.indexOf("garbagegrounds") != -1)
-		{	$(this).wrap('<a href="inv_use.php?pwd=' + pwd +
-				'&which=3&whichitem=186" border="0"></a>');
-		} if(ml) this.setAttribute('title','ML: '+ml);
+//		else if (src.indexOf("garbagegrounds") != -1)
+//		{	$(this).wrap('<a href="inv_use.php?pwd=' + pwd +
+//				'&which=3&whichitem=186" border="0"></a>');
+//		} 
+		if(ml) this.setAttribute('title','ML: '+ml);
 });	}
 
 function spoil_plains2()
@@ -5357,7 +5389,7 @@ function spoil_cobbsknob()
 	});
 }
 
-
+// this is for the old, pre-revamp version of the cyrpt.
 function spoil_cyrpt()
 {	$('img').each(function()
 	{	var ml = null; var src = this.getAttribute('src');
@@ -5368,6 +5400,25 @@ function spoil_cyrpt()
 		else if (src.indexOf("cyrpt2") != -1) ml = '91';
 		if(ml) this.setAttribute('title','ML: '+ml);
 });	}
+
+// this is for the new, post-revamp version of the cyrpt.
+function spoil_crypt()
+{	$('img').each(function()
+	{
+		var ml = null; var src = this.getAttribute('src');
+		if (src.indexOf("ul.gif") != -1) ml = '53-57, +Item'; // nook
+		else if (src.indexOf("ur.gif") != -1) ml = '56-59, olfact dirty old lihc'; // niche
+		else if (src.indexOf("ll.gif") != -1) ml = '55; +ML, +NC'; // cranny
+		else if (src.indexOf("lr.gif") != -1) ml = '54-58, +Init'; //alcove
+		if(ml) this.setAttribute('title','ML: '+ml);
+	});
+	$('area').each(function()
+	{
+		var ml = null; var alt = this.getAttribute('alt');
+		if (alt.indexOf("Haert of the Cyrpt") != -1) ml = '91';
+		if (ml) this.setAttribute('title','ML: '+ml);
+	});
+}
 
 function spoil_woods()
 {	$('img').each(function()
@@ -5417,6 +5468,20 @@ function spoil_dungeons()
 	$('img[src*=dungeon2.gif').attr('title','ML: 12-20');	// daily dungeon
 }
 
+function spoil_da()		// dungeoneer's association, yay.
+{	
+	$('img').each(function()
+	{ var ml = null; var src = this.getAttribute('src');
+	if (src.indexOf('ddoom') != -1) ml = '57-61';
+	else if (src.indexOf('haikudungeon') != -1) ml = '3-5';
+	else if (src.indexOf('limerickdungeon') != -1) ml = 'N/A';
+	else if (src.indexOf('dailydungeon') != -1) ml = '12-20';
+	else if (src.indexOf('greater.gif') != -1) ml = '55-60?';
+	if (ml) this.setAttribute('title','ML: '+ml);
+	
+	});
+}
+
 function spoil_friars()
 {	$('img').each(function()
 	{	var ml = null; var src = this.getAttribute('src');
@@ -5432,8 +5497,8 @@ function spoil_pandamonium()
 	{	var ml = null;
 		var alt = this.getAttribute('alt');
 		if (alt.indexOf('Slums') != -1) ml = '40-52';
-		else if (alt.indexOf('Go Inside') != -1) ml = '60-66';
-		else if (alt.indexOf('Go Backstage') != -1) ml = '55-60';
+		else if (alt.indexOf('Go Inside') != -1) ml = '60-66; CH imp';
+		else if (alt.indexOf('Go Backstage') != -1) ml = '55-60; serialbus';
 		if (ml) this.setAttribute('title','ML: '+ml);
 	});
 }
