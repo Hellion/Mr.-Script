@@ -190,99 +190,99 @@ function FindHash() {
 }
 
 // GETITEMLIST: new way to get item info, courtesy of LogiKol PriceGun...
-function getItemList(callback) 
-{	
-	GM_get(ITEMDB_URL,parseItems);
-	function parseItems(itemList) {
-		var currentTime = integer(new Date().getTime()/60000); // epoch time, in minutes.
-		GM_setValue("lastItemUpdate",currentTime);
-		
-		//remove double tabs... or don't, it's commented out where I got this from.  Hellion 11Jan10
-		//itemList = itemList.replace(/\t\t/g,'\t');
-		
-		//remove trailing tabs		
-		itemList = itemList.replace(/\t\r\n/g,'\r\n');
-		
-		//remove trailing spaces from lines
-		itemList = itemList.replace(/ \r\n/g,'\r\n');
-		
-		//remove trailing spaces from item and description Ids
-		itemList = itemList.replace(/ \t/g,'\t');
-		
-		//remove carriage returns
-		itemList = itemList.replace(/\r/g,'');
-		
-		//split by line
-		var a=itemList.split('\n');
-		
-		for(var i = 0; i < a.length; i++){
-			if(/[0-9]/.test(a[i].charAt(0))) { 
-				var split = a[i].split('\t'); 
-				if(split[0] && split[1] && split[2]){
-					items[split[1]]=[split[0],split[2]];
-				}
-			}
-		}
-//		var itemsLength=0;
-//		for(a in items)itemsLength++;
-//		GM_log('parsed '+itemsLength+' items');
+//function getItemList(callback) 
+//{	
+//	GM_get(ITEMDB_URL,parseItems);
+//	function parseItems(itemList) {
+//		var currentTime = integer(new Date().getTime()/60000); // epoch time, in minutes.
+//		GM_setValue("lastItemUpdate",currentTime);
+//		
+//		//remove double tabs... or don't, it's commented out where I got this from.  Hellion 11Jan10
+//		//itemList = itemList.replace(/\t\t/g,'\t');
+//		
+//		//remove trailing tabs		
+//		itemList = itemList.replace(/\t\r\n/g,'\r\n');
+//		
+//		//remove trailing spaces from lines
+//		itemList = itemList.replace(/ \r\n/g,'\r\n');
+//		
+//		//remove trailing spaces from item and description Ids
+//		itemList = itemList.replace(/ \t/g,'\t');
+//		
+//		//remove carriage returns
+//		itemList = itemList.replace(/\r/g,'');
+//		
+//		//split by line
+//		var a=itemList.split('\n');
+//		
+//		for(var i = 0; i < a.length; i++){
+//			if(/[0-9]/.test(a[i].charAt(0))) { 
+//				var split = a[i].split('\t'); 
+//				if(split[0] && split[1] && split[2]){
+//					items[split[1]]=[split[0],split[2]];
+//				}
+//			}
+//		}
+////		var itemsLength=0;
+////		for(a in items)itemsLength++;
+////		GM_log('parsed '+itemsLength+' items');
+//
+//		GM_setValue('storedItemList',items.toSource());	// storedItemList should now be of the form array[descid]=[itemid,itemname].
+//		if( typeof callback=='function' ){
+//			callback();
+//		}
+//	}
+//}
 
-		GM_setValue('storedItemList',items.toSource());	// storedItemList should now be of the form array[descid]=[itemid,itemname].
-		if( typeof callback=='function' ){
-			callback();
-		}
-	}
-}
-
-function unstoreItemList(force) 
-{	if (itemDB != null && force == null) return;		// if it's already set and we're not forcing a reload, get out.
-	
-	storedItemList = eval(GM_getValue('storedItemList','({})'));
-	var itemListLength=0;
-	for(var i in storedItemList){		// all we really care about is, is it empty or not?
-		itemListLength++;				// not empty? great!
-		break;							// don't waste time counting the whole damn list.
-	}
-	
-	var currentTime = integer(new Date().getTime()/60000);	// convert from milliseconds to minutes
-	var lastUpdate = GM_getValue("lastItemUpdate",1);
-	
-	//check every week.
-	if(itemListLength==0 || (currentTime-lastUpdate)>10080) {	// that's a week's worth of minutes
-		// let's refresh!
-		getItemList(returnItemList);
-	} else {
-		returnItemList(true);
-	}
-	function returnItemList(skip) {
-		if(!skip) {
-			storedItemList = eval(GM_getValue('storedItemList','({})'));
-		}
-		itemDB = storedItemList;
-	}
-}
+//function unstoreItemList(force) 
+//{	if (itemDB != null && force == null) return;		// if it's already set and we're not forcing a reload, get out.
+//	
+//	storedItemList = eval(GM_getValue('storedItemList','({})'));
+//	var itemListLength=0;
+//	for(var i in storedItemList){		// all we really care about is, is it empty or not?
+//		itemListLength++;				// not empty? great!
+//		break;							// don't waste time counting the whole damn list.
+//	}
+//	
+//	var currentTime = integer(new Date().getTime()/60000);	// convert from milliseconds to minutes
+//	var lastUpdate = GM_getValue("lastItemUpdate",1);
+//	
+//	//check every week.
+//	if(itemListLength==0 || (currentTime-lastUpdate)>10080) {	// that's a week's worth of minutes
+//		// let's refresh!
+//		getItemList(returnItemList);
+//	} else {
+//		returnItemList(true);
+//	}
+//	function returnItemList(skip) {
+//		if(!skip) {
+//			storedItemList = eval(GM_getValue('storedItemList','({})'));
+//		}
+//		itemDB = storedItemList;
+//	}
+//}
 
 // end Steal-from-PriceGun section.
 // --------------------------------
 
 // UpdateItemDB: retrieve a fresh copy of the item database from the server when needed.
-function UpdateItemDB(version)
-{	// let's do things the new way.
-	getItemList(returnItemList);
-	function returnItemList(skip) {
-		if(!skip) {
-			storedItemList = eval(GM_getValue('storedItemList','({})'));
-		}
-		itemDB = storedItemList;
-	}
-	return;
-}
+//function UpdateItemDB(version)
+//{	// let's do things the new way.
+//	getItemList(returnItemList);
+//	function returnItemList(skip) {
+//		if(!skip) {
+//			storedItemList = eval(GM_getValue('storedItemList','({})'));
+//		}
+//		itemDB = storedItemList;
+//	}
+//	return;
+//}
 
-function GetItemDB(force) 
-{	
-	unstoreItemList(force);
-	return;
-}
+//function GetItemDB(force) 
+//{	
+//	unstoreItemList(force);
+//	return;
+//}
 
 // FINDMAXQUANTITY: Figure out how many MP restoratives to use
 function FindMaxQuantity(item, howMany, deefault, safeLevel)
@@ -696,12 +696,8 @@ function AddInvCheck(img)
 			if (item === null) { GM_log("null... trying again:"); 
 				item = this.parentNode.previousSibling.firstChild.nextSibling.getAttribute("value");
 			}
-//			GM_log("this.P.P.fc.fc.attr(value)="+item);
-			if (item && item.length > 4) item = item.substring(0,item.length-9); // correct for price mods in the mall
-//			GM_log("item="+item);
-//			GM_log("desc="+this.getAttribute("onclick"));
-//			item = DescToItem(this.getAttribute("onclick"));
-//			GM_log("id="+item[0]+", name="+item[1]);
+			if (item && item.length > 4) item = item.substring(0,item.length-9); // correct for prices in the mall
+
 			var add = "<br><span class='tiny' id='span" + item + "'></span>"; // was item[0]
 			this.parentNode.nextSibling.innerHTML += add;
 
@@ -716,11 +712,8 @@ function AddInvCheck(img)
 					details = i1;
 				}
 				var invcache = eval('('+details+')');
-//				var itemid = item[0];		
 				var itemqty = invcache[item];	if (itemqty === undefined) itemqty = 0;
-//				GM_log("details="+details);
-//				GM_log("itemid="+itemid);
-//				GM_log("d[i]="+invcache[itemid]);
+
 				var addText = "";
 				if (item == 1605) // catalysts
 				{	var reagents = invcache[346]; if (reagents === undefined) reagents = 0;
@@ -1575,7 +1568,7 @@ function at_game() {
 		});
 
 		// Update item database
-		if (itemDB.version != undefined) UpdateItemDB(itemDB.version);
+//		if (itemDB.version != undefined) UpdateItemDB(itemDB.version);
 	}
 }
 
@@ -2206,9 +2199,6 @@ function at_guild() {
 		break;
 		case "?place=ocg": 
 //			GM_log("tdtext="+tdtext);
-//			if (tdtext.indexOf("You acquire an item: Fernswarthy's key") != -1) { // this part is now done in AddLinks().
-//				$('b:eq(1)').append(AppendLink("[Fern's Tower]",'fernruin.php'));
-//			} else 
 			if (tdtext.indexOf("Misspelled Cemetary") != -1) {	// common opening phrase to find F's key.
 				$('p:last').append(AppendLink('[Misspelled Cemetary (1)]','adventure.php?snarfblat=21'));
 			} else if  ((tdtext.indexOf("brought me Fernswarthy's key") != -1) || 	// mus inter for finding F's key
@@ -2268,7 +2258,6 @@ function at_arcade() {
 			var i1 = response.split('inventory = ')[1].split(';')[0];	// should get everything from { to }, inclusive.
 			response = i1;
 		}
-		GM_log("arcade: response="+response);
 		var invcache = eval('('+response+')');
 		var tokens = ((invcache[4621] === undefined) ? "no" : invcache[4621]) + " token" + ((invcache[4621] == 1) ? " " : "s ");
 		var tickets = ((invcache[4622] === undefined) ? "no" : invcache[4622]) + " ticket" + ((invcache[4622] == 1) ? ". " : "s. ");
@@ -3045,11 +3034,6 @@ function at_bigisland()
 		SetCharData("square",a.attr('href'));
 		});
 	}
-//	if (document.location.search.indexOf("?place=nunnery") != -1) {
-//		$('p').each(function() {
-//			GM_log("p="+$(this).text());
-//		});
-//	}
 }
 
 // STORE: Add use boxes and links as appropriate
@@ -3687,71 +3671,6 @@ function at_questlog()
 	}
 }
 
-function fix_progressbar(totalWidth) {
-	var levelbar = $('table[title]:first');
-	if (!levelbar.length) return 0;	// if there's no level progress bar, we have nothing to do here.
-	levelbar = levelbar.get(0);		// convert from jquery object to DOM object
-	var level = parseInt(levelbar.title.match(/(\d+)/g)[1]);	// grab the Y part of the (X / Y) [stats gained out of stats needed to advance]
-	if (level == 2) level = 1; else level = (level + 1)/2;		// stats needed is ((2*level)-1), which means level=(stats+1)/2, except at level 1. 
-	SetCharData("level",level);
-	var statbars = $('td[align="left"]');
-	if (!statbars.length) return;	// can't do the right thing without the stat bars...
-	var mainstatProgBarCount = parseInt(levelbar.title.match(/\d+/)[0]); // = how many stat points into this level we are
-	var charclass = $('table center').contents().filter(function() {if (this.nodeType == 3) return true;}).get(1);
-	if (charclass) charclass = charclass.data; 
-	// should return the "class" part of "<table><center><tr><td><b>name</b><br>level X<br>class<blah...>" in full mode.
-//	GM_log("charclass="+charclass);
-	var mainstatbar = false;
-	if ((charclass == "Turtle Tamer") || (charclass == "Seal Clubber")) mainstatbar = statbars.get(0);
-	if ((charclass == "Pastamancer") || (charclass == "Sauceror")) mainstatbar = statbars.get(1);
-	if ((charclass == "Disco Bandit") || (charclass == "Accordion Thief")) mainstatbar = statbars.get(2);
-	if (!mainstatbar) {	// couldn't find a class name.  fall back to highest stat.
-//		GM_log("no class found.")
-		var curstat = 0;
-		var minstat = ((level-1)*(level-1))+4;
-		if (level == 1) minstat = 0;
-		var musval = statbars.get(0).textContent.match(/(\d+)/g);
-		musval = parseInt(musval[1] || musval[0]);
-		if ((minstat <= musval)) { mainstatbar = statbars.get(0); curstat = musval; }	
-		var mysval = statbars.get(1).textContent.match(/(\d+)/g);
-		mysval = parseInt(mysval[1] || mysval[0]);
-		if ((minstat <= mysval) && (curstat <= mysval)) { mainstatbar = statbars.get(1); curstat = mysval;  }
-		var moxval = statbars.get(2).textContent.match(/(\d+)/g);
-		moxval = parseInt(moxval[1] || moxval[0]);
-		if ((minstat <= moxval && curstat <= moxval)) { mainstatbar = statbars.get(2); curstat = moxval;  }
-//		GM_log("level="+level+", curstat="+curstat+", minstat="+minstat+", musval="+musval+", mysval="+mysval+", moxval="+moxval+", mainstatbar="+mainstatbar);
-	}
-	if (mainstatbar) {
-//			GM_log("statbarcontent =" +mainstatbar.textContent);
-		var statval = mainstatbar.textContent.match(/(\d+)/g);	// could be "11" or " 11 (9)", for example.
-		statval = parseInt(statval[1] || statval[0]);			// pick the unbuffed value if buffed value is present.
-		var substatProgBarCount;
-		if (totalWidth == 100) { 
-			substatProgBarCount = parseInt(mainstatbar.childNodes[1].title.match(/\d+/)[0].replace(/,/g,'')); // = how many substats into this stat point we are
-		} else {	// if (fullWidth == 60), compact mode.  feh.
-			substatProgBarCount = parseInt(mainstatbar.parentNode.nextSibling.childNodes[1].firstChild.title.match(/\d+/)[0].replace(/,/g,''));
-		}
-		var substatNext = (4 * level*level*level) - (6 * level*level) + (20 * level) - 9; // = substats to go from level to level+1
-		var mainstatBase = Math.pow(level - 1, 2) + 4;										// = lowest mainstat to be level X
-		if (mainstatBase == 4) { // i.e. if we're currently level 1, and the formulas don't work, fudge it:
-			mainstatBase = 0;
-			mainstatProgBarCount = mainstatProgBarCount + 3;	// don't go below 3 mainstat, please, folks.
-			substatNext = 25;
-		}
-		var substatCurrent = Math.pow(mainstatProgBarCount, 2) + 2 * mainstatBase * mainstatProgBarCount + substatProgBarCount;
-								// = how many substats into the level we are.  yay.
-		levelbar.title = substatCurrent +' / '+ substatNext;
-		var blackWidth = Math.floor((substatCurrent / substatNext) * totalWidth);
-		var whiteWidth = totalWidth - blackWidth;
-		levelbar.firstChild.firstChild.firstChild.width = blackWidth;
-		levelbar.firstChild.firstChild.lastChild.width = whiteWidth;
-//			GM_log("statval="+statval+", substatProgBarCount="+substatProgBarCount+", mainstatbase="+mainstatBase+", substatCurrent="+substatCurrent);
-//			GM_log("level="+level+", substatNext="+substatNext+", blackwidth="+blackWidth+", mainstatProgBarCount="+mainstatProgBarCount);
-		return level;
-	}
-}
-
-
 // CHARPANE: Find HP, MP, do effects stuff.
 function at_charpane()
 {	// var centerThing = document.getElementsByTagName('center');
@@ -3812,14 +3731,10 @@ function at_charpane()
 		}
 		advcount = integer($('a:contains(Adv):first').parent().next().text());
 
-//		level = fix_progressbar(60);
-//		if (level == 0) {		// level not deduced while tweaking progress bar?
-			var lvlblock = $("center:contains('Lvl.'):first").text();	// this text is always present in compact mode
-//			GM_log("lvlblock="+lvlblock);
-			level = lvlblock.match(/Lvl. (\d+)/)[1];
-			SetCharData("level", level);
-//			GM_log("level set in compactmode to "+level);
-//		}
+		var lvlblock = $("center:contains('Lvl.'):first").text();	// this text is always present in compact mode
+		level = lvlblock.match(/Lvl. (\d+)/)[1];
+		SetCharData("level", level);
+
 
 		SetCharData("currentHP", curHP); SetCharData("maxHP", maxHP);
 		SetCharData("currentMP", curMP); SetCharData("maxMP", maxMP);
@@ -3832,20 +3747,16 @@ function at_charpane()
 				SetCharData("max"    + name, cur_max[1]);
 			}
 		}
-//		level = fix_progressbar(100);
-//		if (level == 0) {		// couldn't figure out level from the progressbar?  Do it the old way.
-			var lvlblock = $("td:contains('Level'):first").text();	
-			if (lvlblock) 
-			{
-				level = lvlblock.match(/Level (\d+)/)[1];
-				SetCharData("level", level);
-//				GM_log("Level set in fullmode to "+level);
-			} else {
-				SetCharData("level",13);		// failsafe setting if we couldn't find the level block, generally due to a custom title.
-				level = 13;
-				GM_log("level defaulted in fullmode to 13");
-			}
-//		}
+		var lvlblock = $("td:contains('Level'):first").text();	
+		if (lvlblock) 
+		{
+			level = lvlblock.match(/Level (\d+)/)[1];
+			SetCharData("level", level);
+		} else {
+			SetCharData("level",13);		// failsafe setting if we couldn't find the level block, generally due to a custom title.
+			level = 13;
+			GM_log("level defaulted in fullmode to 13");
+		}
 
 		var data = $.makeArray($('td[align="center"]').slice(0, 4)).map(text);
 		parse_cur_and_max(["HP", "MP"]);
@@ -3873,13 +3784,12 @@ function at_charpane()
 		if(bEff.length>0) bEff.get(0).setAttribute("oncontextmenu",
 			"top.mainpane.location.href='http://" + server +
 			"/uneffect.php'; return false;");
-	}
+	}	// end full mode processing
 
 	// Re-hydrate (0)
 	var temphydr = integer(GetCharData('hydrate'));
 	if(temphydr)
 	{	
-//		GM_log("hydrate="+temphydr+", advcount="+advcount+", oldcount="+oldcount);
 		if(advcount > oldcount)
 		{	temphydr+=(advcount-oldcount);
 			SetCharData('hydrate', temphydr);
@@ -4210,8 +4120,6 @@ function at_charsheet()
 	var HPMPstats = $("table table table td:lt(10)").text();
 //	GM_log("text="+HPMPstats);
 	if (HPMPstats.indexOf("Mana Points") != -1) mystBonus = 5;
-
-//	GM_log("Myst Bonus = "+mystBonus);
 		
 	$('td:contains("Protection"):not(:has(table))').each(function() {
 		var pstring = $(this).next().text();
@@ -4670,16 +4578,32 @@ function at_pandamonium()
 			var members = $('select[name=bandmember]');
 			var items = $('select[name=togive]').get(0);
 // this is ugly-looking, but solid.
-			members.val("Bognort");	
-			if (members.val()=="Bognort") { items.value = bognort; members.attr('style','color:green'); items.setAttribute('style','color:green'); }
+			members.val("Bognort");				// Try to select this bandmember.  
+												// (This will fail if he already got his item.)
+			if (members.val()=="Bognort") { 	// were we able to select him successfully?
+				items.value = bognort; 			// select his item.
+				members.attr('style','color:green'); 
+				items.setAttribute('style','color:green'); 
+			}
 			else { 
 				members.val("Stinkface");
-				if (members.val() == "Stinkface") { items.value = stinkface; members.attr('style','color:green'); items.setAttribute('style','color:green'); }
+				if (members.val() == "Stinkface") { 
+					items.value = stinkface; 
+					members.attr('style','color:green'); 
+					items.setAttribute('style','color:green'); 
+				}
 				else { 
 					members.val("Flargwurm");
-					if (members.val() == "Flargwurm") { items.value = flargwurm; members.attr('style','color:green'); items.setAttribute('style','color:green'); }
+					if (members.val() == "Flargwurm") { 
+						items.value = flargwurm; 
+						members.attr('style','color:green'); 
+						items.setAttribute('style','color:green'); 
+					}
 					else { 
-						members.val("Jim"); items.value = jim; members.attr('style','color:green'); items.setAttribute('style','color:green');
+						members.val("Jim"); 
+						items.value = jim; 
+						members.attr('style','color:green'); 
+						items.setAttribute('style','color:green');
 					}
 				}
 			}
@@ -4985,16 +4909,13 @@ function at_mining()
 	var staticSparkleImg = "data:image/gif;base64,R0lGODlhMgAyAOMPAP39/dvb2zc3NycnJ5qams3NzQUFBRAQEGtra6enp7W1te3t7UZGRldXV319ff///yH/C05FVFNDQVBFMi4wAwEAAAAh+QQJAQAPACwAAAAAMgAyAAAEW/DJSau9OOvNu/9gKI5kaZ5oqq5s675wLM90bd94ru8rg/AUR+AAfBwCgd/OMFA4GguEQXcEJAQEQGM3ECAAUSIwkJgWn0WJwZxuu9/wuHxOr9vv+Lx+z+/77xEAIfkECQEADwAsAAAAADIAMgAABGvwyUmrvTjrzbv/YCiOZGmeaKqubOu+cCzPdG3feM4Jhm4FA18lIRBSEgzjpKDoGRmLAsJAddYaBEJAMQB4AYqbIKuILhwCRlAXWKyNWaVEKn8kEHVCo36w1v+AgYKDhIWGh4iJiouMjY4kEQAh+QQJAQAPACwAAAAAMgAyAAAEl/DJSau9OOvNu/9gKI5kaZ5oqq5s675wLLeHMXNHYd/aAAy83i+YMRQERMwhgEhefA6npQFISCmGQEJ3NTAUhYMCYRM0CMCYoYEoAAi1Adi9OMoGhXwgIDAcHAsJDEE7Bgl8eQM7TkYACotXVA1XFD6DlBIDC2mYRpyUOUiYD56jpAWXowqfpq2ur7CxsrO0tba3uLm6GhEAIfkECQEADwAsAAAAADIAMgAABGvwyUmrvTjrzbv/YCiOZGmeaKqubOu+cCzPdG3feM4Jhm4FA18lIRBSEgzjpKDoGRmLAsJAddYaBEJAMQB4AYqbIKuILhwCRlAXWKyNWaVEKn8kEHVCo36w1v+AgYKDhIWGh4iJiouMjY4kEQAh+QQJAQAPACwAAAAAMgAyAAAEW/DJSau9OOvNu/9gKI5kaZ5oqq5s675wLM90bd94ru8rg/AUR+AAfBwCgd/OMFA4GguEQXcEJAQEQGM3ECAAUSIwkJgWn0WJwZxuu9/wuHxOr9vv+Lx+z+/77xEAOw==";
 	$("img[src*=wallsparkle]").attr("src",staticSparkleImg);
 	if (document.location.search.indexOf("mine=1") != -1) {
-//		GM_log("mining for dwarves!");
 		var oretype = GetCharData("oretype");
 		var orenumber = GetCharData("orenumber");
 		if (oretype == '') return;
-//		GM_log("ore type="+oretype);
 		var founditem = $('.item').attr("rel")
 		var foundamount = 0;
 		if (founditem) { 
 			founditem = parseInt(founditem.match(/id=(\d+)/)[1],10);
-//			GM_log("found item:" +founditem);
 			if (founditem >= 363) {
 				foundamount = GetCharData("ore"+founditem);
 				foundamount++;
@@ -5310,7 +5231,6 @@ function spoil_bathole()
 	$('area').each(function()
 	{	var ml = null;
 		var alt = this.getAttribute('alt');
-//		GM_log("alt="+alt);
 		if (alt.indexOf('Entryway') != -1) ml = '11-16';
 		else if (alt.indexOf('Guano') != -1) ml = '14-18';
 		else if (alt.indexOf('Batrat') != -1) ml = '23-25';
@@ -5372,7 +5292,6 @@ function spoil_cobbsknob()
 	$('area').each(function()
 	{
 		var ml = null; var alt = this.getAttribute('alt');
-//		GM_log("alt="+alt);
 		if (alt.indexOf('Outskirts') != -1) ml = '1-2';
 		else if (alt.indexOf('Barracks') != -1) ml = '22-30';
 		else if (alt.indexOf('Kitchens') != -1) ml = '20-23';
@@ -6340,13 +6259,13 @@ function buildPrefs()
 						txtsplit[1] + "'>Update</a>";
 			}	}); event.stopPropagation(); event.preventDefault();
 		}, true);
-		var ul2 = document.createElement('a');
-		ul2.setAttribute('href','javascript:void(0);');
-		ul2.innerHTML = "Update Item DB";
-		ul2.addEventListener('click',function(event)
-		{	if (confirm("Are you sure? You should only perform this action if Mr. Script is not functioning properly."))
-			{	UpdateItemDB(0); alert("Database will attempt to update. Please contact Hellion if the problem persists.");
-		}	}, true);
+//		var ul2 = document.createElement('a');
+//		ul2.setAttribute('href','javascript:void(0);');
+//		ul2.innerHTML = "Update Item DB";
+//		ul2.addEventListener('click',function(event)
+//		{	if (confirm("Are you sure? You should only perform this action if Mr. Script is not functioning properly."))
+//			{	UpdateItemDB(0); alert("Database will attempt to update. Please contact Hellion if the problem persists.");
+//		}	}, true);
 
 		var ul4 = document.createElement('a');
 		ul4.setAttribute('href','javascript:void(0);');
@@ -6363,7 +6282,7 @@ function buildPrefs()
 		ulspan.setAttribute('name','updatespan');
 		ulspan.appendChild(ul);
 		ulspan.appendChild(document.createTextNode(' - '));
-		ulspan.appendChild(ul2);
+//		ulspan.appendChild(ul2);
 		ulspan.appendChild(document.createTextNode(' - '));
 		ulspan.appendChild(ul4);
 		ulspan.appendChild(document.createElement('br'));
