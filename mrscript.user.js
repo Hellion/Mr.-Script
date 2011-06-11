@@ -6130,7 +6130,7 @@ function buildPrefs()
 		select.options[2].innerHTML = "On (Right)";
 		prefSpan.appendChild(choice);
 
-		prefSpan.appendChild(MakeOption("Quick-Equip: ", 2, 'quickequip', "Off", "On"));
+//		prefSpan.appendChild(MakeOption("Quick-Equip: ", 2, 'quickequip', "Off", "On"));
 		prefSpan.appendChild(MakeOption("Split Inventory Link: ", 2, 'splitinv', "Off", "On"));
 		prefSpan.appendChild(MakeOption("Split Quest Link: ", 2, 'splitquest', "Off", "On"));
 		choice = MakeOption("Split Messages Link: ", 5, 'splitmsg', "Off", "New Message");
