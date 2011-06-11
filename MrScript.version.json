@@ -1,4 +1,4 @@
-{	"version":"1.6.5",
+{	"version":"1.6.6",
 	"url1":"http://userscripts.org/scripts/source/65705.user.js",
 	"url2":"http://noblesse-oblige.org/hellion/scripts/MrScript.user.js",
-	"desc":"<b>Fixed:</b><br/>Pirate Insult Counter no longer borks CAB display<br/>Travoltan Trousers enabled for new Lab Store<br />Conservatory's Gallery key acquisition adventure links to Gallery instead of Adventure-Again<br/>Untinker quest assignment links to Innabox properly for muscle signs<br/><b>New:</b><br/>Spoilers for Subject 37 Quest<br/>Hermit displays gum/permit count when he turns you away<br/>un-un-unpoisoning only buys anti-anti-antidote if you don't already have some<br/>"}
+	"desc":"<b>Fixed:</b><br/>council links to cobb's knob, a few others<br/>internal cleanups that should reduce memory leakage<br/>removed broken Quick-Equip option<br/><br/><b>New:</b><br/>Spoilers for Pandamonium<br/>Spoilers for the Cyrpt<br/>spoilers for the Dungeoneer's Association<br/><spoilers for clan shower<br/>added Bordertown to Topmenu<br/>"}
