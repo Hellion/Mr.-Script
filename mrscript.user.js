@@ -1934,40 +1934,28 @@ function link_cellar(square) {
 		myhref = myhrefbase + (thissquare + 5);
 		if (sqlist.indexOf(";" + (thissquare+5) + ";") == -1) {
 			$('<center><p><a href="'+myhref+'" id="bwaha-d">Explore Downward</a></center>').prependTo($('center:last'));
-			$('#bwaha-d').click(function() {
-				var a = $(this);
-				SetCharData("square",a.attr('href'));
-			});
+			$('#bwaha-d').click(cellar_linker);
 		}
 	}
 	if ((grid[thissquare] & 2) == 2) {
 		myhref = myhrefbase + (thissquare - 1);
 		if (sqlist.indexOf(";" + (thissquare-1) + ";") == -1) {
 			$('<center><p><a href="'+myhref+'" id="bwaha-l">Explore Leftward</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</center>').prependTo($('center:last'));
-			$('#bwaha-l').click(function() {
-				var a = $(this);
-				SetCharData("square",a.attr('href'));
-			});
+			$('#bwaha-l').click(cellar_linker);
 		}
 	}
 	if ((grid[thissquare] & 1) == 1) {
 		myhref = myhrefbase + (thissquare + 1);
 		if (sqlist.indexOf(";" + (thissquare+1) + ";") == -1) {
 			$('<center><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="'+myhref+'" id="bwaha-r">Explore Rightward</a></center>').prependTo($('center:last'));
-			$('#bwaha-r').click(function() {
-				var a = $(this);
-				SetCharData("square",a.attr('href'));
-			});
+			$('#bwaha-r').click(cellar_linker);
 		}
 	}	
 	if ((grid[thissquare] & 8) == 8) {
 		myhref = myhrefbase + (thissquare - 5);
 		if (sqlist.indexOf(";" + (thissquare-5) + ";") == -1) {
 			$('<center><p><a href="'+myhref+'" id="bwaha-u">Explore Upward</a></center>').prependTo($('center:last'));
-			$('#bwaha-u').click(function() {
-				var a = $(this);
-				SetCharData("square",a.attr('href'));
-			});
+			$('#bwaha-u').click(cellar_linker);
 		}
 	}
 }
@@ -2092,16 +2080,31 @@ function at_hiddencity() {
 	});
 }
 
+function cellar_linker() {
+	var a = $(this);
+	SetCharData("square", a.attr('href'));
+	GM_log("href="+a.attr('href'));
+	var squarenum = a.attr('href').match(/(\d+)/)[0];
+	var sqlist = GetCharData("squarelist");
+	sqlist = sqlist + ";" + squarenum;
+	GM_log("sqlist="+sqlist);
+	SetCharData("squarelist",sqlist);
+}
+
+
 // CELLAR: track what square we clicked on in order to provide exploration links later.
 function at_cellar() {
-	$('a').click(function() {
-		var a = $(this);
-		SetCharData("square", a.attr('href'));
-		var squarenum = a.attr('href').match(/(d+)/)[0];
-		var sqlist = GetCharData("squarelist");
-		sqlist = sqlist + ";" + squarenum
-		SetCharData("squarelist",sqlist);
-	});
+	$('a').click(cellar_linker);
+//	function() {
+//		var a = $(this);
+//		SetCharData("square", a.attr('href'));
+//		GM_log("href="+a.attr('href'));
+//		var squarenum = a.attr('href').match(/(\d+)/)[0];
+//		var sqlist = GetCharData("squarelist");
+//		sqlist = sqlist + ";" + squarenum;
+//		GM_log("sqlist="+sqlist);
+//		SetCharData("squarelist",sqlist);
+//	});
 }
 
 // RATS: track what square we clicked in order to provide "Explore Next Square" link.
