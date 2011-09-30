@@ -1800,29 +1800,12 @@ function at_fight() {
 		var square=GetCharData("square");
 		SetCharData("square",false);
 		if (square) {
-//			GM_log("square="+square);
+			GM_log("square="+square);
 			if (square.indexOf("hiddencity") != -1) {  // || square.indexOf("rats.php") != -1) {	
-				var thissquare = square.match(/(\d+)/)[1];	// break the "22" off of "rats.php?where=22", for example.
-				var hloc = '';
-				var lastsquare = 24;
-//				if (square.indexOf("hiddencity") != -1) {
-				hloc = "hiddencity.php?which=";
-//				lastsquare=24;
-//				} else {
-//				    SetCharData("lastrat",thissquare);	// store for display on the main (pre-quest) tavern page.
-//					hloc = "rats.php?where=";
-//					lastsquare=25;
-//				}
-				var nextsquare = integer(thissquare)+1;
-				if (nextsquare <= lastsquare) {
-					var myhref = hloc+nextsquare;
-					var clicky = "SetCharData('square','"+myhref+"')";
-					$('<center><p><a href="'+myhref+'" id="bwahaha">Explore Next Square</a></center>').prependTo($('center:last'));
-					$('#bwahaha').click(function() {
-						var a = $(this);
-						SetCharData("square",a.attr('href'));
-					});
-				}
+				link_hiddencity(square);
+
+			} else if (square.indexOf("cellar.php") != -1) {
+				link_cellar(square);
 			} else {	// handling adventure.php?snarfblat=X options.
 				var location = integer(square.match(/(\d+)/)[1]);	// the 185 in "adventure.php?snarfblat=185"
 				switch (location)	{
@@ -1915,6 +1898,80 @@ function at_fight() {
 	}
 }
 
+function link_hiddencity(square) {
+	var thissquare = square.match(/(\d+)/)[1];	// break the "22" off of "rats.php?where=22", for example.
+	var hloc = '';
+	var lastsquare = 24;
+	hloc = "hiddencity.php?which=";
+	var nextsquare = integer(thissquare)+1;
+	if (nextsquare <= lastsquare) {
+		var myhref = hloc+nextsquare;
+		var clicky = "SetCharData('square','"+myhref+"')";
+		$('<center><p><a href="'+myhref+'" id="bwahaha">Explore Next Square</a></center>').prependTo($('center:last'));
+		$('#bwahaha').click(function() {
+			var a = $(this);
+			SetCharData("square",a.attr('href'));
+		});
+	}
+}
+
+function link_cellar(square) {
+	var thissquare = square.match(/(\d+)/)[1]; // get number from "cellar.php?action=explore&whichspot=19"
+	thissquare = parseInt(thissquare,10);
+	var myhrefbase = "cellar.php?action=explore&whichspot=";
+	var myhref = "";
+	// grid: 1 hex digit per square for each of the 25 squares.
+	// 		8 = display UP link
+	//		4 =         DOWN
+	// 		2 =         LEFT
+	//      1 = 		RIGHT
+	// plus a 0 at the front because Jick uses 1-based indexing, the bastard.
+	var grid = [0,5,7,7,6,0,13,15,15,15,6,13,15,15,15,14,13,15,15,15,14,9,11,11,11,10];
+	var sqlist = GetCharData("squarelist") + ";" ;
+	GM_log("thissquare="+thissquare+", grid[thissquare]="+grid[thissquare]);
+
+	if ((grid[thissquare] & 4) == 4) {
+		myhref = myhrefbase + (thissquare + 5);
+		if (sqlist.indexOf(";" + (thissquare+5) + ";") == -1) {
+			$('<center><p><a href="'+myhref+'" id="bwaha-d">Explore Downward</a></center>').prependTo($('center:last'));
+			$('#bwaha-d').click(function() {
+				var a = $(this);
+				SetCharData("square",a.attr('href'));
+			});
+		}
+	}
+	if ((grid[thissquare] & 2) == 2) {
+		myhref = myhrefbase + (thissquare - 1);
+		if (sqlist.indexOf(";" + (thissquare-1) + ";") == -1) {
+			$('<center><p><a href="'+myhref+'" id="bwaha-l">Explore Leftward</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</center>').prependTo($('center:last'));
+			$('#bwaha-l').click(function() {
+				var a = $(this);
+				SetCharData("square",a.attr('href'));
+			});
+		}
+	}
+	if ((grid[thissquare] & 1) == 1) {
+		myhref = myhrefbase + (thissquare + 1);
+		if (sqlist.indexOf(";" + (thissquare+1) + ";") == -1) {
+			$('<center><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="'+myhref+'" id="bwaha-r">Explore Rightward</a></center>').prependTo($('center:last'));
+			$('#bwaha-r').click(function() {
+				var a = $(this);
+				SetCharData("square",a.attr('href'));
+			});
+		}
+	}	
+	if ((grid[thissquare] & 8) == 8) {
+		myhref = myhrefbase + (thissquare - 5);
+		if (sqlist.indexOf(";" + (thissquare-5) + ";") == -1) {
+			$('<center><p><a href="'+myhref+'" id="bwaha-u">Explore Upward</a></center>').prependTo($('center:last'));
+			$('#bwaha-u').click(function() {
+				var a = $(this);
+				SetCharData("square",a.attr('href'));
+			});
+		}
+	}
+}
+
 // SHOWYOINKS:  display pickpocketed items.
 // Todo: figure out how to specify the correct placement via jquery....
 function showYoinks(wonCombat) {
@@ -1983,6 +2040,8 @@ function at_valhalla() {
 	SetCharData("nunmoney",0);
 	// reset pandamonium arena solution marker
 	SetCharData("pandabandsolved",false);
+	// reset list of explored squares in the cellar
+	SetCharData("squarelist","");
 }
 
 // COVE: display pirate insult information
@@ -2030,6 +2089,18 @@ function at_hiddencity() {
 	$('a').click(function() {
 		var a = $(this);
 		SetCharData("square",a.attr('href'));
+	});
+}
+
+// CELLAR: track what square we clicked on in order to provide exploration links later.
+function at_cellar() {
+	$('a').click(function() {
+		var a = $(this);
+		SetCharData("square", a.attr('href'));
+		var squarenum = a.attr('href').match(/(d+)/)[0];
+		var sqlist = GetCharData("squarelist");
+		sqlist = sqlist + ";" + squarenum
+		SetCharData("squarelist",sqlist);
 	});
 }
 
@@ -2097,24 +2168,27 @@ function at_adventure() {
 	var square=GetCharData("square");
 	SetCharData("square",false);
 	if (square) {
-		var hloc = '';
-		if (square.indexOf("hiddencity") != -1) hloc = "hiddencity.php?which=";
+		//var hloc = '';
+		if (square.indexOf("hiddencity") != -1) link_hiddencity(square);
+		if (square.indexOf("cellar.php") != -1) link_cellar(square);
+		
+		//hloc = "hiddencity.php?which=";
 //		else if (square.indexOf("rats") != -1) hloc = "rats.php?where=";	// I don't believe this can ever happen, actually.
-		if (hloc == '') return;
-		var thissquare = square.match(/(\d+)/)[1];	// the "22" in "hiddencity.php?which=22" or "rats.php?where=22"
-		var nextsquare = integer(thissquare)+1;
-		if (nextsquare < 25) {
-			var myhref = hloc+nextsquare;
-			var clicky = "SetCharData('square','"+myhref+"')";
-			$('<center><p><a href="'+myhref+'" id="bwahaha">Explore Next Square</a></center>').prependTo($('center:last'));
-			$('#bwahaha').click(function() {
-				var a = $(this);
-				SetCharData("square",a.attr('href'));
-			});
-		}
+		//if (hloc == '') return;
+		//var thissquare = square.match(/(\d+)/)[1];	// the "22" in "hiddencity.php?which=22" or "rats.php?where=22"
+		//var nextsquare = integer(thissquare)+1;
+		//if (nextsquare < 25) {
+		//	var myhref = hloc+nextsquare;
+		//	var clicky = "SetCharData('square','"+myhref+"')";
+		//	$('<center><p><a href="'+myhref+'" id="bwahaha">Explore Next Square</a></center>').prependTo($('center:last'));
+		//	$('#bwahaha').click(function() {
+		//		var a = $(this);
+		//		SetCharData("square",a.attr('href'));
+		//	});
+		//}
 	}
 	var NCTitle = $('b:eq(1)');
-//	GM_log("NCTtext=["+$(NCTitle).text()+"]");
+	GM_log("NCTtext=["+$(NCTitle).text()+"]");
 	switch ($(NCTitle).text()) {
 	case "Rotting Matilda":
 		var cardlink = document.createElement('table');
@@ -2268,9 +2342,14 @@ function at_arcade() {
 }
 
 
-// CHOICE: clear out "square" since it should never persist outside of the hidden city or the tavern, neither of which have choice adventures.
+// CHOICE: special functions for choice adventure text.
 function at_choice() {
+	var square = GetCharData("square");
 	SetCharData("square",false);
+	if (square) {
+		if (square.indexOf("hiddencity") != -1) link_hiddencity(square);
+		if (square.indexOf("cellar.php") != -1) link_cellar(square);	
+	}
 	var usemap = 0;
 	var choicetext = $('body').text();
 //	GM_log("choice text="+choicetext);
@@ -2290,6 +2369,9 @@ function at_choice() {
 			p0.appendChild(AppendLink('[use giant castle map]',"inv_use.php?pwd="+pwd+"&which=3&whichitem=667"));
 		} else if (p0.textContent.indexOf("You step up behind the man") != -1) {	// found Mr. Alarm
 			$('<center><a href="adventure.php?snarfblat=100">Adventure in WHITEY\'S GROVE</a></center><br />').prependTo($('a:last').parent());
+			// add a link to cooking here.
+		} else if (p0.textContent.indexOf("clutching your pants triumphantly") != -1) { // AT guild-opening quest
+			p[1].appendChild(AppendLink('back to the guild','guild.php?place=paco'));
 		}
 	}
 }
@@ -2344,7 +2426,7 @@ function at_bhh() {
 		["triffid barks","[spooky forest (1)]","15"],
 		["bits of wilted lettuce","[Fern's Tower (1)]","22"],
 		["broken petri dishes","[Knob Lab (1)]","50"],
-		["bundles of receipts","[Knob Treasury (1)]","41"],
+		["bundles of receipts","[Knob Treasury (1)]","260"],
 		["callused fingerbones","[South Of Border (1)]","45"],
 		["empty aftershave bottles","[frat house (1)]","27"],
 		["greasy dreadlocks","[hippy camp (1)]","26"],
@@ -2937,7 +3019,7 @@ function at_inventory()
 			if (outfit.indexOf("Harem Girl") != -1)
 			{	equipText.appendChild(AppendLink('[perfume]',
 					'inv_use.php?pwd=' + pwd + '&which=3&whichitem=307'));
-				equipText.appendChild(AppendLink('[knob]', 'knob.php'));
+				equipText.appendChild(AppendLink('[knob]', 'cobbsknob.php'));
 			}
 			else if (outfit.indexOf("Swashbuckling") != -1)
 			{	if (document.referrer.indexOf('council') == -1)
@@ -3367,7 +3449,6 @@ function at_council()
 				p.append(AppendLink('[woods]', 'woods.php'));
 			else if (txt.indexOf("Typical Tavern") != -1)
 				p.append(AppendLink('[Bart Ender]','tavern.php?place=barkeep'));
-//				p.append(AppendLink('[tavern]', 'rats.php'));
 			else if (txt.indexOf("Boss Bat") != -1)
 				p.append(AppendLink('[bat hole]', 'bathole.php'));
 			else if (txt.indexOf("Guild") != -1)
@@ -3511,7 +3592,7 @@ function at_questlog()
 				}
 				b.append(AppendLink('[perfume]', 'inv_use.php?pwd=' +
 					pwd + '&which=3&whichitem=307'));
-				b.append(AppendLink('[knob]', 'knob.php'));
+				b.append(AppendLink('[knob]', 'cobbsknob.php'));
 			}
 			else if (txt.indexOf("By Friar") != -1)
 				b.append(AppendLink('[copse]', 'friars.php'));
@@ -5510,12 +5591,12 @@ function spoil_postwarisland()
 		// Note to wiki peoples: more spoilers, plz
 		if (src.indexOf("nunnery1") != -1) ml = '168';
 		else if (src.indexOf("22.gif") != -1) ml = '61-69';		// pirate cove, undisguised
-		else if (src.indexOf("23.gif") != -1) ml = '39-41';		// hippy camp, unbombed
+		else if (src.indexOf("23.gif") != -1) ml = '230-255';	// frathouse, bombed
 		else if (src.indexOf("24.gif") != -1) ml = '240-250'; 	// hippy camp, bombed
 		else if (src.indexOf("25.gif") != -1) ml = '169-172';	// Junkyard
 		else if (src.indexOf("26.gif") != -1) ml = '169-180';	// McMillicancuddy
 		else if (src.indexOf("27.gif") != -1) ml = '39-41'; 	// frathouse, unbombed 
-		else if (src.indexOf("28.gif") != -1) ml = '230-255'; 	// frathouse, bombed
+		else if (src.indexOf("28.gif") != -1) ml = '39-41'; 	// hippy camp, unbombed
 		if(ml) this.setAttribute('title','ML: '+ml);
 });	}
 
