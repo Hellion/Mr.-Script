@@ -169,6 +169,10 @@ function GetCharData(which) {
 	var charname = GetData("charname");
 	return GM_getValue(charname + which);
 }
+function DelCharData(which) {
+	var charname = GetData("charname");
+	GM_deleteValue(charname + which);
+}
 
 // Password hash functions.  whee.
 function SetPwd(hash) {
@@ -1828,6 +1832,23 @@ function link_cellar(square) {
 	//      1 = 		RIGHT
 	// plus a 0 at the front because Jick uses 1-based indexing for the tavern, the bastard.
 	var grid = [0,5,7,7,6,0,13,15,15,15,6,13,15,15,15,14,13,15,15,15,14,9,11,11,11,10];
+//	var visited = GetCharData("visited");
+//	if (visited == null) visited = [0, 0,0,0,0,1, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0];
+	
+//	var newtable = "<table>";
+//	for (var i = 0; i < 5; i++) {
+//		newtable += "<tr>"
+//		for (var j = 0; j < 5; j++) {
+//			newtable += "<td>" + visited[(i*5)+j+1] + "</td>";
+//		}
+//		newtable += "</tr>"
+//	}
+//	newtable += "</table>";
+//	var div = document.createElement("div");
+//	div.innerHTML = newtable;
+//	document.body.appendChild(div);
+//	GM_log("visited="+visited);
+	
 	var sqlist = GetCharData("squarelist") + ";" ;
 	GM_log("thissquare="+thissquare+", grid[thissquare]="+grid[thissquare]);
 
@@ -1929,6 +1950,8 @@ function at_valhalla() {
 	SetCharData("pandabandsolved",false);
 	// reset list of explored squares in the cellar
 	SetCharData("squarelist","");
+	// reset tracking of what items were where while mining
+	clearwhiches();
 }
 
 // COVE: display pirate insult information
@@ -1983,12 +2006,16 @@ function at_hiddencity() {
 function cellar_linker() {
 	var a = $(this);
 	SetCharData("square", a.attr('href'));
+	var visited = GetCharData("visited");
+	if (visited == null) visited = [0, 0,0,0,0,1, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0 ];
 	GM_log("href="+a.attr('href'));
 	var squarenum = a.attr('href').match(/(\d+)/)[0];
 	var sqlist = GetCharData("squarelist");
 	sqlist = sqlist + ";" + squarenum;
-	GM_log("sqlist="+sqlist);
+	GM_log("linker: sqlist="+sqlist);
 	SetCharData("squarelist",sqlist);
+	visited[parseInt(squarenum,10)] = 1;
+	SetCharData("visited",visited);
 }
 
 
@@ -2021,7 +2048,7 @@ function at_adventure() {
 	SetCharData("square",false);
 	if (square) {
 		if (square.indexOf("hiddencity") != -1) link_hiddencity(square);
-		if (square.indexOf("cellar.php") != -1) link_cellar(square);
+//		if (square.indexOf("cellar.php") != -1) link_cellar(square);
 	}
 	var NCTitle = $('b:eq(1)');
 	GM_log("NCTtext=["+$(NCTitle).text()+"]");
@@ -2181,6 +2208,7 @@ function at_arcade() {
 // CHOICE: special functions for choice adventure text.
 function at_choice() {
 	var square = GetCharData("square");
+	GM_log("choice:Square="+square);
 	SetCharData("square",false);
 	if (square) {
 		if (square.indexOf("hiddencity") != -1) link_hiddencity(square);
@@ -2207,7 +2235,7 @@ function at_choice() {
 			$('<center><a href="adventure.php?snarfblat=100">Adventure in WHITEY\'S GROVE</a></center><br />').prependTo($('a:last').parent());
 			// add a link to cooking here.
 		} else if (p0.textContent.indexOf("clutching your pants triumphantly") != -1) { // AT guild-opening quest
-			p0.appendChild(AppendLink('back to the guild','guild.php?place=paco'));
+			p0.appendChild(AppendLink('[back to the guild]','guild.php?place=challenge'));
 		}
 	}
 }
@@ -2326,14 +2354,13 @@ function at_mallstore()
 {	var img = document.images[0];
 	if (img == undefined) return;
 	var onclick = img.getAttribute("onclick");
-	if (onclick != undefined && onclick.indexOf("desc") != -1)
-	{	AddLinks(onclick, img.parentNode.parentNode, img.parentNode.parentNode.parentNode.parentNode.parentNode, thePath);
+	if (onclick != undefined && onclick.indexOf("desc") != -1) {
+		AddLinks(onclick, img.parentNode.parentNode, img.parentNode.parentNode.parentNode.parentNode.parentNode, thePath);
 	}
-	for (var i=1,len=document.images.length; i<len; i++)
-	{	img = document.images[i];
+	for (var i=1,len=document.images.length; i<len; i++) {
+		img = document.images[i];
 		onclick = img.getAttribute("onclick");
-		if (onclick != undefined && onclick.indexOf("desc") != -1)
-			AddInvCheck(img);
+		if (onclick != undefined && onclick.indexOf("desc") != -1) AddInvCheck(img);
 	}
 }
 
@@ -2341,8 +2368,8 @@ function at_mallstore()
 function at_beerpong()
 {
 	var val = 0, html = $('img[src*=beerpong]').parent().parent().html();
-	if (html)
-	{	if (html.indexOf('ll flay') != -1) val = 1;
+	if (html) {
+		if (html.indexOf('ll flay') != -1) val = 1;
 		else if (html.indexOf('craven') != -1) val = 2;
 		else if (html.indexOf('pestilent') != -1) val = 3;
 		else if (html.indexOf('run red') != -1) val = 4;
@@ -2352,11 +2379,11 @@ function at_beerpong()
 		else if (html.indexOf('ngle man') != -1) val = 8;
 
 		var sel = $('select[name=response]');
-		sel.children().each(function()
-		{	if ($(this).val() > 8) $(this).attr('disabled','disabled');
+		sel.children().each(function() {
+			if ($(this).val() > 8) $(this).attr('disabled','disabled');
 		});
-		if (val > 0)
-		{	var opt = sel.find('option[value='+val+']');
+		if (val > 0) {
+			var opt = sel.find('option[value='+val+']');
 			if (opt.length > 0) opt.attr('selected','selected');
 			else val = 0;
 		}
@@ -2379,21 +2406,21 @@ function at_inventory()
 	if (searchString.indexOf("which=2") != -1) gearpage = 1;
 
 	// Miscellaneous messages that always route you back to inventory:
-	else if (searchString.indexOf("action=message") != -1)
-	{	var fimg = $('img:first');
+	else if (searchString.indexOf("action=message") != -1) {
+		var fimg = $('img:first');
 		var src = fimg.attr('src');
-		if (src.indexOf('blackbird1') != -1)									// blackbird
-		{	var fly = document.createElement('a');
+		if (src.indexOf('blackbird1') != -1) {									// blackbird
+			var fly = document.createElement('a');
 			fly.innerHTML = '[fly, fly, fly]';
 			fly.setAttribute('href', 'javascript:void(0);');
 			$(fly).click(BlackBirdStuff);
 			fimg.after(fly)
 				.after(document.createElement('br'));
 		}
-		else if (src.indexOf('scroll1.gif') != -1)							// 31337 scroll
-		{	var clov = $('b:lt(5):contains(clover)');
-			if (clov.length > 0)
-			{	var quant = clov.text().match(/^[0-9]*/);
+		else if (src.indexOf('scroll1.gif') != -1) {							// 31337 scroll
+			var clov = $('b:lt(5):contains(clover)');
+			if (clov.length > 0) {
+				var quant = clov.text().match(/^[0-9]*/);
 				if (!quant) quant = 1;
 				clov.append(AppendLink('[disassemble]','multiuse.php?pwd='+
 				pwd+'&action=useitem&quantity='+quant+'&whichitem=24'));
@@ -2402,8 +2429,7 @@ function at_inventory()
 	}
 
 	// Equipment page only
-	if (gearpage == 1)
-	{
+	if (gearpage == 1) {
 		var backup = GetPref('backup');
 		var quickequip = GetPref("quickequip");
 		var lnks = document.links;
@@ -2411,18 +2437,19 @@ function at_inventory()
 		var didQElink = false;
 		var selecty = document.getElementsByTagName('select')[0];
 
-		if (backup != '')
-		{	for (var i=0, len=lnks.length; i<len; i++)
-			{	var lnk = lnks[i];
+		if (backup != '') {
+			for (var i=0, len=lnks.length; i<len; i++) {
+				var lnk = lnks[i];
 
-				if (/familiar\.php/.test(lnk.href))
-				{	famLock = lnk; continue; }
+				if (/familiar\.php/.test(lnk.href)) {
+					famLock = lnk; continue; 
+				}
 
 				if (lnk.text == "[unequip all]"
 				 || lnk.text == "Manage your Custom Outfits")
 				{
-					if (!didQElink && 0) // added && 0 to disable 5-Jun-2011
-					{	var qelnk = document.createElement('a');
+					if (!didQElink && 0) { 			// added && 0 to disable 5-Jun-2011
+						var qelnk = document.createElement('a');
 						qelnk.setAttribute('href','javascript:void(0);');
 						qelnk.setAttribute('style', 'color:white;' +
 							'font-size:10px;');
@@ -2448,8 +2475,8 @@ function at_inventory()
 					var yetAnotherVariable = 1;
 					if (lnk.text != "Manage your Custom Outfits")
 						unlink = lnk;
-					else
-					{	yetAnotherVariable = 0;
+					else {
+						yetAnotherVariable = 0;
 						unlink = selecty.parentNode.previousSibling;
 						unlink.firstChild.appendChild(
 							document.createElement('tr'));
@@ -2464,19 +2491,19 @@ function at_inventory()
 						unlink.appendChild(document.createTextNode(' '));
 						unlink = unlink.lastChild;
 					}
-					if (yetAnotherVariable == 1)
-					{	var newlink = document.createElement('a');
+					if (yetAnotherVariable == 1) {
+						var newlink = document.createElement('a');
 						newlink.innerHTML = "[backup]";
 						newlink.href = "#";
 						//newlink.addEventListener('contextmenu',function(event)
 						//{	alert('pow!');}, false);
-						newlink.addEventListener('click',function(event)
-						{	this.innerHTML = "[backing up...]";
+						newlink.addEventListener('click',function(event) {
+							this.innerHTML = "[backing up...]";
 							GM_get(server + '/inv_equip.php?action=customoutfit&which=2&outfitname=' + GetPref('backup'),
-							function(response)
-							{	for (var i=0, len=document.links.length; i<len; i++)
-								{	if (document.links[i].text.indexOf("...") != -1)
-									{	if (response.indexOf("custom outfits") == -1)
+							function(response) {
+								for (var i=0, len=document.links.length; i<len; i++) {
+									if (document.links[i].text.indexOf("...") != -1) {
+										if (response.indexOf("custom outfits") == -1)
 											document.links[i].innerHTML = "[done]";
 										else document.links[i].innerHTML = "[too many outfits]";
 										break;
@@ -2490,14 +2517,15 @@ function at_inventory()
 
 					// Save contents of outfit menu
 					var nunewlink; var opty;
-					for (i=1, len=selecty.options.length; i<len; i++)
-					{	opty = selecty.options[i];
-						if (opty.text == backup)
-						{	nunewlink = document.createElement('a');
+					for (i=1, len=selecty.options.length; i<len; i++) {
+						opty = selecty.options[i];
+						if (opty.text == backup) {
+							nunewlink = document.createElement('a');
 							nunewlink.innerHTML = "[revert to " + backup.toLowerCase() + "]";
 							nunewlink.href = "inv_equip.php?action=outfit&which=2&whichoutfit=" + opty.value;
-							nunewlink.addEventListener('contextmenu',function(event)
-							{	alert('powee!');}, false);
+							nunewlink.addEventListener('contextmenu',function(event) {
+								alert('powee!');
+							}, false);
 						}	
 					}
 
@@ -2536,8 +2564,8 @@ function at_inventory()
 //			var gearList = selecty.parentNode.previousSibling.firstChild;
 			var gearList = document.getElementById('curequip');
 			len = gearList.childNodes.length;
-			for (var i=0, len=gearList.childNodes.length; i<len; i++)
-			{	var tr = gearList.childNodes[i];
+			for (var i=0, len=gearList.childNodes.length; i<len; i++) {
+				var tr = gearList.childNodes[i];
 
 				if (tr.childNodes.length < 2) break;
 				//if (tr.childNodes[0].innerHTML.length == 0) continue;
@@ -2549,19 +2577,19 @@ function at_inventory()
 
 				// Store item number and name of currently equipped item.
 				if (tr.childNodes[1].firstChild
-				&& tr.childNodes[1].firstChild.tagName == 'IMG')
-				{	if (shelfNum == 2 && tr.childNodes[2]
+				&& tr.childNodes[1].firstChild.tagName == 'IMG') {
+					if (shelfNum == 2 && tr.childNodes[2]
 						.textContent.indexOf("1h") == -1) hands = 2;
 					equips[shelfNum] = tr.childNodes[2];
 
 					var pic = tr.childNodes[1].firstChild;
-					if (pic != undefined)
-					{	pics[shelfNum] = pic.parentNode.innerHTML;
+					if (pic != undefined) {
+						pics[shelfNum] = pic.parentNode.innerHTML;
 						var piclic = pic.getAttribute('onclick');
-						if (piclic != undefined)
-						{	var itm = DescToItem(piclic);
-							if (itm)
-							{	curgear[shelfNum] = itm[1];		// was ['name']
+						if (piclic != undefined) {
+							var itm = DescToItem(piclic);
+							if (itm) {
+								curgear[shelfNum] = itm[1];		// was ['name']
 								curgearnum[shelfNum] = itm[0];	// was ['itemid']
 							}	
 						}	
@@ -2569,8 +2597,8 @@ function at_inventory()
 				}
 
 				// Item slot is empty
-				else
-				{	equips[shelfNum] = (tr.childNodes.length > 2 ?
+				else {
+					equips[shelfNum] = (tr.childNodes.length > 2 ?
 						tr.childNodes[2] : tr.childNodes[1]);
 				}
 
@@ -2578,12 +2606,10 @@ function at_inventory()
 				var newsel = document.createElement('select');
 				newsel.setAttribute('style',"width:250px;");
 				newsel.setAttribute('name', shelfNum);
-				if (shelfNum == 3)
-				{	
+				if (shelfNum == 3) {
 					if (hands == 2) newsel.setAttribute('disabled','disabled');
 				}
-				if (curgearnum[shelfNum] > 0)
-				{	
+				if (curgearnum[shelfNum] > 0) {
 					newsel.appendChild(document.createElement('option'));
 				}
 				selects[shelfNum] = newsel;
@@ -2592,8 +2618,7 @@ function at_inventory()
 			// Second pass: Create new table and rows.
 			var nuTabl = $(document.createElement('table'));
 			var len = 9;
-			for (var i=0; i<len; i++)
-			{
+			for (var i=0; i<len; i++) {
 				var extra = (i==8 && famLock ? '<a href="' + famLock.href + '">' +
 				'<img class="hand" src="'+ famLock.firstChild.src +
 				'" style="height:20px;width:20px;margin-right:15px;" /></a>' : '');
@@ -2604,15 +2629,13 @@ function at_inventory()
 				(pics[i] != undefined ? pics[i] : '&nbsp;') +
 				'</td><td> </td><td align="left"> </td></tr>');
 
-				if (curgear[i] == undefined)
-				{	
+				if (curgear[i] == undefined) {
 					curgear[i] = "";
 					curgearnum[i] = 0;
 				}
 
 				// Create selects for blank rows
-				if (selects[i] == undefined)
-				{	
+				if (selects[i] == undefined) {
 					var newsel = document.createElement('select');
 					newsel.setAttribute('style',"width:250px;");
 					newsel.setAttribute('name', i);
@@ -2634,25 +2657,22 @@ function at_inventory()
 			len = lnks.length;
 			var lensub = len-1;
 			var theSel, itemText, shelf;
-			for (var i=0; i<len; i++)
-			{	
+			for (var i=0; i<len; i++) {
 				var lnk = lnks[i];
 
 				// Switch to new shelf, and add anchor
-				if (lnk.href.substr(0,4) == 'java')
-				{	
+				if (lnk.href.substr(0,4) == 'java') {
 					shelf = shelfToNum[lnk.text];
 					continue;
 				}
 
 				// Add equippable item to drop-down of current shelf.
-				else if (lnk.text == "[equip]" || lnk.text == "[offhand]")
-				{	itemText = lnk.parentNode.parentNode.firstChild.innerHTML;
+				else if (lnk.text == "[equip]" || lnk.text == "[offhand]") {
+					itemText = lnk.parentNode.parentNode.firstChild.innerHTML;
 
 					// Three iterations for accessories.
 					var limit = 1; if (shelf == 5) limit = 3;
-					for (var j=0; j<limit; j++)
-					{	
+					for (var j=0; j<limit; j++) {
 						var zshelf; if (lnk.text == "[offhand]") zshelf = 3;
 						else zshelf = shelf+j;
 						theSel = selects[zshelf];
@@ -2661,21 +2681,17 @@ function at_inventory()
 						// Create the select menu option
 						var opt = document.createElement("option");
 						opt.setAttribute("value",lnk.href.split("item=")[1]);
-						if (lnk.text == "[offhand]")
-						{	
+						if (lnk.text == "[offhand]") {
 							opt.setAttribute('dualwield', 1);
 						}
 						opt.innerHTML = itemText;
 
 						// Add the currently worn item to the menu, if necessary
-						if (!theSel.getAttribute("gearfound"))
-						{	
+						if (!theSel.getAttribute("gearfound")) {
 							var curText = curgear[zshelf].toLowerCase();
 							var tstText = itemText.toLowerCase();
 							if (tstText == curText) selects[zshelf].setAttribute('gearfound','gearfound');
-							else if (tstText > curText)
-							/*|| lnks[i+1] == undefined || lnks[i+1].href.indexOf(":t") != -1)*/
-							{	
+							else if (tstText > curText) {
 								var opt2 = document.createElement("option");
 								opt2.setAttribute("value",curgearnum[zshelf]);
 								opt2.innerHTML = curgear[zshelf];
@@ -2694,16 +2710,14 @@ function at_inventory()
 						"acc1","acc2","acc3","familiarequip"];
 
 			// Add the select menus to the DOM and select the currently worn item
-			for (var i=0; i<9; i++)
-			{
+			for (var i=0; i<9; i++) {
 				var row = gearList.childNodes[i];
 				var eqnum = i;
 				var tempsel = selects[i]; var nuus = [];
 				var action = "equip";
 
 				// Add currently equipped item if not found in equip links
-				if (!tempsel.getAttribute('gearfound') && curgearnum[i] > 0)
-				{	
+				if (!tempsel.getAttribute('gearfound') && curgearnum[i] > 0) {
 					var newopt = document.createElement('option');
 					newopt.innerHTML = curgear[i];
 					newopt.setAttribute("value", curgearnum[i]);
@@ -2711,10 +2725,8 @@ function at_inventory()
 					//tempsel.setAttribute('gearfound');
 				}
 
-				for (var j=0, len2=tempsel.childNodes.length; j<len2; j++)
-				{	
-					if (tempsel.childNodes[j].value == curgearnum[i])
-					{	
+				for (var j=0, len2=tempsel.childNodes.length; j<len2; j++) {
+					if (tempsel.childNodes[j].value == curgearnum[i]) {
 						tempsel.selectedIndex = j;	break;
 					}	
 				}
@@ -2749,8 +2761,7 @@ function at_inventory()
 				// I forget why I had to do this, but I'm sure there was a reason.
 				// perhaps because ztype is out of scope in the anonymous function,
 				// or because we'd need a closure here in order to make it work right?
-					switch(ztype)
-					{	
+					switch(ztype) {
 						case 0: GM_get(url, function(t){EquipUpdate(t,0);}); break;
 						case 1: GM_get(url, function(t){EquipUpdate(t,1);}); break;
 						case 2: GM_get(url, function(t){EquipUpdate(t,2);}); break;
@@ -2772,8 +2783,8 @@ function at_inventory()
 				if (pow != null) descTD.append('<font size="1"> '+ pow+ '</font> ');
 				else descTD.append(' ');
 
-				if (row.childNodes[1].firstChild.tagName == 'IMG')
-				{	var un = document.createElement('a');
+				if (row.childNodes[1].firstChild.tagName == 'IMG') {
+					var un = document.createElement('a');
 					un.innerHTML = '<font size="1">[unequip]</font>';
 					un.setAttribute('href', 'inv_equip.php?pwd='+pwd+
 					'&which=2&action=unequip&type='+unq[i]);
@@ -2784,8 +2795,7 @@ function at_inventory()
 		} // quickequip
 	} // equippage
 
-	if (GetPref('shortlinks') > 1 && firstTable.rows[0].textContent == "Results:")
-	{	
+	if (GetPref('shortlinks') > 1 && firstTable.rows[0].textContent == "Results:") {
 		var resultsText = firstTable.rows[1].textContent, bText;
 //		GM_log("resultsText:"+resultsText);
 //		GM_log("referrer:"+document.referrer);
@@ -2798,11 +2808,10 @@ function at_inventory()
 			document.referrer.indexOf('pyramid.php') != -1)	// used a tomb ratchet at the pyramid
 			parent.frames[2].location =
 				'http://' + server + '/pyramid.php';
-		else if (resultsText.indexOf("duck talk") != -1)	// used the giant castle map successfully
-		{	
+		else if (resultsText.indexOf("duck talk") != -1) {	// used the giant castle map successfully
 			bText = document.getElementsByTagName('b')[1];
-			if (bText.textContent == "quantum egg")
-			{	bText.parentNode.appendChild(AppendLink('[rowboat]',
+			if (bText.textContent == "quantum egg") {
+				bText.parentNode.appendChild(AppendLink('[rowboat]',
 				'craft.php?mode=combine&action=craft&a=652&b=609&pwd=' + pwd + '&quantity=1'));
 				GoGoGadgetPlunger();
 			}	
@@ -2828,8 +2837,8 @@ function at_inventory()
 			bText.parentNode.appendChild(AppendLink('[hermit]','hermit.php'));
 		}
 // and this is where we add all the nifty little links after equipping something.
-		else if (resultsText.indexOf("You equip an item") != -1)
-		{	bText = document.getElementsByTagName('b')[1];
+		else if (resultsText.indexOf("You equip an item") != -1) {
+			bText = document.getElementsByTagName('b')[1];
 			//var item = resultsText.substring(14);
 			var item = bText.textContent;
 //			GM_log("item="+item);
@@ -2855,32 +2864,31 @@ function at_inventory()
 			else if ((item == "swashbuckling pants") && (document.referrer.indexOf("choice.php") != -1))
 				bText.parentNode.appendChild(AppendLink('[visit Caronch (1)]','adventure.php?snarfblat=157'));
 		}
-		else if (resultsText.indexOf("Outfit:") != -1)
-		{
+		else if (resultsText.indexOf("Outfit:") != -1) {
 			var outfit = resultsText.split(": ")[1];
 			var equipText = firstTable.rows[1].cells[0]
 				.firstChild.firstChild.firstChild.firstChild;
 			equipText.setAttribute('valign', 'baseline');
 
-			if (outfit.indexOf("Harem Girl") != -1)
-			{	equipText.appendChild(AppendLink('[perfume]',
+			if (outfit.indexOf("Harem Girl") != -1) {
+				equipText.appendChild(AppendLink('[perfume]',
 					'inv_use.php?pwd=' + pwd + '&which=3&whichitem=307'));
 				equipText.appendChild(AppendLink('[knob]', 'cobbsknob.php'));
 			}
-			else if (outfit.indexOf("Swashbuckling") != -1)
-			{	if (document.referrer.indexOf('council') == -1)
+			else if (outfit.indexOf("Swashbuckling") != -1) {
+				if (document.referrer.indexOf('council') == -1)
 					equipText.appendChild(AppendLink('[council]', 'council.php'));
 				equipText.appendChild(AppendLink('[island]', 'island.php'));
 			}
-			else if (outfit.indexOf("Filthy Hippy") != -1)
-			{	if (document.referrer.indexOf('store.php') != -1)
+			else if (outfit.indexOf("Filthy Hippy") != -1) {
+				if (document.referrer.indexOf('store.php') != -1)
 					parent.frames[2].location = 'http://' + server + '/store.php?whichstore=h';
 				else equipText.appendChild(AppendLink('[fruit]', 'store.php?whichstore=h'));
 			}
 			else if (outfit.indexOf("Mining Gear") != -1)
 				equipText.appendChild(AppendLink('[mine]', 'mining.php?mine=1'));
-			else if (outfit.indexOf("Bugbear") != -1)
-			{	if (document.referrer.indexOf('store.php') != -1)
+			else if (outfit.indexOf("Bugbear") != -1) {
+				if (document.referrer.indexOf('store.php') != -1)
 					parent.frames[2].location = 'http://' + server + '/store.php?whichstore=b';
 				else equipText.appendChild(AppendLink('[bakery]', 'store.php?whichstore=b'));
 			}
@@ -4946,6 +4954,47 @@ function at_mining()
 		foundamount = GetCharData("ore"+orenumber);
 		if (foundamount) msg +=" (You've found "+foundamount+" so far.)";
 		$('b:contains("Itznotyerzitz")').parent().append('<tr><td><center><font color="white">'+msg+'</font></center></td></tr>');
+	}
+// track what each square gave us:
+	// first, add onclick() to track what square we just clicked on.
+	$('a[href*=mining.php]').click(function(){
+		var a = $(this);
+		var setwhich = integer(a.attr("href").match(/which=(\d+)/)[1]);
+		SetCharData("mining_which",setwhich);
+	});
+	//also add onclick() to the "Find new cavern" button to wipe out our stored values.
+	$('input').click(function(){
+		GM_log("Clearing mine-tracking info due to new cavern");
+		clearwhiches();
+	});		// if mining_which is set, it's because we just reloaded the page after clicking on a square.
+	var which = GetCharData("mining_which");
+	SetCharData("mining_which", 0);
+//		GM_log("which="+which);
+	if (which != 0 && which !== undefined) {
+		var got = $('.item tr td img').attr("src");		// see what we got.
+		SetCharData("which"+which,got);					// save it.
+	}
+	$('img[alt*=Open Cavern]').each(function(){			// replace each "Open Cavern" picture with the image we saved.
+		var alt = $(this).attr('alt');
+		var xc = integer(alt.match(/(\d)/g)[0]);		// convert from "Open Cavern (1, 4) to the number in the "mine=1?which=xx" link.
+		var yc = integer(alt.match(/(\d)/g)[1]);
+//			GM_log("alt="+alt+"; x, y="+xc+", "+yc);
+		var foo = (xc + (yc*8));
+		if (foo > 54) return;	// that's the last of the mine-able squares
+//			GM_log("calculated which for "+ alt +" is "+foo);
+		var myimage = GetCharData("which"+foo);
+		if (myimage !== undefined) {
+//				GM_log("loading image "+myimage+ " for which="+foo);
+			$(this).attr('src',myimage);
+		}
+		else GM_log("which="+foo+" was undefined");
+	});	
+	
+}
+
+function clearwhiches() {
+	for (var i=9; i<=54; i++) {
+		 DelCharData("which"+i);
 	}
 }
 
