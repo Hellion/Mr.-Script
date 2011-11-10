@@ -2210,11 +2210,17 @@ function at_arcade() {
 // CHOICE: special functions for choice adventure text.
 function at_choice() {
 	var square = GetCharData("square");
-	GM_log("choice:Square="+square);
 	SetCharData("square",false);
 	if (square) {
 		if (square.indexOf("hiddencity") != -1) link_hiddencity(square);
-		if (square.indexOf("cellar.php") != -1) link_cellar(square);	
+		if (square.indexOf("cellar.php") != -1) {
+			var NCTitle = $('b:eq(0)').text();		// check the title of the choice adventure:
+			if (NCTitle != "Results:") {	
+				SetCharData("square",square);	// not "Results:" means it's the choosing half of the choice, where you don't need links.
+			} else { 
+				link_cellar(square);			// "Results:" means it's the result of the choice, where you need the links.
+			}
+		}
 	}
 	var usemap = 0;
 	var choicetext = $('body').text();
@@ -2244,14 +2250,12 @@ function at_choice() {
 
 // Forest Village: Untinker linker.
 function at_forestvillage() {
-//	if (document.location.search == "?place=untinker") {
-		var plunger = GetCharData("plungeraccess") == "Y" ? true: false;
-		var linkloc = plunger ? "knoll.php?place=smith" :"adventure.php?snarfblat=18";
-		var linkname = plunger ? "[get it from Innabox]" : "[degrassi knoll (1)]";
-		$('td:contains("just lost without my"):last').append(AppendLink(linkname,linkloc));
-		$('td:contains("luck finding my screw"):last').append(AppendLink(linkname,linkloc));
-		if (plunger) $('b:contains("Untinker")').append(AppendLink('[innabox]',linkloc)); 
-//	}
+	var plunger = GetCharData("plungeraccess") == "Y" ? true: false;
+	var linkloc = plunger ? "knoll.php?place=smith" :"adventure.php?snarfblat=18";
+	var linkname = plunger ? "[get it from Innabox]" : "[degrassi knoll (1)]";
+	$('td:contains("just lost without my"):last').append(AppendLink(linkname,linkloc));
+	$('td:contains("luck finding my screw"):last').append(AppendLink(linkname,linkloc));
+	if (plunger) $('b:contains("Untinker")').append(AppendLink('[innabox]',linkloc)); 
 }
 
 function at_town_wrong() {
@@ -2331,7 +2335,6 @@ function at_trapper() {
 	} else if (traptext.indexOf("get us some provisions for the trip") != -1) {
 		$('p:contains("6 chunks of goat cheese")').append(AppendLink('[Goatlet (1)]','adventure.php?snarfblat=60'));
 	} else if (traptext.indexOf("I reckon 3 chunks of") != -1) {
-//		GM_log("foo!");
 		var oretype = traptext.match(/3 chunks of (\w+)/)[1];
 		SetCharData("oretype",oretype);
 		SetCharData("orenumber",oretype=="linoleum"?363:oretype=="asbestos"?364:365);
@@ -2339,7 +2342,6 @@ function at_trapper() {
 		SetCharData("ore364",0);
 		SetCharData("ore363",0);
 		$('p:contains("I reckon 3 chunks of")').append(AppendLink('[Itznotyerzitz Mine (1)]','adventure.php?snarfblat=61'));
-//		GM_log("ore type="+oretype);
 	} 
 }
 
@@ -2993,12 +2995,11 @@ function at_store()
 	.attr('title','right-click to equip Travoltan Trousers')
 	.attr('id','proprietor')
 	.get(0)
-	.addEventListener('contextmenu', function(evt)
-	{	
+	.addEventListener('contextmenu', function(evt) {
 		GM_get(server+'/inv_equip.php?pwd='+pwd+
 			'&which=2&action=equip&whichitem=1792',
-		function(txt)
-		{	var pimg = document.getElementById('proprietor');
+		function(txt) {
+			var pimg = document.getElementById('proprietor');
 			pimg.removeAttribute('id');
 			pimg.parentNode.nextSibling.innerHTML +=
 			'<br /><div class="tiny">' +
@@ -3018,8 +3019,8 @@ function at_store()
 		var acquireText = firstTable.find('tr:eq(1) td:first *:first');
 		var bText = $('b:eq(1)').attr('valign','baseline');
 
-		switch(whichstore)
-		{	case 'b':		// everything from the bugbear bakery is cookable.
+		switch(whichstore) {
+			case 'b':		// everything from the bugbear bakery is cookable.
 				bText.parent().append(AppendLink('[cook]', '/craft.php?mode=cook')); break;
 			case 'j':		// everything from the jeweler is pliable
 				bText.parent().append(AppendLink('[ply]', 'craft.php?mode=jewelry'));
@@ -3041,8 +3042,7 @@ function at_store()
 				break;
 		}
 
-		if (descId != undefined)
-		{	
+		if (descId != undefined) {
 			var whut = AddLinks(descId, bText.parent().parent().get(0), acquireText, thePath);
 			if ((whut == 'skill' || whut == 'use') && firstTable.children('tr:eq(1)').text().indexOf("an item:") == -1)
 				NumberLink(bText.get(0));
@@ -3052,69 +3052,66 @@ function at_store()
 	var swap;
 	if (GetPref('shortlinks') > 1)
 	{
-		if (whichstore == 'g') // Stupid Lab Key *sigh*
-		{	
-			if (document.body.textContent == "Uh Oh!You don't belong in this store.")
-			{	
-				GM_get(server+'/knob2.php',function(knob2)
-				{	
-					if (knob2.indexOf('locked') != -1) document.firstChild.innerHTML += knob2;
-					else {
-						var style = $(document.createElement('style'))
-							.attr('type', 'text/css')
-							.html("body {font-family: Arial, Helvetica, sans-serif; background-color: white; color: black;} " +
-							"td {font-family: Arial, Helvetica, sans-serif;} input.button {border: 2px black solid; " +
-							"font-family: Arial, Helvetica, sans-serif; font-size: 10pt; font-weight: bold; background-color: #FFFFFF;}");
-						//document.firstChild.firstChild.appendChild(style);
-						$('head').append(style);
-
-						var tabl = $(document.createElement('table'))
-							.attr('width','95%')
-							.attr('style','font-family: Arial, Helvetica, sans-serif')
-							.attr('cellspacing','0')
-							.attr('cellpadding','0')
-							.append(document.createElement('tbody'));
-						tabl.children('tbody')
-							.append(document.createElement('tr'))
-							.append(document.createElement('tr'));
-						var td = $(document.createElement('td'))
-							.attr('bgcolor','blue')
-							.attr('align','center')
-							.attr('style','color: white;')
-							.html('<b>Knob Goblin Laboratory</b>');
-						tabl.find('tbody tr:first').append(td);
-						td = $(document.createElement('td'))
-							.attr('style','border: 1px solid blue; padding: 5px;')
-							.attr('align','center')
-							.append('<p><img src="http://images.kingdomofloathing.com'
-							+ '/otherimages/shopgoblin.gif" align="middle">'
-							+ 'How did <i>you</i> get here? This store is '
-							+ 'for guards only!<br>');
-						td.children('p').append(
-							AppendOutfitSwap(5, "Get In Gear, Soldier!",0));
-						tabl.find('tbody tr:eq(1)').append(td);
-						var centre = $(document.createElement('center'))
-							.append(tabl);
-						$('body').append(centre);
-					}
-				});
-			}
-			else {	
-				$('p:first').append(
-					AppendOutfitSwap(0, "Return To Civilian Life", 0));
-			}	
-		}
-		else if (whichstore == 'h')
-		{	
+//		if (whichstore == 'g') // Stupid Lab Key *sigh*
+//		{	
+//			if (document.body.textContent == "Uh Oh!You don't belong in this store.")
+//			{	
+//				GM_get(server+'/knob2.php',function(knob2)
+//				{	
+//					if (knob2.indexOf('locked') != -1) document.firstChild.innerHTML += knob2;
+//					else {
+//						var style = $(document.createElement('style'))
+//							.attr('type', 'text/css')
+//							.html("body {font-family: Arial, Helvetica, sans-serif; background-color: white; color: black;} " +
+//							"td {font-family: Arial, Helvetica, sans-serif;} input.button {border: 2px black solid; " +
+//							"font-family: Arial, Helvetica, sans-serif; font-size: 10pt; font-weight: bold; background-color: #FFFFFF;}");
+//						//document.firstChild.firstChild.appendChild(style);
+//						$('head').append(style);
+//
+//						var tabl = $(document.createElement('table'))
+//							.attr('width','95%')
+//							.attr('style','font-family: Arial, Helvetica, sans-serif')
+//							.attr('cellspacing','0')
+//							.attr('cellpadding','0')
+//							.append(document.createElement('tbody'));
+//						tabl.children('tbody')
+//							.append(document.createElement('tr'))
+//							.append(document.createElement('tr'));
+//						var td = $(document.createElement('td'))
+//							.attr('bgcolor','blue')
+//							.attr('align','center')
+//							.attr('style','color: white;')
+//							.html('<b>Knob Goblin Laboratory</b>');
+//						tabl.find('tbody tr:first').append(td);
+//						td = $(document.createElement('td'))
+//							.attr('style','border: 1px solid blue; padding: 5px;')
+//							.attr('align','center')
+//							.append('<p><img src="http://images.kingdomofloathing.com'
+//							+ '/otherimages/shopgoblin.gif" align="middle">'
+//							+ 'How did <i>you</i> get here? This store is '
+//							+ 'for guards only!<br>');
+//						td.children('p').append(
+//							AppendOutfitSwap(5, "Get In Gear, Soldier!",0));
+//						tabl.find('tbody tr:eq(1)').append(td);
+//						var centre = $(document.createElement('center'))
+//							.append(tabl);
+//						$('body').append(centre);
+//					}
+//				});
+//			}
+//			else {	
+//				$('p:first').append(
+//					AppendOutfitSwap(0, "Return To Civilian Life", 0));
+//			}	
+//		}
+//		else 
+		if (whichstore == 'h') {
 			if (noform == 1) swap = AppendOutfitSwap(2, "Like, Get Groovy, Man", 0);
 			else swap = AppendOutfitSwap(0, "Whoa, Clear Your Head, Man", 0);
 			$('p:first').append(swap);
-		} else if (whichstore == 'b')
-		{	
-			if (noform == 1) swap = AppendOutfitSwap(1,
-				"Wave Your Hand And Say \"But I Am A Bugbear.\"", 0);
-			else swap = AppendOutfitSwap(0,
-				"Sneak Away Before The Bugbear Catches On", 0);
+		} else if (whichstore == 'b') {
+			if (noform == 1) swap = AppendOutfitSwap(1,"Wave Your Hand And Say \"But I Am A Bugbear.\"", 0);
+			else swap = AppendOutfitSwap(0,"Sneak Away Before The Bugbear Catches On", 0);
 			$('p:first').append(swap);
 		}
 	}
@@ -3123,8 +3120,7 @@ function at_store()
 // CASINO: Add link for buying pass.
 function at_casino()
 {	
-	if (GetPref('shortlinks') > 1)
-	{	
+	if (GetPref('shortlinks') > 1) {
 		if ($('table:first tr:eq(1)').text().indexOf("Casino Pass") != -1)
 			$('p:first').html(AppendBuyBox(40, 'm', 'Buy Casino Pass', 1));
 	}	
@@ -3546,7 +3542,7 @@ function at_questlog()
 					break;
 				case "Me and My Nemesis":		
 					var subtext = $(this).parent().text(); 
-					GM_log("nemesis subtext="+subtext);
+//					GM_log("nemesis subtext="+subtext);
 					if (subtext == undefined) break;
 					if (subtext.indexOf("smith an Epic Weapon") != -1) {
 						b.append(AppendLink("[casino]","town_wrong.php?place=casino"));
@@ -4469,14 +4465,14 @@ function at_manor3()
 	var wineHTML = GetCharData("wineHTML");
 	var winesneeded;
 	if (wineHTML != undefined && wineHTML.length > 0) {	// If we already did this the long way, just display the saved results.
-GM_log("wine info the quick way!");
+//GM_log("wine info the quick way!");
 		wineDisplay.innerHTML = wineHTML;
 		winelist = eval('('+GetCharData("winelist")+')');
 		winesneeded = eval('('+GetCharData("winesNeeded")+')');
 		document.body.appendChild(wineDisplay);
 		countWines(winelist, winesneeded); 
 	} else {											// No saved results: Better do it the long way.... 
-GM_log("wine info the hard way...");
+//GM_log("wine info the hard way...");
 		GM_get(server+"/manor3.php?place=goblet", function (atext) {	// check the altar for the glyphs we need
 			var pdiv = document.createElement('div');
 //			GM_log("place=goblet text:"+atext);
