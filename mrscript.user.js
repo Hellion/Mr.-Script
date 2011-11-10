@@ -4956,6 +4956,9 @@ function at_mining()
 		foundamount = GetCharData("ore"+orenumber);
 		if (foundamount) msg +=" (You've found "+foundamount+" so far.)";
 		$('b:contains("Itznotyerzitz")').parent().append('<tr><td><center><font color="white">'+msg+'</font></center></td></tr>');
+		if (foundamount >= 3) {
+			$('<center><br /><a href="trapper.php>Visit the Tr4pz0r</a></center>').appendTo($('a:last').parent());
+		}	
 	}
 // track what each square gave us:
 	// first, add onclick() to track what square we just clicked on.
