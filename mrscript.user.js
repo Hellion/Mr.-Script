@@ -12,7 +12,7 @@
 // @name        Mr. Script
 // @namespace   http://www.noblesse-oblige.org/lukifer/scripts/
 // @description	interface overhauler for KingdomofLoathing.com
-// @version		1.6.6
+// @version		1.6.7
 // @author		Lukifer
 // @contributor	Ohayou
 // @contributor Hellion
@@ -37,7 +37,7 @@ var place = location.pathname.replace(/\/|\.(php|html)$/gi, "").toLowerCase();
 //GM_log("at:" + place);
 
 // n.b. version number should always be a 3-digit number.  If you move to 1.9, call it 1.9.0.  Don't go to 1.8.10 or some such.
-var VERSION = 166;
+var VERSION = 167;
 var MAXLIMIT = 999;
 var ENABLE_QS_REFRESH = 1;
 var DISABLE_ITEM_DB = 0;
@@ -65,7 +65,8 @@ mr.script = function script(x) {
 };
 
 
-var server = location.host, serverNo = (server.match(/(.)\./) || {1:"L"})[1]; // the "7" in www7.X, or an "L" if no . is in the hostname.
+var server = location.host, serverNo = (server.match(/(.)\./) || {1:"L"})[1]; 	// the "7" in www7.X, or an "L" if no . is in the hostname.
+																				// gonna be 'w' or 'v' all the time now (for www. or dev. )
 var pwd = GM_getValue('hash.' + server.split('.')[0]);
 
 jQuery.prototype.toString = function() {
@@ -855,7 +856,7 @@ function AddLinks(descId, theItem, formWhere, path) {
 			
 		case 4961:  case 4948: 	case 4949: 	case 4950:							// subject 37 file, GOTO, weremoose spit, abominable blubber
 			addWhere.append(AppendLink('[visit 37]','cobbsknob.php?level=3&action=cell37')); break;
-		case 5193:	case 5194:															// 11-inch knob sausage, exorcised sandwich
+		case 5193:	case 5194:													// 11-inch knob sausage, exorcised sandwich
 			addWhere.append(AppendLink('[back to the guild]','guild.php?place=challenge')); break;
 	}
 
@@ -875,21 +876,21 @@ function AddLinks(descId, theItem, formWhere, path) {
       break;
 
     case "use":
-		if (formWhere != null)
-		{	AppendUseBox(itemNum, 0, 0, formWhere.get(0));
-		} else
-		{  addWhere.append(AppendLink('[use]', 'multiuse.php?pwd=' +
+		if (formWhere != null) {
+			AppendUseBox(itemNum, 0, 0, formWhere.get(0));
+		} else {  
+			addWhere.append(AppendLink('[use]', 'multiuse.php?pwd=' +
 			pwd + '&action=useitem&quantity=1&whichitem='+itemNum));
 		}
 		break;
 
     case "skill":
-		if (formWhere != null)
-		{	AppendUseBox(itemNum, 1, 1, formWhere.get(0));
-		} else
-        {	addWhere.append(AppendLink('[use]', 'inv_use.php?pwd='+ pwd +
-			           '&action=useitem&bounce=skills.php?action=useditem&itemquantity=1&whichitem='+
-                                   itemNum));
+		if (formWhere != null) {
+			AppendUseBox(itemNum, 1, 1, formWhere.get(0));
+		} else {
+			addWhere.append(AppendLink('[use]', 'inv_use.php?pwd='+ pwd +
+				'&action=useitem&bounce=skills.php?action=useditem&itemquantity=1&whichitem='+
+				itemNum));
 		}
 		break;
 
@@ -897,8 +898,8 @@ function AddLinks(descId, theItem, formWhere, path) {
 		addWhere.append(AppendLink('[malus]', 'guild.php?place=malus')); break;
 
     default:
-		if (doWhat)
-        {	addWhere.append(AppendLink('['+ doWhat +']', doWhat+'.php'));
+		if (doWhat) {
+        	addWhere.append(AppendLink('['+ doWhat +']', doWhat+'.php'));
 		}
   }
 
@@ -1834,26 +1835,11 @@ function link_cellar(square) {
 	//      1 = 		RIGHT
 	// plus a 0 at the front because Jick uses 1-based indexing for the tavern, the bastard.
 	var grid = [0,5,7,7,6,0,13,15,15,15,6,13,15,15,15,14,13,15,15,15,14,9,11,11,11,10];
-//	var visited = GetCharData("visited");
-//	if (visited == null) visited = [0, 0,0,0,0,1, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0];
-	
-//	var newtable = "<table>";
-//	for (var i = 0; i < 5; i++) {
-//		newtable += "<tr>"
-//		for (var j = 0; j < 5; j++) {
-//			newtable += "<td>" + visited[(i*5)+j+1] + "</td>";
-//		}
-//		newtable += "</tr>"
-//	}
-//	newtable += "</table>";
-//	var div = document.createElement("div");
-//	div.innerHTML = newtable;
-//	document.body.appendChild(div);
-//	GM_log("visited="+visited);
-	
+		
 	var sqlist = GetCharData("squarelist") + ";" ;
 	GM_log("thissquare="+thissquare+", grid[thissquare]="+grid[thissquare]);
 
+	// I should probably put all these in a table to make a proper grid of the directions.
 	if ((grid[thissquare] & 4) == 4) {
 		myhref = myhrefbase + (thissquare + 5);
 		if (sqlist.indexOf(";" + (thissquare+5) + ";") == -1) {
@@ -2008,16 +1994,12 @@ function at_hiddencity() {
 function cellar_linker() {
 	var a = $(this);
 	SetCharData("square", a.attr('href'));
-	var visited = GetCharData("visited");
-	if (visited == null) visited = [0, 0,0,0,0,1, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0 ];
 	GM_log("href="+a.attr('href'));
 	var squarenum = a.attr('href').match(/(\d+)/)[0];
 	var sqlist = GetCharData("squarelist");
 	sqlist = sqlist + ";" + squarenum;
 	GM_log("linker: sqlist="+sqlist);
 	SetCharData("squarelist",sqlist);
-	visited[parseInt(squarenum,10)] = 1;
-	SetCharData("visited",visited);
 }
 
 
@@ -2217,6 +2199,7 @@ function at_choice() {
 			var NCTitle = $('b:eq(0)').text();		// check the title of the choice adventure:
 			if (NCTitle != "Results:") {	
 				SetCharData("square",square);	// not "Results:" means it's the choosing half of the choice, where you don't need links.
+												// but it will be "Results:" after we choose something, so pass our Square data onward.
 			} else { 
 				link_cellar(square);			// "Results:" means it's the result of the choice, where you need the links.
 			}
