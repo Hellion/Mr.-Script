@@ -1,4 +1,4 @@
-{	"version":"1.6.6",
+{	"version":"1.6.7",
 	"url1":"http://userscripts.org/scripts/source/65705.user.js",
 	"url2":"http://noblesse-oblige.org/hellion/scripts/MrScript.user.js",
-	"desc":"<b>Fixed:</b><br/>council links to cobb's knob, a few others<br/>internal cleanups that should reduce memory leakage<br/>removed broken Quick-Equip option<br/><br/><b>New:</b><br/>Spoilers for Pandamonium<br/>Spoilers for the Cyrpt<br/>spoilers for the Dungeoneer's Association<br/><spoilers for clan shower<br/>added Bordertown to Topmenu<br/>"}
+	"desc":"<b>Fixed:</b><br/>certain links to the Knob were pointing to the old knob URL<br/><br/><b>New:</b><br/>Navigation links (U/D/R/L) added in the Tavern Cellar<br/>Mining results are recorded and displayed<br/>links back to guildmaster upon completing guild-opening challenge<br/>link back to tr4pz0r after finding 3 of the right ore<br/>"}
