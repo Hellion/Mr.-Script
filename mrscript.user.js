@@ -1,4 +1,4 @@
-// Mr. Script v1.6.6
+// Mr. Script v1.6.7
 //
 // --------------------------------------------------------------------
 // This is a user script.  To install it, you need Greasemonkey 0.8 or
@@ -960,7 +960,8 @@ function RightClickHP(event)
 
 // PARSESELECTQUANTITY: Figure out how many of a given restorative are present.
 function ParseSelectQuantity(selectItem, endToken)
-{	var index = selectItem.selectedIndex;
+{	
+	var index = selectItem.selectedIndex;
 	var howMany = 1;
 	if (selectItem.options[index].textContent.indexOf("(") != -1)
 	{	
@@ -1366,7 +1367,7 @@ function MakeOption(text, num, pref, opt1, opt2)
 			case 'logout': 
 			case 'splitquest':
 			case 'splitmsg':
-				top.frames[0].location.reload(); break;
+				top.frames[0].location.reload(); break;	// why do we need to reload here?
 		} 
 	}, true);
 	td.appendChild(select);
@@ -1393,7 +1394,8 @@ function AddToTopOfMain(newElement,refDocument) {
 }
 
 // MAIN.HTML: Resize top pane a bit and store password hash.
-function at_main_c() {
+// was main_c
+function at_main() {
 	FindHash();
 	setTimeout("if (frames[0].location == 'about:blank')" +
              "  frames[0].location = 'topmenu.php'", 1500);	// fix for top menu not always loading properly
@@ -1425,14 +1427,14 @@ function at_main_c() {
 }
 
 // MAIN: call main_c if needed (todo: remove this)
-function at_main() {
+//function at_main() {
 //	GM_log("location.pathname="+location.pathname);
-	if ((location.pathname == "/main.html") ||	
-	  (location.pathname == "/main.php")) { 	
-		at_main_c();
-		return;
-	}
-}
+//	if ((location.pathname == "/main.html") ||	
+//	  (location.pathname == "/main.php")) { 	
+//		at_main_c();
+//		return;
+//	}
+//}
 
 // GAME: look for updates and post link if needed.
 // n.b. game.php is the outermost, non-frame window that contains all the frames.
@@ -2933,7 +2935,7 @@ function at_galaktik()
 	howMany.after(checkSpan);
 }
 
-// BIGISLAND: add inventory check to Frat/Hippy Trade-In stores.
+// BIGISLAND: add inventory check, max buttons to Frat/Hippy Trade-In stores.
 function at_bigisland()
 {
 	$('img').each(function()
@@ -2946,6 +2948,21 @@ function at_bigisland()
 		$('a:lt(4)').click(function() {
 		var a = $(this);
 		SetCharData("square",a.attr('href'));
+		});
+	}
+	// add MAX buttons to the trade-in boxes
+	var select = document.getElementsByTagName("select");
+	if (select) {	// Items to trade in at the store?
+		GM_log("trade-ins!");
+//		select[0].options.selectedIndex = 1;
+		var qty = document.getElementsByName("quantity")[0];
+		MakeMaxButton(qty, function(event) {
+			var selectItem = document.getElementsByName('whichitem')[0];
+			var index = selectItem.selectedIndex;
+			var box = document.getElementsByName('quantity')[0];
+			var quant = ParseSelectQuantity(selectItem, ")");
+			box.value = quant;
+			GM_log("quantity="+quant);
 		});
 	}
 }
@@ -4917,27 +4934,30 @@ function at_mining()
 // Image courtesy of Picklish's Mining Helper script.
 	var staticSparkleImg = "data:image/gif;base64,R0lGODlhMgAyAOMPAP39/dvb2zc3NycnJ5qams3NzQUFBRAQEGtra6enp7W1te3t7UZGRldXV319ff///yH/C05FVFNDQVBFMi4wAwEAAAAh+QQJAQAPACwAAAAAMgAyAAAEW/DJSau9OOvNu/9gKI5kaZ5oqq5s675wLM90bd94ru8rg/AUR+AAfBwCgd/OMFA4GguEQXcEJAQEQGM3ECAAUSIwkJgWn0WJwZxuu9/wuHxOr9vv+Lx+z+/77xEAIfkECQEADwAsAAAAADIAMgAABGvwyUmrvTjrzbv/YCiOZGmeaKqubOu+cCzPdG3feM4Jhm4FA18lIRBSEgzjpKDoGRmLAsJAddYaBEJAMQB4AYqbIKuILhwCRlAXWKyNWaVEKn8kEHVCo36w1v+AgYKDhIWGh4iJiouMjY4kEQAh+QQJAQAPACwAAAAAMgAyAAAEl/DJSau9OOvNu/9gKI5kaZ5oqq5s675wLLeHMXNHYd/aAAy83i+YMRQERMwhgEhefA6npQFISCmGQEJ3NTAUhYMCYRM0CMCYoYEoAAi1Adi9OMoGhXwgIDAcHAsJDEE7Bgl8eQM7TkYACotXVA1XFD6DlBIDC2mYRpyUOUiYD56jpAWXowqfpq2ur7CxsrO0tba3uLm6GhEAIfkECQEADwAsAAAAADIAMgAABGvwyUmrvTjrzbv/YCiOZGmeaKqubOu+cCzPdG3feM4Jhm4FA18lIRBSEgzjpKDoGRmLAsJAddYaBEJAMQB4AYqbIKuILhwCRlAXWKyNWaVEKn8kEHVCo36w1v+AgYKDhIWGh4iJiouMjY4kEQAh+QQJAQAPACwAAAAAMgAyAAAEW/DJSau9OOvNu/9gKI5kaZ5oqq5s675wLM90bd94ru8rg/AUR+AAfBwCgd/OMFA4GguEQXcEJAQEQGM3ECAAUSIwkJgWn0WJwZxuu9/wuHxOr9vv+Lx+z+/77xEAOw==";
 	$("img[src*=wallsparkle]").attr("src",staticSparkleImg);
-	if (document.location.search.indexOf("mine=1") != -1) {
+	if (document.location.search.indexOf("mine=1") != -1) {	// don't display quest data in the knob shaft (mine=2), only the dwarf mine (mine=1).
 		var oretype = GetCharData("oretype");
 		var orenumber = GetCharData("orenumber");
-		if (oretype == '') return;
-		var founditem = $('.item').attr("rel")
-		var foundamount = 0;
-		if (founditem) { 
-			founditem = parseInt(founditem.match(/id=(\d+)/)[1],10);
-			if (founditem >= 363) {
-				foundamount = GetCharData("ore"+founditem);
-				foundamount++;
-				SetCharData("ore"+founditem,foundamount);
+		if (oretype != '') {	
+			// first, process any items we've just received.
+			var founditem = $('.item').attr("rel");	
+			var foundamount = 0;
+			if (founditem) { 
+				founditem = parseInt(founditem.match(/id=(\d+)/)[1],10);
+				if (founditem >= 363) {
+					foundamount = GetCharData("ore"+founditem);
+					foundamount++;
+					SetCharData("ore"+founditem,foundamount);
+				}
 			}
+			// second, display our quest info.
+			var msg = "You need 3 "+oretype+" ores.";
+			foundamount = GetCharData("ore"+orenumber);
+			if (foundamount) msg +=" (You've found "+foundamount+" so far.)";
+			$('b:contains("Itznotyerzitz")').parent().append('<tr><td><center><font color="white">'+msg+'</font></center></td></tr>');
+			if (foundamount >= 3) {
+				$('<center><br /><a href="trapper.php>Visit the Tr4pz0r</a></center>').appendTo($('a:last').parent());
+			}	
 		}
-		var msg = "You need 3 "+oretype+" ores.";
-		foundamount = GetCharData("ore"+orenumber);
-		if (foundamount) msg +=" (You've found "+foundamount+" so far.)";
-		$('b:contains("Itznotyerzitz")').parent().append('<tr><td><center><font color="white">'+msg+'</font></center></td></tr>');
-		if (foundamount >= 3) {
-			$('<center><br /><a href="trapper.php>Visit the Tr4pz0r</a></center>').appendTo($('a:last').parent());
-		}	
 	}
 // track what each square gave us:
 	// first, add onclick() to track what square we just clicked on.
@@ -4953,7 +4973,6 @@ function at_mining()
 	});		// if mining_which is set, it's because we just reloaded the page after clicking on a square.
 	var which = GetCharData("mining_which");
 	SetCharData("mining_which", 0);
-//		GM_log("which="+which);
 	if (which != 0 && which !== undefined) {
 		var got = $('.item tr td img').attr("src");		// see what we got.
 		SetCharData("which"+which,got);					// save it.
@@ -4962,13 +4981,10 @@ function at_mining()
 		var alt = $(this).attr('alt');
 		var xc = integer(alt.match(/(\d)/g)[0]);		// convert from "Open Cavern (1, 4) to the number in the "mine=1?which=xx" link.
 		var yc = integer(alt.match(/(\d)/g)[1]);
-//			GM_log("alt="+alt+"; x, y="+xc+", "+yc);
 		var foo = (xc + (yc*8));
 		if (foo > 54) return;	// that's the last of the mine-able squares
-//			GM_log("calculated which for "+ alt +" is "+foo);
 		var myimage = GetCharData("which"+foo);
 		if (myimage !== undefined) {
-//				GM_log("loading image "+myimage+ " for which="+foo);
 			$(this).attr('src',myimage);
 		}
 		else GM_log("which="+foo+" was undefined");
@@ -4976,9 +4992,35 @@ function at_mining()
 	
 }
 
-function clearwhiches() {
+function clearwhiches() 
+{
 	for (var i=9; i<=54; i++) {
 		 DelCharData("which"+i);
+	}
+}
+
+function at_gamestore()
+{
+	var select = document.getElementsByTagName("select");
+	if (select) {	// cards to trade in, while at the cashier.
+		select[0].options.selectedIndex = 1;	// select first card, saving clicks for tradeins.
+		var qty = document.getElementsByName("quantity");	
+		// put the Max Button on the last "quantity" box (out of ronin/HC, there's also a "quantity" box for buying store items with credit):
+		if (qty.length == 2) {	
+			MakeMaxButton(qty[1], function(event) {
+				var selectItem = document.getElementsByTagName("select")[0]; 
+				var box = document.getElementsByName('quantity')[1];
+				var quant = ParseSelectQuantity(selectItem, ")");
+				box.value = quant;
+			});
+		} else {	// length should equal 1
+			MakeMaxButton(qty[0], function(event) {
+				var selectItem = document.getElementsByTagName("select")[0]; 
+				var box = document.getElementsByName('quantity')[0];
+				var quant = ParseSelectQuantity(selectItem, ")");
+				box.value = quant;
+			});
+		}
 	}
 }
 
@@ -5852,6 +5894,7 @@ function at_topmenu()
 		else guy.setAttribute('target','mainpane');
 		guy.setAttribute('href', swordGuyURL);
 		swordGuy.attr('border',0);
+		swordGuy.attr('id','swordguy');	// add ID tag for later easy selection
 		swordGuy.wrap(guy);
 
 		swordGuy.get(0).addEventListener('contextmenu', function(event)
@@ -5972,7 +6015,16 @@ function at_topmenu()
 		else if (moveqs == 2) {
 			$('#themoons').parent().parent().append(if2).wrap('<td />');
 		}
-		document.location = document.links[1];
+// some defensive coding:  don't assume that "javascript:skillson()" is always document.link[1], like we used to.
+// go hunt it down specifically.
+		for (var i=0; i< document.links.length; i++) {
+//			GM_log("doclinks["+i+"]="+foo);
+			if (document.links[i].href.indexOf("skillson") != -1) break;
+		}
+		if (document.links[i].href.indexOf("skillson") != -1) {
+			GM_log("calling skillson");
+			document.location = document.links[i];
+		}
 	}
 }
 
@@ -6495,14 +6547,7 @@ function at_adminmail()
 // MAINT: Refresh until rollover is over.
 function at_maint()
 {	document.title="KoL Rollover";
-	var s = integer(GetPref("roserver")); 
-	if ((s === undefined) || isNaN(s)) s = 0; //GM_log("s="+s);
-
-	s++;
-	if (s > 7) s = 1;
-	SetPref("roserver",s);
-//	var www = (s==1)?"www":"www"+s;  //	GM_log("www="+www);
-	window.setTimeout('self.location = "http://www'+(s==1?'':s)+'.kingdomofloathing.com";',60000);
+	window.setTimeout('self.location = "http://www.kingdomofloathing.com";',60000);
 }
 
 //console.timeEnd("Mr. Script @ " + place);
