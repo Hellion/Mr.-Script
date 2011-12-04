@@ -1,4 +1,4 @@
-{	"version":"1.6.7",
+{	"version":"1.6.8",
 	"url1":"http://userscripts.org/scripts/source/65705.user.js",
 	"url2":"http://noblesse-oblige.org/hellion/scripts/MrScript.user.js",
-	"desc":"<b>Fixed:</b><br/>certain links to the Knob were pointing to the old knob URL<br/><br/><b>New:</b><br/>Navigation links (U/D/R/L) added in the Tavern Cellar<br/>Mining results are recorded and displayed<br/>links back to guildmaster upon completing guild-opening challenge<br/>link back to tr4pz0r after finding 3 of the right ore<br/>"}
+	"desc":"<b>Fixed:</b><br/>tracking of ores in the mine didn't display post-trapz0r quest<br/><br/><b>New:</b><br/>Add MAX buttons on Frat/Hippy War stores<br/>Auto-select a card and add MAX buttonfor trade-ins at the Game Shoppe Cashier<br/>"}
