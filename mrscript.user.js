@@ -1,4 +1,4 @@
-// Mr. Script v1.6.7
+// Mr. Script v1.6.8
 //
 // --------------------------------------------------------------------
 // This is a user script.  To install it, you need Greasemonkey 0.8 or
@@ -12,7 +12,7 @@
 // @name        Mr. Script
 // @namespace   http://www.noblesse-oblige.org/lukifer/scripts/
 // @description	interface overhauler for KingdomofLoathing.com
-// @version		1.6.7
+// @version		1.6.8
 // @author		Lukifer
 // @contributor	Ohayou
 // @contributor Hellion
@@ -30,14 +30,13 @@
 // @unwrap
 // ==/UserScript==
 
-// This is the latest checkin
 
 var place = location.pathname.replace(/\/|\.(php|html)$/gi, "").toLowerCase();
 //console.time("Mr. Script @ " + place);
 //GM_log("at:" + place);
 
 // n.b. version number should always be a 3-digit number.  If you move to 1.9, call it 1.9.0.  Don't go to 1.8.10 or some such.
-var VERSION = 167;
+var VERSION = 168;
 var MAXLIMIT = 999;
 var ENABLE_QS_REFRESH = 1;
 var DISABLE_ITEM_DB = 0;
@@ -487,14 +486,15 @@ function NumberLink(b)
 	var num = b.textContent.split(' ')[0];
 	while(num.indexOf(',') != -1) num = num.split(',')[0] + num.split(',')[1];
 	num = integer(num);
-	if (num < 26)
-	{	var txt = b.textContent.substring(
+	if (num < 26) {
+		var txt = b.textContent.substring(
 			b.textContent.indexOf(' '),b.textContent.length);
 		var func = "var q = document.getElementsByName(\"quantity\");" +
 			"if(q.length==0) q = document.getElementsByName(\"itemquantity\");"+
 			"if(q.length) q[0].value=" + num + "; return false;";
 		b.innerHTML = "<a href='javascript:void(0);' onclick='" + func + "'>" + num + "</a>" + txt;
-}	}
+	}	
+}
 
 // APPENDOUTFITSWAP: Aren't unified interfaces just keen?
 function AppendOutfitSwap(outfitNumber, text)
@@ -512,18 +512,18 @@ function AppendOutfitSwap(outfitNumber, text)
 		.attr('type','submit')
 		.attr('class','button')
 		.attr('value',text)
-	.click(function()
-	{	this.setAttribute('disabled','disabled');
+	.click(function() {
+		this.setAttribute('disabled','disabled');
 		var backup = GetPref('backup');
 		var which = $('input[name=swap]').val();
-		if (which <= 0 || backup == "")
-		{	top.document.getElementsByName('mainpane')[0].contentDocument.location.pathname =
+		if (which <= 0 || backup == "") {
+			top.document.getElementsByName('mainpane')[0].contentDocument.location.pathname =
 				'/inv_equip.php?action=outfit&which=2&whichoutfit=' + which + '&pwd=' + pwd;
-		} else
-		{	GM_get(server +
+		} else {
+			GM_get(server +
 			'/inv_equip.php?action=customoutfit&which=2&outfitname=' + backup + '&pwd=' + pwd,
-			function(response)
-			{	var which = $('input[name=swap]').val();
+			function(response) {
+				var which = $('input[name=swap]').val();
 				top.document.getElementsByName('mainpane')[0].contentDocument.location.pathname =
 					'/inv_equip.php?action=outfit&which=2&whichoutfit=' + which + '&pwd=' + pwd;
 			});
@@ -535,24 +535,24 @@ function AppendOutfitSwap(outfitNumber, text)
 		.append(hidden);
 
 	// Revert to backup
-	if (outfitNumber == 0)
-	{	GM_get(server + "/account_manageoutfits.php", function(response)
-		{
+	if (outfitNumber == 0) {
+		GM_get(server + "/account_manageoutfits.php", function(response) {
 			var swap = $('input[name=swap]');
 			var val; var index2; var backup = GetPref('backup');
 			var index = response.indexOf(' value="' + backup + '"');
 			if (index != -1) index = response.indexOf('name=delete',index) + 11;
 			if (index != -1) index2 = response.indexOf('>',index);
-			if (index != -1 && index2 != -1)
-			{	val = '-' + response.substring(index,index2);
+			if (index != -1 && index2 != -1) {
+				val = '-' + response.substring(index,index2);
 				swap.attr('value',val);
-			} else
-			{	swap.prev()
+			} else {
+				swap.prev()
 					.attr('disabled','disabled')
 					.val('Backup Outfit Unavailable');
 			}
 		});
-	} return span;
+	} 
+	return span;
 }
 
 // ADDINVCHECK: Extra links for items, independently of where they're displayed.
@@ -560,16 +560,13 @@ function AddInvCheck(img)
 {	// Special thanks to CMeister for the item database and much of this code, 
 	// even though we don't use his itemDB anymore and the code probably no 
 	// longer remotely resembles what he wrote originally either.
-	if (img != undefined && img.getAttribute("onclick").indexOf("desc") != -1)
-	{	
+	if (img != undefined && img.getAttribute("onclick").indexOf("desc") != -1) {
 		if ($(img).parents("table.item").size() > 0) return;	// this image already has an RCM attached; don't override.
 																// (thank you, CDMoyer, for this idea!)
-		img.addEventListener('contextmenu', function(event)
-		{	
+		img.addEventListener('contextmenu', function(event) {
 			if (this.getAttribute("done")) return;
 			item = this.parentNode.previousSibling.firstChild.getAttribute("value");
 			if (item === null) { 
-//				GM_log("null item number retrieved... trying again:"); 
 				item = this.parentNode.previousSibling.firstChild.nextSibling.getAttribute("value");
 			}
 			if (item && item.length > 4) item = item.substring(0,item.length-9); // correct for prices in the mall
@@ -591,16 +588,16 @@ function AddInvCheck(img)
 				var itemqty = invcache[item];	if (itemqty === undefined) itemqty = 0;
 
 				var addText = "";
-				if (item == 1605) // catalysts
-				{	var reagents = invcache[346]; if (reagents === undefined) reagents = 0;
+				if (item == 1605) {		// catalysts
+					var reagents = invcache[346]; if (reagents === undefined) reagents = 0;
 					var solutions = invcache[1635]; if (solutions === undefined) solutions = 0;
 					addText = "(" + reagents + " reagent"; if (reagents != 1) addText += "s";
 					addText += ", " + itemqty + " catalyst"; if (itemqty != 1) addText += "s";
 					addText += " and " + solutions + " scrummie"; if (solutions != 1) addText += "s";
 					addText += " in inventory)";
 				}
-				else if (item == 1549) // MSG
-				{	var noodles = invcache[304]; if (noodles === undefined) noodles = 0;
+				else if (item == 1549) {	// MSG
+					var noodles = invcache[304]; if (noodles === undefined) noodles = 0;
 					addText = "(" + noodles + " noodle"; if (noodles != 1) addText += "s";
 					addText += " and " + itemqty + " MSG"; if (itemqty != 1) addText += "s";
 					addText += " in inventory)";
@@ -630,8 +627,7 @@ function AddTopLink(putWhere, target, href, html, space)
 function AddLinks(descId, theItem, formWhere, path) {
 	// Special thanks to CMeister for the item database and much of this code
 	var itemNum = parseInt($(theItem).parents('.item').attr('rel').match(/id=(\d+)/)[1],10);	// yay for CDM putting item numbers where we can get 'em easily
-	if (!itemNum) 
-	{	
+	if (!itemNum) {
 		GM_log("unable to locate item number in AddLinks()");
 		return '';
 	}
@@ -752,8 +748,7 @@ function AddLinks(descId, theItem, formWhere, path) {
 			addWhere.append(AppendLink("[visit Mourn]","pandamonium.php?action=mourn")); break;
 
 		case   23: 																// gum
-			if (document.referrer.indexOf('hermit') != -1 && path == "/store.php") 	// came to the store directly from the hermit?  use it automatically.
-			{	
+			if (document.referrer.indexOf('hermit') != -1 && path == "/store.php") {	// came to the store from the hermit?  use it automatically.
 				top.document.getElementsByName('mainpane')[0].contentDocument.location.pathname = 'inv_use.php?pwd='+pwd+'&which=3&whichitem=23';
 			} else 	{	
 				addWhere.append(AppendLink('[use]', 'inv_use.php?pwd='+pwd+'&which=3&whichitem=23'));
@@ -761,10 +756,10 @@ function AddLinks(descId, theItem, formWhere, path) {
 			break;
 
 		case   42: 																// hermit permit
-			if (document.referrer.indexOf('hermit') != -1 && path == "/store.php") 
-			{	top.document.getElementsByName('mainpane')[0].contentDocument.location.pathname = '/hermit.php';
-			} else 
-			{	addWhere.append(AppendLink('[hermit]', 'hermit.php'));
+			if (document.referrer.indexOf('hermit') != -1 && path == "/store.php") {
+				top.document.getElementsByName('mainpane')[0].contentDocument.location.pathname = '/hermit.php';
+			} else {
+				addWhere.append(AppendLink('[hermit]', 'hermit.php'));
 			}	
 			break;
 
@@ -775,16 +770,15 @@ function AddLinks(descId, theItem, formWhere, path) {
 			break;
 
 		case   40: 																// casino pass
-			if (document.referrer.indexOf('casino') != -1 && path == "/store.php") 
-			{	top.document.getElementsByName('mainpane')[0].contentDocument.location.pathname = '/casino.php';
-			} else
-			{	addWhere.append(AppendLink('[casino]', 'casino.php'));
+			if (document.referrer.indexOf('casino') != -1 && path == "/store.php") {
+				top.document.getElementsByName('mainpane')[0].contentDocument.location.pathname = '/casino.php';
+			} else {
+				addWhere.append(AppendLink('[casino]', 'casino.php'));
 			}
 			break;
 
 		case  236: 																// cocktailcrafting kit
-			if (document.referrer.indexOf('craft') != -1 && path == "/store.php") // bought via Mr. Script button? auto-use.
-			{	
+			if (document.referrer.indexOf('craft') != -1 && path == "/store.php") {		// bought via Mr. Script button? auto-use.
 				top.document.getElementsByName('mainpane')[0].contentDocument.location.pathname = '/inv_use.php?pwd='+pwd+'&whichitem=236&bounce=craft.php?a=1';
 			} else {
 				doWhat = 'oneuse';
@@ -792,8 +786,7 @@ function AddLinks(descId, theItem, formWhere, path) {
 			break;
 
 		case  157: 																// E-Z cook oven
-			if (document.referrer.indexOf('craft') != -1 && path == "/store.php")	// bought via Mr. Script button?  auto-use.
-			{	
+			if (document.referrer.indexOf('craft') != -1 && path == "/store.php") {		// bought via Mr. Script button?  auto-use.
 				top.document.getElementsByName('mainpane')[0].contentDocument.location.pathname = '/inv_use.php?pwd='+pwd+'&whichitem=157&bounce=craft.php?a=1';
 			} else {
 				doWhat = 'oneuse';
@@ -908,17 +901,18 @@ function AddLinks(descId, theItem, formWhere, path) {
 
 // RIGHTCLICKMP: Fill up with standard restoratives.
 function RightClickMP(event)
-{	var json = GetCharData("mplist");
-	if (json != undefined && json != "")
-	{	var num = 0; var quant = 0; var list = eval('('+json+')');
+{	
+	var json = GetCharData("mplist");
+	if (json != undefined && json != "") {
+		var num = 0; var quant = 0; var list = eval('('+json+')');
 			 if (list['518'])  num = "518";	// MMJ
 		else if (list['344'])  num = "344";	// KG seltzer
 		else if (list['2639']) num = "2639";// BCSoda
 		else if (list['1658']) num = "1658";// Cherry Cloaca
 		else if (list['1659']) num = "1659";// Diet Cloaca
 		else if (list['1660']) num = "1660";// Regular Cloaca
-		if (num > 0)
-		{	quant = FindMaxQuantity(integer(num), list[num], 0, GetPref("safemax"));
+		if (num > 0) {
+			quant = FindMaxQuantity(integer(num), list[num], 0, GetPref("safemax"));
 			var url = server + '/inv_use.php?pwd='+ pwd +
 			    '&action=useitem&bounce=skills.php?action=useditem&itemquantity='+quant+'&whichitem='+num;
 //			GM_log("RC-MP: url="+url);
@@ -931,9 +925,9 @@ function RightClickMP(event)
 
 // RIGHTCLICKHP: Heal up with spells.
 function RightClickHP(event)
-{	var json = GetCharData("hplist");
-	if (json != undefined && json != "")
-	{
+{	
+	var json = GetCharData("hplist");
+	if (json != undefined && json != "") {
 		var num = 0; var quant = 0; var list = eval('('+json+')');
 		var order; var heal = GetCharData("maxHP") - GetCharData("currentHP");
 
@@ -948,11 +942,12 @@ function RightClickHP(event)
 
 		for(i=0; i<6; i++) if (list[order[i]]) { num = order[i]; break; }
 //		GM_log("num="+num);
-		if (num > 0)
-		{	var url = server+'/skills.php?action=Skillz&whichskill='+num+"&quantity="+1+'&pwd='+pwd;
+		if (num > 0) {
+			var url = server+'/skills.php?action=Skillz&whichskill='+num+"&quantity="+1+'&pwd='+pwd;
 //			GM_log("RC-HP: url="+url);
-			GM_get(url, function(result)
-				{	document.location.reload(); });
+			GM_get(url, function(result) {
+				document.location.reload(); 
+			});
 		}	
 	} 
 	event.stopPropagation(); event.preventDefault(); return false;
@@ -963,8 +958,7 @@ function ParseSelectQuantity(selectItem, endToken)
 {	
 	var index = selectItem.selectedIndex;
 	var howMany = 1;
-	if (selectItem.options[index].textContent.indexOf("(") != -1)
-	{	
+	if (selectItem.options[index].textContent.indexOf("(") != -1) {
 		howMany = selectItem.options[index].textContent;
 		if (howMany.charAt(0) == '(') return 999999;
 		howMany = howMany.split("(")[1];
@@ -988,13 +982,13 @@ function MakeMaxButton(textField, maxfunction)
 
 	.click(maxfunction)
 
-	.mousedown(function()
-	{	$(this).parent().attr('style',
+	.mousedown(function() {
+		$(this).parent().attr('style',
 		"background-color:#999999; " + stizzyle);
 	})
 
-	.mouseup(function()
-	{	$(this).parent().attr('style', "background-color:#ffffff; " + stizzyle);
+	.mouseup(function() {
+		$(this).parent().attr('style', "background-color:#ffffff; " + stizzyle);
 	});
 
 	// I am a horrible, horrible hack. If anyone knows how to make it
@@ -1002,8 +996,8 @@ function MakeMaxButton(textField, maxfunction)
 	$(textField)
 		.attr('style','border: none;')
 		.before(table)
-		.mouseover(function()
-		{	if (this.value.length > 5) this.value = "1"; 
+		.mouseover(function() {
+			if (this.value.length > 5) this.value = "1"; 
 		});
 
 	$(table)
@@ -1023,10 +1017,10 @@ function MakeMaxButton(textField, maxfunction)
 
 // SKILLUSELIMIT: Calculate how many times various skills should be cast.
 function SkillUseLimit(skillNum)
-{	var limit = 999999; var min = 0; var max = 0;
+{	
+	var limit = 999999; var min = 0; var max = 0;
 	var safeLevel = GetPref('safemax');
-	switch(integer(skillNum))
-	{	
+	switch(integer(skillNum)) {
 		case 8000: case 8001: case 8002: limit = 3; break;	// 3 Tomes maximum.	
 		case 3012: limit = 1;  break;						// Cannelloni Cocoon
 		case 8200: case 8201: limit = 1; break;				// Grimoires
@@ -1042,11 +1036,9 @@ function SkillUseLimit(skillNum)
 		case 6026: limit = 50; break;						// AT Sea skill
 		case 6028: limit = 5; break;						// AT Trader skill (Inigo's)
 	} 
-	if (max != 0)
-	{	
+	if (max != 0) {
 		var hp = GetCharData("maxHP") - GetCharData("currentHP");
-		switch(safeLevel)
-		{ 	
+		switch(safeLevel) {
 			case 0: limit = integer(0.5+hp/((min+max)/2.0)); break;
 			case 1: limit = integer(0.5+hp/(((max*2)+min)/3.0)); break;
 			case 2: limit = integer(0.5+hp/max); break;
@@ -1058,14 +1050,12 @@ function SkillUseLimit(skillNum)
 // ONFOCUS: Make text input boxes clear on focus
 function AddAutoClear(box, setting)
 {	
-	if (setting == 2)
-	{	
+	if (setting == 2) {
 		$(box)
 			.attr('onFocus', 'this.select();')
 			.attr('onClick', 'this.select();')
 			.attr('OnDblClick', 'this.select();');
-	} else if (setting == 1)
-	{	
+	} else if (setting == 1) {
 		$(box)
 			.attr('onFocus', 'if (this.value==1) this.value="";')
 			.attr('onClick', 'if (this.value==1) this.value="";')
@@ -1076,10 +1066,8 @@ function AddAutoClear(box, setting)
 // GOGOGADGETPLUNGER: Convert meat-paste links to The Plunger.
 function GoGoGadgetPlunger()
 {	
-	if (GetCharData("plungeraccess") == "Y")
-	{	
-		$('a[href*="craft.php?mode=combine"]').each(function()
-		{	
+	if (GetCharData("plungeraccess") == "Y") {
+		$('a[href*="craft.php?mode=combine"]').each(function() {
 			href = this.getAttribute('href');
 			href = href.replace('&a=','&item1=');
 			href = href.replace('&b=','&item2=');
@@ -1096,28 +1084,25 @@ function BlackBirdStuff()
 	this.innerHTML = '[flap, flap, flap]';
 
 	// Fire callback to find current familiar
-	GM_get(server + '/familiar.php', function(txt)
-	{	
+	GM_get(server + '/familiar.php', function(txt) {
 		var curfam = txt.match(/fam\([0-9]{1,3}\)/)
 			.toString().match(/[0-9]{1,3}/).toString();
 		SetCharData('curfam', curfam);
 
 		// 2nd callback to equip blackbird
 		GM_get(server + '/familiar.php?action=newfam&newfam=59&pwd='+
-			pwd, function(txt2)
-		{	//Now fire another callback to use the map
-			GM_get(server + '/inv_use.php?pwd=' + pwd +
-				'&which=3&whichitem=2054', function(txt3)
-			{	// Redirect main pane to store
-				top.document.getElementsByName('mainpane')[0].contentDocument.location.pathname =
-					'/store.php?whichstore=l';
-				//...and another callback to put your familiar back
-				var curfam = GetCharData('curfam');
-				if (curfam > 0)
-				GM_get(server + '/familiar.php?action=newfam&newfam=' +
-					curfam + '&pwd=' + pwd, function(txt4)
-				{
-				});	
+			pwd, function(txt2) {
+				//Now fire another callback to use the map
+				GM_get(server + '/inv_use.php?pwd=' + pwd +
+					'&which=3&whichitem=2054', function(txt3)
+				{	// Redirect main pane to store
+					top.document.getElementsByName('mainpane')[0].contentDocument.location.pathname =
+						'/store.php?whichstore=l';
+					//...and another callback to put your familiar back
+					var curfam = GetCharData('curfam');
+					if (curfam > 0)
+					GM_get(server + '/familiar.php?action=newfam&newfam=' +
+						curfam + '&pwd=' + pwd, function(txt4) { });	
 			});	
 		});	
 	});
@@ -1125,7 +1110,8 @@ function BlackBirdStuff()
 
 // UNEQUIPUPDATE: Callback to unequip inline.
 function UnequipUpdate(event)
-{	var url = this.href;
+{	
+	var url = this.href;
 	if (url.indexOf("http://") != -1) url = url.substring(7,url.length);
 	GM_get(url);
 	var asdf = $(this.parentNode).html(' ');
@@ -1136,17 +1122,18 @@ function UnequipUpdate(event)
 
 // EQUIPUPDATE: This is silly, but the alternatives were even sillier.
 function EquipUpdate(txt, itm)	// txt = HTML of GM_get() result.  itm = type of item trying to be equipped.
-{	var equipped = '';
+{	
+	var equipped = '';
 	if (itm == 8) equipped = txt.indexOf(" equips an item:");
-	else
-	{	equipped = txt.indexOf("You equip");
+	else {
+		equipped = txt.indexOf("You equip");
 		if (equipped == -1) equipped = txt.indexOf("Item equipped:");
 	}
 	var zel = document.getElementsByTagName('select')[itm];
 	var giftd = zel.parentNode.previousSibling;
 
-	if (equipped != -1)
-	{	var zoik = txt.match(/http\:\/\/images.k[^\'\"]+gif/).toString();
+	if (equipped != -1) {
+		var zoik = txt.match(/http\:\/\/images.k[^\'\"]+gif/).toString();
 		// Man, this is SO the stupid way to do this.
 		if (itm == 8) zoik = txt.split(zoik)[1]
 			.match(/http\:\/\/images.k[^\'\"]+gif/).toString();
@@ -1167,20 +1154,15 @@ function EquipUpdate(txt, itm)	// txt = HTML of GM_get() result.  itm = type of 
 		if (itm < 5) // hat through pants only
 		{
 			pwr = txt.split(zoik)[2].match(/\(Power[^\)]+\)/).toString();
-			if (itm == 2)
-			{	
+			if (itm == 2) {
 				var oh = document.getElementsByTagName('select')[3];
-				if (pwr.indexOf("1h") != -1)
-				{	
-					if (jqtd.children('font:contains(1h)')) 
-					{
+				if (pwr.indexOf("1h") != -1) {
+					if (jqtd.children('font:contains(1h)')) {
 						top.frames[2].location.reload(); // Dammit.
 					}
-				} else
-				{	
+				} else {
 					zel.setAttribute('hands','2');
-					if (oh.firstChild.value != 0)
-					{	
+					if (oh.firstChild.value != 0) {
 						oh.appendChild(document.createElement('option'));
 						oh.firstChild.value = 0;
 					} 
@@ -1210,19 +1192,18 @@ function EquipUpdate(txt, itm)	// txt = HTML of GM_get() result.  itm = type of 
 
 		jqtd.append(sigh)
 			.append(uneqlnk);
-	} else
-	{	
+	} else {
 		zel.setAttribute('value',zel.getAttribute('previtem'));
 		var zoik = zel.getAttribute('previmg');
 		if (zoik != 0) giftd.firstChild.setAttribute('src',zoik);
 		else giftd.removeChild(giftd.firstChild);
-}	}
+	}	
+}
 
 // DEFAULTS: Pay no attention to the function behind the curtain.
 function Defaults(revert)
 {
-	if (revert == 0)
-	{	
+	if (revert == 0) {
 		if (GetPref('splitinv') == undefined)	SetPref('splitinv', 1);
 		if (GetPref('splitquest') == undefined)	SetPref('splitquest', 1);
 		if (GetPref('splitmsg') == undefined)	SetPref('splitmsg', 0);
@@ -1270,8 +1251,8 @@ function Defaults(revert)
 		if (GetPref('menu2link8') == undefined) SetPref('menu2link8', 'calendar;http://noblesse-oblige.org/calendar');
 		if (GetPref('menu2link9') == undefined) SetPref('menu2link9', ';');
 	}
-	else if (revert==1) // I'm definitely going to hell.
-	{	SetPref('menu1link0', 'market;town_market.php');
+	else if (revert==1) {
+		SetPref('menu1link0', 'market;town_market.php');
 		SetPref('menu1link1', 'hermit;hermit.php');
 		SetPref('menu1link2', 'untinker;forestvillage.php?place=untinker');
 		SetPref('menu1link3', 'mystic;mystic.php');
@@ -1281,8 +1262,8 @@ function Defaults(revert)
 		SetPref('menu1link7', 'doc;galaktik.php');
 		SetPref('menu1link8', 'lab;cobbsknob.php?action=dispensary'); // store.php?whichstore=g');
 		SetPref('menu1link9', 'fruit;store.php?whichstore=h');
-	} else if (revert==2)
-	{	SetPref('menu2link0', 'buy;searchmall.php');
+	} else if (revert==2) {
+		SetPref('menu2link0', 'buy;searchmall.php');
 		SetPref('menu2link1', 'trade;makeoffer.php');
 		SetPref('menu2link2', 'sell;managestore.php');
 		SetPref('menu2link3', 'collection;managecollection.php');
@@ -1297,7 +1278,8 @@ function Defaults(revert)
 
 // ADDTOPOPTION: Add a menu option in compact mode.
 function AddTopOption(name, url, select, putBefore)
-{	var option = document.createElement('option');
+{	
+	var option = document.createElement('option');
 	option.innerHTML = name; option.value = url;
 	if (putBefore == 0) select.appendChild(option);
 	else select.insertBefore(option, putBefore);
@@ -1328,14 +1310,12 @@ function MakeOption(text, num, pref, opt1, opt2)
 	tr.appendChild(td);
 
 	td = document.createElement('td');
-	if (num < 0) // Man, am I sneaky.
-	{	
+	if (num < 0) {	
 		select = document.createElement('input');
 		select.setAttribute('type','text');
 		select.setAttribute('class','text');
 		select.setAttribute('maxlength','256');
-		if (num == -2)
-		{	
+		if (num == -2) {	
 			var preflink = prefVal.split(';')[1];
 			if (preflink != undefined) select.setAttribute('value', preflink);
 			else select.setAttribute('value', '');
@@ -1343,8 +1323,7 @@ function MakeOption(text, num, pref, opt1, opt2)
 		else select.setAttribute('value', prefVal);
 	} else {	
 		select = document.createElement('select');
-		for (var i=0; i<num; i++)
-		{	
+		for (var i=0; i<num; i++) {	
 			var option = document.createElement('option');
 			if (i == prefVal) option.setAttribute('selected',1);
 			option.value = i; select.appendChild(option);
@@ -1400,9 +1379,8 @@ function at_main() {
 	setTimeout("if (frames[0].location == 'about:blank')" +
              "  frames[0].location = 'topmenu.php'", 1500);	// fix for top menu not always loading properly
 	if (GetCharData("plungeraccess") == undefined || GetCharData("plungeraccess") == 0) {	// not set yet?  go check.
-		GM_get(server + "/knoll.php",function(response)
-		{	if (response != "")
-			{	
+		GM_get(server + "/knoll.php",function(response) {
+			if (response != "")	{	
 				SetCharData("plungeraccess","Y");
 			} else {
 				SetCharData("plungeraccess","N");
@@ -1426,16 +1404,6 @@ function at_main() {
 // may also want to add a check for Funkslinging here.
 }
 
-// MAIN: call main_c if needed (todo: remove this)
-//function at_main() {
-//	GM_log("location.pathname="+location.pathname);
-//	if ((location.pathname == "/main.html") ||	
-//	  (location.pathname == "/main.php")) { 	
-//		at_main_c();
-//		return;
-//	}
-//}
-
 // GAME: look for updates and post link if needed.
 // n.b. game.php is the outermost, non-frame window that contains all the frames.
 // 		as such, the script only sees it exactly once, when you're logging in.
@@ -1452,12 +1420,10 @@ function at_game() {
 	GM_get("noblesse-oblige.org/hellion/scripts/MrScript.version.json",
 		function(txt)
 		{	txt = txt.replace(/\n/,'');		// strip carriage returns so that eval() doesn't blow up
-//			GM_log("txt="+txt);
 			var json = eval('('+txt+')');
 			if (!json.version) return;
 			var vnum = json.version.replace(/\./g, "");	// strip points: 1.4.3 => 143.
 			if (!vnum) return;
-//			GM_log("vnum="+vnum+",VERSION="+VERSION);
 			if (integer(vnum) <= VERSION)		// number returned via lookup is not newer than what this script says it is...
 			{	persist('MrScriptLastUpdate',
 					integer(new Date().getTime()/3600000)); return;
@@ -1719,15 +1685,15 @@ function at_fight() {
 			} else {	// handling adventure.php?snarfblat=X options.
 				var location = integer(square.match(/(\d+)/)[1]);	// the 185 in "adventure.php?snarfblat=185"
 				switch (location)	{
-				case 182:
-				case 183:
-				case 184:
-				case 185:	// Junkyard: add onclick to "adventure again" link to tell ourselves where we are.
-					$('a:contains("dventure")').click(function() {
-						var a = $(this);
-						SetCharData("square",a.attr('href'));
-					});
-				break;
+					case 182:
+					case 183:
+					case 184:
+					case 185:	// Junkyard: add onclick to "adventure again" link to tell ourselves where we are.
+						$('a:contains("dventure")').click(function() {
+							var a = $(this);
+							SetCharData("square",a.attr('href'));
+						});
+					break;
 				}
 			}
 		}
@@ -2339,8 +2305,8 @@ function at_managestore() {
 }
 
 // MALLSTORE: add fun links to (some of) the things you buy!
-function at_mallstore()
-{	var img = document.images[0];
+function at_mallstore() {
+	var img = document.images[0];
 	if (img == undefined) return;
 	var onclick = img.getAttribute("onclick");
 	if (onclick != undefined && onclick.indexOf("desc") != -1) {
@@ -2527,261 +2493,261 @@ function at_inventory()
 			}	
 		}
 
-		if (quickequip > 10) // was > 0; we're disabling this for now.
-		{
-			var shelfToNum =
-			{"Hats:":0,"Shirts:":1,"Melee Weapons:":2,"Ranged Weapons:":2,"Mysticality Weapons:":2,
-			"Weapons:":2,"Off-Hand Items:":3,"Pants:":4,"Accessories:":5,"Familiar Equipment:":8};
-
-			numToEquipType =
-			{0:"Hat:",1:"Shirt:",2:"Weapon:",3:"Off-Hand:",4:"Pants:",
-			5:"Accessory 1:",6:"Accessory 2:",7:"Accessory 3:",8:"Familiar:"};
-
-			equipTypeToNum =
-			{"Hat:":0,"Shirt:":1,"Weapon:":2,"Off-Hand:":3,"Pants:":4,
-			"Accessory_1:":5,"Accessory_2:":6,"Accessory_3:":7,"Familiar:":8};
-
-			shelfNumToLink =
-			{0:"Hats",1:"Shirts",2:"Weapons",3:"Off-Hand",4:"Pants",
-			5:"Accessories",6:"Accessories",7:"Accessories",8:"Familiar"};
-
-			var equips = []; var pics = []; var selects = []; var curgear = [];
-			var curgearnum = []; var hands = 1;
-//			GetItemDB();	// 05-Jun-2011
-
-			// First pass: Get currently equipped items
-//			var gearList = selecty.parentNode.previousSibling.firstChild;
-			var gearList = document.getElementById('curequip');
-			len = gearList.childNodes.length;
-			for (var i=0, len=gearList.childNodes.length; i<len; i++) {
-				var tr = gearList.childNodes[i];
-
-				if (tr.childNodes.length < 2) break;
-				//if (tr.childNodes[0].innerHTML.length == 0) continue;
-
-				var shelfText = tr.childNodes[0].textContent.replace(/[\s]/, '_');
-
-				var shelfNum = equipTypeToNum[shelfText];
-				//var shelfNum = i;
-
-				// Store item number and name of currently equipped item.
-				if (tr.childNodes[1].firstChild
-				&& tr.childNodes[1].firstChild.tagName == 'IMG') {
-					if (shelfNum == 2 && tr.childNodes[2]
-						.textContent.indexOf("1h") == -1) hands = 2;
-					equips[shelfNum] = tr.childNodes[2];
-
-					var pic = tr.childNodes[1].firstChild;
-					if (pic != undefined) {
-						pics[shelfNum] = pic.parentNode.innerHTML;
-						var piclic = pic.getAttribute('onclick');
-						if (piclic != undefined) {
-							var itm = DescToItem(piclic);
-							if (itm) {
-								curgear[shelfNum] = itm[1];		// was ['name']
-								curgearnum[shelfNum] = itm[0];	// was ['itemid']
-							}	
-						}	
-					}	
-				}
-
-				// Item slot is empty
-				else {
-					equips[shelfNum] = (tr.childNodes.length > 2 ?
-						tr.childNodes[2] : tr.childNodes[1]);
-				}
-
-				// Create select menus
-				var newsel = document.createElement('select');
-				newsel.setAttribute('style',"width:250px;");
-				newsel.setAttribute('name', shelfNum);
-				if (shelfNum == 3) {
-					if (hands == 2) newsel.setAttribute('disabled','disabled');
-				}
-				if (curgearnum[shelfNum] > 0) {
-					newsel.appendChild(document.createElement('option'));
-				}
-				selects[shelfNum] = newsel;
-			}
-
-			// Second pass: Create new table and rows.
-			var nuTabl = $(document.createElement('table'));
-			var len = 9;
-			for (var i=0; i<len; i++) {
-				var extra = (i==8 && famLock ? '<a href="' + famLock.href + '">' +
-				'<img class="hand" src="'+ famLock.firstChild.src +
-				'" style="height:20px;width:20px;margin-right:15px;" /></a>' : '');
-
-				nuTabl.append('<tr align="right"><td height="30">' + extra +
-				'<a class="nounder" href="#' + shelfNumToLink[i] + '">' +
-				numToEquipType[i] + '</a></td><td>' +
-				(pics[i] != undefined ? pics[i] : '&nbsp;') +
-				'</td><td> </td><td align="left"> </td></tr>');
-
-				if (curgear[i] == undefined) {
-					curgear[i] = "";
-					curgearnum[i] = 0;
-				}
-
-				// Create selects for blank rows
-				if (selects[i] == undefined) {
-					var newsel = document.createElement('select');
-					newsel.setAttribute('style',"width:250px;");
-					newsel.setAttribute('name', i);
-					//if (curgearnum[i] != 0)
-					newsel.appendChild(document.createElement('option'));
-					selects[i] = newsel;
-					equips[i] = document.createElement('td');
-				}
-			}
-
-			// Attach new gear table and links to the DOM
-			$(gearList.parentNode)
-				.before(nuTabl.get(0))
-				.before(unlink.parentNode)
-				.before(document.createElement('br'))
-				.attr('style','display:none;');
-
-			// Iterate through links
-			len = lnks.length;
-			var lensub = len-1;
-			var theSel, itemText, shelf;
-			for (var i=0; i<len; i++) {
-				var lnk = lnks[i];
-
-				// Switch to new shelf, and add anchor
-				if (lnk.href.substr(0,4) == 'java') {
-					shelf = shelfToNum[lnk.text];
-					continue;
-				}
-
-				// Add equippable item to drop-down of current shelf.
-				else if (lnk.text == "[equip]" || lnk.text == "[offhand]") {
-					itemText = lnk.parentNode.parentNode.firstChild.innerHTML;
-
-					// Three iterations for accessories.
-					var limit = 1; if (shelf == 5) limit = 3;
-					for (var j=0; j<limit; j++) {
-						var zshelf; if (lnk.text == "[offhand]") zshelf = 3;
-						else zshelf = shelf+j;
-						theSel = selects[zshelf];
-						if (theSel == undefined) continue;
-
-						// Create the select menu option
-						var opt = document.createElement("option");
-						opt.setAttribute("value",lnk.href.split("item=")[1]);
-						if (lnk.text == "[offhand]") {
-							opt.setAttribute('dualwield', 1);
-						}
-						opt.innerHTML = itemText;
-
-						// Add the currently worn item to the menu, if necessary
-						if (!theSel.getAttribute("gearfound")) {
-							var curText = curgear[zshelf].toLowerCase();
-							var tstText = itemText.toLowerCase();
-							if (tstText == curText) selects[zshelf].setAttribute('gearfound','gearfound');
-							else if (tstText > curText) {
-								var opt2 = document.createElement("option");
-								opt2.setAttribute("value",curgearnum[zshelf]);
-								opt2.innerHTML = curgear[zshelf];
-								theSel.appendChild(opt2);
-								theSel.setAttribute('gearfound','gearfound');
-							}
-						}
-						theSel.appendChild(opt);
-					}
-				}
-			}
-
-			gearList = nuTabl.get(0).firstChild;
-
-			var unq = ["hat","shirt","weapon","offhand","pants",
-						"acc1","acc2","acc3","familiarequip"];
-
-			// Add the select menus to the DOM and select the currently worn item
-			for (var i=0; i<9; i++) {
-				var row = gearList.childNodes[i];
-				var eqnum = i;
-				var tempsel = selects[i]; var nuus = [];
-				var action = "equip";
-
-				// Add currently equipped item if not found in equip links
-				if (!tempsel.getAttribute('gearfound') && curgearnum[i] > 0) {
-					var newopt = document.createElement('option');
-					newopt.innerHTML = curgear[i];
-					newopt.setAttribute("value", curgearnum[i]);
-					tempsel.appendChild(newopt);
-					//tempsel.setAttribute('gearfound');
-				}
-
-				for (var j=0, len2=tempsel.childNodes.length; j<len2; j++) {
-					if (tempsel.childNodes[j].value == curgearnum[i]) {
-						tempsel.selectedIndex = j;	break;
-					}	
-				}
-
-				// Attach event handler that does the work
-				tempsel.addEventListener('change',function(event)
-				{	
-					if (this.value == 0) return;
-					var loading =
-	'data:image/gif;base64,R0lGODlhEgASAJECAMDAwNvb2%2F%2F%2F%2FwAAACH%2FC05FVFNDQVBFMi4wAwEAAAAh%2BQQFCgACACwAAAAAEgASAAACMpSPqQmw39o7IYjo6qpacpt8iKhoITiiG0qWnNGepjCv7u3WMfxqO0%2FrqVa1CdCIRBQAACH5BAUKAAIALAcAAQAIAAYAAAIOVCKZd2osAFhISmcnngUAIfkEBQoAAgAsCwADAAYACAAAAg5UInmnm4ZeAuBROq%2BtBQAh%2BQQFCgACACwLAAcABgAIAAACD5QTJojH2gQAak5jKdaiAAAh%2BQQFCgACACwHAAsACAAGAAACDpQdcZgKIFp4Lzq6RF0FACH5BAUKAAIALAMACwAIAAYAAAIOFCCZd2osQlhISmcnngUAIfkEBQoAAgAsAQAHAAYACAAAAg4UIHmnm4ZeCuFROq%2BtBQAh%2BQQFCgACACwBAAMABgAIAAACD5QBJojH2kQIak5jKdaiAAA7';
-
-					this.setAttribute('previtem',this.value);
-					var imgtd = this.parentNode.previousSibling;
-
-					$(imgtd.firstChild).attr('style','display:none;')
-					.before('<img src="'+loading+'" width="30" height="30" />');
-
-					if (this.childNodes[this.selectedIndex]
-						.getAttribute('dualwield')) action = "dualwield";
-
-					if (imgtd.childNodes.length > 0)
-						this.setAttribute('previmg',imgtd.firstChild.src);
-					else this.setAttribute('previmg',0);
-
-					var ztype = integer(this.getAttribute('name'));
-					var url = /*'http://'+*/server+"/inv_equip.php?pwd="+
-					pwd+"&which=2&action="+action+"&whichitem="+this.value;
-					if (ztype == 5) url += "&slot=1";
-					else if (ztype == 6) url += "&slot=2";
-					else if (ztype == 7) url += "&slot=3";
-
-				// I forget why I had to do this, but I'm sure there was a reason.
-				// perhaps because ztype is out of scope in the anonymous function,
-				// or because we'd need a closure here in order to make it work right?
-					switch(ztype) {
-						case 0: GM_get(url, function(t){EquipUpdate(t,0);}); break;
-						case 1: GM_get(url, function(t){EquipUpdate(t,1);}); break;
-						case 2: GM_get(url, function(t){EquipUpdate(t,2);}); break;
-						case 3: GM_get(url, function(t){EquipUpdate(t,3);}); break;
-						case 4: GM_get(url, function(t){EquipUpdate(t,4);}); break;
-						case 5: GM_get(url, function(t){EquipUpdate(t,5);}); break;
-						case 6: GM_get(url, function(t){EquipUpdate(t,6);}); break;
-						case 7: GM_get(url, function(t){EquipUpdate(t,7);}); break;
-						case 8: GM_get(url, function(t){EquipUpdate(t,8);}); break;
-					}
-				}, false);
-
-				gearList.childNodes[i].childNodes[2].appendChild(tempsel);
-
-				// Add power and unequip links
-				var pow = '';
-				var descTD = $(row.childNodes[3]);
-				pow = equips[i].innerHTML.match(/\(Pow.+\)/);
-				if (pow != null) descTD.append('<font size="1"> '+ pow+ '</font> ');
-				else descTD.append(' ');
-
-				if (row.childNodes[1].firstChild.tagName == 'IMG') {
-					var un = document.createElement('a');
-					un.innerHTML = '<font size="1">[unequip]</font>';
-					un.setAttribute('href', 'inv_equip.php?pwd='+pwd+
-					'&which=2&action=unequip&type='+unq[i]);
-					un.addEventListener('click', UnequipUpdate, false);
-					descTD.append(un);
-				}
-			}
-		} // quickequip
+//		if (quickequip > 10) // was > 0; we're disabling this for now.
+//		{
+//			var shelfToNum =
+//			{"Hats:":0,"Shirts:":1,"Melee Weapons:":2,"Ranged Weapons:":2,"Mysticality Weapons:":2,
+//			"Weapons:":2,"Off-Hand Items:":3,"Pants:":4,"Accessories:":5,"Familiar Equipment:":8};
+//
+//			numToEquipType =
+//			{0:"Hat:",1:"Shirt:",2:"Weapon:",3:"Off-Hand:",4:"Pants:",
+//			5:"Accessory 1:",6:"Accessory 2:",7:"Accessory 3:",8:"Familiar:"};
+//
+//			equipTypeToNum =
+//			{"Hat:":0,"Shirt:":1,"Weapon:":2,"Off-Hand:":3,"Pants:":4,
+//			"Accessory_1:":5,"Accessory_2:":6,"Accessory_3:":7,"Familiar:":8};
+//
+//			shelfNumToLink =
+//			{0:"Hats",1:"Shirts",2:"Weapons",3:"Off-Hand",4:"Pants",
+//			5:"Accessories",6:"Accessories",7:"Accessories",8:"Familiar"};
+//
+//			var equips = []; var pics = []; var selects = []; var curgear = [];
+//			var curgearnum = []; var hands = 1;
+////			GetItemDB();	// 05-Jun-2011
+//
+//			// First pass: Get currently equipped items
+////			var gearList = selecty.parentNode.previousSibling.firstChild;
+//			var gearList = document.getElementById('curequip');
+//			len = gearList.childNodes.length;
+//			for (var i=0, len=gearList.childNodes.length; i<len; i++) {
+//				var tr = gearList.childNodes[i];
+//
+//				if (tr.childNodes.length < 2) break;
+//				//if (tr.childNodes[0].innerHTML.length == 0) continue;
+//
+//				var shelfText = tr.childNodes[0].textContent.replace(/[\s]/, '_');
+//
+//				var shelfNum = equipTypeToNum[shelfText];
+//				//var shelfNum = i;
+//
+//				// Store item number and name of currently equipped item.
+//				if (tr.childNodes[1].firstChild
+//				&& tr.childNodes[1].firstChild.tagName == 'IMG') {
+//					if (shelfNum == 2 && tr.childNodes[2]
+//						.textContent.indexOf("1h") == -1) hands = 2;
+//					equips[shelfNum] = tr.childNodes[2];
+//
+//					var pic = tr.childNodes[1].firstChild;
+//					if (pic != undefined) {
+//						pics[shelfNum] = pic.parentNode.innerHTML;
+//						var piclic = pic.getAttribute('onclick');
+//						if (piclic != undefined) {
+//							var itm = DescToItem(piclic);
+//							if (itm) {
+//								curgear[shelfNum] = itm[1];		// was ['name']
+//								curgearnum[shelfNum] = itm[0];	// was ['itemid']
+//							}	
+//						}	
+//					}	
+//				}
+//
+//				// Item slot is empty
+//				else {
+//					equips[shelfNum] = (tr.childNodes.length > 2 ?
+//						tr.childNodes[2] : tr.childNodes[1]);
+//				}
+//
+//				// Create select menus
+//				var newsel = document.createElement('select');
+//				newsel.setAttribute('style',"width:250px;");
+//				newsel.setAttribute('name', shelfNum);
+//				if (shelfNum == 3) {
+//					if (hands == 2) newsel.setAttribute('disabled','disabled');
+//				}
+//				if (curgearnum[shelfNum] > 0) {
+//					newsel.appendChild(document.createElement('option'));
+//				}
+//				selects[shelfNum] = newsel;
+//			}
+//
+//			// Second pass: Create new table and rows.
+//			var nuTabl = $(document.createElement('table'));
+//			var len = 9;
+//			for (var i=0; i<len; i++) {
+//				var extra = (i==8 && famLock ? '<a href="' + famLock.href + '">' +
+//				'<img class="hand" src="'+ famLock.firstChild.src +
+//				'" style="height:20px;width:20px;margin-right:15px;" /></a>' : '');
+//
+//				nuTabl.append('<tr align="right"><td height="30">' + extra +
+//				'<a class="nounder" href="#' + shelfNumToLink[i] + '">' +
+//				numToEquipType[i] + '</a></td><td>' +
+//				(pics[i] != undefined ? pics[i] : '&nbsp;') +
+//				'</td><td> </td><td align="left"> </td></tr>');
+//
+//				if (curgear[i] == undefined) {
+//					curgear[i] = "";
+//					curgearnum[i] = 0;
+//				}
+//
+//				// Create selects for blank rows
+//				if (selects[i] == undefined) {
+//					var newsel = document.createElement('select');
+//					newsel.setAttribute('style',"width:250px;");
+//					newsel.setAttribute('name', i);
+//					//if (curgearnum[i] != 0)
+//					newsel.appendChild(document.createElement('option'));
+//					selects[i] = newsel;
+//					equips[i] = document.createElement('td');
+//				}
+//			}
+//
+//			// Attach new gear table and links to the DOM
+//			$(gearList.parentNode)
+//				.before(nuTabl.get(0))
+//				.before(unlink.parentNode)
+//				.before(document.createElement('br'))
+//				.attr('style','display:none;');
+//
+//			// Iterate through links
+//			len = lnks.length;
+//			var lensub = len-1;
+//			var theSel, itemText, shelf;
+//			for (var i=0; i<len; i++) {
+//				var lnk = lnks[i];
+//
+//				// Switch to new shelf, and add anchor
+//				if (lnk.href.substr(0,4) == 'java') {
+//					shelf = shelfToNum[lnk.text];
+//					continue;
+//				}
+//
+//				// Add equippable item to drop-down of current shelf.
+//				else if (lnk.text == "[equip]" || lnk.text == "[offhand]") {
+//					itemText = lnk.parentNode.parentNode.firstChild.innerHTML;
+//
+//					// Three iterations for accessories.
+//					var limit = 1; if (shelf == 5) limit = 3;
+//					for (var j=0; j<limit; j++) {
+//						var zshelf; if (lnk.text == "[offhand]") zshelf = 3;
+//						else zshelf = shelf+j;
+//						theSel = selects[zshelf];
+//						if (theSel == undefined) continue;
+//
+//						// Create the select menu option
+//						var opt = document.createElement("option");
+//						opt.setAttribute("value",lnk.href.split("item=")[1]);
+//						if (lnk.text == "[offhand]") {
+//							opt.setAttribute('dualwield', 1);
+//						}
+//						opt.innerHTML = itemText;
+//
+//						// Add the currently worn item to the menu, if necessary
+//						if (!theSel.getAttribute("gearfound")) {
+//							var curText = curgear[zshelf].toLowerCase();
+//							var tstText = itemText.toLowerCase();
+//							if (tstText == curText) selects[zshelf].setAttribute('gearfound','gearfound');
+//							else if (tstText > curText) {
+//								var opt2 = document.createElement("option");
+//								opt2.setAttribute("value",curgearnum[zshelf]);
+//								opt2.innerHTML = curgear[zshelf];
+//								theSel.appendChild(opt2);
+//								theSel.setAttribute('gearfound','gearfound');
+//							}
+//						}
+//						theSel.appendChild(opt);
+//					}
+//				}
+//			}
+//
+//			gearList = nuTabl.get(0).firstChild;
+//
+//			var unq = ["hat","shirt","weapon","offhand","pants",
+//						"acc1","acc2","acc3","familiarequip"];
+//
+//			// Add the select menus to the DOM and select the currently worn item
+//			for (var i=0; i<9; i++) {
+//				var row = gearList.childNodes[i];
+//				var eqnum = i;
+//				var tempsel = selects[i]; var nuus = [];
+//				var action = "equip";
+//
+//				// Add currently equipped item if not found in equip links
+//				if (!tempsel.getAttribute('gearfound') && curgearnum[i] > 0) {
+//					var newopt = document.createElement('option');
+//					newopt.innerHTML = curgear[i];
+//					newopt.setAttribute("value", curgearnum[i]);
+//					tempsel.appendChild(newopt);
+//					//tempsel.setAttribute('gearfound');
+//				}
+//
+//				for (var j=0, len2=tempsel.childNodes.length; j<len2; j++) {
+//					if (tempsel.childNodes[j].value == curgearnum[i]) {
+//						tempsel.selectedIndex = j;	break;
+//					}	
+//				}
+//
+//				// Attach event handler that does the work
+//				tempsel.addEventListener('change',function(event)
+//				{	
+//					if (this.value == 0) return;
+//					var loading =
+//	'data:image/gif;base64,R0lGODlhEgASAJECAMDAwNvb2%2F%2F%2F%2FwAAACH%2FC05FVFNDQVBFMi4wAwEAAAAh%2BQQFCgACACwAAAAAEgASAAACMpSPqQmw39o7IYjo6qpacpt8iKhoITiiG0qWnNGepjCv7u3WMfxqO0%2FrqVa1CdCIRBQAACH5BAUKAAIALAcAAQAIAAYAAAIOVCKZd2osAFhISmcnngUAIfkEBQoAAgAsCwADAAYACAAAAg5UInmnm4ZeAuBROq%2BtBQAh%2BQQFCgACACwLAAcABgAIAAACD5QTJojH2gQAak5jKdaiAAAh%2BQQFCgACACwHAAsACAAGAAACDpQdcZgKIFp4Lzq6RF0FACH5BAUKAAIALAMACwAIAAYAAAIOFCCZd2osQlhISmcnngUAIfkEBQoAAgAsAQAHAAYACAAAAg4UIHmnm4ZeCuFROq%2BtBQAh%2BQQFCgACACwBAAMABgAIAAACD5QBJojH2kQIak5jKdaiAAA7';
+//
+//					this.setAttribute('previtem',this.value);
+//					var imgtd = this.parentNode.previousSibling;
+//
+//					$(imgtd.firstChild).attr('style','display:none;')
+//					.before('<img src="'+loading+'" width="30" height="30" />');
+//
+//					if (this.childNodes[this.selectedIndex]
+//						.getAttribute('dualwield')) action = "dualwield";
+//
+//					if (imgtd.childNodes.length > 0)
+//						this.setAttribute('previmg',imgtd.firstChild.src);
+//					else this.setAttribute('previmg',0);
+//
+//					var ztype = integer(this.getAttribute('name'));
+//					var url = /*'http://'+*/server+"/inv_equip.php?pwd="+
+//					pwd+"&which=2&action="+action+"&whichitem="+this.value;
+//					if (ztype == 5) url += "&slot=1";
+//					else if (ztype == 6) url += "&slot=2";
+//					else if (ztype == 7) url += "&slot=3";
+//
+//				// I forget why I had to do this, but I'm sure there was a reason.
+//				// perhaps because ztype is out of scope in the anonymous function,
+//				// or because we'd need a closure here in order to make it work right?
+//					switch(ztype) {
+//						case 0: GM_get(url, function(t){EquipUpdate(t,0);}); break;
+//						case 1: GM_get(url, function(t){EquipUpdate(t,1);}); break;
+//						case 2: GM_get(url, function(t){EquipUpdate(t,2);}); break;
+//						case 3: GM_get(url, function(t){EquipUpdate(t,3);}); break;
+//						case 4: GM_get(url, function(t){EquipUpdate(t,4);}); break;
+//						case 5: GM_get(url, function(t){EquipUpdate(t,5);}); break;
+//						case 6: GM_get(url, function(t){EquipUpdate(t,6);}); break;
+//						case 7: GM_get(url, function(t){EquipUpdate(t,7);}); break;
+//						case 8: GM_get(url, function(t){EquipUpdate(t,8);}); break;
+//					}
+//				}, false);
+//
+//				gearList.childNodes[i].childNodes[2].appendChild(tempsel);
+//
+//				// Add power and unequip links
+//				var pow = '';
+//				var descTD = $(row.childNodes[3]);
+//				pow = equips[i].innerHTML.match(/\(Pow.+\)/);
+//				if (pow != null) descTD.append('<font size="1"> '+ pow+ '</font> ');
+//				else descTD.append(' ');
+//
+//				if (row.childNodes[1].firstChild.tagName == 'IMG') {
+//					var un = document.createElement('a');
+//					un.innerHTML = '<font size="1">[unequip]</font>';
+//					un.setAttribute('href', 'inv_equip.php?pwd='+pwd+
+//					'&which=2&action=unequip&type='+unq[i]);
+//					un.addEventListener('click', UnequipUpdate, false);
+//					descTD.append(un);
+//				}
+//			}
+//		} // quickequip
 	} // equippage
 
 	if (GetPref('shortlinks') > 1 && firstTable.rows[0].textContent == "Results:") {
@@ -2894,35 +2860,33 @@ function at_inventory()
 }
 
 // GALAKTIK: Add use boxes when buying
-function at_galaktik()
-{
+function at_galaktik() {
 	var row = $('table:first tr:eq(1):contains("You acquire")'), txt;
-	if (row.length == 1)
-	{	var num = 1;
+	if (row.length == 1) {
+		var num = 1;
 		txt = row.text();
 		if (txt.indexOf("an item:") == -1)
 			num = $('b:eq(1)').text().split(" ")[0];
 		var docG = parseInt($('table.item').attr('rel').match(/id=(\d+)/)[1],10);
-		if (GetPref('docuse') == 1 && docG < 233)	// 231=unguent, 232=ointment.  we can auto-use those.
-		{	var sanitycheck = FindMaxQuantity(docG, num, 0, 0) + 1;
+		if (GetPref('docuse') == 1 && docG < 233) {	// 231=unguent, 232=ointment.  we can auto-use those.
+			var sanitycheck = FindMaxQuantity(docG, num, 0, 0) + 1;
 			if (num > sanitycheck) num = sanitycheck;
 			parent.frames[2].location = 'http://' + server +
 			'/multiuse.php?action=useitem&quantity=' + num +
 			'&pwd=' + pwd + '&whichitem=' + docG;
-		} else
-		{	AppendUseBox(docG, 0, 1, row.find('td center').get(0));
+		} else {
+			AppendUseBox(docG, 0, 1, row.find('td center').get(0));
 			if (num > 1) NumberLink($('b:eq(1)').get(0));
 		}
 	}
-
 	var howMany = $('input[name=howmany]');
 	var check = $(document.createElement('input'))
 		.attr("type","checkbox")
 		.attr("name","usecheckbox")
 		.attr("style","height:12px;width:12px;");
 	if (GetPref('docuse') == 1) check.attr("checked",true);
-	check.change(function()
-	{	var box = $('input[name=usecheckbox]');
+	check.change(function() {
+		var box = $('input[name=usecheckbox]');
 		if (box.attr('checked')) SetPref('docuse',1);
 		else SetPref('docuse',0);
 	});
@@ -2936,8 +2900,7 @@ function at_galaktik()
 }
 
 // BIGISLAND: add inventory check, max buttons to Frat/Hippy Trade-In stores.
-function at_bigisland()
-{
+function at_bigisland() {
 	$('img').each(function()
 	{	var onclick = this.getAttribute('onclick');
 		if (onclick != undefined && onclick.indexOf("desc") != -1)
@@ -2953,12 +2916,10 @@ function at_bigisland()
 	// add MAX buttons to the trade-in boxes
 	var select = document.getElementsByTagName("select");
 	if (select) {	// Items to trade in at the store?
-		GM_log("trade-ins!");
 //		select[0].options.selectedIndex = 1;
 		var qty = document.getElementsByName("quantity")[0];
 		MakeMaxButton(qty, function(event) {
 			var selectItem = document.getElementsByName('whichitem')[0];
-			var index = selectItem.selectedIndex;
 			var box = document.getElementsByName('quantity')[0];
 			var quant = ParseSelectQuantity(selectItem, ")");
 			box.value = quant;
@@ -2968,13 +2929,13 @@ function at_bigisland()
 }
 
 // STORE: Add use boxes and links as appropriate
-function at_store()
-{	var firstTable = $('table:first tbody');		// we're interested in this when it's the "Results:" box from buying something.
+function at_store() {
+	var firstTable = $('table:first tbody');		// we're interested in this when it's the "Results:" box from buying something.
 	var whichstore; var noform = 1;
 	
 	var insput = $('input[name=whichstore]');
-	if (insput.length > 0)
-	{	whichstore = insput.attr('value'); noform = 0;
+	if (insput.length > 0) {
+		whichstore = insput.attr('value'); noform = 0;
 	} else whichstore = document.location.search.match(/whichstore\=([a-z0-9])/)[1];
 
 	// Refresh hash
@@ -2990,7 +2951,6 @@ function at_store()
 
 	// You can thank Mr. Mag for this one...
 	// right-click on the image of the shopkeeper to put on your travoltan trousers without leaving the store.
-//	if (whichstore != 'g') {	// can't switch pants in the lab store, and this throws an error if you're in the wrong outfit anyway.
 	$("img[src*=otherimages]:first")
 	.attr('title','right-click to equip Travoltan Trousers')
 	.attr('id','proprietor')
@@ -3050,61 +3010,7 @@ function at_store()
 	}
 
 	var swap;
-	if (GetPref('shortlinks') > 1)
-	{
-//		if (whichstore == 'g') // Stupid Lab Key *sigh*
-//		{	
-//			if (document.body.textContent == "Uh Oh!You don't belong in this store.")
-//			{	
-//				GM_get(server+'/knob2.php',function(knob2)
-//				{	
-//					if (knob2.indexOf('locked') != -1) document.firstChild.innerHTML += knob2;
-//					else {
-//						var style = $(document.createElement('style'))
-//							.attr('type', 'text/css')
-//							.html("body {font-family: Arial, Helvetica, sans-serif; background-color: white; color: black;} " +
-//							"td {font-family: Arial, Helvetica, sans-serif;} input.button {border: 2px black solid; " +
-//							"font-family: Arial, Helvetica, sans-serif; font-size: 10pt; font-weight: bold; background-color: #FFFFFF;}");
-//						//document.firstChild.firstChild.appendChild(style);
-//						$('head').append(style);
-//
-//						var tabl = $(document.createElement('table'))
-//							.attr('width','95%')
-//							.attr('style','font-family: Arial, Helvetica, sans-serif')
-//							.attr('cellspacing','0')
-//							.attr('cellpadding','0')
-//							.append(document.createElement('tbody'));
-//						tabl.children('tbody')
-//							.append(document.createElement('tr'))
-//							.append(document.createElement('tr'));
-//						var td = $(document.createElement('td'))
-//							.attr('bgcolor','blue')
-//							.attr('align','center')
-//							.attr('style','color: white;')
-//							.html('<b>Knob Goblin Laboratory</b>');
-//						tabl.find('tbody tr:first').append(td);
-//						td = $(document.createElement('td'))
-//							.attr('style','border: 1px solid blue; padding: 5px;')
-//							.attr('align','center')
-//							.append('<p><img src="http://images.kingdomofloathing.com'
-//							+ '/otherimages/shopgoblin.gif" align="middle">'
-//							+ 'How did <i>you</i> get here? This store is '
-//							+ 'for guards only!<br>');
-//						td.children('p').append(
-//							AppendOutfitSwap(5, "Get In Gear, Soldier!",0));
-//						tabl.find('tbody tr:eq(1)').append(td);
-//						var centre = $(document.createElement('center'))
-//							.append(tabl);
-//						$('body').append(centre);
-//					}
-//				});
-//			}
-//			else {	
-//				$('p:first').append(
-//					AppendOutfitSwap(0, "Return To Civilian Life", 0));
-//			}	
-//		}
-//		else 
+	if (GetPref('shortlinks') > 1) {
 		if (whichstore == 'h') {
 			if (noform == 1) swap = AppendOutfitSwap(2, "Like, Get Groovy, Man", 0);
 			else swap = AppendOutfitSwap(0, "Whoa, Clear Your Head, Man", 0);
@@ -3143,8 +3049,8 @@ function at_craft()
 	if (tbltext.indexOf("more advanced cooking appliance") != -1) { itemNeeded = 157; desc = "Buy & Install a Dramatic Range"; }
 	else if (tbltext.indexOf("cocktail set is not advanced") != -1) { itemNeeded = 236; desc = "Buy & Install a Queue du Coq kit"; }
 	else if (tbltext.indexOf("haven't got a hammer") != -1) { itemNeeded = 338; desc = "Buy a tenderizing hammer"; }
-	if (GetPref('shortlinks') > 1 && mlink.length > 0 && ilink.length == 0 && itemNeeded > 0)
-	{	mlink.parent().parent().parent().find('center:first').after('<span id="buyspan"></span>');
+	if (GetPref('shortlinks') > 1 && mlink.length > 0 && ilink.length == 0 && itemNeeded > 0) {
+		mlink.parent().parent().parent().find('center:first').after('<span id="buyspan"></span>');
 		GM_get(server + '/heydeze.php', function(txt)
 		{	if (txt != '') store = 'y';
 			else if (itemNeeded == 338) store = 's';
@@ -3153,16 +3059,14 @@ function at_craft()
 		});
 	}
 	
-	switch(mode)
-	{
+	switch(mode) {
 		case 'combine':
 			break;
 			
 		case 'smith':
 			// Needs layout fix
 			var box = $('form[name=pulverize] input[name=qty]');
-			if (box.length > 0)
-			{	
+			if (box.length > 0) {
 				var smash = $('select[name=smashitem]');
 				smash.attr('style', 'vertical-align:top;');
 				MakeMaxButton(box.get(0), function(event)
@@ -3174,17 +3078,14 @@ function at_craft()
 					' vertical-align:middle;');
 			}
 
-			$('b').each(function()
-			{	
+			$('b').each(function() {
 				var zis = $(this);
 				var txt = zis.text();
-				if (txt.indexOf("powder") != -1)
-				{	
+				if (txt.indexOf("powder") != -1) {
 					$zis.parent().append(AppendLink('[malus]',
 						'guild.php?place=malus'));
 				}
-				else if (txt.indexOf("nugget") != -1)
-				{	
+				else if (txt.indexOf("nugget") != -1) {
 					zis.parent().append(AppendLink('[malus]',
 						'guild.php?place=malus'));
 					if (txt.indexOf("twink") == -1)
@@ -3197,13 +3098,12 @@ function at_craft()
 }
 
 // SEWER: Add form for buying gum.
-function at_sewer()
-{	var tr = $('table:first tr:first:contains(Results)');
+function at_sewer() {
+	var tr = $('table:first tr:first:contains(Results)');
 	if (GetPref('shortlinks') > 1 &&
-		tr.length > 0)
+		tr.length > 0) 
 	{	
-		if (tr.next().text().indexOf("extending") != -1)
-		{	
+		if (tr.next().text().indexOf("extending") != -1) {
 			$('p:first').get(0).innerHTML +=
 				'<br><br>' + AppendBuyBox(23, 'm', 'Buy Gum', 0);
 		} else {	
@@ -3214,10 +3114,8 @@ function at_sewer()
 }
 
 // HERMIT: Add form for buying permits.
-function at_hermit()
-{	
-	$('img').each(function()
-	{	
+function at_hermit() {
+	$('img').each(function() {
 		var onclick = this.getAttribute('onclick');
 		if (onclick != undefined && onclick.indexOf(":item") != -1)	// Hermit calls js:item(descid) instead of js:descitem(descid)
 		{	
@@ -3226,8 +3124,7 @@ function at_hermit()
 			AddInvCheck(this);
 		}
 	});
-	if (GetPref('shortlinks') > 1)
-	{	
+	if (GetPref('shortlinks') > 1) {
 		var p = $('p:first');
 		var txt = $('body').text();
 		if (txt.indexOf("out of Permits") != -1) {			// no permit
@@ -3235,7 +3132,7 @@ function at_hermit()
 			a.parent().prepend('<br>' + AppendBuyBox(42, 'm', 'Buy Permits', 0)+'<br>');
 		}
 		else if (txt.indexOf("disappointed") != -1)	{			// no trinkets
-			GM_get(server+'/api.php?what=inventory&for=MrScript',function(response) {			// see if we have some anti-anti-antidote onhand
+			GM_get(server+'/api.php?what=inventory&for=MrScript',function(response) {		// Check gum and permit counts.
 				var invcache = eval('('+response+')');
 				var gum = invcache[23]; if (gum === undefined) gum = 0;
 				var hpermit = invcache[42]; if (hpermit === undefined) hpermit = 0;
@@ -3243,17 +3140,18 @@ function at_hermit()
 				if (gum == 0) { 
 					p.get(0).innerHTML += '<br><br>' + AppendBuyBox(23, 'm', 'Buy Gum', 0);
 				}
-				p.append('<br><br><center><font color="blue">You have '+(gum==0?" no ":gum)+(gum!=1?" gums ":" gum ")+" and "+(hpermit==0?" no ":hpermit)+(hpermit!=1?" permits ":" permit ")+"in inventory.</font></center><br>");
+				p.append('<br><br><center><font color="blue">You have '+(gum==0?" no ":gum)+(gum!=1?" gums ":" gum ")
+					+" and "+(hpermit==0?" no ":hpermit)+(hpermit!=1?" permits ":" permit ")+"in inventory.</font></center><br>");
 				p.append('<br><center><a href="inv_use.php?pwd='+pwd+'&which=3&whichitem=23">Use some chewing gum</a></center>');
 			});
 		}
 
 		var tr = $('table:first tr:contains(Results)');
-		if (tr.next().text().indexOf("You acquire") != -1)
-		{	var descId = $('img:first').get(0).getAttribute('onclick');
+		if (tr.next().text().indexOf("You acquire") != -1) {
+			var descId = $('img:first').get(0).getAttribute('onclick');
 			var bText = $('b:eq(1)').attr('valign','baseline');
-			if (bText.text().indexOf("ten-leaf clovers") != -1)
-			{	var num = integer(bText.text().split(" ten-leaf")[0]);
+			if (bText.text().indexOf("ten-leaf clovers") != -1) {
+				var num = integer(bText.text().split(" ten-leaf")[0]);
 				bText.parent().append(AppendLink('[disassemble]', 'multiuse.php?pwd=' +
 				pwd + '&action=useitem&quantity=' + num + '&whichitem=24'));
 			}
@@ -3266,8 +3164,7 @@ function at_hermit()
 function at_mountains()
 {	
 	var img = $('img:last');
-	if (img.attr('src').indexOf("mount4") != -1)
-	{
+	if (img.attr('src').indexOf("mount4") != -1) {
 		img.attr('border', 0).attr('src','http://images.kingdomofloathing.com/'+
 			'otherimages/mountains/hermitage.gif');
 		var a = document.createElement('a');
@@ -3277,33 +3174,28 @@ function at_mountains()
 	}
 }
 
-function at_mystic()
-{
+// MYSTIC: link back to the 8-bit realm
+function at_mystic() {
 	$('<center><br /><a href="adventure.php?snarfblat=73>Adventure in the 8-Bit Realm</a></center>').appendTo($('a:last').parent());
 }
 
 // BARREL: add links to the results of your barrel droppings.
-function at_barrel()
-{	$('img').each(function()
-	{	
+function at_barrel() {
+	$('img').each(function() {
 		var onclick = this.getAttribute("onclick");
 		if (onclick == undefined) return;
-		if (onclick.indexOf("desc") != -1)
-		{	
+		if (onclick.indexOf("desc") != -1) {
 			AddLinks(onclick, this.parentNode.parentNode, null, thePath);
 		}	
 	});
 }
 
 // COUNCIL: Add shortcut links for current quests.
-function at_council()
-{	if (GetPref('shortlinks') > 1)
-	{
-		$('p').each(function()
-		{	
+function at_council() {
+	if (GetPref('shortlinks') > 1) {
+		$('p').each(function() {
 			var p = $(this);
 			var txt = p.text();
-
 			if (txt.indexOf("Toot") != -1)
 				p.append(AppendLink('[toot]', 'tutorial.php?action=toot'));
 			else if (txt.indexOf("larva") != -1 && txt.indexOf("Thanks") == -1)
@@ -3320,8 +3212,8 @@ function at_council()
 				var derr = AppendLink('[harem outfit]', "inv_equip.php" +
 					"?action=outfit&which=2&whichoutfit=4");
 				p.append(derr);	
-				if (GetPref('backup') != "")
-				{	$(derr).children('*:last')
+				if (GetPref('backup') != "") {
+					$(derr).children('*:last')
 						.attr('href', 'javascript:void(0);').click(function()
 					//bink.addEventListener('click',function(event)
 					{	GM_get(server + '/inv_equip.php' +
@@ -3336,8 +3228,8 @@ function at_council()
 				derr = AppendLink('[guard outfit]', "inv_equip.php" +
 					"?action=outfit&which=2&whichoutfit=5");
 				p.append(derr);	
-				if (GetPref('backup') != "")
-				{	$(derr).children('*:last')
+				if (GetPref('backup') != "") {
+					$(derr).children('*:last')
 						.attr('href', 'javascript:void(0);').click(function()
 					//bink.addEventListener('click',function(event)
 					{	GM_get(server + '/inv_equip.php' +
@@ -3370,11 +3262,9 @@ function at_council()
 				var derr = AppendLink('[swashbuckle]', "inv_equip.php" +
 					"?action=outfit&which=2&whichoutfit=9");
 				p.append(derr);
-				if (GetPref('backup') != "")
-				{	
+				if (GetPref('backup') != "") {
 					$(derr).children('*:last').attr('href', '#')
-					.click(function(event)
-					{	
+					.click(function(event) {
 						GM_get(server + '/inv_equip.php' +
 							'?action=customoutfit&which=2&outfitname=' +
 						GetPref('backup'), function(response)
@@ -3390,8 +3280,7 @@ function at_council()
 			else if (txt.indexOf("garbage") != -1
 				&& txt.indexOf("Thanks") == -1)
 			{	
-				if (txt.indexOf("sky") != -1)
-				{	
+				if (txt.indexOf("sky") != -1) {
 					p.append(AppendLink('[plant bean]', 'plains.php?place=grounds'));
 					top.frames[0].location.reload();
 				} else p.append(AppendLink('[beanstalk]', 'beanstalk.php'));
@@ -3404,25 +3293,21 @@ function at_council()
 				p.append(AppendLink('[island]', 'island.php'));
 		});
 
-		$('b').each(function()
-		{	
+		$('b').each(function() {
 			var b = $(this);
 			var txt = b.text();
-
 			if (txt.indexOf("leaflet") != -1)
 				b.append(AppendLink('[read]', 'leaflet.php'));
 			else if (txt.indexOf("Knob map") != -1) 
 				b.append(AppendLink('[use map+key]','inv_use.php?pwd=' + pwd + '&which=3&whichitem=2442'));
-			else if ((txt.indexOf("dragonbone") != -1) || (txt.indexOf("batskin") != -1))
-			{	
+			else if ((txt.indexOf("dragonbone") != -1) || (txt.indexOf("batskin") != -1)) {
 				b.append(AppendLink('[make belt]', 'craft.php?mode=combine&action=craft&a=676&b=192&pwd=' +
 					pwd + '&quantity=1'));
 				GoGoGadgetPlunger();
-		}	});
+			}	
+		});
 	}
-
-	$('img').each(function()
-	{	
+	$('img').each(function() {
 		var onclick = this.getAttribute('onclick');
 		if (onclick != undefined && onclick.indexOf("desc") != -1)
 			AddLinks(onclick, this.parentNode.parentNode, null, thePath);
@@ -3435,8 +3320,7 @@ function at_questlog()
 	if (document.links[0].href.indexOf("?which=1") == -1
 		&& GetPref('shortlinks') > 1)
 	{
-		$('b').each(function()
-		{	
+		$('b').each(function() {
 			var b = $(this);
 			var txt = b.text();
 			var gotit = true;
@@ -3450,13 +3334,12 @@ function at_questlog()
 				case "The Goblin Who Wouldn't Be King":
 					var derr = AppendLink('[disguise]', "inv_equip.php?action=outfit&which=2&whichoutfit=4");
 					b.append(derr);
-					if (GetPref('backup') != "")
-					{
+					if (GetPref('backup') != "") {
 						$(derr).children('*:last')
-						.attr('href', 'javascript:void(0);').click(function()
-						{	GM_get(server + '/inv_equip.php?action=customoutfit&which=2&outfitname=' +
-							GetPref('backup'),function(response)
-							{	parent.frames[2].location = 'http://'+server +
+						.attr('href', 'javascript:void(0);').click(function() {
+							GM_get(server + '/inv_equip.php?action=customoutfit&which=2&outfitname=' +
+							GetPref('backup'),function(response) {
+								parent.frames[2].location = 'http://'+server +
 							"/inv_equip.php?action=outfit&which=2&whichoutfit=4";
 							}); return false;
 							//event.stopPropagation(); event.preventDefault();
@@ -3479,16 +3362,13 @@ function at_questlog()
 					b.append(AppendLink('[mountains]', 'mountains.php'));
 					var derr = AppendLink('[swashbuckle]', "inv_equip.php?action=outfit&which=2&whichoutfit=9");
 					b.append(derr);
-					if (GetPref('backup') != "")
-					{	
+					if (GetPref('backup') != "") {
 						$(derr).children('*:last')
 						.attr('href', 'javascript:void(0);')
-						.click(function(event)
-						{	
+						.click(function(event) {
 							GM_get(server + '/inv_equip.php' +
 								'?action=customoutfit&which=2&outfitname=' +
-							GetPref('backup'), function(response)
-							{	
+							GetPref('backup'), function(response) {
 								parent.frames[2].location = 'http://'+server +
 								"/inv_equip.php?action=outfit&which=2&whichoutfit=9";
 							}); return false;
@@ -3505,6 +3385,7 @@ function at_questlog()
 					var subtext = $(this).parent().text(); // contents().get(2).data;
 	//				subtext = subtext.textContent;
 	//				GM_log("Palindome subtext="+subtext);
+// TODO: ADD LINKS HERE.
 					if (subtext.indexOf("get into the Palindome.") != -1) {  // swash, cove.
 					} else if (subtext.indexOf("discovered the fabulous Palindome") != -1) { // talisman, palindome
 					} else if (subtext.indexOf("but then you lost it again") != -1) { // lab
@@ -3577,6 +3458,7 @@ function at_questlog()
 					b.html("The Ultimate Showdown Of Ultimate Destiny");
 					b.append(AppendLink('[lair]', 'lair.php'));
 					break;
+// can't process these here, we're doing full-string matching and we don't have %playername and %familiarname available.
 //				case "and the Quest for the Holy MacGuffin":
 //				case "Go To White Citadel":
 //					b.append(AppendLink('[woods]', 'woods.php'));
@@ -3726,19 +3608,19 @@ function at_charpane()
 	SetData("charname",bText[0].textContent);
 
 	// Compact Mode
-	if (compactMode)
-	{	var mp=0;
-		for (var i=4, len=bText.length; i<len; i++)
-		{	str = bText[i].textContent;
+	if (compactMode) {
+		var mp=0;
+		for (var i=4, len=bText.length; i<len; i++) {
+			str = bText[i].textContent;
 			var spl = str.split('/');
-			if (spl.length > 1)
-			{	if (mp == 0)
-				{	curHP = integer(spl[0]);
+			if (spl.length > 1) {
+				if (mp == 0) {
+					curHP = integer(spl[0]);
 					maxHP = integer(spl[1]); mp++;
 					bText[i].parentNode.previousSibling
 						.addEventListener('contextmenu', RightClickHP,true);
-				}else
-				{	curMP = integer(spl[0]);
+				} else {
+					curMP = integer(spl[0]);
 					maxMP = integer(spl[1]);
 					bText[i].parentNode.previousSibling
 						.addEventListener('contextmenu',RightClickMP,true);
@@ -3752,7 +3634,6 @@ function at_charpane()
 		level = lvlblock.match(/Lvl. (\d+)/)[1];
 		SetCharData("level", level);
 
-
 		SetCharData("currentHP", curHP); SetCharData("maxHP", maxHP);
 		SetCharData("currentMP", curMP); SetCharData("maxMP", maxMP);
 //		GM_log("compact mode: set level="+level+", curHP="+ curHP+", maxHP="+maxHP+", curMP="+curMP+", maxMP="+maxMP);
@@ -3765,8 +3646,7 @@ function at_charpane()
 			}
 		}
 		var lvlblock = $("td:contains('Level'):first").text();	
-		if (lvlblock) 
-		{
+		if (lvlblock) {
 			level = lvlblock.match(/Level (\d+)/)[1];
 			SetCharData("level", level);
 		} else {
@@ -3782,8 +3662,8 @@ function at_charpane()
 
 		// Change image link for costumes
 		var img = imgs[0];
-		if (GetPref('backup'))
-		{	img.parentNode.parentNode.nextSibling
+		if (GetPref('backup')) {
+			img.parentNode.parentNode.nextSibling
 				.setAttribute('id','outfitbkup');
 			img.addEventListener('contextmenu',function(event)
 			{	GM_get(server + '/inv_equip.php?action=customoutfit&which=2&outfitname=' +
@@ -3805,28 +3685,28 @@ function at_charpane()
 
 	// Re-hydrate (0)
 	var temphydr = integer(GetCharData('hydrate'));
-	if (temphydr)
-	{	
-		if (advcount > oldcount)
-		{	temphydr+=(advcount-oldcount);
+	if (temphydr) {
+		if (advcount > oldcount) {
+			temphydr+=(advcount-oldcount);
 			SetCharData('hydrate', temphydr);
 		}
 		if (advcount < temphydr) SetCharData('hydrate', false);
-		else if (advcount == temphydr)
-		{	if (compactMode) $('a[href=adventure.php?snarfblat=123]')
+		else if (advcount == temphydr) {
+			if (compactMode) $('a[href=adventure.php?snarfblat=123]')
 				.after(':<br /><a href="adventure.php?snarfblat=122' +
 				'" style="color:red;" target="mainpane">Oasis</a>');
 			else $('a[href=adventure.php?snarfblat=123]')
 				.after('<br /><br /><a href="adventure.php?snarfblat=122" '+
 			'target="mainpane" style="color:red;">Re-Ultrahydrate</a><br />')
 				.parent().parent().attr('align','center');
-	}	}
+		}	
+	}
 	SetCharData('advcount', advcount);
 
 	// Poison and other un-effecty things
 	SetCharData("phial",0);
-	for (i=0,len=imgs.length; i<len; i++)
-	{	var img = imgs[i], imgClick = img.getAttribute('onclick');
+	for (i=0,len=imgs.length; i<len; i++) {
+		var img = imgs[i], imgClick = img.getAttribute('onclick');
 		var imgSrc = img.src.substr(img.src.lastIndexOf('/')+1);
 		if (imgSrc == 'mp.gif')
 			img.addEventListener('contextmenu', RightClickMP, false);
@@ -3848,8 +3728,7 @@ function at_charpane()
 						{	
 							top.frames[1].location.reload(); 
 						});
-					}
-					else {																			// no: buy it
+					}	else {																		// no: buy it
 						GM_get(server+'/galaktik.php?howmany=1&action=buyitem&whichitem=829&pwd='+pwd,
 						function(result)
 						{	
@@ -3867,8 +3746,8 @@ function at_charpane()
 			// Effect descIDs are 32 characters?? Bah, I'm not using strings that long. Six characters will do.
 			var effNum = effectsDB[imgClick.substr(5,6)];
 			if (effNum == undefined) continue;
-			switch (effNum)
-			{	case 275: // hydrated
+			switch (effNum) {
+				case 275: // hydrated
 					var hydtxt = img.parentNode.nextSibling.textContent;
 					if (/\(1\)/.test(hydtxt))			// 1 turn left?  set marker to add rehydrate link next adventure.
 						SetCharData('hydrate', advcount-1);
@@ -3921,8 +3800,7 @@ function at_skills()
 	var noDisable = GetPref('nodisable');
 	
 	// Remove stupid "The " from menu
-	if (miniSkills)
-	{	
+	if (miniSkills) {
 		var sel = document.getElementsByTagName("select")[0];
 		var json = "{";
 		for (var i=0, len=sel.childNodes.length; i<len; i++) {	
@@ -4059,29 +3937,31 @@ function at_skills()
 }
 
 // MULITUSE: Autofill the proper "maxed-out" number in the use box.
-function at_multiuse()
-{	var inputStuff = document.getElementsByTagName("input");
-	for (var i=0, len=inputStuff.length; i<len; i++)
-	{	var temp = inputStuff[i];
-		if (temp.name == "quantity")
-		{	temp.addEventListener('keydown', function(event)
-			{	if (event.which == 77 || event.which == 88) // 'm', 'x'
-				{	this.value = "";
+function at_multiuse() {
+	var inputStuff = document.getElementsByTagName("input");
+	for (var i=0, len=inputStuff.length; i<len; i++) {
+		var temp = inputStuff[i];
+		if (temp.name == "quantity") {
+			temp.addEventListener('keydown', function(event) {
+				if (event.which == 77 || event.which == 88) // 'm', 'x'
+				{	
+					this.value = "";
 					//event.stopPropagation(); event.preventDefault();
 				}
 			}, true);
 
-			temp.addEventListener('keyup', function(event)
-			{	if (event.which == 77 || event.which == 88) // 77 = 'm', 'x'
-				{	var selectItem = document.getElementsByName("whichitem")[0];
+			temp.addEventListener('keyup', function(event) {
+				if (event.which == 77 || event.which == 88) // 77 = 'm', 'x'
+				{	
+					var selectItem = document.getElementsByName("whichitem")[0];
 					var quant = ParseSelectQuantity(selectItem, ")");
 					var index = selectItem.selectedIndex;
 					this.value = FindMaxQuantity(selectItem.options[index].value, quant, 1, GetPref('safemax'));
 				} event.stopPropagation(); event.preventDefault();
 			}, false);
 
-			MakeMaxButton(temp, function(event)
-			{	var box = document.getElementsByName('quantity')[0];
+			MakeMaxButton(temp, function(event) {
+				var box = document.getElementsByName('quantity')[0];
 				var selectItem = document.getElementsByName('whichitem')[0];
 				var quant = ParseSelectQuantity(selectItem, ")");
 				var index = selectItem.selectedIndex;
@@ -4093,8 +3973,7 @@ function at_multiuse()
 }
 
 // MR. KLAW: Mr. Vanity Klaw
-function at_clan_rumpus()
-{	
+function at_clan_rumpus() {	
 	if (document.location.search == "?action=click&spot=3&furni=3" && GetPref('klaw') == 1) {	
 		var tr = $('table:first tr:first:contains(Results)');
 		if (tr.length > 0) {	
@@ -4110,8 +3989,7 @@ function at_clan_rumpus()
 
 
 // MR. VIP KLAW: look, more stuffies
-function at_clan_viplounge()
-{	
+function at_clan_viplounge() {
 	if (document.location.search == "?action=klaw" && GetPref('klaw') == 1) {
 		var tr= $('table:first tr:first:contains(Results)');
 		if (tr.length > 0) {
@@ -4140,8 +4018,7 @@ function at_clan_viplounge()
 }
 
 // CHARSHEET: decode resistance level text.
-function at_charsheet()
-{
+function at_charsheet() {
 	// see if the character qualifies for the Myst-Class innate 5% resistance bonus... 
 	var mystBonus = 0;
 	var HPMPstats = $("table table table td:lt(10)").text();
@@ -4187,15 +4064,13 @@ function at_charsheet()
 }
 
 // THESEA: if the sea is not present, talk to the old man.
-function at_thesea()
-{	
+function at_thesea() {
 	if (document.body.textContent.length == 0)
 		top.document.getElementsByName('mainpane')[0].contentDocument.location.pathname = '/oldman.php?action=talk';
 }
 
 // OLDMAN: If the old man is not present, put up a SCUBA gear reminder.
-function at_oldman()
-{ 	
+function at_oldman() {
 	if (document.body.textContent.length == 0) {
 		var style = $(document.createElement('style'))
 			.attr('type', 'text/css')
@@ -4256,8 +4131,7 @@ function at_manor()
 }
 
 // MANOR3: display wine-bottle glyph info.
-function at_manor3()
-{
+function at_manor3() {
 // basic spoilers, part 1: display glyphs while selecting the wines.
 	var wineDB = {'2275':'278847834','2271':'163456429','2276':'147519269',
 				  '2273':'905945394','2272':'289748376','2274':'625138517'};
@@ -4438,8 +4312,8 @@ function at_manor3()
 	wineDisplay.setAttribute('width','95%');
 	wineDisplay.style.display = "none";
 	
-	function toggleDisplay()
-	{	if (wineDisplay.style.display == "none") {
+	function toggleDisplay() {
+		if (wineDisplay.style.display == "none") {
 			wineDisplay.style.display = "block";
 		} else {
 			wineDisplay.style.display = "none";
@@ -4535,8 +4409,7 @@ function at_manor3()
 }
 
 // PALINSHELVES: fill in the correct choices to summon Dr. Awkward.
-function at_palinshelves()
-{	
+function at_palinshelves() {
 	for (var i=0,len=document.images.length; i<len; i++) {
 		var img = document.images[i];
 		var onclick = img.getAttribute("onclick");
@@ -4550,8 +4423,7 @@ function at_palinshelves()
 	}	
 }
 
-function at_pandamonium()
-{
+function at_pandamonium() {
 	var gotitem = $('.effect > b').text();
 //	GM_log("gotitem="+gotitem);
 	if (gotitem == "Azazel's unicorn") SetCharData("pandabandsolved",false);	// defensive clear for next time through
@@ -4640,8 +4512,7 @@ function at_pandamonium()
 }
 
 // PYRAMID: Display ratchets and other goodies.
-function at_pyramid()
-{
+function at_pyramid() {
 	var ratch = document.createElement('a');
 	ratch.innerHTML = '<font size="2">[use a ratchet]</font>';
 	ratch.setAttribute('href','inv_use.php?pwd=' + pwd + '&which=3&whichitem=2540');
@@ -4699,8 +4570,7 @@ function at_pyramid()
 }
 
 // AT_CAVE: spoil that nemesis quest.
-function at_cave() 
-{
+function at_cave() {
 	var dooritem = {"/mus_door1.gif":[37,"a viking helmet"],
 					"/mys_door1.gif":[560,"a stalk of asparagus"],
 					"/mox_door1.gif":[565,"a pair of dirty hobo gloves"],
@@ -4744,8 +4614,7 @@ function at_cave()
 
 
 // LAIR1: More linkies.
-function at_lair1()
-{
+function at_lair1() {
 	if (document.location.search == "?action=mirror") {
 		$('p:last:contains("Only those comfortable")').append(AppendLink("[get nekkid]","inv_equip.php?pwd="+pwd+"&action=unequipall"));
 		return;
@@ -4802,8 +4671,7 @@ function at_lair1()
 }
 
 // LAIR2: I am the keymaster!
-function at_lair2()
-{
+function at_lair2() {
 	if (GetPref("lairspoil") == 1) {
 		var bodyHTML = document.getElementsByTagName("body")[0].innerHTML;
 		if (bodyHTML.indexOf("10 buttons must ye push") != -1) {
@@ -4828,8 +4696,8 @@ function at_lair2()
 }
 
 // LAIR6: links, door codes, familiars.
-function at_lair6()
-{	var tabl = document.getElementsByTagName('table');
+function at_lair6() {
+	var tabl = document.getElementsByTagName('table');
 	img = document.images;
 	if (tabl[1].innerHTML.indexOf("fying seri") != -1) {
 		tabl[1].parentNode.innerHTML +=
@@ -4911,8 +4779,7 @@ function at_lair6()
 }
 
 // FAMILIAR: Blackbird singing in the dead of night.
-function at_familiar()
-{
+function at_familiar() {
 	if ($('img:first').attr('src').indexOf('blackbird2') != -1 ||
 		$('input[value=59]').length > 0)
 	{
@@ -4929,8 +4796,7 @@ function at_familiar()
 }
 
 // MINING: uber-twinklify all twinkly images.
-function at_mining() 
-{
+function at_mining() {
 // Image courtesy of Picklish's Mining Helper script.
 	var staticSparkleImg = "data:image/gif;base64,R0lGODlhMgAyAOMPAP39/dvb2zc3NycnJ5qams3NzQUFBRAQEGtra6enp7W1te3t7UZGRldXV319ff///yH/C05FVFNDQVBFMi4wAwEAAAAh+QQJAQAPACwAAAAAMgAyAAAEW/DJSau9OOvNu/9gKI5kaZ5oqq5s675wLM90bd94ru8rg/AUR+AAfBwCgd/OMFA4GguEQXcEJAQEQGM3ECAAUSIwkJgWn0WJwZxuu9/wuHxOr9vv+Lx+z+/77xEAIfkECQEADwAsAAAAADIAMgAABGvwyUmrvTjrzbv/YCiOZGmeaKqubOu+cCzPdG3feM4Jhm4FA18lIRBSEgzjpKDoGRmLAsJAddYaBEJAMQB4AYqbIKuILhwCRlAXWKyNWaVEKn8kEHVCo36w1v+AgYKDhIWGh4iJiouMjY4kEQAh+QQJAQAPACwAAAAAMgAyAAAEl/DJSau9OOvNu/9gKI5kaZ5oqq5s675wLLeHMXNHYd/aAAy83i+YMRQERMwhgEhefA6npQFISCmGQEJ3NTAUhYMCYRM0CMCYoYEoAAi1Adi9OMoGhXwgIDAcHAsJDEE7Bgl8eQM7TkYACotXVA1XFD6DlBIDC2mYRpyUOUiYD56jpAWXowqfpq2ur7CxsrO0tba3uLm6GhEAIfkECQEADwAsAAAAADIAMgAABGvwyUmrvTjrzbv/YCiOZGmeaKqubOu+cCzPdG3feM4Jhm4FA18lIRBSEgzjpKDoGRmLAsJAddYaBEJAMQB4AYqbIKuILhwCRlAXWKyNWaVEKn8kEHVCo36w1v+AgYKDhIWGh4iJiouMjY4kEQAh+QQJAQAPACwAAAAAMgAyAAAEW/DJSau9OOvNu/9gKI5kaZ5oqq5s675wLM90bd94ru8rg/AUR+AAfBwCgd/OMFA4GguEQXcEJAQEQGM3ECAAUSIwkJgWn0WJwZxuu9/wuHxOr9vv+Lx+z+/77xEAOw==";
 	$("img[src*=wallsparkle]").attr("src",staticSparkleImg);
@@ -4961,13 +4827,13 @@ function at_mining()
 	}
 // track what each square gave us:
 	// first, add onclick() to track what square we just clicked on.
-	$('a[href*=mining.php]').click(function(){
+	$('a[href*=mining.php]').click(function() {
 		var a = $(this);
 		var setwhich = integer(a.attr("href").match(/which=(\d+)/)[1]);
 		SetCharData("mining_which",setwhich);
 	});
 	//also add onclick() to the "Find new cavern" button to wipe out our stored values.
-	$('input').click(function(){
+	$('input').click(function() {
 		GM_log("Clearing mine-tracking info due to new cavern");
 		clearwhiches();
 	});		// if mining_which is set, it's because we just reloaded the page after clicking on a square.
@@ -4977,7 +4843,7 @@ function at_mining()
 		var got = $('.item tr td img').attr("src");		// see what we got.
 		SetCharData("which"+which,got);					// save it.
 	}
-	$('img[alt*=Open Cavern]').each(function(){			// replace each "Open Cavern" picture with the image we saved.
+	$('img[alt*=Open Cavern]').each(function() {		// replace each "Open Cavern" picture with the image we saved.
 		var alt = $(this).attr('alt');
 		var xc = integer(alt.match(/(\d)/g)[0]);		// convert from "Open Cavern (1, 4) to the number in the "mine=1?which=xx" link.
 		var yc = integer(alt.match(/(\d)/g)[1]);
@@ -4992,15 +4858,13 @@ function at_mining()
 	
 }
 
-function clearwhiches() 
-{
+function clearwhiches() {
 	for (var i=9; i<=54; i++) {
 		 DelCharData("which"+i);
 	}
 }
 
-function at_gamestore()
-{
+function at_gamestore() {
 	var select = document.getElementsByTagName("select");
 	if (select) {	// cards to trade in, while at the cashier.
 		select[0].options.selectedIndex = 1;	// select first card, saving clicks for tradeins.
@@ -5025,8 +4889,7 @@ function at_gamestore()
 }
 
 // OCEAN: Lat/Long spoilers.
-function at_ocean()
-{	
+function at_ocean() {
 	$("input[name=lat]").parents("table:first").before(
 	'<select onchange="var spl=this.value.split(\',\'); document.getElementsByName(\'lon\')[0].value = spl[0]; document.getElementsByName(\'lat\')[0].value = spl[1];">'+
 	'<option> </option>'+
@@ -5048,8 +4911,7 @@ function at_ocean()
 }
 
 // CAMPGROUND: Telescope spoilers
-function at_campground()
-{
+function at_campground() {
 	var resultsBar = $('td:first:contains("Results")');
 	if (GetPref("telescope") 
 		&& resultsBar.length > 0
@@ -5058,98 +4920,68 @@ function at_campground()
 		resultsBar.parent().next().find('p').each(function(t) {	
 			var txt = this.textContent;
 			var snarf = false;
-			if (txt.indexOf("carving of") != -1)
-			{	var gate = txt.split("carving of ")[1];
+			if (txt.indexOf("carving of") != -1) {
+				var gate = txt.split("carving of ")[1];
 				if (gate.indexOf("an armchair") != -1)
-					snarf = ['pygmy pygment','pigment',
-					'hiddencity.php','hidden city'];
+					snarf = ['pygmy pygment','pigment','hiddencity.php','hidden city'];
 				else if (gate.indexOf("cowardly-l") != -1)
-					snarf = ['wussiness potion','potion5',
-					'friars.php','deep fat friars'];
+					snarf = ['wussiness potion','potion5','friars.php','deep fat friars'];
 				else if (gate.indexOf("banana peel") != -1)
-					snarf = ['gremlin juice','potion6',
-					'bigisland.php?place=junkyard','island'];
+					snarf = ['gremlin juice','potion6','bigisland.php?place=junkyard','island'];
 				else if (gate.indexOf("coiled viper") != -1)
-					snarf = ['adder bladder','bladder',
-					'adventure.php?snarfblat=111','black forest (1)'];
+					snarf = ['adder bladder','bladder','adventure.php?snarfblat=111','black forest (1)'];
 				else if (gate.indexOf("a rose") != -1)
-					snarf = ['Angry Farmer candy','rcandy',
-					'adventure.php?snarfblat=82','castle in the sky (1)'];
+					snarf = ['Angry Farmer candy','rcandy','adventure.php?snarfblat=82','castle in the sky (1)'];
 				else if (gate.indexOf("glum teenager") != -1)
-					snarf = ['thin black candle','bcandle',
-					'adventure.php?snarfblat=82','castle in the sky (1)'];
+					snarf = ['thin black candle','bcandle','adventure.php?snarfblat=82','castle in the sky (1)'];
 				else if (gate.indexOf("hedgehog") != -1)
-					snarf = ['super-spiky hair gel','balm',
-					'adventure.php?snarfblat=81','fantasy airship (1)'];
+					snarf = ['super-spiky hair gel','balm','adventure.php?snarfblat=81','fantasy airship (1)'];
 				else if (gate.indexOf("a raven") != -1)
-					snarf = ['Black No. 2','blackdye',
-					'adventure.php?snarfblat=111','black forest (1)'];
+					snarf = ['Black No. 2','blackdye','adventure.php?snarfblat=111','black forest (1)'];
 				else if (gate.indexOf("smiling man") != -1)
-					snarf = ['Mick\'s IcyVapoHotness Rub','balm',
-					'adventure.php?snarfblat=82','castle in the sky (1)'];
+					snarf = ['Mick\'s IcyVapoHotness Rub','balm','adventure.php?snarfblat=82','castle in the sky (1)'];
 			} else if (txt.indexOf("baseball bat") != -1)
-				snarf = ['baseball','baseball',
-				'adventure.php?snarfblat=31','guano junction (1)'];
+				snarf = ['baseball','baseball','adventure.php?snarfblat=31','guano junction (1)'];
 			else if (txt.indexOf("made of Meat") != -1)
-				snarf = ['meat vortex','vortex',
-				'adventure.php?snarfblat=80','valley (1)'];
+				snarf = ['meat vortex','vortex','adventure.php?snarfblat=80','valley (1)'];
 			else if (txt.indexOf("amber waves") != -1)
-				snarf = ['bronzed locust','locust1',
-				'beach.php','beach'];
+				snarf = ['bronzed locust','locust1','beach.php','beach'];
 			else if (txt.indexOf("slimy eyestalk") != -1)
-				snarf = ['fancy bath salts','potion4',
-				'adventure.php?snarfblat=107','bathroom (1)'];
+				snarf = ['fancy bath salts','potion4','adventure.php?snarfblat=107','bathroom (1)'];
 			else if (txt.indexOf("flaming katana") != -1)
-				snarf = ['frigid ninja star','ninjastars',
-				'adventure.php?snarfblat=62','ninja snowmen lair (1)'];
+				snarf = ['frigid ninja star','ninjastars','adventure.php?snarfblat=62','ninja snowmen lair (1)'];
 			else if (txt.indexOf("translucent wing") != -1)
-				snarf = ['spider web','web',
-				'adventure.php?snarfblat=112','sleazy back alley (1)'];
+				snarf = ['spider web','web','adventure.php?snarfblat=112','sleazy back alley (1)'];
 			else if (txt.indexOf("looking tophat") != -1)
-				snarf = ['sonar-in-a-biscuit','biscuit',
-				'adventure.php?snarfblat=31','guano junction (1)'];
+				snarf = ['sonar-in-a-biscuit','biscuit','adventure.php?snarfblat=31','guano junction (1)'];
 			else if (txt.indexOf("of albumen") != -1)
-				snarf = ['black pepper','blpepper',
-				'adventure.php?snarfblat=111','black forest (1)'];
+				snarf = ['black pepper','blpepper','adventure.php?snarfblat=111','black forest (1)'];
 			else if (txt.indexOf("white ear") != -1)
-				snarf = ['pygmy blowgun','tinyblowgun',
-				'hiddencity.php','hidden city'];
+				snarf = ['pygmy blowgun','tinyblowgun','hiddencity.php','hidden city'];
 			else if (txt.indexOf("cowboy hat") != -1)
-				snarf = ['chaos butterfly','butterfly',
-				'adventure.php?snarfblat=82','castle in the sky (1)'];
+				snarf = ['chaos butterfly','butterfly','adventure.php?snarfblat=82','castle in the sky (1)'];
 			else if (txt.indexOf("periscope") != -1)
-				snarf = ['photoprotoneutron torpedo','torpedo',
-				'adventure.php?snarfblat=81','fantasy airship (1)'];
+				snarf = ['photoprotoneutron torpedo','torpedo','adventure.php?snarfblat=81','fantasy airship (1)'];
 			else if (txt.indexOf("strange shadow") != -1)
-				snarf = ['inkwell','inkwell',
-				'adventure.php?snarfblat=104','haunted library (1)'];
+				snarf = ['inkwell','inkwell','adventure.php?snarfblat=104','haunted library (1)'];
 			else if (txt.indexOf("moonlight reflecting") != -1)
-				snarf = ['hair spray','spraycan',
-				'store.php?whichstore=m','demon market'];
+				snarf = ['hair spray','spraycan','store.php?whichstore=m','demon market'];
 			else if (txt.indexOf("wooden frame") != -1)
-				snarf = ['disease','disease',
-				'adventure.php?snarfblat=42','knob harem (1)'];
+				snarf = ['disease','disease','adventure.php?snarfblat=42','knob harem (1)'];
 			else if (txt.indexOf("long coattails") != -1)
-				snarf = ['Knob Goblin firecracker','firecrack',
-				'adventure.php?snarfblat=114','knob outskirts (1)'];
+				snarf = ['Knob Goblin firecracker','firecrack','adventure.php?snarfblat=114','knob outskirts (1)'];
 			else if (txt.indexOf("steam shooting") != -1)
-				snarf = ['powdered organs','scpowder',
-				'pyramid.php','pyramid'];
+				snarf = ['powdered organs','scpowder','pyramid.php','pyramid'];
 			else if (txt.indexOf("holding a spatula") != -1)
-				snarf = ['leftovers of indeterminate origin','leftovers',
-				'adventure.php?snarfblat=102','haunted kitchen (1)'];
+				snarf = ['leftovers of indeterminate origin','leftovers','adventure.php?snarfblat=102','haunted kitchen (1)'];
 			else if (txt.indexOf("bass guitar") != -1)
-				snarf = ['mariachi G-string','string',
-				'adventure.php?snarfblat=45','south of the border (1)'];
+				snarf = ['mariachi G-string','string','adventure.php?snarfblat=45','south of the border (1)'];
 			else if (txt.indexOf("North Pole") != -1)
-				snarf = ['NG','ng',
-				'adventure.php?snarfblat=80','valley (1)'];
+				snarf = ['NG','ng','adventure.php?snarfblat=80','valley (1)'];
 			else if (txt.indexOf("writing desk") != -1)
-				snarf = ['plot hole','hole',
-				'adventure.php?snarfblat=82','castle in the sky (1)'];
+				snarf = ['plot hole','hole','adventure.php?snarfblat=82','castle in the sky (1)'];
 			else if (txt.indexOf("cuticle") != -1)
-				snarf = ['razor-sharp can lid','canlid',
-				'adventure.php?snarfblat=113','haunted pantry (1)'];
+				snarf = ['razor-sharp can lid','canlid','adventure.php?snarfblat=113','haunted pantry (1)'];
 			else if (txt.indexOf("formidable stinger") != -1)
 				snarf = ['tropical orchid','troporchid','shore.php','shore'];
 			else if (txt.indexOf("pair of horns") != -1)
@@ -5166,7 +4998,7 @@ function at_campground()
 					.after('<div style="clear:both;"></div>');
 			}
 		});
-
+//TODO: replace this with a call to the inventory API.
 		GM_get(server + '/inventory.php?which=3', function(txt) {	
 			$('b[class=combatitem]').each(function() {	
 				if (txt.indexOf('>'+this.innerHTML) != -1) this.setAttribute('style','color:green;');
@@ -5177,11 +5009,9 @@ function at_campground()
 }
 
 // BASEMENT: Im in ur base, spoilin ur puzzlez.
-function at_basement()
-{	
+function at_basement() {
 	var bq = document.getElementsByTagName('blockquote')[0];
 	var ins = document.getElementsByTagName('input');
-
 	// Phial link
 	for (var i=0, len=ins.length; i<len; i++) {
 		if (ins[i].type != 'submit') continue;
@@ -5675,16 +5505,6 @@ function at_tutorial()
 		pwd + '&which=3&whichitem=1155'));
 }
 
-//function at_showplayer()
-//{	if (location.search != "?who=53596" && location.search != "?who=73736")
-//		return;
-//	var img = document.getElementsByTagName('img'); for (var i=50, len=img.length; i<len; i++)
-//	{	var temp = img[i]; if (temp.width == 100 && temp.title.indexOf("Tiny") != -1)
-//		{	var nu = document.createElement('img'); nu.title = "Worst. Trophy. Ever.";
-//			nu.src = "http://images.kingdomofloathing.com/otherimages/trophy/not_wearing_any_pants.gif";
-//			temp.parentNode.insertBefore(nu,temp.nextSibling); break;
-//}	}	}
-
 // DESC_ITEM: Add use boxes/links to item descriptions
 function at_desc_item() {
   linkKOLWiki();
@@ -5767,16 +5587,16 @@ function at_topmenu()
 
 	var toprow1 = 0, toprow2, toprow3, front;
 	var shorttop = 0, haveLair = 0, weBuildHere;
-	if (GetPref('shortlinks') % 2 > 0)
-	{	shorttop = 1;
+	if (GetPref('shortlinks') % 2 > 0) {
+		shorttop = 1;
 		toprow1 = document.createElement('span');
 		toprow2 = document.createElement('span');
 		front = GetPref('toprow');
 	}
 
 	// Find all links and attach event handlers
-	$('a').each(function(ind)
-	{	var a = $(this);
+	$('a').each(function(ind) {
+		var a = $(this);
 		var txt = a.text();
 
 		// prefs
@@ -5804,8 +5624,8 @@ function at_topmenu()
 		if (txt == "lair") haveLair = 1;
 
 		// Confirm logout
-		if (txt == "log out" && logoutconf == 1)
-		{	a.after('<a href="javascript:void(0);" onclick="this.' +
+		if (txt == "log out" && logoutconf == 1) {
+			a.after('<a href="javascript:void(0);" onclick="this.' +
 'previousSibling.innerHTML=\'logout\'; this.innerHTML=\'\';"></a>');
 			a.replaceWith('<a target="_top" href="logout.php" ' +
 'onclick="if(this.innerHTML!=\'sure?\') { this.blur(); ' +
@@ -5813,8 +5633,8 @@ function at_topmenu()
 'innerHTML=\' (nope)\'; return false; }">log out</a>');
 		}
 
-		if (txt == "plains")
-		{	a.after(' <a href="manor.php" target="mainpane">manor</a>');
+		if (txt == "plains") {
+			a.after(' <a href="manor.php" target="mainpane">manor</a>');
 
 //			GM_log("checking level in topmenu: is currently "+integer(GetCharData('level')));
 			if (integer(GetCharData('level')) > 9) 
@@ -5825,13 +5645,12 @@ function at_topmenu()
 			weBuildHere.parentNode.setAttribute('nowrap','nowrap');
 		}
 		
-		if (txt == "beach")
-		{	if (integer(GetCharData('level')) > 12) 
+		if (txt == "beach") {
+			if (integer(GetCharData('level')) > 12) 
 			a.after(' <a href="thesea.php" target="mainpane">sea</a>');
 		}
 		
-		if (txt == "town")
-		{
+		if (txt == "town") {
 			a.html("town:");
 			a.after(' <a href="dungeons.php" target="mainpane">dungeons</a>');
 //			a.after(' <a href="forestvillage.php" target="mainpane">F-ville</a>');
@@ -5841,8 +5660,8 @@ function at_topmenu()
 		}
 
 		// Remove last row, which will be manually re-added.
-		if (shorttop)
-		{	if (txt == "documentation" || txt == "report bug"
+		if (shorttop) {
+			if (txt == "documentation" || txt == "report bug"
 			||  txt == "store" ||  txt == "donate" ||  txt == "forums")
 			{	a.html("");
 				a.get(0).nextSibling.textContent = "";
@@ -5850,8 +5669,8 @@ function at_topmenu()
 		}
 
 		// Inventory
-		if (txt == "inventory" && splitinv == 1)
-		{	a.html('ory').attr('href','inventory.php?which=3')
+		if (txt == "inventory" && splitinv == 1) {
+			a.html('ory').attr('href','inventory.php?which=3')
 				.before('<a href="inventory.php?which=1" '+
 					'target="mainpane">inv</a>')
 				.before('<a href="inventory.php?which=2" ' +
@@ -5860,16 +5679,16 @@ function at_topmenu()
 		}
 
 		// Quests
-		if (txt == "quests" && splitquest == 1)
-		{	a.html('sts').attr('href','questlog.php?which=4')
+		if (txt == "quests" && splitquest == 1) {
+			a.html('sts').attr('href','questlog.php?which=4')
 				.before('<a href="questlog.php?which=1" '+
 					'target="mainpane">que</a>');
 		}
 
 		// Messages
-		if (txt == "messages" && splitmsg > 0)
-		{	switch (splitmsg)
-			{	case 2: a.attr('href','messages.php?box=Outbox'); break;
+		if (txt == "messages" && splitmsg > 0) {
+			switch (splitmsg) {
+				case 2: a.attr('href','messages.php?box=Outbox'); break;
 				case 3: a.attr('href','messages.php?box=Saved'); break;
 				case 4: a.attr('href','messages.php?box=PvP'); break;
 				default: a.attr('href','sendmessage.php');
@@ -5879,16 +5698,16 @@ function at_topmenu()
 		}
 
 		// Ass-metric link. Surround it in a named span for easy hiding.
-		if (moveqs > 0 && txt == "Asymmetric Publications, LLC")
-		{	a.parent().wrapAll('<span name="assy" id="menus"></span>');
+		if (moveqs > 0 && txt == "Asymmetric Publications, LLC") {
+			a.parent().wrapAll('<span name="assy" id="menus"></span>');
 		}
 	});
 
 	// Attach skills link to Sword and Martini Guy
 	var swordGuy = $('img:first[src*=smallleft]');
 	var swordGuyURL = GetPref('swordguy');
-	if (swordGuyURL != '' && swordGuy.length > 0)
-	{	var guy = document.createElement('a');
+	if (swordGuyURL != '' && swordGuy.length > 0) {
+		var guy = document.createElement('a');
 		if (swordGuyURL.indexOf("http://") != -1)
 			guy.setAttribute('target','_blank');
 		else guy.setAttribute('target','mainpane');
@@ -5897,12 +5716,12 @@ function at_topmenu()
 		swordGuy.attr('id','swordguy');	// add ID tag for later easy selection
 		swordGuy.wrap(guy);
 
-		swordGuy.get(0).addEventListener('contextmenu', function(event)
-		{	var nuhref = prompt('Where would you like this link to point?',
+		swordGuy.get(0).addEventListener('contextmenu', function(event) {
+			var nuhref = prompt('Where would you like this link to point?',
 				GetPref('swordguy'));
 			var ln = this.parentNode;
-			if (nuhref)
-			{	SetPref('swordguy', nuhref);
+			if (nuhref) {
+				SetPref('swordguy', nuhref);
 				swordGuy = nuhref;
 			}
 			ln.setAttribute('href', nuhref);
@@ -5917,33 +5736,33 @@ function at_topmenu()
 	}
 
 	// Add rows of links
-	if (shorttop)
-	{	var a;
+	if (shorttop) {
+		var a;
 
 		toprow1.setAttribute("name","toprow1");
 		if (front != 1) toprow1.setAttribute("style","display: none;");
 
-		for (var j=0; j<10; j++)
-		{	var zoiks = GetPref('menu1link'+j); var tarjay = 'mainpane';
+		for (var j=0; j<10; j++) {
+			var zoiks = GetPref('menu1link'+j); var tarjay = 'mainpane';
 			var zplit = zoiks.split(';');
-			if (zplit[0] == "guildstore")
-			{	AddTopLink(toprow1, 'mainpane', 'fnord', '', 1);
+			if (zplit[0] == "guildstore") {
+				AddTopLink(toprow1, 'mainpane', 'fnord', '', 1);
 				AddTopLink(toprow1, 'mainpane', 'smeg', '', 1);
-				GM_get(server+'/store.php?whichstore=2', function(t)
-				{	if (t.length>10 && t.indexOf("You don't belong") == -1)
+				GM_get(server+'/store.php?whichstore=2', function(t) {
+					if (t.length>10 && t.indexOf("You don't belong") == -1)
 						$('a[href=fnord]')
 						.attr('href', 'store.php?whichstore=2')
 						.html('gouda');
 				});
-				GM_get(server+'/store.php?whichstore=3', function(t)
-				{	if (t.length>10 && t.indexOf("You don't belong") == -1)
+				GM_get(server+'/store.php?whichstore=3', function(t) {
+					if (t.length>10 && t.indexOf("You don't belong") == -1)
 						$('a[href=smeg]')
 						.attr('href', 'store.php?whichstore=3')
 						.html('smack');
 				})
 
-			} else if (zoiks != "")
-			{	if (zoiks.indexOf("http://") != -1) tarjay = '_blank';
+			} else if (zoiks != "") {
+				if (zoiks.indexOf("http://") != -1) tarjay = '_blank';
 				AddTopLink(toprow1, tarjay, zplit[1], zplit[0], 1);
 			} else break;
 		}
@@ -5962,8 +5781,8 @@ function at_topmenu()
 		if (haveLair == 1 && integer(GetCharData('level')) == 13)
 			AddTopLink(toprow1, 'mainpane', 'lair2.php?action=door', 'door', 1);
 		a = document.createElement('a'); a.innerHTML = "more"; a.setAttribute('href','#');
-		a.addEventListener('click', function(event)
-		{	var tr1 = document.getElementsByName("toprow1")[0];
+		a.addEventListener('click', function(event) {
+			var tr1 = document.getElementsByName("toprow1")[0];
 			var tr2 = document.getElementsByName("toprow2")[0];
 			tr1.style.display = "none"; tr2.style.display = "inline";
 			SetPref('toprow', 2);
@@ -5972,10 +5791,10 @@ function at_topmenu()
 		toprow2.setAttribute("name","toprow2");
 		if (front != 2) toprow2.setAttribute("style","display: none;");
 
-		for (var j=0; j<10; j++)
-		{	var zoiks = GetPref('menu2link'+j); var tarjay = 'mainpane';
-			if (zoiks != "")
-			{	if (zoiks.indexOf("http://") != -1 || zoiks.indexOf("searchplayer") != -1) tarjay = '_blank';
+		for (var j=0; j<10; j++) {
+			var zoiks = GetPref('menu2link'+j); var tarjay = 'mainpane';
+			if (zoiks != "") {
+				if (zoiks.indexOf("http://") != -1 || zoiks.indexOf("searchplayer") != -1) tarjay = '_blank';
 				AddTopLink(toprow2, tarjay, zoiks.split(';')[1], zoiks.split(';')[0], 1);
 			} else break;
 		}
@@ -5988,8 +5807,8 @@ function at_topmenu()
 		AddTopLink(toprow2, '_blank', 'http://forums.kingdomofloathing.com', 'forums', 1);
 		AddTopLink(toprow2, '_blank', 'radio.php', 'radio', 1);
 		a = document.createElement('a'); a.innerHTML = "more"; a.setAttribute('href','#');
-		a.addEventListener('click', function(event)
-		{	var tr2 = document.getElementsByName("toprow2")[0];
+		a.addEventListener('click', function(event) {
+			var tr2 = document.getElementsByName("toprow2")[0];
 			var tr1 = document.getElementsByName("toprow1")[0];
 			tr2.style.display = "none"; tr1.style.display = "inline";
 			SetPref('toprow', 1);
@@ -6015,7 +5834,7 @@ function at_topmenu()
 		else if (moveqs == 2) {
 			$('#themoons').parent().parent().append(if2).wrap('<td />');
 		}
-// some defensive coding:  don't assume that "javascript:skillson()" is always document.link[1], like we used to.
+// some defensive coding:  don't assume that "javascript:skillson()" is always document.link[1].
 // go hunt it down specifically.
 		for (var i=0; i< document.links.length; i++) {
 //			GM_log("doclinks["+i+"]="+foo);
@@ -6029,8 +5848,7 @@ function at_topmenu()
 }
 
 // ASCEND: Make sure we're really ready to jump into that gash.
-function at_ascend()
-{
+function at_ascend() {
 	var checklist = GetPref('ascension_list');
 	if (checklist != '') {
 		checklist = checklist.replace(/,/g,"<br>");
@@ -6042,8 +5860,7 @@ function at_ascend()
 }
 
 // COMPACTMENU: Add options to menus and stuff.
-function at_compactmenu()
-{
+function at_compactmenu() {
 	var selectItem, links, oonTD, linkTD;
 	var quickSkills = 0, moveqs = 0;
 
@@ -6052,19 +5869,20 @@ function at_compactmenu()
 
 	moveqs = GetPref('moveqs');
 	links = document.getElementsByTagName('a');
-	for (var i=0, len=links.length; i<len; i++)
-	{	var temp = links[i];
+	for (var i=0, len=links.length; i<len; i++) {
+		var temp = links[i];
 
-		if (temp.text.indexOf("menu") != -1)
-		{	quickSkills = 1;
-			if (moveqs > 0)
-			{	temp.innerHTML = "";
+		if (temp.text.indexOf("menu") != -1) {
+			quickSkills = 1;
+			if (moveqs > 0) {
+				temp.innerHTML = "";
 				linkTD = temp.parentNode;
-		}	}
+			}	
+		}
 
-		if (temp.innerHTML.indexOf("20") != -1)
-		{	if (moveqs > 0 && quickSkills > 0)
-			{	oonTD = temp.parentNode;
+		if (temp.innerHTML.indexOf("20") != -1) {
+			if (moveqs > 0 && quickSkills > 0) {
+				oonTD = temp.parentNode;
 				temp.innerHTML = '';
 
 				var iframe = document.getElementsByName('skillpane')[0];
@@ -6079,20 +5897,20 @@ function at_compactmenu()
 
 				// Remove Moons label. Sneakily.
 				temp = document.getElementsByTagName('b')[0];
-				if (temp.innerHTML.indexOf('Moons') != -1)
-				{	var umspan = document.createElement('span');
+				if (temp.innerHTML.indexOf('Moons') != -1) {
+					var umspan = document.createElement('span');
 					temp.parentNode.setAttribute('style','display:none;');
 					umspan.setAttribute('id','menus');
 					temp.parentNode.appendChild(umspan);
 					umspan.appendChild(temp);
 				}
 				iframe.contentWindow.setTimeout('self.location = "skills.php?tiny=1";',50);
-		}	}
+			}	
+		}
 	}
 
 	// Camera One!
-	if (GetPref('shortlinks') % 2 > 0 || GetPref('splitinv') == 1)
-	{	
+	if (GetPref('shortlinks') % 2 > 0 || GetPref('splitinv') == 1) {
 		selectItem = document.getElementsByTagName('select')[0];
 		//selectItem.setAttribute('style','font-size: 9pt;');
 		selectItem.parentNode.parentNode.setAttribute('nowrap','nowrap');
@@ -6131,7 +5949,9 @@ function at_compactmenu()
 					for (var i=0; i<s.options.length; i++) {
 						if (s.options[i].value == "craft.php?mode=combine")
 						{	s.options[i].value = "knoll.php?place=paster"; break;
-				}	}	});
+						}	
+					}	
+				});
 			}
 			if (GetPref('logout') == 1 && selectItem.options[i].innerHTML == "Log Out") {
 				selectItem.options[i].value = "logout";
@@ -6139,31 +5959,31 @@ function at_compactmenu()
 					'else if (confirm("Log out?")) parent.frames[2].location = "logout.php"; ' +
 					'else this.selectedIndex=0;');
 			}
-	}	}
+		}	
+	}
 
 	// Camera Two!
-	if (GetPref('shortlinks') % 2 > 0)
-	{	selectItem = document.getElementsByTagName('select')[1];
+	if (GetPref('shortlinks') % 2 > 0) {
+		selectItem = document.getElementsByTagName('select')[1];
 		selectItem.parentNode.parentNode.setAttribute('nowrap','nowrap');
-		for (var i=0, len = selectItem.options.length; i<len; i++)
-		{	if (selectItem.options[i].innerHTML.indexOf("Nearby Plains") != -1)
-			{	AddTopOption("The Beanstalk", "beanstalk.php", selectItem, selectItem.options[i+1]);
+		for (var i=0, len = selectItem.options.length; i<len; i++) {
+			if (selectItem.options[i].innerHTML.indexOf("Nearby Plains") != -1) {
+				AddTopOption("The Beanstalk", "beanstalk.php", selectItem, selectItem.options[i+1]);
 				AddTopOption("Spookyraven Manor", "manor.php", selectItem, selectItem.options[i+2]);
 				len += 2;	// extend loop to cover new options just added.
 			}	
 			if (GetPref('malllink') == 1 && selectItem.options[i].innerHTML == "The Mall") {
 				selectItem.options[i].value = "searchmall.php";
 			}
-			if (selectItem.options[i].innerHTML.indexOf("Seaside Town") != -1)
-			{
+			if (selectItem.options[i].innerHTML.indexOf("Seaside Town") != -1) {
 				AddTopOption("Town: Wrong side","town_wrong.php", selectItem, selectItem.options[i+1]);
 				AddTopOption("Town: Right side","town_right.php", selectItem, selectItem.options[i+2]);
 				AddTopOption("Town: Dungeons","dungeons.php", selectItem, selectItem.options[i+3]);
 				len += 3;
 			}
-			if (selectItem.options[i].innerHTML.indexOf("Desert Beach") != -1)
-			{	if (integer(GetCharData('level')) > 12) 
-				{	AddTopOption("The Sea","thesea.php",selectItem, selectItem.options[i+1]);
+			if (selectItem.options[i].innerHTML.indexOf("Desert Beach") != -1) {
+				if (integer(GetCharData('level')) > 12) {
+					AddTopOption("The Sea","thesea.php",selectItem, selectItem.options[i+1]);
 					// len++;
 				}
 			}
@@ -6190,13 +6010,11 @@ function at_compactmenu()
 
 // ------------------------------
 
-function buildPrefs()
-{
+function buildPrefs() {
     if (!document.querySelector('#privacy')) return;
     var scriptID = "MrScript";
     var scriptName = "Mr. Script's Choicetastic Optionarium";
-    if (!document.querySelector('#scripts'))
-    {
+    if (!document.querySelector('#scripts')) {
         //scripts tab is not built, do it here
         var scripts = document.querySelector('ul').appendChild(document.createElement('li'));
         scripts.id = 'scripts';
@@ -6208,9 +6026,8 @@ function buildPrefs()
         img.border = '0';
         img.style.paddingRight = '10px';
         a.appendChild(document.createTextNode('Scripts'));
-        a.addEventListener('click', function (e)
-        {
-            //make our new tab active when clicked, clear out the #guts div and add our settings to it
+        a.addEventListener('click', function (e) {
+             //make our new tab active when clicked, clear out the #guts div and add our settings to it
             e.stopPropagation();
             document.querySelector('.active').className = '';
             document.querySelector('#scripts').className = 'active';
@@ -6219,12 +6036,9 @@ function buildPrefs()
             //click handler for everything in this section
 //            document.querySelector('#' + scriptID).addEventListener('click', changeSettings, false);
         }, false);
-    }
-    else
-    {
+    } else {
         //script tab already exists
-        document.querySelector('#scripts').firstChild.addEventListener('click', function (e)
-        {
+        document.querySelector('#scripts').firstChild.addEventListener('click', function (e) {
             //some other script is doing the activation work, just add our settings
             e.stopPropagation();
             document.querySelector('#guts').appendChild(buildSettings());
@@ -6281,8 +6095,8 @@ function buildPrefs()
 	
 	function createMenu1(menu1Span) {
 		// Customized Links, Take 1
-		for (var j=0; j<10; j++)
-		{	var menutxt = GetPref('menu1link'+j);
+		for (var j=0; j<10; j++) {
+			var menutxt = GetPref('menu1link'+j);
 			if (menutxt != undefined) menutxt = menutxt.split(';')[0];
 			else menutxt = "";
 			menu1Span.appendChild(MakeOption(menutxt, -2, 'menu1link'+j), 0, 0);
@@ -6290,12 +6104,12 @@ function buildPrefs()
 		var select = document.createElement('a');
 		select.innerHTML = 'Restore Defaults'; select.href = '#';
 		select.setAttribute('class','tiny');
-		select.addEventListener('click',function(event)
-		{	event.stopPropagation(); event.preventDefault();
+		select.addEventListener('click',function(event) {
+			event.stopPropagation(); event.preventDefault();
 			if (confirm("Restore default menu options? (Just double-checking.)") == false) return;
 			Defaults(1);
-			for (var i=0; i<10; i++)
-			{	var tag = document.getElementsByName('menu1link'+i+'tag')[0];
+			for (var i=0; i<10; i++) {
+				var tag = document.getElementsByName('menu1link'+i+'tag')[0];
 				var link = document.getElementsByName('menu1link'+i)[0];
 				tag.value = GetPref('menu1link'+i).split(';')[0];
 				if (tag.value == "undefined") tag.value = "";
@@ -6306,10 +6120,10 @@ function buildPrefs()
 		var choice = document.createElement('input');
 		choice.type = 'submit'; choice.setAttribute('class','button');
 		choice.value = 'Apply'; choice.href = '#';
-		choice.addEventListener('click',function(event)
-		{	event.stopPropagation(); event.preventDefault();
-			for (var i=0; i<10; i++)
-			{	var tag = document.getElementsByName('menu1link'+i+'tag')[0].value;
+		choice.addEventListener('click',function(event) {
+			event.stopPropagation(); event.preventDefault();
+			for (var i=0; i<10; i++) {
+				var tag = document.getElementsByName('menu1link'+i+'tag')[0].value;
 				var link = document.getElementsByName('menu1link'+i)[0].value;
 				if (tag != undefined && link != undefined && tag != "")
 					SetPref('menu1link'+i,tag+';'+link);
@@ -6325,8 +6139,8 @@ function buildPrefs()
 	
 	function createMenu2(menu2Span) {
 		// Customized Links, Take 2
-		for (var j=0; j<10; j++)
-		{	var menutxt = GetPref('menu2link'+j);
+		for (var j=0; j<10; j++) {
+			var menutxt = GetPref('menu2link'+j);
 			if (menutxt != undefined) menutxt = menutxt.split(';')[0];
 			else menutxt = "";
 			menu2Span.appendChild(MakeOption(menutxt, -2, 'menu2link'+j), 0, 0);
@@ -6334,12 +6148,12 @@ function buildPrefs()
 		var select = document.createElement('a');
 		select.innerHTML = 'Restore Defaults'; select.href = '#';
 		select.setAttribute('class','tiny');
-		select.addEventListener('click',function(event)
-		{	event.stopPropagation(); event.preventDefault();
+		select.addEventListener('click',function(event) {
+			event.stopPropagation(); event.preventDefault();
 			if (confirm("Restore default menu options? (Just double-checking.)") == false) return;
 			Defaults(2);
-			for (var i=0; i<10; i++)
-			{	var tag = document.getElementsByName('menu2link'+i+'tag')[0];
+			for (var i=0; i<10; i++) {
+				var tag = document.getElementsByName('menu2link'+i+'tag')[0];
 				var link = document.getElementsByName('menu2link'+i)[0];
 				tag.value = GetPref('menu2link'+i).split(';')[0];
 				if (tag.value == "undefined") tag.value = "";
@@ -6350,9 +6164,9 @@ function buildPrefs()
 		var choice = document.createElement('input');
 		choice.type = 'submit'; choice.setAttribute('class','button');
 		choice.value = 'Apply'; choice.href = '#';
-		choice.addEventListener('click',function(event)
-		{	for (var i=0; i<10; i++)
-			{	var tag = document.getElementsByName('menu2link'+i+'tag')[0].value;
+		choice.addEventListener('click',function(event) {
+			for (var i=0; i<10; i++) {
+				var tag = document.getElementsByName('menu2link'+i+'tag')[0].value;
 				var link = document.getElementsByName('menu2link'+i)[0].value;
 				if (tag != undefined && link != undefined && tag != "")
 					SetPref('menu2link'+i,tag+';'+link);
@@ -6371,18 +6185,19 @@ function buildPrefs()
 		var ul = document.createElement('a');
 		ul.setAttribute('href','#');
 		ul.innerHTML = "Check For Update";
-		ul.addEventListener('click',function(event)
-		{	GM_get("noblesse-oblige.org/hellion/scripts/MrScript.version.txt", function(txt)
-			{	var uspan = document.getElementsByName('updatespan')[0];
+		ul.addEventListener('click',function(event) {
+			GM_get("noblesse-oblige.org/hellion/scripts/MrScript.version.txt", function(txt) {
+				var uspan = document.getElementsByName('updatespan')[0];
 				var txtsplit = txt.split(',');
 				var versionNumber = txtsplit[0].replace('.','').replace('.','');
-				if (integer(versionNumber) <= VERSION)
-				{	uspan.innerHTML = "<br>No Update Available.";
+				if (integer(versionNumber) <= VERSION) {
+					uspan.innerHTML = "<br>No Update Available.";
 					persist('MrScriptLastUpdate', integer(new Date().getTime()/3600000)); return;
-				} else
-				{	uspan.innerHTML = "<br>Version " + txtsplit[0] + " Available: <a target='_blank' href='" +
+				} else {
+					uspan.innerHTML = "<br>Version " + txtsplit[0] + " Available: <a target='_blank' href='" +
 						txtsplit[1] + "'>Update</a>";
-			}	}); event.stopPropagation(); event.preventDefault();
+				}	
+			}); event.stopPropagation(); event.preventDefault();
 		}, true);
 //		var ul2 = document.createElement('a');
 //		ul2.setAttribute('href','javascript:void(0);');
@@ -6414,8 +6229,7 @@ function buildPrefs()
 		centeredlinks.appendChild(ulspan);
 	}
 
-    function buildSettings()
-    {
+    function buildSettings() {
         //build our settings and return them for appending
         var guts = document.createElement("div"); 
         guts.id = scriptID;
@@ -6510,8 +6324,7 @@ function sendmessage() {
   autoclear_added_rows();
 }
 
-function autoclear_added_rows()
-{
+function autoclear_added_rows() {
 	$('a[href^=javascript]').each(function()
 	{
 		var link = $(this);
@@ -6530,8 +6343,7 @@ function autoclear_added_rows()
 	});
 }
 
-function at_adminmail()
-{
+function at_adminmail() {
 	function showBRform() {
 		$('table:first').attr('style','display:inline');
 	}
@@ -6545,8 +6357,8 @@ function at_adminmail()
 }
 
 // MAINT: Refresh until rollover is over.
-function at_maint()
-{	document.title="KoL Rollover";
+function at_maint() {
+	document.title="KoL Rollover";
 	window.setTimeout('self.location = "http://www.kingdomofloathing.com";',60000);
 }
 
