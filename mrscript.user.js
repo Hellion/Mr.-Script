@@ -712,8 +712,9 @@ function AddLinks(descId, theItem, formWhere, path) {
 			break;
 
 		case 2052: 																// Blackbird
-			addWhere.append(AppendLink('[fly]', 'inv_familiar.php?pwd=' +
-				 pwd + '&whichitem=2052&which=3')); break;
+//			addWhere.append(AppendLink('[fly]', 'inv_familiar.php?pwd=' +
+//				 pwd + '&whichitem=2052&which=3')); break;
+			addWhere.append(AppendLink('[use map]','inv_use.php?pwd=' + pwd + '&which=3&whichitem=2054')); break;
 
 		case 2050: case 2051:													// bird parts
 			addWhere.append(AppendLink('[bird]', 'craft.php?mode=combine' +
@@ -1908,6 +1909,8 @@ function at_valhalla() {
 	SetCharData("squarelist","");
 	// reset tracking of what items were where while mining
 	clearwhiches();
+	// reset count of beeguy summonses
+	SetCharData("saidbeeguy",0)
 }
 
 // COVE: display pirate insult information
@@ -2059,6 +2062,15 @@ function at_adventure() {
 //		GM_log("srch="+document.location.search);
 		if (document.location.search=="?snarfblat=100") {	// we were trying for Whitey's Grove; go get the quest from the guild.
 			top.document.getElementsByName('mainpane')[0].contentDocument.location.pathname="guild.php?place=paco";
+		} else if (document.location.search=="?snarfblat=141") { // we were at the Pond (frozen dooks)
+			$('<center><a href="adventure.php?snarfblat=142">Adventure in the Back 40</a></center><br />')
+				.prependTo($('a:last').parent());
+		} else if (document.location.search=="?snarfblat=142") { // we were at the Back 40 (hot dooks)
+			$('<center><a href="adventure.php?snarfblat=143">Adventure in the Other Back 40</a></center><br />')
+				.prependTo($('a:last').parent());
+		} else if (document.location.search=="?snarfblat=143") { // we were at the Other Back 40 (spooky dooks)
+			$('<center><a href="bigisland.php?place=farm&action=farmer&pwd='+pwd+'">See the Farmer</a></center><br />')
+				.prependTo($('a:last').parent());
 		}
 		break;
 	}
@@ -2136,6 +2148,9 @@ function at_guild() {
 						   .append(AppendLink('[Poop Deck (1)]','adventure.php?snarfblat=159'));
 			}
 		break;
+		case "?place=challenge":	
+			//add links here for going to haunted pantry, sleazy back alley, or Cobb's Knob.
+		break;
 	}
 }
 
@@ -2195,6 +2210,20 @@ function at_choice() {
 			// add a link to cooking here.
 		} else if (p0.textContent.indexOf("clutching your pants triumphantly") != -1) { // AT guild-opening quest
 			p0.appendChild(AppendLink('[back to the guild]','guild.php?place=challenge'));
+		} else if (p0.textContent == "Blech.") {
+			$('a:contains("Adventure Again (McMillicancuddy")')
+				.prepend('<center><a href=adventure.php?snarfblat=141>Go to the Pond</a></center><br />');
+		} else if (p0.textContent.indexOf("you find yourself face to face with... yourself") != -1) {
+			var saidgmob = GetCharData("saidbeeguy");
+			if (saidgmob == undefined) saidgmob = 0;
+			$('p:last').append("<br /><font color='blue'>You have said 'Guy made of bees' " + saidgmob + " times.</font><br />");
+		} else if (choicetext.indexOf("Guy made of bees.") != -1) {
+			GM_log("you just said GMOB!");
+			var gmob = GetCharData("saidbeeguy");
+			if ((gmob == undefined) || (gmob == 0)) gmob = 1;
+			else gmob = gmob + 1;
+			SetCharData("saidbeeguy",gmob);
+			GM_log("Set GMOB to "+gmob);
 		}
 	}
 }
@@ -2915,7 +2944,7 @@ function at_bigisland() {
 	}
 	// add MAX buttons to the trade-in boxes
 	var select = document.getElementsByTagName("select");
-	if (select) {	// Items to trade in at the store?
+	if (select && select.length > 0) {	// Items to trade in at the store?
 //		select[0].options.selectedIndex = 1;
 		var qty = document.getElementsByName("quantity")[0];
 		MakeMaxButton(qty, function(event) {
@@ -3171,6 +3200,13 @@ function at_mountains()
 		$(a).attr('href','hermit.php')
 			.insertBefore(img)
 			.append(img);
+	}
+}
+
+function at_knoll() {	
+	if (document.location.search == "?place=mayor") {
+		p = $('p:first');
+		p.append(AppendLink('[spooky barrow (1)]','adventure.php?snarfblat=999'));
 	}
 }
 
@@ -3575,7 +3611,8 @@ function at_charpane()
 {	// var centerThing = document.getElementsByTagName('center');
 	var imgs = document.images;
 	if (imgs.length == 0 || imgs == null) return;
-	var compactMode = imgs[0].getAttribute('height') < 60;
+	var compactMode = imgs[0].getAttribute('height') < 60 || imgs[0].getAttribute('src').indexOf("clancy") > -1;
+//if clancy is the first image, we're in compact mode, but he's 100 pixels tall, the little bastard.	
 	var bText = document.getElementsByTagName('b');
 	var curHP, maxHP, curMP, maxMP, level, str, advcount, effLink;
 	var oldcount = integer(GetCharData('advcount'));
