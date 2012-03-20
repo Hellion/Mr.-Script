@@ -5331,6 +5331,7 @@ function spoil_woods()
 		else if (src.indexOf("barrow") != -1) ml = '56-65';
 		else if (src.indexOf("pen.") != -1) ml = '13-20';
 		else if (src.indexOf("grove") != -1) ml = '34-36';
+		else if (src.indexOf("temple") != -1) ml = 'scales to 50';
 //		else if (src.indexOf("tavern") != -1) ml = '10';
 		if (ml) this.setAttribute('title','ML: '+ml);
 });	}
