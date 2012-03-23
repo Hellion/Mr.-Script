@@ -2213,6 +2213,8 @@ function at_choice() {
 		} else if (p0.textContent == "Blech.") {
 			$('a:contains("Adventure Again (McMillicancuddy")')
 				.prepend('<center><a href=adventure.php?snarfblat=141>Go to the Pond</a></center><br />');
+		} else if (p0.textContent.indexOf('children Stephen and Elizabeth') != -1) {
+			$('<center><a href="adventure.php?snarfblat=103">Adventure in The Conservatory</a></center><br />').prependTo($('a:last').parent());
 		} else if (p0.textContent.indexOf("you find yourself face to face with... yourself") != -1) {
 			var saidgmob = GetCharData("saidbeeguy");
 			if (saidgmob == undefined) saidgmob = 0;
@@ -2819,6 +2821,11 @@ function at_inventory()
 		{	
 			bText = document.getElementsByTagName('b')[1];
 			bText.parentNode.appendChild(AppendLink('[hermit]','hermit.php'));
+		}
+		else if (resultsText.indexOf("a tiny black hut with a sign") != -1)	// successfully used black market map
+		{
+			bText = document.getElementsByTagName('blocktext')[0];
+			bText.appendChild(AppendLink('[to market, to market]','store.php?whichstore=l'));
 		}
 // and this is where we add all the nifty little links after equipping something.
 		else if (resultsText.indexOf("You equip an item") != -1) {
