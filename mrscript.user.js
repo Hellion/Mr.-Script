@@ -2055,6 +2055,9 @@ function at_adventure() {
 	case "A Dicey Situation":
 		$('<center><a href="pandamonium.php?action=sven">Check with Sven</a></center><br />').prependTo($('a:last').parent());
 		break;
+	case "The Manor in Which You're Accustomed":
+		$('<center><a href="manor.php">Go on inside</a></center><br />').prependTo($('a:last').parent());
+		break;
 	case "":	// got a "You shouldn't be here" or other reject message... (or an untitled Limerick Dungeon adventure, sigh)
 		$('center table tr td').each(function(){
 			GM_log("NCTitle check:"+$(this).text());
