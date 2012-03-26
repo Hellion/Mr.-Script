@@ -2827,7 +2827,7 @@ function at_inventory()
 		}
 		else if (resultsText.indexOf("a tiny black hut with a sign") != -1)	// successfully used black market map
 		{
-			bText = document.getElementsByTagName('blocktext')[0];
+			bText = document.getElementsByTagName('blockquote')[0];
 			bText.appendChild(AppendLink('[to market, to market]','store.php?whichstore=l'));
 		}
 // and this is where we add all the nifty little links after equipping something.
