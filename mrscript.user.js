@@ -3728,6 +3728,8 @@ function at_charpane()
 		if (bEff.length>0) bEff.get(0).setAttribute("oncontextmenu",
 			"top.mainpane.location.href='http://" + server +
 			"/uneffect.php'; return false;");
+		if ($('#nudgeblock div:contains("a work in progress")').length > 0) $('#nudgeblock').hide();
+//		GM_log("nbdlen = " + $('#nudgeblock div:contains("a work in progress")').length);
 	}	// end full mode processing
 
 	// Re-hydrate (0)
