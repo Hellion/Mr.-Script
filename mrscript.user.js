@@ -1080,34 +1080,34 @@ function GoGoGadgetPlunger()
 }
 
 // BLACKBIRDSTUFF: GM_get callbacks that do blackbird mojo.
-function BlackBirdStuff()
-{
-	this.innerHTML = '[flap, flap, flap]';
-
-	// Fire callback to find current familiar
-	GM_get(server + '/familiar.php', function(txt) {
-		var curfam = txt.match(/fam\([0-9]{1,3}\)/)
-			.toString().match(/[0-9]{1,3}/).toString();
-		SetCharData('curfam', curfam);
-
-		// 2nd callback to equip blackbird
-		GM_get(server + '/familiar.php?action=newfam&newfam=59&pwd='+
-			pwd, function(txt2) {
-				//Now fire another callback to use the map
-				GM_get(server + '/inv_use.php?pwd=' + pwd +
-					'&which=3&whichitem=2054', function(txt3)
-				{	// Redirect main pane to store
-					top.document.getElementsByName('mainpane')[0].contentDocument.location.pathname =
-						'/store.php?whichstore=l';
-					//...and another callback to put your familiar back
-					var curfam = GetCharData('curfam');
-					if (curfam > 0)
-					GM_get(server + '/familiar.php?action=newfam&newfam=' +
-						curfam + '&pwd=' + pwd, function(txt4) { });	
-			});	
-		});	
-	});
-}
+//function BlackBirdStuff()
+//{
+//	this.innerHTML = '[flap, flap, flap]';
+//
+//	// Fire callback to find current familiar
+//	GM_get(server + '/familiar.php', function(txt) {
+//		var curfam = txt.match(/fam\([0-9]{1,3}\)/)
+//			.toString().match(/[0-9]{1,3}/).toString();
+//		SetCharData('curfam', curfam);
+//
+//		// 2nd callback to equip blackbird
+//		GM_get(server + '/familiar.php?action=newfam&newfam=59&pwd='+
+//			pwd, function(txt2) {
+//				//Now fire another callback to use the map
+//				GM_get(server + '/inv_use.php?pwd=' + pwd +
+//					'&which=3&whichitem=2054', function(txt3)
+//				{	// Redirect main pane to store
+//					top.document.getElementsByName('mainpane')[0].contentDocument.location.pathname =
+//						'/store.php?whichstore=l';
+//					//...and another callback to put your familiar back
+//					var curfam = GetCharData('curfam');
+//					if (curfam > 0)
+//					GM_get(server + '/familiar.php?action=newfam&newfam=' +
+//						curfam + '&pwd=' + pwd, function(txt4) { });	
+//			});	
+//		});	
+//	});
+//}
 
 // UNEQUIPUPDATE: Callback to unequip inline.
 function UnequipUpdate(event)
@@ -2399,12 +2399,13 @@ function at_inventory()
 		var fimg = $('img:first');
 		var src = fimg.attr('src');
 		if (src.indexOf('blackbird1') != -1) {									// blackbird
-			var fly = document.createElement('a');
-			fly.innerHTML = '[fly, fly, fly]';
-			fly.setAttribute('href', 'javascript:void(0);');
-			$(fly).click(BlackBirdStuff);
-			fimg.after(fly)
-				.after(document.createElement('br'));
+			fimg.append(AppendLink('[use map]','inv_use.php?pwd=' + pwd + '&which=3&whichitem=2054'))
+//			var fly = document.createElement('a');
+//			fly.innerHTML = '[fly, fly, fly]';
+//			fly.setAttribute('href', 'javascript:void(0);');
+//			$(fly).click(BlackBirdStuff);
+//			fimg.after(fly)
+//				.after(document.createElement('br'));
 		}
 		else if (src.indexOf('scroll1.gif') != -1) {							// 31337 scroll
 			var clov = $('b:lt(5):contains(clover)');
@@ -2467,18 +2468,20 @@ function at_inventory()
 					else {
 						yetAnotherVariable = 0;
 						unlink = selecty.parentNode.previousSibling;
-						unlink.firstChild.appendChild(
-							document.createElement('tr'));
-						unlink.firstChild.lastChild.appendChild(
-							document.createElement('td'));
-						unlink = unlink.firstChild.lastChild.lastChild;
-						unlink.setAttribute('align','center');
-						unlink.setAttribute('colspan','3');
-						unlink.appendChild(document.createElement('font'));
-						unlink = unlink.firstChild;
-						unlink.setAttribute('size','1');
-						unlink.appendChild(document.createTextNode(' '));
-						unlink = unlink.lastChild;
+						if (unlink != null) {
+							unlink.firstChild.appendChild(
+								document.createElement('tr'));
+							unlink.firstChild.lastChild.appendChild(
+								document.createElement('td'));
+							unlink = unlink.firstChild.lastChild.lastChild;
+							unlink.setAttribute('align','center');
+							unlink.setAttribute('colspan','3');
+							unlink.appendChild(document.createElement('font'));
+							unlink = unlink.firstChild;
+							unlink.setAttribute('size','1');
+							unlink.appendChild(document.createTextNode(' '));
+							unlink = unlink.lastChild;
+						}
 					}
 					if (yetAnotherVariable == 1) {
 						var newlink = document.createElement('a');
@@ -2789,6 +2792,8 @@ function at_inventory()
 //		GM_log("resultsText:"+resultsText);
 //		GM_log("referrer:"+document.referrer);
 // this is where we go back to a useful location if we've done/used something elsewhere that caused the inventory page to load.
+		GM_log("rT="+resultsText);
+		GM_log("ref="+document.referrer);
 		if (resultsText.indexOf("ladder into the Bat Hole") != -1 &&
 			document.referrer.indexOf('bathole.php') != -1)	// used a sonar at the bathole
 			parent.frames[2].location =
@@ -4828,21 +4833,21 @@ function at_lair6() {
 }
 
 // FAMILIAR: Blackbird singing in the dead of night.
-function at_familiar() {
-	if ($('img:first').attr('src').indexOf('blackbird2') != -1 ||
-		$('input[value=59]').length > 0)
-	{
-		var fly = document.createElement('a');
-		fly.innerHTML = '[fly, fly, fly]';
-		fly.setAttribute('href', 'javascript:void(0);');
-		$(fly).click(BlackBirdStuff);
-		var p = document.createElement('p');
-		p.setAttribute('style', 'font-weight:bold;');
-		p.appendChild(document.createTextNode('Blackbird: '));
-		p.appendChild(fly);
-		$('form:first').parent('center').prepend(p);
-	}
-}
+//function at_familiar() {
+//	if ($('img:first').attr('src').indexOf('blackbird2') != -1 ||
+//		$('input[value=59]').length > 0)
+//	{
+//		var fly = document.createElement('a');
+//		fly.innerHTML = '[fly, fly, fly]';
+//		fly.setAttribute('href', 'javascript:void(0);');
+//		$(fly).click(BlackBirdStuff);
+//		var p = document.createElement('p');
+//		p.setAttribute('style', 'font-weight:bold;');
+//		p.appendChild(document.createTextNode('Blackbird: '));
+//		p.appendChild(fly);
+//		$('form:first').parent('center').prepend(p);
+//	}
+//}
 
 // MINING: uber-twinklify all twinkly images.
 function at_mining() {
