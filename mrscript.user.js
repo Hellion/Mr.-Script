@@ -1402,7 +1402,7 @@ function at_fight() {
 		var insultsArray = insultsList.split(";");
 		var numInsults = 0;
 		for (var i = 0; i < insultsArray.length; i++) {
-			if (insultsArray[i] == 1) numInsults++;
+			numInsults += insultsArray[i];
 		}
 		var bookname = $(this).text();
 		bookname = bookname.replace("Insults","Insults["+numInsults+"/8]");
@@ -1536,7 +1536,7 @@ function at_fight() {
 					insultsArray[7] = 1;
 				}
 				for (var i=0;i<insultsArray.length;i++) {
-					if (insultsArray[i]==1) numInsults++;
+					numInsults += insultsArray[i];
 				}
 				insultsList = insultsArray.join(";");
 				SetCharData("insults",insultsList);
@@ -1798,7 +1798,7 @@ function at_cove() {
 	var insultsArray = insultsList.split(";");
 	var numInsults = 0;
 	for (var i=0;i<insultsArray.length;i++) {
-		if (insultsArray[i]==1) numInsults++;
+		numInsults += insultsArray[i];
 	}
 	var iColor={0:"red",1:"red",2:"red",3:"red",4:"red",5:"maroon",6:"blue",7:"green",8:"green"}; 
 
@@ -2278,12 +2278,6 @@ function at_inventory()
 		var src = fimg.attr('src');
 		if (src.indexOf('blackbird1') != -1) {									// blackbird
 			fimg.append(AppendLink('[use map]','inv_use.php?pwd=' + pwd + '&which=3&whichitem=2054'))
-//			var fly = document.createElement('a');
-//			fly.innerHTML = '[fly, fly, fly]';
-//			fly.setAttribute('href', 'javascript:void(0);');
-//			$(fly).click(BlackBirdStuff);
-//			fimg.after(fly)
-//				.after(document.createElement('br'));
 		}
 		else if (src.indexOf('scroll1.gif') != -1) {							// 31337 scroll
 			var clov = $('b:lt(5):contains(clover)');
@@ -2316,35 +2310,35 @@ function at_inventory()
 				if (lnk.text == "[unequip all]"
 				 || lnk.text == "Manage your Custom Outfits")
 				{
-					if (!didQElink && 0) { 			// added && 0 to disable 5-Jun-2011
-						var qelnk = document.createElement('a');
-						qelnk.setAttribute('href','javascript:void(0);');
-						qelnk.setAttribute('style', 'color:white;' +
-							'font-size:10px;');
-						qelnk.innerHTML = (quickequip == "1" ?
-							"Dis" : "En") + "able Quick-Equip";
-						qelnk.addEventListener('click', function(event)
-						{	SetPref('quickequip',
-								this.innerHTML.charAt(0) == 'E' ? 1 : 0);
-							document.location = 'inventory.php?which=2';
-						}, false);
-						var qediv = document.createElement('div');
-						qediv.setAttribute('style',
-							'float:right;padding:0 7px;margin-top:3px;');
-						qediv.appendChild(qelnk);
-						$(lnk).parents('center').parents('tr').prev()
-						.children('td:first')
-						.prepend('<div style="float:left;width:110px;">'+
-							'&nbsp;</div>')
-						.prepend(qediv);
-						didQElink = true;
-					}
+//					if (!didQElink && 0) { 			// added && 0 to disable 5-Jun-2011
+//						var qelnk = document.createElement('a');
+//						qelnk.setAttribute('href','javascript:void(0);');
+//						qelnk.setAttribute('style', 'color:white;' +
+//							'font-size:10px;');
+//						qelnk.innerHTML = (quickequip == "1" ?
+//							"Dis" : "En") + "able Quick-Equip";
+//						qelnk.addEventListener('click', function(event)
+//						{	SetPref('quickequip',
+//								this.innerHTML.charAt(0) == 'E' ? 1 : 0);
+//							document.location = 'inventory.php?which=2';
+//						}, false);
+//						var qediv = document.createElement('div');
+//						qediv.setAttribute('style',
+//							'float:right;padding:0 7px;margin-top:3px;');
+//						qediv.appendChild(qelnk);
+//						$(lnk).parents('center').parents('tr').prev()
+//						.children('td:first')
+//						.prepend('<div style="float:left;width:110px;">'+
+//							'&nbsp;</div>')
+//						.prepend(qediv);
+//						didQElink = true;
+//					}
 
-					var yetAnotherVariable = 1;
+					var processingUnequipAll = 1;
 					if (lnk.text != "Manage your Custom Outfits")
 						unlink = lnk;
 					else {
-						yetAnotherVariable = 0;
+						processingUnequipAll = 0;
 						unlink = selecty.parentNode.previousSibling;
 						if (unlink != null) {
 							unlink.firstChild.appendChild(
@@ -2361,7 +2355,7 @@ function at_inventory()
 							unlink = unlink.lastChild;
 						}
 					}
-					if (yetAnotherVariable == 1) {
+					if (processingUnequipAll == 1) {
 						var newlink = document.createElement('a');
 						newlink.innerHTML = "[backup]";
 						newlink.href = "#";
@@ -2401,7 +2395,7 @@ function at_inventory()
 
 					if (nunewlink)
 						unlink.parentNode.insertBefore(nunewlink,unlink);
-					if (yetAnotherVariable == 1) unlink.parentNode.insertBefore(
+					if (processingUnequipAll == 1) unlink.parentNode.insertBefore(
 						document.createTextNode(" - "),unlink);
 					break;
 				}
