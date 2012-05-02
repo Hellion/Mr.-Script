@@ -2789,7 +2789,7 @@ function at_hermit() {
 		var txt = $('body').text();
 		if (txt.indexOf("out of Permits") != -1) {			// no permit
 			var a = $('a[href*=mountains]');
-			a.parent().prepend('<br>' + AppendBuyBox(42, 'm', 'Buy Permits', 0)+'<br>');
+			a.parent().prepend('<br>' + AppendBuyBox(42, 'm', 'Buy Permit', 1)+'<br>');
 		}
 		else if (txt.indexOf("disappointed") != -1)	{			// no trinkets
 			GM_get(server+'/api.php?what=inventory&for=MrScript',function(response) {		// Check gum and permit counts.
