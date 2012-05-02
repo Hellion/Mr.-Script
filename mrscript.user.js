@@ -1114,7 +1114,7 @@ function Defaults(revert)
 		if (GetPref('menu1link3') == undefined) SetPref('menu1link3', 'mystic;mystic.php');
 		if (GetPref('menu1link4') == undefined) SetPref('menu1link4', 'hunter;bhh.php');
 		if (GetPref('menu1link5') == undefined) SetPref('menu1link5', 'guildstore');
-		if (GetPref('menu1link6') == undefined) SetPref('menu1link6', 'demon;store.php?whichstore=m');
+		if (GetPref('menu1link6') == undefined) SetPref('menu1link6', 'general;store.php?whichstore=m');
 		if (GetPref('menu1link7') == undefined) SetPref('menu1link7', 'doc;galaktik.php');
 		if (GetPref('menu1link8') == undefined) SetPref('menu1link8', 'lab;cobbsknob.php?action=dispensary'); // store.php?whichstore=g');
 		if (GetPref('menu1link9') == undefined) SetPref('menu1link9', 'fruit;store.php?whichstore=h');
@@ -1137,7 +1137,7 @@ function Defaults(revert)
 		SetPref('menu1link3', 'mystic;mystic.php');
 		SetPref('menu1link4', 'hunter;bhh.php');
 		SetPref('menu1link5', 'guildstore');
-		SetPref('menu1link6', 'demon;store.php?whichstore=m');
+		SetPref('menu1link6', 'general;store.php?whichstore=m');
 		SetPref('menu1link7', 'doc;galaktik.php');
 		SetPref('menu1link8', 'lab;cobbsknob.php?action=dispensary'); // store.php?whichstore=g');
 		SetPref('menu1link9', 'fruit;store.php?whichstore=h');
@@ -1402,7 +1402,7 @@ function at_fight() {
 		var insultsArray = insultsList.split(";");
 		var numInsults = 0;
 		for (var i = 0; i < insultsArray.length; i++) {
-			numInsults += insultsArray[i];
+			numInsults += integer(insultsArray[i]);
 		}
 		var bookname = $(this).text();
 		bookname = bookname.replace("Insults","Insults["+numInsults+"/8]");
@@ -1536,7 +1536,7 @@ function at_fight() {
 					insultsArray[7] = 1;
 				}
 				for (var i=0;i<insultsArray.length;i++) {
-					numInsults += insultsArray[i];
+					numInsults += integer(insultsArray[i]);
 				}
 				insultsList = insultsArray.join(";");
 				SetCharData("insults",insultsList);
@@ -1798,7 +1798,7 @@ function at_cove() {
 	var insultsArray = insultsList.split(";");
 	var numInsults = 0;
 	for (var i=0;i<insultsArray.length;i++) {
-		numInsults += insultsArray[i];
+		numInsults += integer(insultsArray[i]);
 	}
 	var iColor={0:"red",1:"red",2:"red",3:"red",4:"red",5:"maroon",6:"blue",7:"green",8:"green"}; 
 
@@ -4635,7 +4635,7 @@ function at_campground() {
 			else if (txt.indexOf("strange shadow") != -1)
 				snarf = ['inkwell','inkwell','adventure.php?snarfblat=104','haunted library (1)'];
 			else if (txt.indexOf("moonlight reflecting") != -1)
-				snarf = ['hair spray','spraycan','store.php?whichstore=m','demon market'];
+				snarf = ['hair spray','spraycan','store.php?whichstore=m','General Store'];
 			else if (txt.indexOf("wooden frame") != -1)
 				snarf = ['disease','disease','adventure.php?snarfblat=42','knob harem (1)'];
 			else if (txt.indexOf("long coattails") != -1)
@@ -5670,7 +5670,7 @@ function at_compactmenu() {
 		AddTopOption("Bounty Hunter", "bhh.php", selectItem, 0);
 		AddTopOption("Gouda's Grocery", "store.php?whichstore=2", selectItem, 0);
 		AddTopOption("Smacketeria", "store.php?whichstore=3", selectItem, 0);
-		AddTopOption("Demon Market", "store.php?whichstore=m", selectItem, 0);
+		AddTopOption("General Store", "store.php?whichstore=m", selectItem, 0);
 		AddTopOption("Doc Galaktik", "galaktik.php", selectItem, 0);
 		AddTopOption("Laboratory", "cobbsknob.php?action=dispensary", selectItem, 0); // was "store.php?whichstore=g", selectItem, 0);
 		AddTopOption("Hippy Store", "store.php?whichstore=h", selectItem, 0);
