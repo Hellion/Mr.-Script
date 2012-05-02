@@ -1,4 +1,4 @@
-{	"version":"1.6.8",
+{	"version":"1.6.9",
 	"url1":"http://userscripts.org/scripts/source/65705.user.js",
 	"url2":"http://noblesse-oblige.org/hellion/scripts/MrScript.user.js",
-	"desc":"<b>Fixed:</b><br/>tracking of ores in the mine didn't display post-trapz0r quest<br/><br/><b>New:</b><br/>Add MAX buttons on Frat/Hippy War stores<br/>Auto-select a card and add MAX buttonfor trade-ins at the Game Shoppe Cashier<br/>"}
+	"desc":"<b>Fixed</b>Return to tower automatically after gettin' nekkid<b>New:</b><br/>updated for Hermit and General Store changes<br/>updated for blackbird changes<br/>dooks link to next zone (assuming shortcut) when done with current zone<br/>count # of times you say Bee Guy<br/>hide quest nudge block if it has nothing useful<br/>more helpful shortcut links in the manor<br/>update spoiler info for hidden temple zone"}
