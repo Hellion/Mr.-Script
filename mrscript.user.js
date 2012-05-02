@@ -2787,8 +2787,9 @@ function at_hermit() {
 	if (GetPref('shortlinks') > 1) {
 		var p = $('p:first');
 		var txt = $('body').text();
-		if (txt.indexOf("out of Permits") != -1) {			// no permit
-			var a = $('a[href*=mountains]');
+		GM_log("hermit txt="+txt);
+		if (txt.indexOf("Hermit Permit required,") != -1) {			// no permit
+			var a = $('b:eq(1)');
 			a.parent().prepend('<br>' + AppendBuyBox(42, 'm', 'Buy Permit', 1)+'<br>');
 		}
 		else if (txt.indexOf("disappointed") != -1)	{			// no trinkets
@@ -2802,7 +2803,7 @@ function at_hermit() {
 				}
 				p.append('<br><br><center><font color="blue">You have '+(gum==0?" no ":gum)+(gum!=1?" gums ":" gum ")
 					+" and "+(hpermit==0?" no ":hpermit)+(hpermit!=1?" permits ":" permit ")+"in inventory.</font></center><br>");
-				p.append('<br><center><a href="inv_use.php?pwd='+pwd+'&which=3&whichitem=23">Use some chewing gum</a></center>');
+				if (gum != 0) p.append('<br><center><a href="inv_use.php?pwd='+pwd+'&which=3&whichitem=23">Use some chewing gum</a></center>');
 			});
 		}
 
