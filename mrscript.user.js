@@ -2414,6 +2414,10 @@ function at_inventory()
 			document.referrer.indexOf('bathole.php') != -1)	// used a sonar at the bathole
 			parent.frames[2].location =
 				'http://' + server + '/bathole.php';
+		else if (resultsText.indexOf("You spray the Knob Goblin perfume on") != -1) {
+			bText = document.getElementsByTagName('b')[1];
+			bText.parentNode.appendChild(AppendLink('[knob]','cobbsknob.php'));
+		}
 		else if (resultsText.indexOf("cheap ratchet") != -1 &&
 			document.referrer.indexOf('pyramid.php') != -1)	// used a tomb ratchet at the pyramid
 			parent.frames[2].location =
