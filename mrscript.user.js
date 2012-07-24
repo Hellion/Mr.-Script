@@ -2414,10 +2414,6 @@ function at_inventory()
 			document.referrer.indexOf('bathole.php') != -1)	// used a sonar at the bathole
 			parent.frames[2].location =
 				'http://' + server + '/bathole.php';
-		else if (resultsText.indexOf("You spray the Knob Goblin perfume on") != -1) {
-			bText = document.getElementsByTagName('b')[1];
-			bText.parentNode.appendChild(AppendLink('[knob]','cobbsknob.php'));
-		}
 		else if (resultsText.indexOf("cheap ratchet") != -1 &&
 			document.referrer.indexOf('pyramid.php') != -1)	// used a tomb ratchet at the pyramid
 			parent.frames[2].location =
@@ -2953,7 +2949,7 @@ function at_council() {
 				&& txt.indexOf("Thanks") == -1)
 			{	
 				if (txt.indexOf("sky") != -1) {
-					p.append(AppendLink('[plant bean]', 'plains.php?place=grounds'));
+					p.append(AppendLink('[plant bean]', 'place.php?whichplace=plains&action=garbage_grounds'));
 					top.frames[0].location.reload();
 				} else p.append(AppendLink('[beanstalk]', 'beanstalk.php'));
 			}
@@ -4780,6 +4776,15 @@ function at_basement() {
 
 
 // SPOIL_(ZONE): Display ML on mouseover.
+function spoil_place() {
+	var whichplace = document.location.search;
+	GM_log("whichplace = " & whichplace);
+	switch (whichplace) {
+		case "?whichplace=plains": spoil_plains();
+		break;
+	}
+}
+
 function spoil_manor2()
 {	$('img').each(function() {
 		var ml = null; var src = this.getAttribute('src');
