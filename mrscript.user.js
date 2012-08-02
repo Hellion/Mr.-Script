@@ -1892,10 +1892,12 @@ function at_adventure() {
 		NCTitle.append(cardlink);
 		break;
 	case "It's Always Swordfish":
-		$('<center><br /><a href="adventure.php?snarfblat=160>Adventure Belowdecks</a></center>').appendTo($('a:last').parent());
+		$('<center><br /><a href="adventure.php?snarfblat=160>Adventure Belowdecks</a></center>').prependTo($('a:last').parent());
+		GM_log("swordfished!");
 		break;
 	case "Mr. Alarm":
 		$('<center><a href="adventure.php?snarfblat=100">Adventure in WHITEY\'S GROVE</a></center><br />').prependTo($('a:last').parent());
+		GM_log("Alarming!");
 		break;
 	case "It's A Sign!":
 		$('<center><a href="adventure.php?snarfblat=100">Adventure Again (Whitey\'s Grove)</a></center><br />').prependTo($('a:last').parent());
@@ -3356,6 +3358,11 @@ function at_charpane()
 
 	// Re-hydrate (0)
 	var temphydr = integer(GetCharData('hydrate'));
+	GM_log("hydrate="+GetCharData('hydrate'));
+	GM_log("temphydr="+temphydr);
+	GM_log("advcount="+advcount);
+	GM_log("oldcount="+oldcount);
+
 	if (temphydr) {
 		if (advcount > oldcount) {
 			temphydr+=(advcount-oldcount);
@@ -5303,6 +5310,9 @@ function at_topmenu()
 
 		// Lair
 		if (txt == "lair") haveLair = 1;
+
+		// bugbear challenge run
+		if (txt == "ship") a.attr("href","place.php?whichplace=bugbearship");
 
 		// Confirm logout
 		if (txt == "log out" && logoutconf == 1) {
