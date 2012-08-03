@@ -1892,8 +1892,7 @@ function at_adventure() {
 		NCTitle.append(cardlink);
 		break;
 	case "It's Always Swordfish":
-		$('<center><br /><a href="adventure.php?snarfblat=160>Adventure Belowdecks</a></center>').prependTo($('a:last').parent());
-		GM_log("swordfished!");
+		$('<center><br /><a href="adventure.php?snarfblat=160">Adventure Belowdecks</a></center>').prependTo($('a:last').parent());
 		break;
 	case "Mr. Alarm":
 		$('<center><a href="adventure.php?snarfblat=100">Adventure in WHITEY\'S GROVE</a></center><br />').prependTo($('a:last').parent());
@@ -2846,7 +2845,8 @@ function at_knoll() {
 
 // MYSTIC: link back to the 8-bit realm
 function at_mystic() {
-	$('<center><br /><a href="adventure.php?snarfblat=73>Adventure in the 8-Bit Realm</a></center>').appendTo($('a:last').parent());
+	//GM_log("inserting link");
+	$('<center><br /><a href="adventure.php?snarfblat=73">Adventure in the 8-Bit Realm</a><br /><br /></center>').prependTo($('a:last').parent());
 }
 
 // BARREL: add links to the results of your barrel droppings.
