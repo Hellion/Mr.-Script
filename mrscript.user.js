@@ -2839,7 +2839,8 @@ function at_mountains()
 function at_knoll() {	
 	if (document.location.search == "?place=mayor") {
 		p = $('p:first');
-		p.append(AppendLink('[spooky barrow (1)]','adventure.php?snarfblat=999'));
+		p.append(AppendLink('[spooky barrow (1)]','adventure.php?snarfblat=48'));
+		p.append(AppendLink('[bugbear pens (1)]','adventure.php?snarfblat=47'));
 	}
 }
 
