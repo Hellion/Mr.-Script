@@ -27,6 +27,10 @@
 // @exclude     http://images.kingdomofloathing.com/*
 // @exclude     http://forums.kingdomofloathing.com/*
 // @require     http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js
+// @grant	GM_log
+// @grant	GM_setValue
+// @grant	GM_getValue
+// @grant	GM_xmlhttpRequest
 // @unwrap
 // ==/UserScript==
 
@@ -3281,25 +3285,25 @@ function at_charpane()
 
 	// Compact Mode
 	if (compactMode) {
-		var mp=0;
-		for (var i=4, len=bText.length; i<len; i++) {
-			str = bText[i].textContent;
-			var spl = str.split('/');
-			if (spl.length > 1) {
-				if (mp == 0) {
-					curHP = integer(spl[0]);
-					maxHP = integer(spl[1]); mp++;
-					bText[i].parentNode.previousSibling
-						.addEventListener('contextmenu', RightClickHP,true);
-				} else {
-					curMP = integer(spl[0]);
-					maxMP = integer(spl[1]);
-					bText[i].parentNode.previousSibling
-						.addEventListener('contextmenu',RightClickMP,true);
-					break;
-				}
-			}
-		}
+//		var mp=0;
+//		for (var i=4, len=bText.length; i<len; i++) {
+//			str = bText[i].textContent;
+//			var spl = str.split('/');
+//			if (spl.length > 1) {
+//				if (mp == 0) {
+//					curHP = integer(spl[0]);
+//					maxHP = integer(spl[1]); mp++;
+//					bText[i].parentNode.previousSibling
+//						.addEventListener('contextmenu', RightClickHP,true);
+//				} else {
+//					curMP = integer(spl[0]);
+//					maxMP = integer(spl[1]);
+//					bText[i].parentNode.previousSibling
+//						.addEventListener('contextmenu',RightClickMP,true);
+//					break;
+//				}
+//			}
+//		}
 		advcount = integer($('a:contains(Adv):first').parent().next().text());
 
 		var lvlblock = $("center:contains('Lvl.'):first").text();	// this text is always present in compact mode
@@ -3333,20 +3337,20 @@ function at_charpane()
 		advcount = integer(data.shift());
 
 		// Change image link for costumes
-		var img = imgs[0];
-		if (GetPref('backup')) {
-			img.parentNode.parentNode.nextSibling
-				.setAttribute('id','outfitbkup');
-			img.addEventListener('contextmenu',function(event)
-			{	GM_get(server + '/inv_equip.php?action=customoutfit&which=2&outfitname=' +
-				GetPref('backup'),function(response)
-				{	var msg; if (response.indexOf("custom outfits") == -1) msg = "Outfit Backed Up";
-					else msg = "Too Many Outfits";
-					document.getElementById('outfitbkup').innerHTML +=
-					"<span class='tiny'><center>"+msg+"</center></span>";
-				}); event.stopPropagation(); event.preventDefault();
-			}, true);
-		}
+//		var img = imgs[0];
+//		if (GetPref('backup')) {
+//			img.parentNode.parentNode.nextSibling
+//				.setAttribute('id','outfitbkup');
+//			img.addEventListener('contextmenu',function(event)
+//			{	GM_get(server + '/inv_equip.php?action=customoutfit&which=2&outfitname=' +
+//				GetPref('backup'),function(response)
+//				{	var msg; if (response.indexOf("custom outfits") == -1) msg = "Outfit Backed Up";
+//					else msg = "Too Many Outfits";
+//					document.getElementById('outfitbkup').innerHTML +=
+//					"<span class='tiny'><center>"+msg+"</center></span>";
+//				}); event.stopPropagation(); event.preventDefault();
+//			}, true);
+//		}
 
 		// Add SGEEA to Effects right-click
 		var bEff = $('b:gt(4):contains(Effects)');
@@ -3387,10 +3391,10 @@ function at_charpane()
 	for (i=0,len=imgs.length; i<len; i++) {
 		var img = imgs[i], imgClick = img.getAttribute('onclick');
 		var imgSrc = img.src.substr(img.src.lastIndexOf('/')+1);
-		if (imgSrc == 'mp.gif')
-			img.addEventListener('contextmenu', RightClickMP, false);
-		else if (imgSrc == 'hp.gif')
-			img.addEventListener('contextmenu', RightClickHP, false);
+//		if (imgSrc == 'mp.gif')
+//			img.addEventListener('contextmenu', RightClickMP, false);
+//		else if (imgSrc == 'hp.gif')
+//			img.addEventListener('contextmenu', RightClickHP, false);
 		if (imgClick == null || imgClick.substr(0,4) != "eff(") continue;
 		var effName = (compactMode ? img.getAttribute('title') : img.parentNode.nextSibling.firstChild.innerHTML);
 
