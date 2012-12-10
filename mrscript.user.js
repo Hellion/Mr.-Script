@@ -47,29 +47,31 @@ var DISABLE_ITEM_DB = 0;
 
 var thePath = location.pathname;
 
-var global = this, mr = unsafeWindow.top.mr = global;
+var global = this; //, mr = unsafeWindow.top.mr = global;
 
 makeTags("form,input".split(",")); // convenient node creation
 
 // run eval(mr.script.call(this)) from the Firebug console to get script globals
-mr.script = function script(x) {
-	var stuff = [], target = this === global ? unsafeWindow.top : this;
-	var privates = true; // stuff defined before our stuff is potentially harmful
-	for (var id in global) {
-		if (privates && "$x" != id) continue;
-		privates = false;
-		stuff.push(id);
-		if ("script" == id) { // anything after our stuff is potentially harmful too
-			 return "var " + stuff.map(function(n) { return n + " = this." + n; }).join(",");
-		}
-		target[id] = global[id];
-	}
-	return 'console.error("Failed to find Mr. Script global identifiers. :-(");';
-};
+//mr.script = function script(x) {
+//	var stuff = [], target = this === global ? unsafeWindow.top : this;
+//	var privates = true; // stuff defined before our stuff is potentially harmful
+//	for (var id in global) {
+//		if (privates && "$x" != id) continue;
+//		privates = false;
+//		stuff.push(id);
+//		if ("script" == id) { // anything after our stuff is potentially harmful too
+//			 return "var " + stuff.map(function(n) { return n + " = this." + n; }).join(",");
+//		}
+//		target[id] = global[id];
+//	}
+//	return 'console.error("Failed to find Mr. Script global identifiers. :-(");';
+//};
 
 
+// server variable lets you be logged on to different servers with different characters and keep them straight.
+// not nearly so nifty now that there's only www and dev....
 var server = location.host, serverNo = (server.match(/(.)\./) || {1:"L"})[1]; 	// the "7" in www7.X, or an "L" if no . is in the hostname.
-																				// gonna be 'w' or 'v' all the time now (for www. or dev. )
+
 var pwd = GM_getValue('hash.' + server.split('.')[0]);
 
 jQuery.prototype.toString = function() {
@@ -97,6 +99,9 @@ if ((handler = global["at_" + place])) {
 if ((handler = spoilers && global["spoil_" + place])) {
 	handler();
 }
+
+global = null;
+handler = null;
 
 // no imperative top-level code below here; the rest is function definitions:
 
@@ -414,6 +419,12 @@ function makeTags(names, doc) {
 		global[name.toUpperCase()] = bind(tagMaker, doc||document, name);
 	});
 }
+function AUB_KeyUp(event) {
+    if (event.which == 77 || event.which == 88) {    // 77='m', 88='x'
+	var whichItem = document.getElementsByName('whichitem')[0];
+    this.value = FindMaxQuantity(whichItem.value, 999, 0, GetPref('safemax'));
+    }
+}
 
 // APPENDUSEBOX: Attach use multiple form.
 function AppendUseBox(itemNumber, skillsForm, maxButton, appendHere) {
@@ -449,12 +460,13 @@ function AppendUseBox(itemNumber, skillsForm, maxButton, appendHere) {
 			});
 		}
 	}
-	text.addEventListener('keyup', function(event) {
-		if (event.which == 77 || event.which == 88) { // 77 = 'm', 88 = 'x'
-		  var whichItem = document.getElementsByName('whichitem')[0];
-		  this.value = FindMaxQuantity(whichItem.value, 999, 0, GetPref('safemax'));
-		}
-	}, false);
+	text.addEventListener('keyup', AUB_KeyUp, false); 
+//was: function(event) {
+//		if (event.which == 77 || event.which == 88) { // 77 = 'm', 88 = 'x'
+//		  var whichItem = document.getElementsByName('whichitem')[0];
+//		  this.value = FindMaxQuantity(whichItem.value, 999, 0, GetPref('safemax'));
+//		}
+//	}, false);
 }
 
 // APPENDBUYBOX: Return HTML for buying an item.
@@ -2158,7 +2170,7 @@ function at_bhh() {
 		["vials of pirate sweat","[pirate's cove (1)]","66"],
 		["balls of white lint","[Whitey's Grove (1)]","100"],
 		["worthless pieces of yellow glass","[Dungeons of Doom (1)]","39"],
-		["billy idols","[Goatlet (1)]","60"],
+		["billy idols","[Goatlet (1)]","271"],
 		["burned-out arcanodiodes","[Airship (1)]","81"],
 		["coal buttons","[Ninja Snowmen (1)]","62"],
 		["discarded pacifiers","[Castle (1)]","82"],
@@ -2315,30 +2327,6 @@ function at_inventory()
 				if (lnk.text == "[unequip all]"
 				 || lnk.text == "Manage your Custom Outfits")
 				{
-//					if (!didQElink && 0) { 			// added && 0 to disable 5-Jun-2011
-//						var qelnk = document.createElement('a');
-//						qelnk.setAttribute('href','javascript:void(0);');
-//						qelnk.setAttribute('style', 'color:white;' +
-//							'font-size:10px;');
-//						qelnk.innerHTML = (quickequip == "1" ?
-//							"Dis" : "En") + "able Quick-Equip";
-//						qelnk.addEventListener('click', function(event)
-//						{	SetPref('quickequip',
-//								this.innerHTML.charAt(0) == 'E' ? 1 : 0);
-//							document.location = 'inventory.php?which=2';
-//						}, false);
-//						var qediv = document.createElement('div');
-//						qediv.setAttribute('style',
-//							'float:right;padding:0 7px;margin-top:3px;');
-//						qediv.appendChild(qelnk);
-//						$(lnk).parents('center').parents('tr').prev()
-//						.children('td:first')
-//						.prepend('<div style="float:left;width:110px;">'+
-//							'&nbsp;</div>')
-//						.prepend(qediv);
-//						didQElink = true;
-//					}
-
 					var processingUnequipAll = 1;
 					if (lnk.text != "Manage your Custom Outfits")
 						unlink = lnk;
@@ -2392,9 +2380,9 @@ function at_inventory()
 							nunewlink = document.createElement('a');
 							nunewlink.innerHTML = "[revert to " + backup.toLowerCase() + "]";
 							nunewlink.href = "inv_equip.php?action=outfit&which=2&whichoutfit=" + opty.value;
-							nunewlink.addEventListener('contextmenu',function(event) {
-								alert('powee!');
-							}, false);
+					//		nunewlink.addEventListener('contextmenu',function(event) {
+					//			alert('powee!');
+					//		}, false);
 						}	
 					}
 
@@ -2593,6 +2581,20 @@ function at_bigisland() {
 	}
 }
 
+function pants(evt) {
+    GM_get(server+'/inv_equip.php?pwd='+pwd+'&which=2&action=equip&whichitem=1792',
+	function(txt) {
+	    var pimg = document.getElementById('proprietor');
+	    pimg.removeAttribute('id');
+	    pimg.parentNode.nextSibling.innerHTML +=
+	    '<br /><div class="tiny">' +
+	    (txt.indexOf('You equip') != -1 ?
+	    'Travoltan Trousers Equipped' :
+	    'Travoltan Trousers Could Not Be Equipped') + '</span>';
+	}); 
+    evt.stopPropagation(); 
+    evt.preventDefault();
+}
 // STORE: Add use boxes and links as appropriate
 function at_store() {
 	var firstTable = $('table:first tbody');		// we're interested in this when it's the "Results:" box from buying something.
@@ -2620,19 +2622,20 @@ function at_store() {
 	.attr('title','right-click to equip Travoltan Trousers')
 	.attr('id','proprietor')
 	.get(0)
-	.addEventListener('contextmenu', function(evt) {
-		GM_get(server+'/inv_equip.php?pwd='+pwd+
-			'&which=2&action=equip&whichitem=1792',
-		function(txt) {
-			var pimg = document.getElementById('proprietor');
-			pimg.removeAttribute('id');
-			pimg.parentNode.nextSibling.innerHTML +=
-			'<br /><div class="tiny">' +
-			(txt.indexOf('You equip') != -1 ?
-			'Travoltan Trousers Equipped' :
-			'Travoltan Trousers Could Not Be Equipped') + '</span>';
-		}); evt.stopPropagation(); evt.preventDefault();
-	}, true);
+	.addEventListener('contextmenu', pants, true);
+//instead of pants, was: function(evt) {
+//		GM_get(server+'/inv_equip.php?pwd='+pwd+
+//			'&which=2&action=equip&whichitem=1792',
+//		function(txt) {
+//			var pimg = document.getElementById('proprietor');
+//			pimg.removeAttribute('id');
+//			pimg.parentNode.nextSibling.innerHTML +=
+//			'<br /><div class="tiny">' +
+//			(txt.indexOf('You equip') != -1 ?
+//			'Travoltan Trousers Equipped' :
+//			'Travoltan Trousers Could Not Be Equipped') + '</span>';
+//		}); evt.stopPropagation(); evt.preventDefault();
+//	}, true);
 //	}
 
 	if (GetPref('shortlinks') > 1 && firstTable != undefined &&
@@ -3285,25 +3288,25 @@ function at_charpane()
 
 	// Compact Mode
 	if (compactMode) {
-//		var mp=0;
-//		for (var i=4, len=bText.length; i<len; i++) {
-//			str = bText[i].textContent;
-//			var spl = str.split('/');
-//			if (spl.length > 1) {
-//				if (mp == 0) {
-//					curHP = integer(spl[0]);
-//					maxHP = integer(spl[1]); mp++;
-//					bText[i].parentNode.previousSibling
-//						.addEventListener('contextmenu', RightClickHP,true);
-//				} else {
-//					curMP = integer(spl[0]);
-//					maxMP = integer(spl[1]);
-//					bText[i].parentNode.previousSibling
-//						.addEventListener('contextmenu',RightClickMP,true);
-//					break;
-//				}
-//			}
-//		}
+		var mp=0;
+		for (var i=4, len=bText.length; i<len; i++) {
+			str = bText[i].textContent;
+			var spl = str.split('/');
+			if (spl.length > 1) {
+				if (mp == 0) {
+					curHP = integer(spl[0]);
+					maxHP = integer(spl[1]); mp++;
+					bText[i].parentNode.previousSibling
+						.addEventListener('contextmenu', RightClickHP,true);
+				} else {
+					curMP = integer(spl[0]);
+					maxMP = integer(spl[1]);
+					bText[i].parentNode.previousSibling
+						.addEventListener('contextmenu',RightClickMP,true);
+					break;
+				}
+			}
+		}
 		advcount = integer($('a:contains(Adv):first').parent().next().text());
 
 		var lvlblock = $("center:contains('Lvl.'):first").text();	// this text is always present in compact mode
@@ -3337,20 +3340,20 @@ function at_charpane()
 		advcount = integer(data.shift());
 
 		// Change image link for costumes
-//		var img = imgs[0];
-//		if (GetPref('backup')) {
-//			img.parentNode.parentNode.nextSibling
-//				.setAttribute('id','outfitbkup');
-//			img.addEventListener('contextmenu',function(event)
-//			{	GM_get(server + '/inv_equip.php?action=customoutfit&which=2&outfitname=' +
-//				GetPref('backup'),function(response)
-//				{	var msg; if (response.indexOf("custom outfits") == -1) msg = "Outfit Backed Up";
-//					else msg = "Too Many Outfits";
-//					document.getElementById('outfitbkup').innerHTML +=
-//					"<span class='tiny'><center>"+msg+"</center></span>";
-//				}); event.stopPropagation(); event.preventDefault();
-//			}, true);
-//		}
+		var img = imgs[0];
+		if (GetPref('backup')) {
+			img.parentNode.parentNode.nextSibling
+				.setAttribute('id','outfitbkup');
+			img.addEventListener('contextmenu',function(event)
+			{	GM_get(server + '/inv_equip.php?action=customoutfit&which=2&outfitname=' +
+				GetPref('backup'),function(response)
+				{	var msg; if (response.indexOf("custom outfits") == -1) msg = "Outfit Backed Up";
+					else msg = "Too Many Outfits";
+					document.getElementById('outfitbkup').innerHTML +=
+					"<span class='tiny'><center>"+msg+"</center></span>";
+				}); event.stopPropagation(); event.preventDefault();
+			}, true);
+		}
 
 		// Add SGEEA to Effects right-click
 		var bEff = $('b:gt(4):contains(Effects)');
@@ -3391,10 +3394,10 @@ function at_charpane()
 	for (i=0,len=imgs.length; i<len; i++) {
 		var img = imgs[i], imgClick = img.getAttribute('onclick');
 		var imgSrc = img.src.substr(img.src.lastIndexOf('/')+1);
-//		if (imgSrc == 'mp.gif')
-//			img.addEventListener('contextmenu', RightClickMP, false);
-//		else if (imgSrc == 'hp.gif')
-//			img.addEventListener('contextmenu', RightClickHP, false);
+		if (imgSrc == 'mp.gif')
+			img.addEventListener('contextmenu', RightClickMP, false);
+		else if (imgSrc == 'hp.gif')
+			img.addEventListener('contextmenu', RightClickHP, false);
 		if (imgClick == null || imgClick.substr(0,4) != "eff(") continue;
 		var effName = (compactMode ? img.getAttribute('title') : img.parentNode.nextSibling.firstChild.innerHTML);
 
@@ -4790,11 +4793,28 @@ function at_basement() {
 // SPOIL_(ZONE): Display ML on mouseover.
 function spoil_place() {
 	var whichplace = document.location.search;
-	GM_log("whichplace = " & whichplace);
+	GM_log("whichplace = " + whichplace);
 	switch (whichplace) {
-		case "?whichplace=plains": spoil_plains();
-		break;
+		case "?whichplace=plains": spoil_plains();		break;
+		case "?whichplace=orc_chasm": spoil_orcChasm(); 	break;
+		case "?whichplace=highlands": spoil_highlands(); 	break;
+		default: break;
 	}
+}
+function spoil_highlands()
+{
+	$('#peak1 img').attr('title','ML: 71-78');
+	$('#peak2 img').attr('title','ML: 81-93');
+	$('#peak3 img').attr('title','ML: 85');
+}
+
+function spoil_orcChasm() 
+{
+	$('img').each(function() {
+		var ml = null; var src= this.getAttribute('src');
+		if (src.indexOf("1x1trans") != -1) ml = '75-85';
+		if (ml) this.setAttribute('title','ML: '+ml);
+	});
 }
 
 function spoil_manor2()
@@ -5730,7 +5750,7 @@ function buildPrefs() {
             document.querySelector('#guts').innerHTML = '<div class="scaffold"></div>';
             document.querySelector('#guts').appendChild(buildSettings());
             //click handler for everything in this section
-//            document.querySelector('#' + scriptID).addEventListener('click', changeSettings, false);
+            document.querySelector('#' + scriptID).addEventListener('click', changeSettings, false);
         }, false);
     } else {
         //script tab already exists
@@ -5739,7 +5759,7 @@ function buildPrefs() {
             e.stopPropagation();
             document.querySelector('#guts').appendChild(buildSettings());
             //click handler for everything in this section
-//            document.querySelector('#' + scriptID).addEventListener('click', changeSettings, false);
+            document.querySelector('#' + scriptID).addEventListener('click', changeSettings, false);
         }, false);
     }
 	
