@@ -1,4 +1,4 @@
-// Mr. Script v1.7.0
+// Mr. Test v1.6.9
 //
 // --------------------------------------------------------------------
 // This is a user script.  To install it, you need Greasemonkey 0.8 or
@@ -9,10 +9,10 @@
 // --------------------------------------------------------------------
 //
 // ==UserScript==
-// @name        Mr. Script
+// @name        Mr. Test2
 // @namespace   http://www.noblesse-oblige.org/lukifer/scripts/
 // @description	interface overhauler for KingdomofLoathing.com
-// @version		1.7.0
+// @version		1.6.9
 // @author		Lukifer
 // @contributor	Ohayou
 // @contributor Hellion
@@ -40,7 +40,7 @@ var place = location.pathname.replace(/\/|\.(php|html)$/gi, "").toLowerCase();
 //GM_log("at:" + place);
 
 // n.b. version number should always be a 3-digit number.  If you move to 1.9, call it 1.9.0.  Don't go to 1.8.10 or some such.
-var VERSION = 170;
+var VERSION = 169;
 var MAXLIMIT = 999;
 var ENABLE_QS_REFRESH = 1;
 var DISABLE_ITEM_DB = 0;
@@ -49,7 +49,7 @@ var thePath = location.pathname;
 
 var global = this; //, mr = unsafeWindow.top.mr = global;
 
-//makeTags("form,input".split(",")); // convenient node creation
+makeTags("form,input".split(",")); // convenient node creation
 
 // run eval(mr.script.call(this)) from the Firebug console to get script globals
 //mr.script = function script(x) {
@@ -68,10 +68,8 @@ var global = this; //, mr = unsafeWindow.top.mr = global;
 //};
 
 
-// server variable lets you be logged on to different servers with different characters and keep them straight.
-// not nearly so nifty now that there's only www and dev....
 var server = location.host, serverNo = (server.match(/(.)\./) || {1:"L"})[1]; 	// the "7" in www7.X, or an "L" if no . is in the hostname.
-
+																				// gonna be 'w' or 'v' all the time now (for www. or dev. )
 var pwd = GM_getValue('hash.' + server.split('.')[0]);
 
 jQuery.prototype.toString = function() {
@@ -99,8 +97,6 @@ if ((handler = global["at_" + place])) {
 if ((handler = spoilers && global["spoil_" + place])) {
 	handler();
 }
-
-global = null;
 handler = null;
 
 // no imperative top-level code below here; the rest is function definitions:
@@ -370,56 +366,55 @@ function AppendLink(linkString, linkURL)
 }
 
 // returns a function bound to self (with additional args passed pre-populated)
-//function bind( func, self /*, param 1, param 2, ... */ ) {
-//	var params = [].slice.call( arguments, 2 );
-//	return function a( /* param1, ..., param n,   param n+1, ... */ ) {
-//		return func.apply( self, params.concat( [].slice.call( arguments ) ) );
-//	};
-//}
+function bind( func, self /*, param 1, param 2, ... */ ) {
+	var params = [].slice.call( arguments, 2 );
+	return function a( /* param1, ..., param n,   param n+1, ... */ ) {
+		return func.apply( self, params.concat( [].slice.call( arguments ) ) );
+	};
+}
 
 // comfy way of concatenating a bunch of nodes into a DocumentFragment
-//function FRAGMENT(nodes, doc) {
-//	doc = doc || document;
-//	var fragment = doc.createDocumentFragment();
-//	for (var i = 0, node; node = nodes[i]; i++ ) {
-//		if ("string" == typeof node)
-//			node = doc.createTextNode( node );
-//		fragment.appendChild(node);
-//	}
-//	return fragment;
-//}
+function FRAGMENT(nodes, doc) {
+	doc = doc || document;
+	var fragment = doc.createDocumentFragment();
+	for (var i = 0, node; node = nodes[i]; i++ ) {
+		if ("string" == typeof node)
+			node = doc.createTextNode( node );
+		fragment.appendChild(node);
+	}
+	return fragment;
+}
 
-//function makeTags(names, doc) {
-//	function tagMaker(name, attrs, children) {
-//		console.log(name, attrs, children);
-//		var node = this.createElement( name );
-//		if ("object" != typeof attrs || $.isArray(attrs)) {
-//			children = attrs;
-//			attrs = null;
-//		}
-//		if (attrs) {
-//			for (var a in attrs)
-//				node.setAttribute(a, attrs[a]);
-//			if (attrs['class'])
-//				node.className = attrs['class'];
-//			if (attrs['style'])
-//				node.style.cssText = attrs['style'];
-//		}
-//		if (children) {
-//			if ($.isArray(children))
-//				node.appendChild( FRAGMENT(children, this) );
-//			else if (({ "string":1, "number": 1 })[typeof children])
-//				node.appendChild( this.createTextNode( children+"" ) );
-//			else if (children.tagName)
-//				node.appendChild( children );
-//		}
-//		return node;
-//	}
-//	names.forEach(function(name) {
-//		global[name.toUpperCase()] = bind(tagMaker, doc||document, name);
-//	});
-//}
-
+function makeTags(names, doc) {
+	function tagMaker(name, attrs, children) {
+		console.log(name, attrs, children);
+		var node = this.createElement( name );
+		if ("object" != typeof attrs || $.isArray(attrs)) {
+			children = attrs;
+			attrs = null;
+		}
+		if (attrs) {
+			for (var a in attrs)
+				node.setAttribute(a, attrs[a]);
+			if (attrs['class'])
+				node.className = attrs['class'];
+			if (attrs['style'])
+				node.style.cssText = attrs['style'];
+		}
+		if (children) {
+			if ($.isArray(children))
+				node.appendChild( FRAGMENT(children, this) );
+			else if (({ "string":1, "number": 1 })[typeof children])
+				node.appendChild( this.createTextNode( children+"" ) );
+			else if (children.tagName)
+				node.appendChild( children );
+		}
+		return node;
+	}
+	names.forEach(function(name) {
+		global[name.toUpperCase()] = bind(tagMaker, doc||document, name);
+	});
+}
 function AUB_KeyUp(event) {
     if (event.which == 77 || event.which == 88) {    // 77='m', 88='x'
 	var whichItem = document.getElementsByName('whichitem')[0];
@@ -2171,9 +2166,9 @@ function at_bhh() {
 		["vials of pirate sweat","[pirate's cove (1)]","66"],
 		["balls of white lint","[Whitey's Grove (1)]","100"],
 		["worthless pieces of yellow glass","[Dungeons of Doom (1)]","39"],
-		["billy idols","[Goatlet (1)]","271"],
+		["billy idols","[Goatlet (1)]","60"],
 		["burned-out arcanodiodes","[Airship (1)]","81"],
-		["coal buttons","[Ninja Snowmen (1)]","272"],
+		["coal buttons","[Ninja Snowmen (1)]","62"],
 		["discarded pacifiers","[Castle (1)]","82"],
 		["disintegrating corks","[Wine Cellar (1)]","178"],
 		["non-Euclidean hooves","[Louvre (1)]","106"],
@@ -2328,6 +2323,30 @@ function at_inventory()
 				if (lnk.text == "[unequip all]"
 				 || lnk.text == "Manage your Custom Outfits")
 				{
+//					if (!didQElink && 0) { 			// added && 0 to disable 5-Jun-2011
+//						var qelnk = document.createElement('a');
+//						qelnk.setAttribute('href','javascript:void(0);');
+//						qelnk.setAttribute('style', 'color:white;' +
+//							'font-size:10px;');
+//						qelnk.innerHTML = (quickequip == "1" ?
+//							"Dis" : "En") + "able Quick-Equip";
+//						qelnk.addEventListener('click', function(event)
+//						{	SetPref('quickequip',
+//								this.innerHTML.charAt(0) == 'E' ? 1 : 0);
+//							document.location = 'inventory.php?which=2';
+//						}, false);
+//						var qediv = document.createElement('div');
+//						qediv.setAttribute('style',
+//							'float:right;padding:0 7px;margin-top:3px;');
+//						qediv.appendChild(qelnk);
+//						$(lnk).parents('center').parents('tr').prev()
+//						.children('td:first')
+//						.prepend('<div style="float:left;width:110px;">'+
+//							'&nbsp;</div>')
+//						.prepend(qediv);
+//						didQElink = true;
+//					}
+
 					var processingUnequipAll = 1;
 					if (lnk.text != "Manage your Custom Outfits")
 						unlink = lnk;
@@ -2551,10 +2570,6 @@ function at_galaktik() {
 		.append(check)
 		.append(document.createTextNode("Auto-Use Unguents And Ointments"));
 	howMany.after(checkSpan);
-	$("img:first")
-	.attr('title','right-click to equip Travoltan Trousers')
-	.attr('id','proprietor')
-	.bind('contextmenu',pants);
 }
 
 // BIGISLAND: add inventory check, max buttons to Frat/Hippy Trade-In stores.
@@ -2609,7 +2624,6 @@ function at_store() {
 	if (insput.length > 0) {
 		whichstore = insput.attr('value'); noform = 0;
 	} else whichstore = document.location.search.match(/whichstore\=([a-z0-9])/)[1];
-	GM_log("whichstore = " + whichstore);
 
 	// Refresh hash
 	var inphash = $("input[name=phash]");
@@ -2624,15 +2638,11 @@ function at_store() {
 
 	// You can thank Mr. Mag for this one...
 	// right-click on the image of the shopkeeper to put on your travoltan trousers without leaving the store.
-//	GM_log("img[src*=otherimages]:" + $("img[src*='otherimages']:first").attr('src'));
-//	GM_log("img:first:" + $("img:first").attr('src'));
-
-	$("img:first")
+	$("img[src*=otherimages]:first")
 	.attr('title','right-click to equip Travoltan Trousers')
 	.attr('id','proprietor')
-	.bind('contextmenu',pants);
-//	.get(0)
-//	.addEventListener('contextmenu', pants, true);
+	.get(0)
+	.addEventListener('contextmenu', pants, true);
 //instead of pants, was: function(evt) {
 //		GM_get(server+'/inv_equip.php?pwd='+pwd+
 //			'&which=2&action=equip&whichitem=1792',
@@ -2805,7 +2815,7 @@ function at_hermit() {
 	if (GetPref('shortlinks') > 1) {
 		var p = $('p:first');
 		var txt = $('body').text();
-//		GM_log("hermit txt="+txt);
+		GM_log("hermit txt="+txt);
 		if (txt.indexOf("Hermit Permit required,") != -1) {			// no permit
 			var a = $('b:eq(1)');
 			a.parent().prepend('<br>' + AppendBuyBox(42, 'm', 'Buy Permit', 1)+'<br>');
@@ -2820,8 +2830,7 @@ function at_hermit() {
 					p.get(0).innerHTML += '<br><br>' + AppendBuyBox(23, 'm', 'Buy Gum', 0);
 				}
 				p.append('<br><br><center><font color="blue">You have '+(gum==0?" no ":gum)+(gum!=1?" gums ":" gum ")
-//					+" and "+(hpermit==0?" no ":hpermit)+(hpermit!=1?" permits ":" permit ")
-					+"in inventory.</font></center><br>");
+					+" and "+(hpermit==0?" no ":hpermit)+(hpermit!=1?" permits ":" permit ")+"in inventory.</font></center><br>");
 				if (gum != 0) p.append('<br><center><a href="inv_use.php?pwd='+pwd+'&which=3&whichitem=23">Use some chewing gum</a></center>');
 			});
 		}
@@ -2942,14 +2951,10 @@ function at_council() {
 				p.append(AppendLink('[copse]', 'friars.php'));
 			else if (txt.indexOf("Cyrpt") != -1)
 				p.append(AppendLink('[cyrpt]', 'cyrpt.php'));
-			else if (txt.indexOf("the Trapper,") != -1)
-				p.append(AppendLink('[John, M.D.]', 'place.php?whichplace=mclargehuge&action=trappercabin'));
+			else if (txt.indexOf("L337") != -1)
+				p.append(AppendLink('[trapz0r]', 'trapper.php'));
 			else if (txt.indexOf("Chasm") != -1)
 				p.append(AppendLink('[mountains]', 'mountains.php'));
-			else if (txt.indexOf("Highland Lord") != -1) {
-				p.append(AppendLink('[chasm]','place.php?whichplace=orc_chasm'));
-				p.append(AppendLink('[highlands]','place.php?whichplace=highlands'));
-			}
 			if (txt.indexOf("invaded!") != -1 || txt.indexOf("pirates") != -1)
 			{	
 				var derr = AppendLink('[swashbuckle]', "inv_equip.php" +
@@ -3303,25 +3308,25 @@ function at_charpane()
 
 	// Compact Mode
 	if (compactMode) {
-		var mp=0;
-		for (var i=4, len=bText.length; i<len; i++) {
-			str = bText[i].textContent;
-			var spl = str.split('/');
-			if (spl.length > 1) {
-				if (mp == 0) {
-					curHP = integer(spl[0]);
-					maxHP = integer(spl[1]); mp++;
-					bText[i].parentNode.previousSibling
-						.addEventListener('contextmenu', RightClickHP,true);
-				} else {
-					curMP = integer(spl[0]);
-					maxMP = integer(spl[1]);
-					bText[i].parentNode.previousSibling
-						.addEventListener('contextmenu',RightClickMP,true);
-					break;
-				}
-			}
-		}
+//		var mp=0;
+//		for (var i=4, len=bText.length; i<len; i++) {
+//			str = bText[i].textContent;
+//			var spl = str.split('/');
+//			if (spl.length > 1) {
+//				if (mp == 0) {
+//					curHP = integer(spl[0]);
+//					maxHP = integer(spl[1]); mp++;
+//					bText[i].parentNode.previousSibling
+//						.addEventListener('contextmenu', RightClickHP,true);
+//				} else {
+//					curMP = integer(spl[0]);
+//					maxMP = integer(spl[1]);
+//					bText[i].parentNode.previousSibling
+//						.addEventListener('contextmenu',RightClickMP,true);
+//					break;
+//				}
+//			}
+//		}
 		advcount = integer($('a:contains(Adv):first').parent().next().text());
 
 		var lvlblock = $("center:contains('Lvl.'):first").text();	// this text is always present in compact mode
@@ -3355,20 +3360,20 @@ function at_charpane()
 		advcount = integer(data.shift());
 
 		// Change image link for costumes
-		var img = imgs[0];
-		if (GetPref('backup')) {
-			img.parentNode.parentNode.nextSibling
-				.setAttribute('id','outfitbkup');
-			img.addEventListener('contextmenu',function(event)
-			{	GM_get(server + '/inv_equip.php?action=customoutfit&which=2&outfitname=' +
-				GetPref('backup'),function(response)
-				{	var msg; if (response.indexOf("custom outfits") == -1) msg = "Outfit Backed Up";
-					else msg = "Too Many Outfits";
-					document.getElementById('outfitbkup').innerHTML +=
-					"<span class='tiny'><center>"+msg+"</center></span>";
-				}); event.stopPropagation(); event.preventDefault();
-			}, true);
-		}
+//		var img = imgs[0];
+//		if (GetPref('backup')) {
+//			img.parentNode.parentNode.nextSibling
+//				.setAttribute('id','outfitbkup');
+//			img.addEventListener('contextmenu',function(event)
+//			{	GM_get(server + '/inv_equip.php?action=customoutfit&which=2&outfitname=' +
+//				GetPref('backup'),function(response)
+//				{	var msg; if (response.indexOf("custom outfits") == -1) msg = "Outfit Backed Up";
+//					else msg = "Too Many Outfits";
+//					document.getElementById('outfitbkup').innerHTML +=
+//					"<span class='tiny'><center>"+msg+"</center></span>";
+//				}); event.stopPropagation(); event.preventDefault();
+//			}, true);
+//		}
 
 		// Add SGEEA to Effects right-click
 		var bEff = $('b:gt(4):contains(Effects)');
@@ -3409,10 +3414,10 @@ function at_charpane()
 	for (i=0,len=imgs.length; i<len; i++) {
 		var img = imgs[i], imgClick = img.getAttribute('onclick');
 		var imgSrc = img.src.substr(img.src.lastIndexOf('/')+1);
-		if (imgSrc == 'mp.gif')
-			img.addEventListener('contextmenu', RightClickMP, false);
-		else if (imgSrc == 'hp.gif')
-			img.addEventListener('contextmenu', RightClickHP, false);
+//		if (imgSrc == 'mp.gif')
+//			img.addEventListener('contextmenu', RightClickMP, false);
+//		else if (imgSrc == 'hp.gif')
+//			img.addEventListener('contextmenu', RightClickHP, false);
 		if (imgClick == null || imgClick.substr(0,4) != "eff(") continue;
 		var effName = (compactMode ? img.getAttribute('title') : img.parentNode.nextSibling.firstChild.innerHTML);
 
@@ -4808,29 +4813,11 @@ function at_basement() {
 // SPOIL_(ZONE): Display ML on mouseover.
 function spoil_place() {
 	var whichplace = document.location.search;
-	GM_log("whichplace = " + whichplace);
+	GM_log("whichplace = " & whichplace);
 	switch (whichplace) {
-		case "?whichplace=plains": spoil_plains();		break;
-		case "?whichplace=orc_chasm": spoil_orcChasm(); 	break;
-		case "?whichplace=highlands": spoil_highlands(); 	break;
-		case "?whichplace=mclargehuge": spoil_mclargehuge();	break;
-		default: break;
+		case "?whichplace=plains": spoil_plains();
+		break;
 	}
-}
-function spoil_highlands()
-{
-	$('#peak1 img').attr('title','ML: 71-78');
-	$('#peak2 img').attr('title','ML: 81-93');
-	$('#peak3 img').attr('title','ML: 85');
-}
-
-function spoil_orcChasm() 
-{
-	$('img').each(function() {
-		var ml = null; var src= this.getAttribute('src');
-		if (src.indexOf("1x1trans") != -1) ml = '75-85';
-		if (ml) this.setAttribute('title','ML: '+ml);
-	});
 }
 
 function spoil_manor2()
@@ -5127,18 +5114,11 @@ function spoil_mountains()
 function spoil_mclargehuge()
 {	$('img').each(function()
 	{	var ml = null; var src = this.getAttribute('src');
-		if (src.indexOf("goatlet") != -1) ml = '68';
-		else if (src.indexOf("lair") != -1) ml = '80-90';
-		else if (src.indexOf("mine") != -1) ml = '53-58';
-		else if (src.indexOf("slope") != -1) ml = '73-75';
-		else if (src.indexOf("peak") != -1) ml = '105-107';
-		else if (src.indexOf("") != -1) ml = '';
-//		old peak...
-//		if (src.indexOf("omright") != -1) ml = '53-57';
-//		else if (src.indexOf("ommid") != -1) ml = '68';
-//		else if (src.indexOf("rightmid") != -1) ml = '71-76';
-//		else if (src.indexOf("leftmid") != -1) ml = '70-90';
-//		else if (src.indexOf("top") != -1) ml = '105-107';
+		if (src.indexOf("omright") != -1) ml = '53-57';
+		else if (src.indexOf("ommid") != -1) ml = '68';
+		else if (src.indexOf("rightmid") != -1) ml = '71-76';
+		else if (src.indexOf("leftmid") != -1) ml = '70-90';
+		else if (src.indexOf("top") != -1) ml = '105-107';
 		if (ml) this.setAttribute('title','ML: '+ml);
 });	}
 
@@ -5773,7 +5753,7 @@ function buildPrefs() {
             document.querySelector('#guts').innerHTML = '<div class="scaffold"></div>';
             document.querySelector('#guts').appendChild(buildSettings());
             //click handler for everything in this section
-            document.querySelector('#' + scriptID).addEventListener('click', changeSettings, false);
+//            document.querySelector('#' + scriptID).addEventListener('click', changeSettings, false);
         }, false);
     } else {
         //script tab already exists
@@ -5782,7 +5762,7 @@ function buildPrefs() {
             e.stopPropagation();
             document.querySelector('#guts').appendChild(buildSettings());
             //click handler for everything in this section
-            document.querySelector('#' + scriptID).addEventListener('click', changeSettings, false);
+//            document.querySelector('#' + scriptID).addEventListener('click', changeSettings, false);
         }, false);
     }
 	
