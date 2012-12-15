@@ -26,7 +26,7 @@
 // @include     http://*kingdomofloathing.com/*
 // @exclude     http://images.kingdomofloathing.com/*
 // @exclude     http://forums.kingdomofloathing.com/*
-// @require     http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js
+// @require     http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js
 // @grant	GM_log
 // @grant	GM_setValue
 // @grant	GM_getValue
@@ -49,25 +49,6 @@ var thePath = location.pathname;
 
 var global = this; //, mr = unsafeWindow.top.mr = global;
 
-//makeTags("form,input".split(",")); // convenient node creation
-
-// run eval(mr.script.call(this)) from the Firebug console to get script globals
-//mr.script = function script(x) {
-//	var stuff = [], target = this === global ? unsafeWindow.top : this;
-//	var privates = true; // stuff defined before our stuff is potentially harmful
-//	for (var id in global) {
-//		if (privates && "$x" != id) continue;
-//		privates = false;
-//		stuff.push(id);
-//		if ("script" == id) { // anything after our stuff is potentially harmful too
-//			 return "var " + stuff.map(function(n) { return n + " = this." + n; }).join(",");
-//		}
-//		target[id] = global[id];
-//	}
-//	return 'console.error("Failed to find Mr. Script global identifiers. :-(");';
-//};
-
-
 // server variable lets you be logged on to different servers with different characters and keep them straight.
 // not nearly so nifty now that there's only www and dev....
 var server = location.host, serverNo = (server.match(/(.)\./) || {1:"L"})[1]; 	// the "7" in www7.X, or an "L" if no . is in the hostname.
@@ -84,6 +65,15 @@ String.prototype.trim = function () {
 
 var autoclear = GetPref('autoclear');
 var spoilers = GetPref('zonespoil') == 1;
+
+//really cool hack to capture DomNodeInserts without having to use the deprecated DOMNodeInserted event,
+//which is apparently a huge performance drain:
+//after the document is loaded, slap an invisible animation onto any "interesting" new elements that arrive.
+//bind a handler to the animation-start event which then does whatever needs doing with the new elements.
+//in our case, the AJAX 'Results:' boxes are always starting with <center><center>....
+addCss('@-moz-keyframes nodeInserted { from { clip: rect(1px,auto,auto,auto) } to { clip: rect(0px,auto,auto,auto) } }');
+addCss('center > center { animation-duration: 0.001s; animation-name: nodeInserted }');
+$(document).on('animationstart',ResultHandler);
 
 anywhere(); // stuff we always add where we can
 
@@ -122,6 +112,46 @@ function dropped_item() {
 			AddLinks(onclick, this.parentNode.parentNode, null, thePath);
 		}
 	});
+}
+
+function addCss(cssString) {
+	var head = document.getElementsByTagName('head')[0];
+	if (head === undefined) return;
+	var newCss = document.createElement('style');
+	newCss.type = "text/css";
+	newCss.innerHTML = cssString;
+	head.appendChild(newCss);
+}
+
+function ResultHandler(event) {
+	GM_log("Result Handling!  event.animationName="+event.originalEvent.animationName);
+	if (event.originalEvent.animationName == 'nodeInserted') {
+		GM_log("NodeInsertion!");
+//		if (($(event.target).find("a[name='effdivtop']")) != undefined) {
+//			GM_log("effdivtopped.  Stop.");
+//			return;
+//			//the <a> block named effdivtop is the outer of two center-center blocks that get processed.
+//			//we'll ignore it and only do stuff on the inner block. ... apparently we don't need this after all.
+//		}
+		var mystuff = $(event.target).html();
+		GM_log("mystuff: \n"+mystuff);
+		if (mystuff.indexOf('You equip an item') != -1) {
+			var bnode = $(event.target).find('b:eq(1)').parent();
+			var btext = $(event.target).find('b:eq(1)').text();
+			GM_log('btext='+btext);
+			switch(btext) {
+				case 'continuum transfunctioner': bnode.append(AppendLink('[8-bit realm (1)]','adventure.php?snarfblat=73'));	break;
+				case 'huge mirror shard':	  bnode.append(AppendLink('[chamber]','lair6.php?place=1'));		break;
+				case 'snorkel':			  bnode.append(AppendLink('[map]',inv_use('26')));			break;
+				case 'pool cue':		  bnode.append(AppendLink('[chalk it!]',inv_use('1794')));		break;
+				case "Talisman o' Nam":		  bnode.append(AppendLink('[Dome moD]','plains.php'));			break;
+				case 'worm-riding hooks':	  bnode.append(AppendLink('[drum!]',inv_use('2328')));			break;
+			}
+		} else if (mystuff.indexOf('Outfit:') != -1) {
+			//figure out a bunch of outfit manipulation stuff here.
+			GM_log('mystuff = \n'+mystuff);
+		}
+	}
 }
 
 // Don't ask why this guy bothered to write wrapper functions. He just did. :-)
@@ -369,57 +399,6 @@ function AppendLink(linkString, linkURL)
 	return finalSpan;
 }
 
-// returns a function bound to self (with additional args passed pre-populated)
-//function bind( func, self /*, param 1, param 2, ... */ ) {
-//	var params = [].slice.call( arguments, 2 );
-//	return function a( /* param1, ..., param n,   param n+1, ... */ ) {
-//		return func.apply( self, params.concat( [].slice.call( arguments ) ) );
-//	};
-//}
-
-// comfy way of concatenating a bunch of nodes into a DocumentFragment
-//function FRAGMENT(nodes, doc) {
-//	doc = doc || document;
-//	var fragment = doc.createDocumentFragment();
-//	for (var i = 0, node; node = nodes[i]; i++ ) {
-//		if ("string" == typeof node)
-//			node = doc.createTextNode( node );
-//		fragment.appendChild(node);
-//	}
-//	return fragment;
-//}
-
-//function makeTags(names, doc) {
-//	function tagMaker(name, attrs, children) {
-//		console.log(name, attrs, children);
-//		var node = this.createElement( name );
-//		if ("object" != typeof attrs || $.isArray(attrs)) {
-//			children = attrs;
-//			attrs = null;
-//		}
-//		if (attrs) {
-//			for (var a in attrs)
-//				node.setAttribute(a, attrs[a]);
-//			if (attrs['class'])
-//				node.className = attrs['class'];
-//			if (attrs['style'])
-//				node.style.cssText = attrs['style'];
-//		}
-//		if (children) {
-//			if ($.isArray(children))
-//				node.appendChild( FRAGMENT(children, this) );
-//			else if (({ "string":1, "number": 1 })[typeof children])
-//				node.appendChild( this.createTextNode( children+"" ) );
-//			else if (children.tagName)
-//				node.appendChild( children );
-//		}
-//		return node;
-//	}
-//	names.forEach(function(name) {
-//		global[name.toUpperCase()] = bind(tagMaker, doc||document, name);
-//	});
-//}
-
 function AUB_KeyUp(event) {
     if (event.which == 77 || event.which == 88) {    // 77='m', 88='x'
 	var whichItem = document.getElementsByName('whichitem')[0];
@@ -462,12 +441,6 @@ function AppendUseBox(itemNumber, skillsForm, maxButton, appendHere) {
 		}
 	}
 	text.addEventListener('keyup', AUB_KeyUp, false); 
-//was: function(event) {
-//		if (event.which == 77 || event.which == 88) { // 77 = 'm', 88 = 'x'
-//		  var whichItem = document.getElementsByName('whichitem')[0];
-//		  this.value = FindMaxQuantity(whichItem.value, 999, 0, GetPref('safemax'));
-//		}
-//	}, false);
 }
 
 // APPENDBUYBOX: Return HTML for buying an item.
@@ -580,64 +553,70 @@ function AddInvCheck(img)
 	if (img != undefined && img.getAttribute("onclick").indexOf("desc") != -1) {
 		if ($(img).parents("table.item").size() > 0) return;	// this image already has an RCM attached; don't override.
 																// (thank you, CDMoyer, for this idea!)
-		img.addEventListener('contextmenu', function(event) {
-			if (this.getAttribute("done")) return;
-			item = this.parentNode.previousSibling.firstChild.getAttribute("value");
-			if (item === null) { 
-				item = this.parentNode.previousSibling.firstChild.nextSibling.getAttribute("value");
-			}
-			if (item && item.length > 4) item = item.substring(0,item.length-9); // correct for prices in the mall
-
-			var add = "<br><span class='tiny' id='span" + item + "'></span>";
-			this.parentNode.nextSibling.innerHTML += add;
-
-			GM_get(server+'/api.php?what=inventory&for=MrScript',function(details) {
-				// this call will either get us the raw invcache data in the form of {"id":"qty","id":"qty",etc}
-				// or a full HTML page containing the javascript that eventually says 'var inventory = {"id":"qty","id":"qty",etc};'
-				// so if we don't get something that starts with the { character, assume we got the full javascript source
-				// and break it down to just the inventory info that we want here.
-				// n.b. JS source file version should no longer arrive as of 11Jan10, but we'll play it safe.
-				if (details[0] != '{') {		
-					var i1 = details.split('inventory = ')[1].split(';')[0];	// should get everything from { to }, inclusive.
-					details = i1;
-				}
-				var invcache = eval('('+details+')');
-				var itemqty = invcache[item];	if (itemqty === undefined) itemqty = 0;
-
-				var addText = "";
-				if (item == 1605) {		// catalysts
-					var reagents = invcache[346]; if (reagents === undefined) reagents = 0;
-					var solutions = invcache[1635]; if (solutions === undefined) solutions = 0;
-					addText = "(" + reagents + " reagent"; if (reagents != 1) addText += "s";
-					addText += ", " + itemqty + " catalyst"; if (itemqty != 1) addText += "s";
-					addText += " and " + solutions + " scrummie"; if (solutions != 1) addText += "s";
-					addText += " in inventory)";
-				}
-				else if (item == 1549) {	// MSG
-					var noodles = invcache[304]; if (noodles === undefined) noodles = 0;
-					addText = "(" + noodles + " noodle"; if (noodles != 1) addText += "s";
-					addText += " and " + itemqty + " MSG"; if (itemqty != 1) addText += "s";
-					addText += " in inventory)";
-				}
-				else addText = '('+itemqty+' in inventory)';
-				document.getElementById('span'+item).innerHTML += addText;	
-			});
-			this.setAttribute("done","done"); event.stopPropagation(); event.preventDefault();
-		}, true);
-	}	
+		img.addEventListener('contextmenu', InvChecker, true);
+	}
 }
+
+function InvChecker (event) 
+{
+	if (this.getAttribute("done")) return;
+	item = this.parentNode.previousSibling.firstChild.getAttribute("value");
+	if (item === null) { 
+		item = this.parentNode.previousSibling.firstChild.nextSibling.getAttribute("value");
+	}
+	if (item && item.length > 4) item = item.substring(0,item.length-9); // correct for prices in the mall
+	
+	var add = document.createElement('span');
+	var br = document.createElement('br');
+	$(add).attr('class','tiny').attr('id','span'+item).text("checking...");
+	$(this).parent().next().append(br).append(add);
+
+	GM_get(server+'/api.php?what=inventory&for=MrScript',function(details) {
+		// this call will get us the raw invcache data in the form of {"id":"qty","id":"qty",etc}
+		// n.b. JS source file version should no longer arrive as of 11Jan10, but we'll play it safe.
+		if (details[0] != '{') {		
+			var i1 = details.split('inventory = ')[1].split(';')[0];	// should get everything from { to }, inclusive.
+			details = i1;
+		}
+		var invcache = eval('('+details+')');		//there must be a better way.  TODO: un-eval this code.
+		var itemqty = invcache[item];	
+		if (itemqty === undefined) itemqty = 0;
+
+		var addText = "";
+		if (item == 1605) {		// catalysts
+			var reagents = invcache[346]; if (reagents === undefined) reagents = 0;
+			var solutions = invcache[1635]; if (solutions === undefined) solutions = 0;
+			addText = "(" + reagents + " reagent"; if (reagents != 1) addText += "s";
+			addText += ", " + itemqty + " catalyst"; if (itemqty != 1) addText += "s";
+			addText += " and " + solutions + " scrummie"; if (solutions != 1) addText += "s";
+			addText += " in inventory)";
+		}
+		else if (item == 1549) {	// MSG
+			var noodles = invcache[304]; if (noodles === undefined) noodles = 0;
+			addText = "(" + noodles + " noodle"; if (noodles != 1) addText += "s";
+			addText += " and " + itemqty + " MSG"; if (itemqty != 1) addText += "s";
+			addText += " in inventory)";
+		}
+		else addText = '('+itemqty+' in inventory)';
+		$('#span'+item).text(addText);
+//		document.getElementById('span'+item).innerHTML += addText;	
+	});
+	this.setAttribute("done","done"); event.stopPropagation(); event.preventDefault();
+}
+
 
 // ADDTOPLINK: Much easier for a function to do all the work.
 function AddTopLink(putWhere, target, href, html, space)
 {
 	if (href == "") return;
 	var a = document.createElement('a');
-	if (target != 0) a.setAttribute('target', target);
-	a.setAttribute('href', href);
-	a.innerHTML = html;
-
-	putWhere.appendChild(a);
-	if (space) putWhere.appendChild(document.createTextNode(" "));
+	if (target != 0) $(a).attr('target',target); //a.setAttribute('target', target);
+	$(a).attr('href',href).html(html);
+//	a.setAttribute('href', href);
+//	a.innerHTML = html;
+	$(putWhere).append(a);
+//	putWhere.appendChild(a);
+	if (space) $(putWhere).append(document.createTextNode(" ")); //putWhere.appendChild(document.createTextNode(" "));
 }
 
 // ADDLINKS: Extra links, etc. for items, independently of where they are.
@@ -2119,7 +2098,7 @@ function at_choice() {
 			if (saidgmob == undefined) saidgmob = 0;
 			$('p:last').append("<br /><font color='blue'>You have said 'Guy made of bees' " + saidgmob + " times.</font><br />");
 		} else if (choicetext.indexOf("Guy made of bees.") != -1) {
-			GM_log("you just said GMOB!");
+//			GM_log("you just said GMOB!");
 			var gmob = GetCharData("saidbeeguy");
 			if ((gmob == undefined) || (gmob == 0)) gmob = 1;
 			else gmob = gmob + 1;
@@ -2284,6 +2263,7 @@ function at_beerpong()
 // INVENTORY: Add shortcuts when equipping outfits
 function at_inventory()
 {
+//GM_log("starting at_inventory()");
 	var firstTable = document.getElementsByTagName('table')[0];
 
 	var gearpage = 0; // Man, this is annoying.
@@ -2396,14 +2376,14 @@ function at_inventory()
 			}	
 		}
 	} // equippage
-
+//	GM_log("fttC: " + firstTable.rows[0].textContent);
 	if (GetPref('shortlinks') > 1 && firstTable.rows[0].textContent == "Results:") {
 		var resultsText = firstTable.rows[1].textContent, bText;
 //		GM_log("resultsText:"+resultsText);
 //		GM_log("referrer:"+document.referrer);
 // this is where we go back to a useful location if we've done/used something elsewhere that caused the inventory page to load.
-		GM_log("rT="+resultsText);
-		GM_log("ref="+document.referrer);
+//		GM_log("rT="+resultsText);
+//		GM_log("ref="+document.referrer);
 		if (resultsText.indexOf("ladder into the Bat Hole") != -1 &&
 			document.referrer.indexOf('bathole.php') != -1)	// used a sonar at the bathole
 			parent.frames[2].location =
@@ -2450,7 +2430,7 @@ function at_inventory()
 			bText = document.getElementsByTagName('b')[1];
 			//var item = resultsText.substring(14);
 			var item = bText.textContent;
-//			GM_log("item="+item);
+			GM_log("item="+item);
 			if (item == "continuum transfunctioner")
 				bText.parentNode.appendChild(AppendLink('[8-bit]', 'adventure.php?snarfblat=73'));
 			else if (item == "huge mirror shard")
@@ -2458,8 +2438,8 @@ function at_inventory()
 			else if (item == "makeshift SCUBA gear")
 				bText.parentNode.appendChild(AppendLink('[odor]', 'lair2.php?action=odor'));
 			else if (item == "snorkel")
-				bText.parentNode.appendChild(AppendLink('[map]', 'inv_use.php?pwd='+
-				pwd + '&which=3&whichitem=26'));
+				bText.parentNode.appendChild(AppendLink('[map]', inv_use('26'))); //'inv_use.php?pwd='+
+//				pwd + '&which=3&whichitem=26'));
 			else if (item == "pool cue")
 				bText.parentNode.appendChild(AppendLink('[chalk]', 'inv_use.php?pwd='+
 				pwd + '&which=3&whichitem=1794'));
@@ -3381,10 +3361,10 @@ function at_charpane()
 
 	// Re-hydrate (0)
 	var temphydr = integer(GetCharData('hydrate'));
-	GM_log("hydrate="+GetCharData('hydrate'));
-	GM_log("temphydr="+temphydr);
-	GM_log("advcount="+advcount);
-	GM_log("oldcount="+oldcount);
+//	GM_log("hydrate="+GetCharData('hydrate'));
+//	GM_log("temphydr="+temphydr);
+//	GM_log("advcount="+advcount);
+//	GM_log("oldcount="+oldcount);
 
 	if (temphydr) {
 		if (advcount > oldcount) {
@@ -4290,10 +4270,10 @@ function at_cave() {
 		doorpicname = $('img:first').attr('src');
 		var door = doorpicname.slice(doorpicname.lastIndexOf('/'));
 		if (dooritem[door]) {	// item is in our list
-			var descid = $('option:[value="'+dooritem[door][0]+'"]').attr('descid');
+			var descid = $('option[value="'+dooritem[door][0]+'"]').attr('descid');
 			if (descid) { 	// item is in the selection list
 				$('select[name="whichitem"]').attr('style','color:green');	// mark as selected
-				$('option:[value="'+dooritem[door][0]+'"]').attr('selected','selected');// select the right item
+				$('option[value="'+dooritem[door][0]+'"]').attr('selected','selected');// select the right item
 			} else {
 				var failnote = "<center><p><font color='blue'>You need "+dooritem[door][1]+" to proceed.</font></center>";
 				$('select[name="whichitem"]')
@@ -4313,6 +4293,11 @@ function at_cave() {
 	}
 }
 
+function inv_use(item) {
+	var inv_string = "inv_use.php?pwd="+pwd+"&which=3&whichitem="+item;
+	GM_log("inv_use gives " + inv_string);
+	return inv_string;
+}
 
 // LAIR1: More linkies.
 function at_lair1() {
@@ -4325,8 +4310,8 @@ function at_lair1() {
 		{	var p = document.getElementsByTagName('p')[i];
 			var ptxt = p.textContent;
 	// gate 1: 
-			if (ptxt.indexOf("Suc Rose") != -1) p.appendChild(AppendLink('[sugar rush]',
-				'inv_use.php?pwd='+pwd+'&which=3&whichitem=540'));
+			if (ptxt.indexOf("Suc Rose") != -1) p.appendChild(AppendLink('[sugar rush]',inv_use(540)));
+//				'inv_use.php?pwd='+pwd+'&which=3&whichitem=540'));
 			else if (ptxt.indexOf("Hilarity") != -1) p.appendChild(AppendLink('[gremlin juice]',
 				'inv_use.php?pwd='+pwd+'&which=3&whichitem=2631'));
 			else if (ptxt.indexOf("Humility") != -1) p.appendChild(AppendLink('[wussiness]',
