@@ -1,4 +1,4 @@
-// Mr. Script v1.7.0
+// Mr. Script v1.7.1
 //
 // --------------------------------------------------------------------
 // This is a user script.  To install it, you need Greasemonkey 0.8 or
@@ -12,7 +12,7 @@
 // @name        Mr. Script
 // @namespace   http://www.noblesse-oblige.org/lukifer/scripts/
 // @description	interface overhauler for KingdomofLoathing.com
-// @version		1.7.0
+// @version		1.7.1
 // @author		Lukifer
 // @contributor	Ohayou
 // @contributor Hellion
@@ -40,7 +40,7 @@ var place = location.pathname.replace(/\/|\.(php|html)$/gi, "").toLowerCase();
 //GM_log("at:" + place);
 
 // n.b. version number should always be a 3-digit number.  If you move to 1.9, call it 1.9.0.  Don't go to 1.8.10 or some such.
-var VERSION = 170;
+var VERSION = 171;
 var MAXLIMIT = 999;
 var ENABLE_QS_REFRESH = 1;
 var DISABLE_ITEM_DB = 0;
@@ -124,9 +124,9 @@ function addCss(cssString) {
 }
 
 function ResultHandler(event) {
-	GM_log("Result Handling!  event.animationName="+event.originalEvent.animationName);
+//	GM_log("Result Handling!  event.animationName="+event.originalEvent.animationName);
 	if (event.originalEvent.animationName == 'nodeInserted') {
-		GM_log("NodeInsertion!");
+//		GM_log("NodeInsertion!");
 //		if (($(event.target).find("a[name='effdivtop']")) != undefined) {
 //			GM_log("effdivtopped.  Stop.");
 //			return;
@@ -138,7 +138,7 @@ function ResultHandler(event) {
 		if (mystuff.indexOf('You equip an item') != -1) {
 			var bnode = $(event.target).find('b:eq(1)').parent();
 			var btext = $(event.target).find('b:eq(1)').text();
-			GM_log('btext='+btext);
+//			GM_log('btext='+btext);
 			switch(btext) {
 				case 'continuum transfunctioner': bnode.append(AppendLink('[8-bit realm (1)]','adventure.php?snarfblat=73'));	break;
 				case 'huge mirror shard':	  bnode.append(AppendLink('[chamber]','lair6.php?place=1'));		break;
@@ -149,7 +149,7 @@ function ResultHandler(event) {
 			}
 		} else if (mystuff.indexOf('You put on an Outfit:') != -1) {
 			//figure out a bunch of outfit manipulation stuff here.
-			GM_log('Outfit mystuff = \n'+mystuff);
+//			GM_log('Outfit mystuff = \n'+mystuff);
 			var bnode = $(event.target).find('b:eq(1)');
 			var btext = $(event.target).find('b:eq(1)').text();
 			switch (btext) {
@@ -639,7 +639,9 @@ function AddTopLink(putWhere, target, href, html, space)
 // ADDLINKS: Extra links, etc. for items, independently of where they are.
 function AddLinks(descId, theItem, formWhere, path) {
 	// Special thanks to CMeister for the item database and much of this code
-	var itemNum = parseInt($(theItem).parents('.item').attr('rel').match(/id=(\d+)/)[1],10);	// yay for CDM putting item numbers where we can get 'em easily
+	var itemNum = $(theItem).parents('.item');
+	if (itemNum && itemNum.attr('rel')) itemNum = parseInt(itemNum.attr('rel').match(/id=(\d+)/)[1],10);
+//	var itemNum = parseInt($(theItem).parents('.item').attr('rel').match(/id=(\d+)/)[1],10);	// yay for CDM putting item numbers where we can get 'em easily
 	if (!itemNum) {
 		GM_log("unable to locate item number in AddLinks()");
 		return '';
@@ -1838,7 +1840,7 @@ function at_hiddencity() {
 	SetCharData("square",false);		// if we click on an altar, unmark it.
 	var ball = {1: 1900, 2: 1901, 3: 1904, 4: 1905};	// that's "altar:ID of ball that gives buff at this altar".
 	var altarsrc = $('img:first').attr("src"); 
-	if (altarsrc) {
+	if (altarsrc && (altarsrc.indexOf("/altar") != -1)) {
 		var altar = integer(altarsrc.charAt(altarsrc.indexOf("/altar") + 6));	// This will be a number from 1 to 4 on the right pages.
 		var stone = GetCharData('altar'+altar);
 		if ((stone != undefined) && (stone != '')) {
@@ -4815,7 +4817,7 @@ function spoil_place() {
 	GM_log("whichplace = " + whichplace);
 	switch (whichplace) {
 		case "?whichplace=plains": spoil_plains();		break;
-		case "?whichplace=orc_chasm": spoil_orcChasm(); 	break;
+		case "?whichplace=orc_chasm": spoil_orc_chasm(); 	break;
 		case "?whichplace=highlands": spoil_highlands(); 	break;
 		case "?whichplace=mclargehuge": spoil_mclargehuge();	break;
 		default: break;
@@ -4823,18 +4825,14 @@ function spoil_place() {
 }
 function spoil_highlands()
 {
-	$('#peak1 img').attr('title','ML: 71-78');
-	$('#peak2 img').attr('title','ML: 81-93');
-	$('#peak3 img').attr('title','ML: 85');
+	$('#peak1 > a > img').attr('title','ML: 71-78');
+	$('#peak2 > a > img').attr('title','ML: 81-93');
+	$('#peak3 > a > img').attr('title','ML: 85');
 }
 
-function spoil_orcChasm() 
+function spoil_orc_chasm() 
 {
-	$('img').each(function() {
-		var ml = null; var src= this.getAttribute('src');
-		if (src.indexOf("1x1trans") != -1) ml = '75-85';
-		if (ml) this.setAttribute('title','ML: '+ml);
-	});
+	$('#smut_orc_camp > a > img').attr('title','ML: 75-85');
 }
 
 function spoil_manor2()
@@ -5061,11 +5059,11 @@ function spoil_cove()
 		if (ml) this.setAttribute('title','ML: '+ml);
 });	}
 
-function spoil_dungeons()
-{	$('img[src*=ddoom]').attr('title','ML: 36-45');		// dungeon of doom
-	$('img[src*=dungeon.gif').attr('title','ML: 3-4');	// haiku dungeon--now with combats!
-	$('img[src*=dungeon2.gif').attr('title','ML: 12-20');	// daily dungeon
-}
+//function spoil_dungeons()
+//{	$('img[src*=ddoom]').attr('title','ML: 36-45');		// dungeon of doom
+//	$('img[src*=dungeon.gif').attr('title','ML: 3-4');	// haiku dungeon--now with combats!
+//	$('img[src*=dungeon2.gif').attr('title','ML: 12-20');	// daily dungeon
+//}
 
 function spoil_da()		// dungeoneer's association, yay.
 {	
@@ -5126,7 +5124,7 @@ function spoil_lair3()
 }	}
 
 function spoil_mountains()
-{	$("img[src*=valley2]").attr('title','ML: 75-87');
+{	$("img[src*=roflvalley]").attr('title','ML: 75-87');
 	$("img[src*=bigbarrel]").attr('title','ML: 15/25/35');
 }
 
