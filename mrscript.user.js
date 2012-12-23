@@ -4814,15 +4814,15 @@ function at_basement() {
 // SPOIL_(ZONE): Display ML on mouseover.
 function spoil_place() {
 	var whichplace = document.location.search;
+	whichplace = whichplace.split('&',1)[0];	//?whichplace=foo&action=bar -> ?whichplace=foo
+	whichplace = whichplace.split('=',2)[1];	//?whichplace=foo -> foo
 	GM_log("whichplace = " + whichplace);
-	switch (whichplace) {
-		case "?whichplace=plains": spoil_plains();		break;
-		case "?whichplace=orc_chasm": spoil_orc_chasm(); 	break;
-		case "?whichplace=highlands": spoil_highlands(); 	break;
-		case "?whichplace=mclargehuge": spoil_mclargehuge();	break;
-		default: break;
+	var handler = global["spoil_" + whichplace];
+	if (handler && typeof handler == "function") {
+		handler();
 	}
 }
+
 function spoil_highlands()
 {
 	$('#peak1 > a > img').attr('title','ML: 71-78');
@@ -5057,25 +5057,19 @@ function spoil_cove()
 		else if (src.indexOf("cove3_3x3b") != -1) ml = '120';
 		else if (src.indexOf("cove3_5x2b") != -1) ml = '140';
 		if (ml) this.setAttribute('title','ML: '+ml);
-});	}
-
-//function spoil_dungeons()
-//{	$('img[src*=ddoom]').attr('title','ML: 36-45');		// dungeon of doom
-//	$('img[src*=dungeon.gif').attr('title','ML: 3-4');	// haiku dungeon--now with combats!
-//	$('img[src*=dungeon2.gif').attr('title','ML: 12-20');	// daily dungeon
-//}
+	});	
+}
 
 function spoil_da()		// dungeoneer's association, yay.
 {	
 	$('img').each(function()
-	{ var ml = null; var src = this.getAttribute('src');
-	if (src.indexOf('ddoom') != -1) ml = '57-61';
-	else if (src.indexOf('haikudungeon') != -1) ml = '3-5';
-	else if (src.indexOf('limerickdungeon') != -1) ml = 'N/A';
-	else if (src.indexOf('dailydungeon') != -1) ml = '12-20';
-	else if (src.indexOf('greater.gif') != -1) ml = '55-60?';
-	if (ml) this.setAttribute('title','ML: '+ml);
-	
+	{ 	var ml = null; var src = this.getAttribute('src');
+		if (src.indexOf('ddoom') != -1) ml = '57-61';
+		else if (src.indexOf('haikudungeon') != -1) ml = '3-5';
+		else if (src.indexOf('limerickdungeon') != -1) ml = 'N/A';
+		else if (src.indexOf('dailydungeon') != -1) ml = '12-20';
+		else if (src.indexOf('greater.gif') != -1) ml = '55-60?';
+		if (ml) this.setAttribute('title','ML: '+ml);
 	});
 }
 
@@ -5110,27 +5104,34 @@ function spoil_beanstalk()
 });	}
 
 function spoil_fernruin()
-{	$('img[src*=ruins_5]').attr('title','ML: 16-24');
+{	
+	$('img[src*=ruins_5]').attr('title','ML: 16-24');
 }
 
 function spoil_lair3()
-{	var hedge = $('img[src*=hedgemaze.gif]');
+{	
+	var hedge = $('img[src*=hedgemaze.gif]');
 	if (hedge.length>0)
-	{	hedge.attr('title','ML: 232');
+	{
+		hedge.attr('title','ML: 232');
 		$('img[src*=castletoptower.gif]')
 			.before(AppendLink('[hedge puzzle]', 'hedgepuzzle.php'))
 			.before('<br /><br />')
 			.parent().attr('style','text-align:center;');
-}	}
+	}
+}
 
 function spoil_mountains()
-{	$("img[src*=roflvalley]").attr('title','ML: 75-87');
+{
+	$("img[src*=roflvalley]").attr('title','ML: 75-87');
 	$("img[src*=bigbarrel]").attr('title','ML: 15/25/35');
 }
 
 function spoil_mclargehuge()
-{	$('img').each(function()
-	{	var ml = null; var src = this.getAttribute('src');
+{	
+	$('img').each(function()
+	{	
+		var ml = null; var src = this.getAttribute('src');
 		if (src.indexOf("goatlet") != -1) ml = '68';
 		else if (src.indexOf("lair") != -1) ml = '80-90';
 		else if (src.indexOf("mine") != -1) ml = '53-58';
@@ -5144,24 +5145,31 @@ function spoil_mclargehuge()
 //		else if (src.indexOf("leftmid") != -1) ml = '70-90';
 //		else if (src.indexOf("top") != -1) ml = '105-107';
 		if (ml) this.setAttribute('title','ML: '+ml);
-});	}
+	});
+}
 
 function spoil_canadia()
-{	$('img').each(function()
-	{	var ml = null; var src = this.getAttribute('src');
+{
+	$('img').each(function()
+	{	
+		var ml = null; var src = this.getAttribute('src');
 		if (src.indexOf("olcamp") != -1) ml = '2-3';
 		else if (src.indexOf("lcamp") != -1) ml = '35-40';
 		if (ml) this.setAttribute('title','ML: '+ml);
-});	}
+	});
+}
 
 function spoil_cave()			// dark and dank and sinister cave, that is...
-{	$('img[src*=chamberbottom]').attr('title','ML: 20-25');
+{	
+	$('img[src*=chamberbottom]').attr('title','ML: 20-25');
 	$('img[src*=chamber_door]').attr('title','ML: 27');
 }
 
 function spoil_bigisland()
-{	$('img').each(function()
-	{	var ml = null; var src = this.getAttribute('src');
+{
+	$('img').each(function()
+	{	
+		var ml = null; var src = this.getAttribute('src');
 		if (src.indexOf("nunnery1") != -1) ml = 'ML: 168';
 		else if (src.indexOf("bfleft") != -1) ml = this.getAttribute('title') + ' (ML: 170-210)'; // don't overwrite image number info
 		else if (src.indexOf("bfright") != -1) ml = this.getAttribute('title') + ' (ML: 170-210)';
@@ -5187,11 +5195,14 @@ function spoil_bigisland()
 		else if (src.indexOf("lighthouse_left") != -1) ml = 'ML: 171';
 		
 		if (ml) this.setAttribute('title',ml);
-});	}
+	});
+}
 
 function spoil_postwarisland()		
-{	$('img').each(function()
-	{	var ml = null; var src = this.getAttribute('src');
+{
+	$('img').each(function()
+	{
+		var ml = null; var src = this.getAttribute('src');
 		// Note to wiki peoples: more spoilers, plz
 		if (src.indexOf("nunnery1") != -1) ml = '168';
 		else if (src.indexOf("22.gif") != -1) ml = '61-69';		// pirate cove, undisguised
@@ -5202,21 +5213,27 @@ function spoil_postwarisland()
 		else if (src.indexOf("27.gif") != -1) ml = '39-41'; 	// frathouse, unbombed 
 		else if (src.indexOf("28.gif") != -1) ml = '39-41'; 	// hippy camp, unbombed
 		if (ml) this.setAttribute('title','ML: '+ml);
-});	}
+	});
+}
 
 function spoil_thesea()
-{	$('img').each(function()
-	{	var ml= null; var src = this.getAttribute('src');
+{
+	$('img').each(function()
+	{
+		var ml= null; var src = this.getAttribute('src');
 		if (src.indexOf("sea1") != 1) ml = '300-330';		// briny
 		if (src.indexOf("sea2") != 1) ml = '350-400';		// brinier
 		if (src.indexOf("sea3") != 1) ml = '375-425';		// briniest
 //		if (src.indexOf("") != 1) ml = '';
 		if (ml) this.setAttribute('title','ML: '+ml);
-});	}
+	});
+}
 
 function spoil_seafloor()
-{	$('img').each(function()
-	{	var ml= null; var src = this.getAttribute('src');
+{
+	$('img').each(function()
+	{
+		var ml= null; var src = this.getAttribute('src');
 		if (src.indexOf("garden") != 1) ml = '350-450';			// octopus's garden
 		if (src.indexOf("divebar") != 1) ml = '400-600';		// dive bar
 		if (src.indexOf("mine") != 1) ml = '400-500';			// anemone mine
@@ -5226,16 +5243,20 @@ function spoil_seafloor()
 		if (src.indexOf("reef") != 1) ml = '400-500';			// Madness Reef
 //		if (src.indexOf("") != 1) ml = '';
 		if (ml) this.setAttribute('title','ML: '+ml);
-});	}		
+	});
+}		
 
 function spoil_wormwood()
-{	$('img').each(function()
-	{	var ml= null; var src = this.getAttribute('src');
+{
+	$('img').each(function()
+	{
+		var ml= null; var src = this.getAttribute('src');
 		if (src.indexOf("wormwood3") != -1) ml = '9-7 for skirt, STLT, myst; 5-4 for !pipe, necklace, moxie; 1 for flask, mask, muscle'; // Mansion 
 		if (src.indexOf("wormwood4") != -1) ml = '9-7 for mask, !pipe, muscle; 5-4 for skirt, flask, myst; 1 for STLT, necklace, moxie'; // dome
 		if (src.indexOf("wormwood8") != -1) ml = '9-7 for necklace, flask, moxie; 5-4 for mask, STLT, muscle; 1 for skirt, !pipe, myst'; // windmill
 		if (ml) this.setAttribute('title',ml);
-});	}
+	});
+}
 
 // MTNOOB: Open letter! Yay!
 function at_tutorial()
