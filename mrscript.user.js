@@ -55,14 +55,6 @@ var server = location.host, serverNo = (server.match(/(.)\./) || {1:"L"})[1]; 	/
 
 var pwd = GM_getValue('hash.' + server.split('.')[0]);
 
-jQuery.prototype.toString = function() {
-  return "[jQuery:" + this.length + "]";
-};
-
-String.prototype.trim = function () {
-    return this.replace(/^\s*/, "").replace(/\s*$/, "");
-}
-
 var autoclear = GetPref('autoclear');
 var spoilers = GetPref('zonespoil') == 1;
 
@@ -94,6 +86,14 @@ global = null;
 handler = null;
 
 // no imperative top-level code below here; the rest is function definitions:
+
+jQuery.prototype.toString = function() {
+  return "[jQuery:" + this.length + "]";
+};
+
+String.prototype.trim = function () {
+    return this.replace(/^\s*/, "").replace(/\s*$/, "");
+}
 
 // ANYWHERE: stuff that we want to do on every possible occasion.
 function anywhere() {
@@ -235,10 +235,16 @@ function SetPwd(hash) {
 	persist('hash.' + server.split('.')[0], hash);
 }
 function FindHash() {
-	GM_get(server + '/store.php?whichstore=m', function(html) {
-		var hashIndex = html.indexOf("name=phash");
-		var hash = html.substring(hashIndex+18, hashIndex+50);
+	GM_get(server + '/api.php?what=status&for=MrScript', function(html) {
+		GM_log("html = " + html);
+		var CharInfo = JSON.parse(html);
+		var hash = CharInfo["pwd"];
 		SetPwd(hash);
+
+//	GM_get(server + '/store.php?whichstore=m', function(html) {
+//		var hashIndex = html.indexOf("name=phash");
+//		var hash = html.substring(hashIndex+18, hashIndex+50);
+//		SetPwd(hash);
 	});
 }
 
