@@ -1,4 +1,4 @@
-{	"version":"1.7.0",
+{	"version":"1.7.1",
 	"url1":"http://userscripts.org/scripts/source/65705.user.js",
 	"url2":"http://noblesse-oblige.org/hellion/scripts/MrScript.user.js",
-	"desc":"<b>Fixed:</b>MEMORY LEAK"}
+	"desc":"<b>Fixed:</b>hidden city problem interaction with kolproxy<br/><br/><b>New:</b>helpful links appear in Results box when using/equipping stuff from chat<br/>spoilers for new level-9 quests (trapper, highland lord)<br/>"}
