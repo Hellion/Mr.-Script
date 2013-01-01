@@ -236,7 +236,7 @@ function SetPwd(hash) {
 }
 function FindHash() {
 	GM_get(server + '/api.php?what=status&for=MrScript', function(html) {
-		GM_log("html = " + html);
+//		GM_log("html = " + html);
 		var CharInfo = JSON.parse(html);
 		var hash = CharInfo["pwd"];
 		SetPwd(hash);
