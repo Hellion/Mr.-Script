@@ -2559,7 +2559,7 @@ function at_galaktik() {
 		.append(check)
 		.append(document.createTextNode("Auto-Use Unguents And Ointments"));
 	howMany.after(checkSpan);
-	$("img:first")
+	$("img[src*='otherimages']:first")
 	.attr('title','right-click to equip Travoltan Trousers')
 	.attr('id','proprietor')
 	.bind('contextmenu',pants);
@@ -2635,7 +2635,7 @@ function at_store() {
 //	GM_log("img[src*=otherimages]:" + $("img[src*='otherimages']:first").attr('src'));
 //	GM_log("img:first:" + $("img:first").attr('src'));
 
-	$("img:first")
+	$("img[src*='otherimages']:first")
 	.attr('title','right-click to equip Travoltan Trousers')
 	.attr('id','proprietor')
 	.bind('contextmenu',pants);
