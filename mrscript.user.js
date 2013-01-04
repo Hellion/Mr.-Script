@@ -2480,6 +2480,10 @@ function at_inventory()
 				top.document.getElementsByName('mainpane')[0].contentDocument.location.pathname = '/manor3.php';
 			else if ((item == "swashbuckling pants") && (document.referrer.indexOf("choice.php") != -1))
 				bText.parentNode.appendChild(AppendLink('[visit Caronch (1)]','adventure.php?snarfblat=157'));
+			else if ((item == "Victor, the Insult Comic Hellhound Puppet") ||
+				 (item == "observational glasses") ||
+				 (item == "hilarious comedy prop"))
+				bText.parentNode.appendChild(AppendLink('[visit Mourn]','pandamonium.php?action=mourn'));
 		}
 		else if (resultsText.indexOf("Outfit:") != -1) {
 			var outfit = resultsText.split(": ")[1];
@@ -4216,6 +4220,11 @@ function at_pandamonium() {
 				}
 			}
 		}
+	}
+	else if (document.location.search == "?action=mourn") {
+		$('input.button[value*="Insult"]').parent().append(AppendLink('[put on Victor (offhand)]','inv_equip.php?pwd='+pwd+'&which=2&action=equip&whichitem=4667'));
+		$('input.button[value*="Observational"]').parent().append(AppendLink('[put on observational glasses (acc1)]','inv_equip.php?pwd='+pwd+'&which=2&action=equip&whichitem=4668&slot=1'));
+		$('input.button[value*="comedy"]').parent().append(AppendLink('[put on hilarious comedy Prop (weapon)]','inv_equip.php?pwd='+pwd+'&which=2&action=equip&whichitem=4669'));
 	}
 }
 
