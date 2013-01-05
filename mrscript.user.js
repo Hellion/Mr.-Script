@@ -876,6 +876,8 @@ function AddLinks(descId, theItem, formWhere, path) {
 			addWhere.append(AppendLink('[visit 37]','cobbsknob.php?level=3&action=cell37')); break;
 		case 5193:	case 5194:													// 11-inch knob sausage, exorcised sandwich
 			addWhere.append(AppendLink('[back to the guild]','guild.php?place=challenge')); break;
+		case 5571:												// Groar's fur
+			addWhere.append(AppendLink('[visit the John]','place.php?whichplace=mclargehuge&action=trappercabin')); break;
 	}
 
   switch (doWhat) {
