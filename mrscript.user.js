@@ -161,7 +161,7 @@ function ResultHandler(event) {
 				case 'Mining Gear':			bnode.append(AppendLink('[dwarf mine]','mining.php?mine=1')); break;
 				case 'Bugbear Costume':			bnode.append(AppendLink('[bakery]','store.php?whichstore=b')); break;
 				case 'eXtreme Cold-Weather Gear':	bnode.append(AppendLink('[Trapper]','trapper.php')); 
-									bnode.append(AppendLink('[hit the slopes (1)]','adventure.php?snarfblat=272')); break;
+									bnode.append(AppendLink('[hit the slopes (1)]','adventure.php?snarfblat=273')); break;
 				case 'Cloaca-Cola Uniform':	
 				case 'Dyspepsi-Cola Uniform':		bnode.append(AppendLink('[battlefield (1)]','adventure.php?snarfblat=85'));break;
 				case 'Frat Warrior Fatigues':
@@ -1960,6 +1960,9 @@ function at_adventure() {
 		break;
 	case "The Manor in Which You're Accustomed":
 		$('<center><a href="manor.php">Go on inside</a></center><br />').prependTo($('a:last').parent());
+		break;
+	case "3 eXXXtreme 4ever 6pack":
+		$('<center><a href="place.php?whichplace=mclargehuge&action=cloudypeak">Open the Peak!</a></center><br />').prependTo($('a:last').parent());
 		break;
 	case "":	// got a "You shouldn't be here" or other reject message... (or an untitled Limerick Dungeon adventure, sigh)
 		$('center table tr td').each(function(){
