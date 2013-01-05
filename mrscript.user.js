@@ -717,7 +717,7 @@ function AddLinks(descId, theItem, formWhere, path) {
 			addWhere.append(AppendLink('[mystic]','mystic.php')); break;
 			
 		case  535: 																// bridge
-			addWhere.append(AppendLink('[chasm]','mountains.php?orcs=1&pwd='+pwd)); break;
+			addWhere.append(AppendLink('[chasm]','place.php?whichplace=orc_chasm&action=bridge0')); break;
 			
 		case  602: 																// Degrassi Knoll shopping list
 			if (GetCharData("plungeraccess") == "Y") addWhere.append(AppendLink('[gnoll store]', "store.php?whichstore=5"));
