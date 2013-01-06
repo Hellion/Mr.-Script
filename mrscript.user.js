@@ -146,6 +146,7 @@ function ResultHandler(event) {
 				case 'pool cue':		  bnode.append(AppendLink('[chalk it!]',inv_use(1794)));		break;
 				case "Talisman o' Nam":		  bnode.append(AppendLink('[Dome moD]','plains.php'));			break;
 				case 'worm-riding hooks':	  bnode.append(AppendLink('[drum!]',inv_use(2328)));			break;
+				case 'Mega Gem':		bnode.append(AppendLink('[Dr. Awkward (1)]','adventure.php?snarfblat=119')); 	break;
 			}
 		} else if (mystuff.indexOf('You put on an Outfit:') != -1) {
 			//figure out a bunch of outfit manipulation stuff here.
@@ -161,11 +162,18 @@ function ResultHandler(event) {
 				case 'Mining Gear':			bnode.append(AppendLink('[dwarf mine]','mining.php?mine=1')); break;
 				case 'Bugbear Costume':			bnode.append(AppendLink('[bakery]','store.php?whichstore=b')); break;
 				case 'eXtreme Cold-Weather Gear':	bnode.append(AppendLink('[Trapper]','trapper.php')); 
-									bnode.append(AppendLink('[hit the slopes (1)]','adventure.php?snarfblat=273')); break;
+									bnode.append(AppendLink('[hit the slopes (1)]','adventure.php?snarfblat=272')); break;
 				case 'Cloaca-Cola Uniform':	
 				case 'Dyspepsi-Cola Uniform':		bnode.append(AppendLink('[battlefield (1)]','adventure.php?snarfblat=85'));break;
 				case 'Frat Warrior Fatigues':
 				case 'War Hippy Fatigues':		bnode.append(AppendLink('[island]','island.php')); break;
+			}
+		} else if (mystuff.indexOf('You acquire an item:') != -1) {
+			var bnode = $(event.target).find('b:eq(1)');
+			var btext = $(event.target).find('b:eq(1)').text();
+			switch (btext) {
+				case 'forged identification documents':	bnode.append(AppendLink('[shore]','shore.php')); break;
+				case 'wet stunt nut stew': bnode.append(AppendLink('[visit Mr. Alarm (1)]','adventure.php?snarfblat=50')); break;
 			}
 		}
 	}
@@ -717,7 +725,7 @@ function AddLinks(descId, theItem, formWhere, path) {
 			addWhere.append(AppendLink('[mystic]','mystic.php')); break;
 			
 		case  535: 																// bridge
-			addWhere.append(AppendLink('[chasm]','place.php?whichplace=orc_chasm&action=bridge0')); break;
+			addWhere.append(AppendLink('[chasm]','mountains.php?orcs=1&pwd='+pwd)); break;
 			
 		case  602: 																// Degrassi Knoll shopping list
 			if (GetCharData("plungeraccess") == "Y") addWhere.append(AppendLink('[gnoll store]', "store.php?whichstore=5"));
@@ -876,8 +884,6 @@ function AddLinks(descId, theItem, formWhere, path) {
 			addWhere.append(AppendLink('[visit 37]','cobbsknob.php?level=3&action=cell37')); break;
 		case 5193:	case 5194:													// 11-inch knob sausage, exorcised sandwich
 			addWhere.append(AppendLink('[back to the guild]','guild.php?place=challenge')); break;
-		case 5571:												// Groar's fur
-			addWhere.append(AppendLink('[visit the John]','place.php?whichplace=mclargehuge&action=trappercabin')); break;
 	}
 
   switch (doWhat) {
@@ -1358,6 +1364,7 @@ function at_game() {
 function at_fight() {
 // code for NS Lair spoilers borrowed shamelessly from Tard's NS Trainer v0.8
 	// monster name:[preferred combat item, funkslinging item, is this lair-spoilery, special treatment flag]
+	// special treatment: 0=nothing; 1=any gremlin; 2=non-tool gremlin; 3=hidden city; 4=pirate insults.
 	var MonsterArray = {
 	"a Beer Batter":["baseball","",1,0],
 	"a best-selling novelist":["plot hole","",1,0],
@@ -1918,7 +1925,7 @@ function at_adventure() {
 		NCTitle.append(cardlink);
 		break;
 	case "It's Always Swordfish":
-		$('<center><br /><a href="adventure.php?snarfblat=160">Adventure Belowdecks</a></center>').prependTo($('a:last').parent());
+		$('<center><br /><a href="adventure.php?snarfblat=160">Adventure Belowdecks</a></center><br />').prependTo($('a:last').parent());
 		break;
 	case "Mr. Alarm":
 		$('<center><a href="adventure.php?snarfblat=100">Adventure in WHITEY\'S GROVE</a></center><br />').prependTo($('a:last').parent());
@@ -2839,7 +2846,13 @@ function at_hermit() {
 				p.append('<br><br><center><font color="blue">You have '+(gum==0?" no ":gum)+(gum!=1?" gums ":" gum ")
 //					+" and "+(hpermit==0?" no ":hpermit)+(hpermit!=1?" permits ":" permit ")
 					+"in inventory.</font></center><br>");
-				if (gum != 0) p.append('<br><center><a href="'+inv_use(23)+'">Use a chewing gum</a></center>');
+				if (gum != 0) {
+					switch (gum) {
+					case 1: p.append('<br><center><a href="'+inv_use(23)+'">Use a chewing gum</a></center>'); break;
+					case 2: p.append('<br><center><a href="multiuse.php?whichitem=23&quantity=2&action=useitem&pwd='+pwd+'">Use 2 chewing gums</a></center>'); break;
+					default: p.append('<br><center><a href="multiuse.php?whichitem=23&action=useitem&quantity=3&pwd='+pwd+'">Use 3 chewing gums</a></center>'); break;
+					}
+				}
 			});
 		}
 
