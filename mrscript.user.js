@@ -4825,13 +4825,13 @@ function at_basement() {
 			break;
 		case "sorority.gif": case "bigbaby.gif":
 		case "pooltable.gif": case "goblinaxe.gif": lvl = Math.pow(lvl,1.4);
-			str = "Moxie Needed: " + integer(lvl*.94) + " to " + integer(lvl*1.06);
+			str = "Moxie Needed: " + integer(lvl*.9) + " to " + integer(lvl*1.1);
 			break;
 		case "mops.gif": case "voodoo.gif": case "darkshards.gif": lvl = Math.pow(lvl,1.4);
-			str = "Mysticality Needed: " + integer(lvl*.94) + " to " + integer(lvl*1.06);
+			str = "Mysticality Needed: " + integer(lvl*.9) + " to " + integer(lvl*1.1);
 			break;
 		case "typewriters.gif": case "bigstatue.gif": case "bigmallet.gif": lvl = Math.pow(lvl,1.4);
-			str = "Muscle Needed: " + integer(lvl*.94) + " to " + integer(lvl*1.06);
+			str = "Muscle Needed: " + integer(lvl*.9) + " to " + integer(lvl*1.1);
 			break;
 		case "haiku11.gif": lvl = Math.pow(lvl,1.4) * 10;
 			str = "HP Needed: " + integer(lvl*.94) + " to " + integer(lvl*1.06) + "(lowered by DA)";
