@@ -732,7 +732,8 @@ function AddLinks(descId, theItem, formWhere, path) {
 			else addWhere.append(AppendLink('[Knoll (1)]', "adventure.php?snarfblat=18"));
 			break;
 			
-		case  727: 																// Hedge maze puzzle piece
+		case  727:	case 728: 																// Hedge maze puzzle piece/key
+
 			addWhere.append(AppendLink('[maze]', 'hedgepuzzle.php')); break;
 
 		case 2267: 																// Mega Gem
@@ -884,6 +885,8 @@ function AddLinks(descId, theItem, formWhere, path) {
 			addWhere.append(AppendLink('[visit 37]','cobbsknob.php?level=3&action=cell37')); break;
 		case 5193:	case 5194:													// 11-inch knob sausage, exorcised sandwich
 			addWhere.append(AppendLink('[back to the guild]','guild.php?place=challenge')); break;
+		case 1764:												// spookyraven library key
+			addWhere.append(AppendLink('[library (1)]','adventure.php?snarfblat=104')); break;
 	}
 
   switch (doWhat) {
@@ -1143,7 +1146,7 @@ function Defaults(revert)
 		if (GetPref('menu1link0') == undefined) SetPref('menu1link0', 'market;town_market.php');
 		if (GetPref('menu1link1') == undefined) SetPref('menu1link1', 'hermit;hermit.php');
 		if (GetPref('menu1link2') == undefined) SetPref('menu1link2', 'untinker;forestvillage.php?place=untinker');
-		if (GetPref('menu1link3') == undefined) SetPref('menu1link3', 'mystic;mystic.php');
+		if (GetPref('menu1link3') == undefined) SetPref('menu1link3', 'mystic;forestvillage.php?action=mystic');
 		if (GetPref('menu1link4') == undefined) SetPref('menu1link4', 'hunter;bhh.php');
 		if (GetPref('menu1link5') == undefined) SetPref('menu1link5', 'guildstore');
 		if (GetPref('menu1link6') == undefined) SetPref('menu1link6', 'general;store.php?whichstore=m');
@@ -2893,9 +2896,10 @@ function at_knoll() {
 }
 
 // MYSTIC: link back to the 8-bit realm
-function at_mystic() {
-	//GM_log("inserting link");
-	$('<center><br /><a href="adventure.php?snarfblat=73">Adventure in the 8-Bit Realm</a><br /><br /></center>').prependTo($('a:last').parent());
+function at_shop() {
+	if (document.location.search == "?whichshop=mystic") {
+		$('<center><br /><a href="adventure.php?snarfblat=73">Adventure in the 8-Bit Realm</a><br /><br /></center>').prependTo($('a:last').parent());
+	}
 }
 
 // BARREL: add links to the results of your barrel droppings.
@@ -4242,7 +4246,7 @@ function at_pandamonium() {
 	else if (document.location.search == "?action=mourn") {
 		$('input.button[value*="Insult"]').parent().append(AppendLink('[put on Victor (offhand)]','inv_equip.php?pwd='+pwd+'&which=2&action=equip&whichitem=4667'));
 		$('input.button[value*="Observational"]').parent().append(AppendLink('[put on observational glasses (acc1)]','inv_equip.php?pwd='+pwd+'&which=2&action=equip&whichitem=4668&slot=1'));
-		$('input.button[value*="comedy"]').parent().append(AppendLink('[put on hilarious comedy Prop (weapon)]','inv_equip.php?pwd='+pwd+'&which=2&action=equip&whichitem=4669'));
+		$('input.button[value*="Comedy"]').parent().append(AppendLink('[put on hilarious comedy Prop (weapon)]','inv_equip.php?pwd='+pwd+'&which=2&action=equip&whichitem=4669'));
 	}
 }
 
