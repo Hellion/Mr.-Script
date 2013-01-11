@@ -4571,7 +4571,7 @@ function at_mining() {
 	}
 // track what each square gave us:
 	// first, add onclick() to track what square we just clicked on.
-	$('a[href*=mining.php]').click(function() {
+	$('a[href*="mining.php"]').click(function() {
 		var a = $(this);
 		var setwhich = integer(a.attr("href").match(/which=(\d+)/)[1]);
 		SetCharData("mining_which",setwhich);
@@ -4587,7 +4587,7 @@ function at_mining() {
 		var got = $('.item tr td img').attr("src");		// see what we got.
 		SetCharData("which"+which,got);					// save it.
 	}
-	$('img[alt*=Open Cavern]').each(function() {		// replace each "Open Cavern" picture with the image we saved.
+	$('img[alt*="Open Cavern"]').each(function() {		// replace each "Open Cavern" picture with the image we saved.
 		var alt = $(this).attr('alt');
 		var xc = integer(alt.match(/(\d)/g)[0]);		// convert from "Open Cavern (1, 4) to the number in the "mine=1?which=xx" link.
 		var yc = integer(alt.match(/(\d)/g)[1]);
