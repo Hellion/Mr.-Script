@@ -1642,6 +1642,9 @@ function at_fight() {
 			$("p:contains('Adventure')").html('<a href="inventory.php?which=2"><font size="4">CLICK HERE TO CHANGE YOUR GEAR</font></a>');
 			$("p:contains('Go back to')").html('');
 			break;
+		case "Groar":
+			$("<center><p><a href='place.php?whichplace=mclargehuge&action=trappercabin'>Back to the Trapper</a></p></center><br />").prependTo($("p:contains['McLargeHuge']"));
+			break;
 		case "a dirty thieving brigand":
 			var meatline = $("img[src*='meat.gif']:last").parent().next().text();	// should be "You gain X meat"
 			var meat = integer(meatline.match(/You gain (\d+) Meat/)[1]);
