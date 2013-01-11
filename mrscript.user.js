@@ -147,6 +147,7 @@ function ResultHandler(event) {
 				case "Talisman o' Nam":		  bnode.append(AppendLink('[Dome moD]','plains.php'));			break;
 				case 'worm-riding hooks':	  bnode.append(AppendLink('[drum!]',inv_use(2328)));			break;
 				case 'Mega Gem':		bnode.append(AppendLink('[Dr. Awkward (1)]','adventure.php?snarfblat=119')); 	break;
+				case 'dingy planks':		bnode.append(AppendLink('[boat]', inv_use(146)));			break; 
 			}
 		} else if (mystuff.indexOf('You put on an Outfit:') != -1) {
 			//figure out a bunch of outfit manipulation stuff here.
