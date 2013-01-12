@@ -146,6 +146,8 @@ function ResultHandler(event) {
 				case 'pool cue':		  bnode.append(AppendLink('[chalk it!]',inv_use(1794)));		break;
 				case "Talisman o' Nam":		  bnode.append(AppendLink('[Dome moD]','plains.php'));			break;
 				case 'worm-riding hooks':	  bnode.append(AppendLink('[drum!]',inv_use(2328)));			break;
+				case 'Mega Gem':		bnode.append(AppendLink('[Dr. Awkward (1)]','adventure.php?snarfblat=119')); 	break;
+				case 'dingy planks':		bnode.append(AppendLink('[boat]', inv_use(146)));			break; 
 			}
 		} else if (mystuff.indexOf('You put on an Outfit:') != -1) {
 			//figure out a bunch of outfit manipulation stuff here.
@@ -166,6 +168,13 @@ function ResultHandler(event) {
 				case 'Dyspepsi-Cola Uniform':		bnode.append(AppendLink('[battlefield (1)]','adventure.php?snarfblat=85'));break;
 				case 'Frat Warrior Fatigues':
 				case 'War Hippy Fatigues':		bnode.append(AppendLink('[island]','island.php')); break;
+			}
+		} else if (mystuff.indexOf('You acquire an item:') != -1) {
+			var bnode = $(event.target).find('b:eq(1)');
+			var btext = $(event.target).find('b:eq(1)').text();
+			switch (btext) {
+				case 'forged identification documents':	bnode.append(AppendLink('[shore]','shore.php')); break;
+				case 'wet stunt nut stew': bnode.append(AppendLink('[visit Mr. Alarm (1)]','adventure.php?snarfblat=50')); break;
 			}
 		}
 	}
@@ -724,7 +733,8 @@ function AddLinks(descId, theItem, formWhere, path) {
 			else addWhere.append(AppendLink('[Knoll (1)]', "adventure.php?snarfblat=18"));
 			break;
 			
-		case  727: 																// Hedge maze puzzle piece
+		case  727:	case 728: 																// Hedge maze puzzle piece/key
+
 			addWhere.append(AppendLink('[maze]', 'hedgepuzzle.php')); break;
 
 		case 2267: 																// Mega Gem
@@ -876,7 +886,9 @@ function AddLinks(descId, theItem, formWhere, path) {
 			addWhere.append(AppendLink('[visit 37]','cobbsknob.php?level=3&action=cell37')); break;
 		case 5193:	case 5194:													// 11-inch knob sausage, exorcised sandwich
 			addWhere.append(AppendLink('[back to the guild]','guild.php?place=challenge')); break;
-		case 5571:												// Groar's fur
+		case 1764:												// spookyraven library key
+			addWhere.append(AppendLink('[library (1)]','adventure.php?snarfblat=104')); break;
+		case 5571:
 			addWhere.append(AppendLink('[visit the John]','place.php?whichplace=mclargehuge&action=trappercabin')); break;
 	}
 
@@ -1137,7 +1149,7 @@ function Defaults(revert)
 		if (GetPref('menu1link0') == undefined) SetPref('menu1link0', 'market;town_market.php');
 		if (GetPref('menu1link1') == undefined) SetPref('menu1link1', 'hermit;hermit.php');
 		if (GetPref('menu1link2') == undefined) SetPref('menu1link2', 'untinker;forestvillage.php?place=untinker');
-		if (GetPref('menu1link3') == undefined) SetPref('menu1link3', 'mystic;mystic.php');
+		if (GetPref('menu1link3') == undefined) SetPref('menu1link3', 'mystic;forestvillage.php?action=mystic');
 		if (GetPref('menu1link4') == undefined) SetPref('menu1link4', 'hunter;bhh.php');
 		if (GetPref('menu1link5') == undefined) SetPref('menu1link5', 'guildstore');
 		if (GetPref('menu1link6') == undefined) SetPref('menu1link6', 'general;store.php?whichstore=m');
@@ -1358,6 +1370,7 @@ function at_game() {
 function at_fight() {
 // code for NS Lair spoilers borrowed shamelessly from Tard's NS Trainer v0.8
 	// monster name:[preferred combat item, funkslinging item, is this lair-spoilery, special treatment flag]
+	// special treatment: 0=nothing; 1=any gremlin; 2=non-tool gremlin; 3=hidden city; 4=pirate insults.
 	var MonsterArray = {
 	"a Beer Batter":["baseball","",1,0],
 	"a best-selling novelist":["plot hole","",1,0],
@@ -1918,7 +1931,7 @@ function at_adventure() {
 		NCTitle.append(cardlink);
 		break;
 	case "It's Always Swordfish":
-		$('<center><br /><a href="adventure.php?snarfblat=160">Adventure Belowdecks</a></center>').prependTo($('a:last').parent());
+		$('<center><br /><a href="adventure.php?snarfblat=160">Adventure Belowdecks</a></center><br />').prependTo($('a:last').parent());
 		break;
 	case "Mr. Alarm":
 		$('<center><a href="adventure.php?snarfblat=100">Adventure in WHITEY\'S GROVE</a></center><br />').prependTo($('a:last').parent());
@@ -2839,7 +2852,13 @@ function at_hermit() {
 				p.append('<br><br><center><font color="blue">You have '+(gum==0?" no ":gum)+(gum!=1?" gums ":" gum ")
 //					+" and "+(hpermit==0?" no ":hpermit)+(hpermit!=1?" permits ":" permit ")
 					+"in inventory.</font></center><br>");
-				if (gum != 0) p.append('<br><center><a href="'+inv_use(23)+'">Use a chewing gum</a></center>');
+				if (gum != 0) {
+					switch (gum) {
+					case 1: p.append('<br><center><a href="'+inv_use(23)+'">Use a chewing gum</a></center>'); break;
+					case 2: p.append('<br><center><a href="multiuse.php?whichitem=23&quantity=2&action=useitem&pwd='+pwd+'">Use 2 chewing gums</a></center>'); break;
+					default: p.append('<br><center><a href="multiuse.php?whichitem=23&action=useitem&quantity=3&pwd='+pwd+'">Use 3 chewing gums</a></center>'); break;
+					}
+				}
 			});
 		}
 
@@ -2879,10 +2898,11 @@ function at_knoll() {
 	}
 }
 
-// MYSTIC: link back to the 8-bit realm
-function at_mystic() {
-	//GM_log("inserting link");
-	$('<center><br /><a href="adventure.php?snarfblat=73">Adventure in the 8-Bit Realm</a><br /><br /></center>').prependTo($('a:last').parent());
+// SHOP: link back to the 8-bit realm if we're at the mystic shop.
+function at_shop() {
+	if (document.location.search == "?whichshop=mystic") {
+		$('<center><br /><a href="adventure.php?snarfblat=73">Adventure in the 8-Bit Realm</a><br /><br /></center>').prependTo($('a:last').parent());
+	}
 }
 
 // BARREL: add links to the results of your barrel droppings.
@@ -4229,7 +4249,7 @@ function at_pandamonium() {
 	else if (document.location.search == "?action=mourn") {
 		$('input.button[value*="Insult"]').parent().append(AppendLink('[put on Victor (offhand)]','inv_equip.php?pwd='+pwd+'&which=2&action=equip&whichitem=4667'));
 		$('input.button[value*="Observational"]').parent().append(AppendLink('[put on observational glasses (acc1)]','inv_equip.php?pwd='+pwd+'&which=2&action=equip&whichitem=4668&slot=1'));
-		$('input.button[value*="comedy"]').parent().append(AppendLink('[put on hilarious comedy Prop (weapon)]','inv_equip.php?pwd='+pwd+'&which=2&action=equip&whichitem=4669'));
+		$('input.button[value*="Comedy"]').parent().append(AppendLink('[put on hilarious comedy Prop (weapon)]','inv_equip.php?pwd='+pwd+'&which=2&action=equip&whichitem=4669'));
 	}
 }
 
@@ -4554,7 +4574,7 @@ function at_mining() {
 	}
 // track what each square gave us:
 	// first, add onclick() to track what square we just clicked on.
-	$('a[href*=mining.php]').click(function() {
+	$('a[href*="mining.php"]').click(function() {
 		var a = $(this);
 		var setwhich = integer(a.attr("href").match(/which=(\d+)/)[1]);
 		SetCharData("mining_which",setwhich);
@@ -4570,7 +4590,7 @@ function at_mining() {
 		var got = $('.item tr td img').attr("src");		// see what we got.
 		SetCharData("which"+which,got);					// save it.
 	}
-	$('img[alt*=Open Cavern]').each(function() {		// replace each "Open Cavern" picture with the image we saved.
+	$('img[alt*="Open Cavern"]').each(function() {		// replace each "Open Cavern" picture with the image we saved.
 		var alt = $(this).attr('alt');
 		var xc = integer(alt.match(/(\d)/g)[0]);		// convert from "Open Cavern (1, 4) to the number in the "mine=1?which=xx" link.
 		var yc = integer(alt.match(/(\d)/g)[1]);
@@ -4812,13 +4832,13 @@ function at_basement() {
 			break;
 		case "sorority.gif": case "bigbaby.gif":
 		case "pooltable.gif": case "goblinaxe.gif": lvl = Math.pow(lvl,1.4);
-			str = "Moxie Needed: " + integer(lvl*.94) + " to " + integer(lvl*1.06);
+			str = "Moxie Needed: " + integer(lvl*.9) + " to " + integer(lvl*1.1);
 			break;
 		case "mops.gif": case "voodoo.gif": case "darkshards.gif": lvl = Math.pow(lvl,1.4);
-			str = "Mysticality Needed: " + integer(lvl*.94) + " to " + integer(lvl*1.06);
+			str = "Mysticality Needed: " + integer(lvl*.9) + " to " + integer(lvl*1.1);
 			break;
 		case "typewriters.gif": case "bigstatue.gif": case "bigmallet.gif": lvl = Math.pow(lvl,1.4);
-			str = "Muscle Needed: " + integer(lvl*.94) + " to " + integer(lvl*1.06);
+			str = "Muscle Needed: " + integer(lvl*.9) + " to " + integer(lvl*1.1);
 			break;
 		case "haiku11.gif": lvl = Math.pow(lvl,1.4) * 10;
 			str = "HP Needed: " + integer(lvl*.94) + " to " + integer(lvl*1.06) + "(lowered by DA)";
