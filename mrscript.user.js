@@ -3428,10 +3428,10 @@ function at_charpane()
 		}
 		if (advcount < temphydr) SetCharData('hydrate', false);
 		else if (advcount == temphydr) {
-			if (compactMode) $('a[href=adventure.php?snarfblat=123]')
+			if (compactMode) $('a[href="adventure.php?snarfblat=123"]')
 				.after(':<br /><a href="adventure.php?snarfblat=122' +
 				'" style="color:red;" target="mainpane">Oasis</a>');
-			else $('a[href=adventure.php?snarfblat=123]')
+			else $('a[href="adventure.php?snarfblat=123"]')
 				.after('<br /><br /><a href="adventure.php?snarfblat=122" '+
 			'target="mainpane" style="color:red;">Re-Ultrahydrate</a><br />')
 				.parent().parent().attr('align','center');
