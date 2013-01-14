@@ -537,7 +537,7 @@ function AppendOutfitSwap(outfitNumber, text)
 	.click(function() {
 		this.setAttribute('disabled','disabled');
 		var backup = GetPref('backup');
-		var which = $('input[name=swap]').val();
+		var which = $('input[name="swap"]').val();
 		if (which <= 0 || backup == "") {
 			top.document.getElementsByName('mainpane')[0].contentDocument.location.pathname =
 				'/inv_equip.php?action=outfit&which=2&whichoutfit=' + which + '&pwd=' + pwd;
@@ -545,7 +545,7 @@ function AppendOutfitSwap(outfitNumber, text)
 			GM_get(server +
 			'/inv_equip.php?action=customoutfit&which=2&outfitname=' + backup + '&pwd=' + pwd,
 			function(response) {
-				var which = $('input[name=swap]').val();
+				var which = $('input[name="swap"]').val();
 				top.document.getElementsByName('mainpane')[0].contentDocument.location.pathname =
 					'/inv_equip.php?action=outfit&which=2&whichoutfit=' + which + '&pwd=' + pwd;
 			});
@@ -559,7 +559,7 @@ function AppendOutfitSwap(outfitNumber, text)
 	// Revert to backup
 	if (outfitNumber == 0) {
 		GM_get(server + "/account_manageoutfits.php", function(response) {
-			var swap = $('input[name=swap]');
+			var swap = $('input[name="swap"]');
 			var val; var index2; var backup = GetPref('backup');
 			var index = response.indexOf(' value="' + backup + '"');
 			if (index != -1) index = response.indexOf('name=delete',index) + 11;
@@ -715,7 +715,8 @@ function AddLinks(descId, theItem, formWhere, path) {
 		case 2556: case 2557: case 2558: case 2559: case 2560: case 2561: 		// LEWs
 		case  150: case  151: case  152: case  153: case  154: case  155:		// Epic Hats
 			addWhere.append(AppendLink('[take to guild]','guild.php?place=scg')); break; 
-			
+		case 2550: case 2551: case 2552: case 2553: case 2554: case 2555:		// LEW parts
+			addWhere.append(AppendLink('[smith]','craft.php?mode=smith')); break;
 		case 454: 																// rusty screwdriver
 			addWhere.append(AppendLink('[untinker]','forestvillage.php?place=untinker')); break;
 			
@@ -2277,7 +2278,7 @@ function at_mallstore() {
 // BEERPONG: Auto-choose pirate insults.
 function at_beerpong()
 {
-	var val = 0, html = $('img[src*=beerpong]').parent().parent().html();
+	var val = 0, html = $('img[src*="beerpong"]').parent().parent().html();
 	if (html) {
 		if (html.indexOf('ll flay') != -1) val = 1;
 		else if (html.indexOf('craven') != -1) val = 2;
@@ -2288,12 +2289,12 @@ function at_beerpong()
 		else if (html.indexOf('some worm') != -1) val = 7;
 		else if (html.indexOf('ngle man') != -1) val = 8;
 
-		var sel = $('select[name=response]');
+		var sel = $('select[name="response"]');
 		sel.children().each(function() {
 			if ($(this).val() > 8) $(this).attr('disabled','disabled');
 		});
 		if (val > 0) {
-			var opt = sel.find('option[value='+val+']');
+			var opt = sel.find('option[value="'+val+'"]');
 			if (opt.length > 0) opt.attr('selected','selected');
 			else val = 0;
 		}
@@ -2563,14 +2564,14 @@ function at_galaktik() {
 			if (num > 1) NumberLink($('b:eq(1)').get(0));
 		}
 	}
-	var howMany = $('input[name=howmany]');
+	var howMany = $('input[name="howmany"]');
 	var check = $(document.createElement('input'))
 		.attr("type","checkbox")
 		.attr("name","usecheckbox")
 		.attr("style","height:12px;width:12px;");
 	if (GetPref('docuse') == 1) check.attr("checked",true);
 	check.change(function() {
-		var box = $('input[name=usecheckbox]');
+		var box = $('input[name="usecheckbox"]');
 		if (box.attr('checked')) SetPref('docuse',1);
 		else SetPref('docuse',0);
 	});
@@ -2635,14 +2636,14 @@ function at_store() {
 	var firstTable = $('table:first tbody');		// we're interested in this when it's the "Results:" box from buying something.
 	var whichstore; var noform = 1;
 	
-	var insput = $('input[name=whichstore]');
+	var insput = $('input[name="whichstore"]');
 	if (insput.length > 0) {
 		whichstore = insput.attr('value'); noform = 0;
 	} else whichstore = document.location.search.match(/whichstore\=([a-z0-9])/)[1];
 	GM_log("whichstore = " + whichstore);
 
 	// Refresh hash
-	var inphash = $("input[name=phash]");
+	var inphash = $('input[name="phash"]');
 	if (inphash.length>0) SetPwd(inphash.val());
 
 	// Quantity checking
@@ -2743,10 +2744,10 @@ function at_casino()
 // CRAFT: Buttons for buying ovens, etc.
 function at_craft()
 {
-	var mode = document.location.search.match(/mode=[a-z]+/), mlink, store;
+	var mode, mlink, store;
 	var itemNeeded = 0, desc = "";
-	if (mode) mode = mode.toString().split('=')[1];
-//	GM_log("at_craft: mode="+mode);
+	mode = $('input[name="mode"]').val();
+	GM_log("at_craft: mode="+mode);
 
 // sadly for some of our efforts, the "?mode=X" part is often left off after you submit an action.  So we may be left to our own devices 
 // to determine what we were actually trying to do.
@@ -2773,9 +2774,9 @@ function at_craft()
 			
 		case 'smith':
 			// Needs layout fix
-			var box = $('form[name=pulverize] input[name=qty]');
+			var box = $('form[name="pulverize"] input[name="qty"]');
 			if (box.length > 0) {
-				var smash = $('select[name=smashitem]');
+				var smash = $('select[name="smashitem"]');
 				smash.attr('style', 'vertical-align:top;');
 				MakeMaxButton(box.get(0), function(event)
 				{	
@@ -2807,7 +2808,7 @@ function at_craft()
 
 // SEWER: Add form for buying gum.
 function at_sewer() {
-	var tr = $('table:first tr:first:contains(Results)');
+	var tr = $('table:first tr:first:contains("Results")');
 	if (GetPref('shortlinks') > 1 &&
 		tr.length > 0) 
 	{	
@@ -2815,7 +2816,7 @@ function at_sewer() {
 			$('p:first').get(0).innerHTML +=
 				'<br><br>' + AppendBuyBox(23, 'm', 'Buy Gum', 0);
 		} else {	
-			$('b:contains(worthless)').parent()
+			$('b:contains("worthless")').parent()
 				.append(AppendLink('[hermit]', 'hermit.php'));
 		}
 	}	
@@ -2862,7 +2863,7 @@ function at_hermit() {
 			});
 		}
 
-		var tr = $('table:first tr:contains(Results)');
+		var tr = $('table:first tr:contains("Results")');
 		if (tr.next().text().indexOf("You acquire") != -1) {
 			var descId = $('img:first').get(0).getAttribute('onclick');
 			var bText = $('b:eq(1)').attr('valign','baseline');
@@ -3357,7 +3358,7 @@ function at_charpane()
 				}
 			}
 		}
-		advcount = integer($('a:contains(Adv):first').parent().next().text());
+		advcount = integer($('a:contains("Adv"):first').parent().next().text());
 
 		var lvlblock = $("center:contains('Lvl.'):first").text();	// this text is always present in compact mode
 		level = lvlblock.match(/Lvl. (\d+)/)[1];
@@ -3488,11 +3489,11 @@ function at_charpane()
 					if (/\(1\)/.test(hydtxt))			// 1 turn left?  set marker to add rehydrate link next adventure.
 						SetCharData('hydrate', advcount-1);
 					else if (/\(5\)/.test(hydtxt) || /\(20\)/.test(hydtxt))		// got 5 turns (or 20 from clover) now?  add Desert link.
-					{	if (compactMode) $('a[href=adventure.php?snarfblat=122]')
+					{	if (compactMode) $('a[href="adventure.php?snarfblat=122"]')
 						.after(':<br /><a href="adventure.php?' +
 						'snarfblat=123" target="mainpane">' +
 						'Desert</a>');
-						else $('a[href=adventure.php?snarfblat=122]')
+						else $('a[href="adventure.php?snarfblat=122"]')
 						.after('<br /><br /><a href="adventure.php?' +
 						'snarfblat=123" target="mainpane">' +
 						'The Arid, Extra-Dry Desert</a><br />')
@@ -3712,7 +3713,7 @@ function at_multiuse() {
 // MR. KLAW: Mr. Vanity Klaw
 function at_clan_rumpus() {	
 	if (document.location.search == "?action=click&spot=3&furni=3" && GetPref('klaw') == 1) {	
-		var tr = $('table:first tr:first:contains(Results)');
+		var tr = $('table:first tr:first:contains("Results")');
 		if (tr.length > 0) {	
 			txt = tr.next().text();
 			if (txt.indexOf("wisp of smoke") == -1 &&
@@ -3728,7 +3729,7 @@ function at_clan_rumpus() {
 // MR. VIP KLAW: look, more stuffies
 function at_clan_viplounge() {
 	if (document.location.search == "?action=klaw" && GetPref('klaw') == 1) {
-		var tr= $('table:first tr:first:contains(Results)');
+		var tr= $('table:first tr:first:contains("Results")');
 		if (tr.length > 0) {
 			txt = tr.next().text();
 			if (txt.indexOf("You probably shouldn't play") == -1)  {
@@ -3893,7 +3894,7 @@ function at_manor3() {
 // basic spoilers, part 2: link to equip spectacles when needed.
 // this part is all-but-unnecessary, only being needed on someone's first runthrough, but
 // we'll leave it here on the off chance that someone uses Mr. Script that early in their KoL career.
-	$('img[src*=lar2a]')
+	$('img[src*="lar2a"]')
 		.attr('title','Click to Equip Spectacles')
 		.attr('border','0')
 		.wrap('<a target="mainpane" href="inv_equip.php?pwd=' +
@@ -4169,7 +4170,7 @@ function at_pandamonium() {
 		var pandasolved = GetCharData("pandabandsolved");
 		if ((pandasolved == false) || (pandasolved == undefined)) {	// no solution found yet?	
 //			GM_log("solving...");
-			var itemlist = $('select[name=togive]');
+			var itemlist = $('select[name="togive"]');
 			var set1 = 0, set2 = 0;
 			var bear = false, paper = false, marsh = false;
 			var cake = false, cherry = false, pillow = false;
@@ -4187,7 +4188,7 @@ function at_pandamonium() {
 			});
 //			GM_log("set1="+set1+", set2="+set2);
 			if ((set1 < 2) || (set2 < 2)) {
-				$('form[name=bandcamp]').prepend('<p><font color="blue">No solution available yet.</font></p>');
+				$('form[name="bandcamp"]').prepend('<p><font color="blue">No solution available yet.</font></p>');
 				$('select').attr('style','color:red');
 			} else {	// >=2 of each set available-- solve it!
 				if (marsh) bognort = 4673; // "marshmallow"; //4673; 
@@ -4211,9 +4212,9 @@ function at_pandamonium() {
 			stinkface = GetCharData("stinkface");
 			flargwurm = GetCharData("flargwurm");
 			jim = GetCharData("jim");
-			$('form[name=bandcamp]').prepend('<p><font color="blue">Solution found!  Click [Give It]!</font></p>');
-			var members = $('select[name=bandmember]');
-			var items = $('select[name=togive]').get(0);
+			$('form[name="bandcamp"]').prepend('<p><font color="blue">Solution found!  Click [Give It]!</font></p>');
+			var members = $('select[name="bandmember"]');
+			var items = $('select[name="togive"]').get(0);
 // this is ugly-looking, but solid.
 			members.val("Bognort");				// Try to select this bandmember.  
 												// (This will fail if he already got his item.)
@@ -4546,7 +4547,7 @@ function at_lair6() {
 function at_mining() {
 // Image courtesy of Picklish's Mining Helper script.
 	var staticSparkleImg = "data:image/gif;base64,R0lGODlhMgAyAOMPAP39/dvb2zc3NycnJ5qams3NzQUFBRAQEGtra6enp7W1te3t7UZGRldXV319ff///yH/C05FVFNDQVBFMi4wAwEAAAAh+QQJAQAPACwAAAAAMgAyAAAEW/DJSau9OOvNu/9gKI5kaZ5oqq5s675wLM90bd94ru8rg/AUR+AAfBwCgd/OMFA4GguEQXcEJAQEQGM3ECAAUSIwkJgWn0WJwZxuu9/wuHxOr9vv+Lx+z+/77xEAIfkECQEADwAsAAAAADIAMgAABGvwyUmrvTjrzbv/YCiOZGmeaKqubOu+cCzPdG3feM4Jhm4FA18lIRBSEgzjpKDoGRmLAsJAddYaBEJAMQB4AYqbIKuILhwCRlAXWKyNWaVEKn8kEHVCo36w1v+AgYKDhIWGh4iJiouMjY4kEQAh+QQJAQAPACwAAAAAMgAyAAAEl/DJSau9OOvNu/9gKI5kaZ5oqq5s675wLLeHMXNHYd/aAAy83i+YMRQERMwhgEhefA6npQFISCmGQEJ3NTAUhYMCYRM0CMCYoYEoAAi1Adi9OMoGhXwgIDAcHAsJDEE7Bgl8eQM7TkYACotXVA1XFD6DlBIDC2mYRpyUOUiYD56jpAWXowqfpq2ur7CxsrO0tba3uLm6GhEAIfkECQEADwAsAAAAADIAMgAABGvwyUmrvTjrzbv/YCiOZGmeaKqubOu+cCzPdG3feM4Jhm4FA18lIRBSEgzjpKDoGRmLAsJAddYaBEJAMQB4AYqbIKuILhwCRlAXWKyNWaVEKn8kEHVCo36w1v+AgYKDhIWGh4iJiouMjY4kEQAh+QQJAQAPACwAAAAAMgAyAAAEW/DJSau9OOvNu/9gKI5kaZ5oqq5s675wLM90bd94ru8rg/AUR+AAfBwCgd/OMFA4GguEQXcEJAQEQGM3ECAAUSIwkJgWn0WJwZxuu9/wuHxOr9vv+Lx+z+/77xEAOw==";
-	$("img[src*=wallsparkle]").attr("src",staticSparkleImg);
+	$("img[src*='wallsparkle']").attr("src",staticSparkleImg);
 	if (document.location.search.indexOf("mine=1") != -1) {	// don't display quest data in the knob shaft (mine=2), only the dwarf mine (mine=1).
 		var oretype = GetCharData("oretype");
 		var orenumber = GetCharData("orenumber");
@@ -5145,16 +5146,16 @@ function spoil_beanstalk()
 
 function spoil_fernruin()
 {	
-	$('img[src*=ruins_5]').attr('title','ML: 16-24');
+	$('img[src*="ruins_5"]').attr('title','ML: 16-24');
 }
 
 function spoil_lair3()
 {	
-	var hedge = $('img[src*=hedgemaze.gif]');
+	var hedge = $('img[src*="hedgemaze.gif"]');
 	if (hedge.length>0)
 	{
 		hedge.attr('title','ML: 232');
-		$('img[src*=castletoptower.gif]')
+		$('img[src*="castletoptower.gif"]')
 			.before(AppendLink('[hedge puzzle]', 'hedgepuzzle.php'))
 			.before('<br /><br />')
 			.parent().attr('style','text-align:center;');
@@ -5163,8 +5164,8 @@ function spoil_lair3()
 
 function spoil_mountains()
 {
-	$("img[src*=roflvalley]").attr('title','ML: 75-87');
-	$("img[src*=bigbarrel]").attr('title','ML: 15/25/35');
+	$("img[src*='roflvalley']").attr('title','ML: 75-87');
+	$("img[src*='bigbarrel']").attr('title','ML: 15/25/35');
 }
 
 function spoil_mclargehuge()
@@ -5201,8 +5202,8 @@ function spoil_canadia()
 
 function spoil_cave()			// dark and dank and sinister cave, that is...
 {	
-	$('img[src*=chamberbottom]').attr('title','ML: 20-25');
-	$('img[src*=chamber_door]').attr('title','ML: 27');
+	$('img[src*="chamberbottom"]').attr('title','ML: 20-25');
+	$('img[src*="chamber_door"]').attr('title','ML: 27');
 }
 
 function spoil_bigisland()
@@ -5301,7 +5302,7 @@ function spoil_wormwood()
 // MTNOOB: Open letter! Yay!
 function at_tutorial()
 {	if (location.search.indexOf("toot") == -1) return;
-	$('b:contains(Ralph)').append(
+	$('b:contains("Ralph")').append(
 		AppendLink('[read]', inv_use(1155)));//'inv_use.php?pwd='+pwd + '&which=3&whichitem=1155'));
 }
 
@@ -5331,7 +5332,7 @@ function at_topmenu()
 {
 // moonslink script cheerfully borrowed from Beingeaten
 	if (GetPref('moonslink')== 1) {
-		var moons = $('img[src*=moon]');
+		var moons = $('img[src*="moon"]');
 		var calendarURL = 'http://noblesse-oblige.org/calendar/';
 		var moonlink = document.createElement('a');
 		moonlink.setAttribute('target','_blank');
@@ -5507,7 +5508,7 @@ function at_topmenu()
 	});
 
 	// Attach skills link to Sword and Martini Guy
-	var swordGuy = $('img:first[src*=smallleft]');
+	var swordGuy = $('img:first[src*="smallleft"]');
 	var swordGuyURL = GetPref('swordguy');
 	if (swordGuyURL != '' && swordGuy.length > 0) {
 		var guy = document.createElement('a');
@@ -5553,13 +5554,13 @@ function at_topmenu()
 				AddTopLink(toprow1, 'mainpane', 'smeg', '', 1);
 				GM_get(server+'/store.php?whichstore=2', function(t) {
 					if (t.length>10 && t.indexOf("You don't belong") == -1)
-						$('a[href=fnord]')
+						$('a[href="fnord"]')
 						.attr('href', 'store.php?whichstore=2')
 						.html('gouda');
 				});
 				GM_get(server+'/store.php?whichstore=3', function(t) {
 					if (t.length>10 && t.indexOf("You don't belong") == -1)
-						$('a[href=smeg]')
+						$('a[href="smeg"]')
 						.attr('href', 'store.php?whichstore=3')
 						.html('smack');
 				})
@@ -6128,7 +6129,7 @@ function sendmessage() {
 }
 
 function autoclear_added_rows() {
-	$('a[href^=javascript]').each(function()
+	$('a[href^="javascript"]').each(function()
 	{
 		var link = $(this);
 		if (link.attr('href').indexOf('add') == -1) return;
