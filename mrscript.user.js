@@ -1,4 +1,4 @@
-// Mr. Script v1.7.1
+// Mr. Script v1.7.2
 //
 // --------------------------------------------------------------------
 // This is a user script.  To install it, you need Greasemonkey 0.8 or
@@ -12,7 +12,7 @@
 // @name        Mr. Script
 // @namespace   http://www.noblesse-oblige.org/lukifer/scripts/
 // @description	interface overhauler for KingdomofLoathing.com
-// @version		1.7.1
+// @version		1.7.2
 // @author		Lukifer
 // @contributor	Ohayou
 // @contributor Hellion
@@ -30,6 +30,7 @@
 // @grant	GM_log
 // @grant	GM_setValue
 // @grant	GM_getValue
+// @grant	GM_deleteValue
 // @grant	GM_xmlhttpRequest
 // @unwrap
 // ==/UserScript==
@@ -40,7 +41,7 @@ var place = location.pathname.replace(/\/|\.(php|html)$/gi, "").toLowerCase();
 //GM_log("at:" + place);
 
 // n.b. version number should always be a 3-digit number.  If you move to 1.9, call it 1.9.0.  Don't go to 1.8.10 or some such.
-var VERSION = 171;
+var VERSION = 172;
 var MAXLIMIT = 999;
 var ENABLE_QS_REFRESH = 1;
 var DISABLE_ITEM_DB = 0;
@@ -175,6 +176,14 @@ function ResultHandler(event) {
 			switch (btext) {
 				case 'forged identification documents':	bnode.append(AppendLink('[shore]','shore.php')); break;
 				case 'wet stunt nut stew': bnode.append(AppendLink('[visit Mr. Alarm (1)]','adventure.php?snarfblat=50')); break;
+			}
+		} else if (mystuff.indexOf('You acquire an effect:') != -1) {
+			var bnode = $(event.target).find('b:eq(1)');
+			var btext = $(event.target).find('b:eq(1)').text();
+			switch (btext) {
+				case 'Filthworm Larva Stench':		bnode.append(AppendLink('[drone chamber (1)]','adventure.php?snarfblat=128')); break;
+				case 'Filthworm Drone Stench':		bnode.append(AppendLink('[guard chamber (1)]','adventure.php?snarfblat=129')); break;
+				case 'Filthworm Guard Stench':		bnode.append(AppendLink('[Queen! (1)]','adventure.php?snarfblat=130'));	break;
 			}
 		}
 	}
@@ -2747,7 +2756,7 @@ function at_craft()
 	var mode, mlink, store;
 	var itemNeeded = 0, desc = "";
 	mode = $('input[name="mode"]').val();
-	GM_log("at_craft: mode="+mode);
+//	GM_log("at_craft: mode="+mode);
 
 // sadly for some of our efforts, the "?mode=X" part is often left off after you submit an action.  So we may be left to our own devices 
 // to determine what we were actually trying to do.

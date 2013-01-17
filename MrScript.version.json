@@ -1,4 +1,4 @@
-{	"version":"1.7.1",
+{	"version":"1.7.2",
 	"url1":"http://userscripts.org/scripts/source/65705.user.js",
 	"url2":"http://noblesse-oblige.org/hellion/scripts/MrScript.user.js",
-	"desc":"<b>Fixed:</b>hidden city problem interaction with kolproxy<br/><br/><b>New:</b>helpful links appear in Results box when using/equipping stuff from chat<br/>spoilers for new level-9 quests (trapper, highland lord)<br/>"}
+	"desc":"<b>Fixed:</b>improved detection of crafting mode (specifically smithing)<br/>ultrahydration notice<br/>link from slopes to peak when eXXXtremity is good<br/>potential bug with travoltan trousers post-purchase<br/>map of mining results works again<br/><br/><b>New:</b>link from Groar to trapper<br/>spoiler links for Mourn<br/>link from bridge to new chasm<br/>"}
