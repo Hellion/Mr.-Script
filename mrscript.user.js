@@ -733,7 +733,7 @@ function AddLinks(descId, theItem, formWhere, path) {
 			addWhere.append(AppendLink('[guild]','guild.php?place=paco')); break;
 			
 		case  459: case  460: case  461: case  462: case  463:					// pixels
-			addWhere.append(AppendLink('[mystic]','mystic.php')); break;
+			addWhere.append(AppendLink('[mystic]','forestvillage.php?action=mystic')); break;
 			
 		case  535: 																// bridge
 			addWhere.append(AppendLink('[chasm]','place.php?whichplace=orc_chasm&action=bridge0')); break;
@@ -1182,7 +1182,7 @@ function Defaults(revert)
 		SetPref('menu1link0', 'market;town_market.php');
 		SetPref('menu1link1', 'hermit;hermit.php');
 		SetPref('menu1link2', 'untinker;forestvillage.php?place=untinker');
-		SetPref('menu1link3', 'mystic;mystic.php');
+		SetPref('menu1link3', 'mystic;forestvillage.php?action=mystic');
 		SetPref('menu1link4', 'hunter;bhh.php');
 		SetPref('menu1link5', 'guildstore');
 		SetPref('menu1link6', 'general;store.php?whichstore=m');
@@ -5808,7 +5808,7 @@ function at_compactmenu() {
 		AddTopOption("Market Square", "town_market.php", selectItem, 0);
 		AddTopOption("Hermitage", "hermit.php", selectItem, 0);
 		AddTopOption("Untinker", "forestvillage.php?place=untinker", selectItem, 0);
-		AddTopOption("Mystic Crackpot", "mystic.php", selectItem, 0);
+		AddTopOption("Mystic Crackpot", "forestvillage.php?place=mystic", selectItem, 0);
 		AddTopOption("Bounty Hunter", "bhh.php", selectItem, 0);
 		AddTopOption("Gouda's Grocery", "store.php?whichstore=2", selectItem, 0);
 		AddTopOption("Smacketeria", "store.php?whichstore=3", selectItem, 0);
