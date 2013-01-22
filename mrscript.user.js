@@ -723,6 +723,7 @@ function AddLinks(descId, theItem, formWhere, path) {
 		case   32: case   50: case   54: case   57: case   60: case   68: 		// EWs
 		case 2556: case 2557: case 2558: case 2559: case 2560: case 2561: 		// LEWs
 		case  150: case  151: case  152: case  153: case  154: case  155:		// Epic Hats
+		case 4504: case 3291:								// heart of volcano, secret tropical map
 			addWhere.append(AppendLink('[take to guild]','guild.php?place=scg')); break; 
 		case 2550: case 2551: case 2552: case 2553: case 2554: case 2555:		// LEW parts
 			addWhere.append(AppendLink('[smith]','craft.php?mode=smith')); break;
