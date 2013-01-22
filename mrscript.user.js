@@ -2206,9 +2206,9 @@ function at_choice() {
 					["You give the iron gate a mighty kick","O"],
 					["You fit the two halves of the stone","P"]
 				];
-			for (kt in kText) {
-				GM_log("checking for "+kt[0]);
-				if (p0.textContent.indexOf(kt[0]) != -1) SetCharData("Krakrox",kt[1]);
+			for (var i=0; i<kText.length; i++) { 
+//				GM_log("checking for "+kText[i][0]);
+				if (p0.textContent.indexOf(kText[i][0]) != -1) SetCharData("Krakrox",kText[i][1]);
 			}
 		}
 	}
