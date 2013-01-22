@@ -900,6 +900,24 @@ function AddLinks(descId, theItem, formWhere, path) {
 			addWhere.append(AppendLink('[library (1)]','adventure.php?snarfblat=104')); break;
 		case 5571:
 			addWhere.append(AppendLink('[visit the John]','place.php?whichplace=mclargehuge&action=trappercabin')); break;
+		case 4029:		// Hyboria: memory of a grappling hook
+			if (GetCharData("Krakrox") == "A") {
+				SetCharData("Krakrox","B");
+			} else {
+				SetCharData("Krakrox","F");
+			}
+			break;	
+		case 4032:		// Hyboria: memory of half a stone circle
+			SetCharData("Krakrox","D"); break;
+		case 4034:		// Hyboria: memory of an iron key
+			SetCharData("Krakrox","G"); break;
+		case 4030:		// Hyboria: memory of a small stone block
+			SetCharData("Krakrox","I"); break;
+		case 4031:		// Hyboria: memory of a little stone block
+			SetCharData("Krakrox","K"); break;
+		case 4033:		// Hyboria: memoryof a stone half-circle
+			SetCharData("Krakrox","M"); break;
+		
 	}
 
   switch (doWhat) {
@@ -1664,6 +1682,18 @@ function at_fight() {
 			if (meatSoFar > 100000) meatSoFar = 0;
 			SetCharData("nunmoney",meatSoFar);
 			break;
+		case "a giant bird-creature":
+			SetCharData("Krakrox","C");
+			break;
+		case "a giant octopus":
+			SetCharData("Krakrox","E");
+			break;
+		case "a giant spider":
+			SetCharData("Krakrox","H");
+			break;
+		case "a giant jungle python":
+			SetCharData("Krakrox","J");
+			break;
 		}
 		showYoinks(true);
 		dropped_item();
@@ -1837,7 +1867,9 @@ function at_valhalla() {
 	// reset tracking of what items were where while mining
 	clearwhiches();
 	// reset count of beeguy summonses
-	SetCharData("saidbeeguy",0)
+	SetCharData("saidbeeguy",0);
+	// reset Hyboria quest status
+	SetCharData("Krakrox","A");
 }
 
 // COVE: display pirate insult information
@@ -2122,8 +2154,16 @@ function at_choice() {
 			}
 		}
 	}
+	var cNum = 0;
+
+	var inputs = $('input[name="whichchoice"]');
+	if (inputs && inputs[0]) { cNum = inputs[0].value; }
+//	GM_log("cNum = " + cNum);
+	if (cNum >= 366 && cNum <= 386) {
+		spoil_Krakrox(cNum);
+	}
 	var usemap = 0;
-	var choicetext = $('body').text();
+	var choicetext = $('body').text(); // for finding stuff that's not in a <p> tag.  sigh.
 //	GM_log("choice text="+choicetext);
 	if (choicetext.indexOf("Procrastination Giant's turn to guard") != -1) usemap = 1;
 	var p=document.getElementsByTagName('p');
@@ -2132,13 +2172,13 @@ function at_choice() {
 		var p0 = p[0];
 //		GM_log("p0="+p0.textContent);
 		if (p0.textContent.indexOf("actually a book.") != -1) {	// The Oracle
-			p0.appendChild(AppendLink('[go ahead, read it already]',inv_use(818))); // 'inv_use.php?pwd='+pwd+'&which=3&whichitem=818'));
+			p0.appendChild(AppendLink('[go ahead, read it already]',inv_use(818))); 
 		} else if (p0.textContent.indexOf("a new pledge") != -1) {	// Orcish Frat House Blueprints adventure
 			$('a [href="adventure.php?snarfblat=27"]').attr('href','adventure.php?snarfblat=157').text("Adventure in BARRRNEY'S BARRR");
 		} else if (p0.textContent.indexOf("go tell Bart") != -1) {  // the Tavern Faucet
 			p0.appendChild(AppendLink('[go on already]','tavern.php?place=barkeep'));
 		} else if (usemap == 1) {	// castle wheel ready for giant castle map
-			p0.appendChild(AppendLink('[use giant castle map]',inv_use(667))); // "inv_use.php?pwd="+pwd+"&which=3&whichitem=667"));
+			p0.appendChild(AppendLink('[use giant castle map]',inv_use(667))); 
 		} else if (p0.textContent.indexOf("You step up behind the man") != -1) {	// found Mr. Alarm
 			$('<center><a href="adventure.php?snarfblat=100">Adventure in WHITEY\'S GROVE</a></center><br />').prependTo($('a:last').parent());
 			// add a link to cooking here.
@@ -2160,6 +2200,16 @@ function at_choice() {
 			else gmob = gmob + 1;
 			SetCharData("saidbeeguy",gmob);
 			GM_log("Set GMOB to "+gmob);
+		} else {
+			var kText = [["The lever slides down and stops","L"],
+					["some sort of intervention was called","N"],
+					["You give the iron gate a mighty kick","O"],
+					["You fit the two halves of the stone","P"]
+				];
+			for (kt in kText) {
+				GM_log("checking for "+kt[0]);
+				if (p0.textContent.indexOf(kt[0]) != -1) SetCharData("Krakrox",kt[1]);
+			}
 		}
 	}
 }
@@ -4859,6 +4909,122 @@ function at_basement() {
 	}
 	if (str != "") bim.parentNode.innerHTML += "<br><span class='small'><b>"+str+"</b></span>";
 }
+
+//Spoil_Krakrox: walk through the entire Jungles of Hyboria quest.
+function spoil_Krakrox(cNum) {
+var Krakrox = {
+		366: {
+			A:"Go North",
+			B:"Go North",
+			C:"Go North",
+			D:"Go North",
+			E:"Go North",
+			F:"Go North",
+			G:"Go North",
+			H:"Go North",
+			I:"Go North",
+			J:"Go North",
+			K:"Go North",
+			L:"Go North",
+			M:"Go North",
+			N:"Go North",
+			O:"Go North",
+			P:"Go North"
+		},
+		367: {	O:"Unlock the temple door",
+			P:"Enter the temple (fight!)"//wrong place?
+		},
+		368: {	A:"Go West",
+			B:"Go West",
+			C:"Go West",
+			D:"Examine Well",
+			E:"Examine Well",
+			F:"Go East",
+			G:"Go East",
+			H:"Go East",
+			I:"Go East",
+			J:"Go East",
+			K:"Go North",
+			L:"Go East",
+			M:"Go East",
+			N:"Go North",
+			O:"Go North",
+			P:"Go North"
+		},
+		369: {	K:"Go North",
+			L:"Go South",
+			N:"Go North",
+			O:"Go North",
+			P:"Go North"
+		},
+		370: {	F:"Go North",
+			G:"Go North",
+			H:"Go North",
+			I:"Go South",
+			J:"Go South",
+			L:"Go South",
+			M:"Go South"
+		},
+		371: {	A:"Go South",
+			B:"Go North",
+			C:"Go North"
+		},
+		372: {	D:"Climb down well (fight giant octopus)",
+			E:"Take grappling hook"
+		},
+		373: {	K:"Place both blocks and pull lever",
+			L:"Go South",
+			N:"Kick down the gate",
+			O:"Go North",
+			P:"Go North"
+		},
+		374: {	B:"Climb Tower (fight giant bird-creature)",
+			C:"Climb Tower (get memory of half a stone circle)",
+		},
+		375: {	F:"Go Upstairs (get memory of an iron key)",
+			G:"Go Downstairs",
+			H:"Go Downstairs",
+		},
+		376: {	O:"Unlock the Temple Door",
+			P:"Enter the Temple (fight!)"
+		},
+		377: {
+			I:"Go Upstairs",
+			J:"Go Upstairs",
+			L:"Go Downstairs",
+			M:"Go Downstairs"
+		},
+		378: {	A:"Search"
+		},
+		379: {	G:"Search the webs (fight giant spider)",
+			H:"Search the webs (find memory of a small stone block)"
+		},
+		380: {	I:"Search the vines (fight giant jungle python)",
+			J:"Cut open the snake (find memory of a little stone block)"
+		},
+		381: {	L:"Crawl into the Tunnel",
+			M:"Crawl into the Tunnel"
+		},
+		382: {	L:"Go West",
+			M:"Go West"
+		},
+		383: {	L:"Go South",
+			M:"Go North"
+		},
+		384: {	L:"Open Chest, then smash it (get memory of a stone half-circle)"
+		},
+		385: {	M:"Go North"
+		},
+		386: {	M:"Ponder the Weights"
+		}
+	}
+	var QuestStatus = GetCharData("Krakrox");
+	if (QuestStatus == null) { QuestStatus = "A"; SetCharData("Krakrox",QuestStatus); }
+	var spoilText = Krakrox[cNum][QuestStatus];
+	GM_log("spoilText = " + spoilText);
+	$("body").append("<br /><center><p><font color='blue'>"+spoilText+"</font></p></center><br />");
+}
+
 
 
 // SPOIL_(ZONE): Display ML on mouseover.
