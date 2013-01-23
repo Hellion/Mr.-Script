@@ -125,21 +125,11 @@ function addCss(cssString) {
 }
 
 function ResultHandler(event) {
-//	GM_log("Result Handling!  event.animationName="+event.originalEvent.animationName);
 	if (event.originalEvent.animationName == 'nodeInserted') {
-//		GM_log("NodeInsertion!");
-//		if (($(event.target).find("a[name='effdivtop']")) != undefined) {
-//			GM_log("effdivtopped.  Stop.");
-//			return;
-//			//the <a> block named effdivtop is the outer of two center-center blocks that get processed.
-//			//we'll ignore it and only do stuff on the inner block. ... apparently we don't need this after all.
-//		}
 		var mystuff = $(event.target).html();
-//		GM_log("mystuff: \n"+mystuff);
+		var bnode = $(event.target).find('b:eq(1)').parent();
+		var btext = $(event.target).find('b:eq(1)').text();
 		if (mystuff.indexOf('You equip an item') != -1) {
-			var bnode = $(event.target).find('b:eq(1)').parent();
-			var btext = $(event.target).find('b:eq(1)').text();
-//			GM_log('btext='+btext);
 			switch(btext) {
 				case 'continuum transfunctioner': bnode.append(AppendLink('[8-bit realm (1)]','adventure.php?snarfblat=73'));	break;
 				case 'huge mirror shard':	  bnode.append(AppendLink('[chamber]','lair6.php?place=1'));		break;
@@ -151,10 +141,6 @@ function ResultHandler(event) {
 				case 'dingy planks':		bnode.append(AppendLink('[boat]', inv_use(146)));			break; 
 			}
 		} else if (mystuff.indexOf('You put on an Outfit:') != -1) {
-			//figure out a bunch of outfit manipulation stuff here.
-//			GM_log('Outfit mystuff = \n'+mystuff);
-			var bnode = $(event.target).find('b:eq(1)');
-			var btext = $(event.target).find('b:eq(1)').text();
 			switch (btext) {
 				case 'Knob Goblin Harem Girl Disguise':	bnode.append(AppendLink('[perfume]',inv_use(307))); 
 									bnode.append(AppendLink('[knob]','cobbsknob.php')); break;
@@ -171,15 +157,11 @@ function ResultHandler(event) {
 				case 'War Hippy Fatigues':		bnode.append(AppendLink('[island]','island.php')); break;
 			}
 		} else if (mystuff.indexOf('You acquire an item:') != -1) {
-			var bnode = $(event.target).find('b:eq(1)');
-			var btext = $(event.target).find('b:eq(1)').text();
 			switch (btext) {
 				case 'forged identification documents':	bnode.append(AppendLink('[shore]','shore.php')); break;
 				case 'wet stunt nut stew': bnode.append(AppendLink('[visit Mr. Alarm (1)]','adventure.php?snarfblat=50')); break;
 			}
 		} else if (mystuff.indexOf('You acquire an effect:') != -1) {
-			var bnode = $(event.target).find('b:eq(1)');
-			var btext = $(event.target).find('b:eq(1)').text();
 			switch (btext) {
 				case 'Filthworm Larva Stench':		bnode.append(AppendLink('[drone chamber (1)]','adventure.php?snarfblat=128')); break;
 				case 'Filthworm Drone Stench':		bnode.append(AppendLink('[guard chamber (1)]','adventure.php?snarfblat=129')); break;
@@ -254,16 +236,10 @@ function SetPwd(hash) {
 }
 function FindHash() {
 	GM_get(server + '/api.php?what=status&for=MrScript', function(html) {
-//		GM_log("html = " + html);
 		var CharInfo = JSON.parse(html);
 		var hash = CharInfo["pwd"];
 		SetPwd(hash);
-
-//	GM_get(server + '/store.php?whichstore=m', function(html) {
-//		var hashIndex = html.indexOf("name=phash");
-//		var hash = html.substring(hashIndex+18, hashIndex+50);
-//		SetPwd(hash);
-	});
+	}
 }
 
 // FINDMAXQUANTITY: Figure out how many MP restoratives to use
@@ -274,107 +250,80 @@ function FindMaxQuantity(item, howMany, deefault, safeLevel)
 
 	switch(integer(item))
 	{
-		case 344: // Knob Goblin Seltzer
-			min = 8; max = 12; break;
-		case 345: // Knob Goblin Superseltzer
-			min = 25; max = 29; break;
-		case 347: // Dyspepsi-Cola
-			min = 10; max = 14; break;
-		case 357: // Mountain Stream Soda
-			min = 6; max = 9; break;
-		case 465: // Blue Pixel Potion
-			min = 55; max = 79; break;
-		case 466: // Green Pixel Potion
-			min = 31; max = 40; break;
-		case 518: // Magical Mystery Juice
+		case 344: min = 8; max = 12; break; 	// Knob Goblin Seltzer
+		case 345: min = 25; max = 29; break; 	// Knob Goblin Superseltzer
+		case 347: min = 10; max = 14; break;  	// Dyspepsi-Cola
+		case 357: min = 6; max = 9; break;  	// Mountain Stream Soda
+		case 465: min = 55; max = 79; break;  	// Blue Pixel Potion
+		case 466: min = 31; max = 40; break;  	// Green Pixel Potion
+		case 518: 				// Magical Mystery Juice
 			min = 4 + (1.5 * GetCharData("level")); max = min + 2; break;
-		case 593: // Phonics Down
-			min = 46; max = 50; break;
-		case 592: // Tiny House
-			min = 20; max = 24; break;
-		case 882: // Blatantly Canadian
-			min = 20; max = 25; break;
-		case 1003: // Soda Water
-			min = 3; max = 5; break;
-		case 1334: // Cloaca-Cola
-			min = 10; max = 14; break;
-		case 1559: // Tonic Water
-			min = 30; max = 50; break;
-		case 1658: case 1659: case 1660: // Flavored Cloaca Colas
-			min = 7; max = 9; break;
-		case 1788: // Unrefined Mountain Stream Syrup
-			min = 50; max = 60; break;
-		case 1950: // Tussin
-			min = 100; max = 100; break;
-		case 1965: // Monsieur Bubble
-			min = 45; max = 64; break;
-		case 2616: // Magi-Wipes
-			min = 50; max = 60; break;
-		case 2600: // Lily
-			min = 60; max = 70; break;
-		case 2576: // Locust
-			min = 34; max = 38; break;
-		case 2389: // Monstar
-		case 2367: // Soy! Soy!
-			min = 70; max = 80; break;
-		case 2639: // Black Cherry
-			min = 9; max = 11; break;
-		case 2035: // Marquis de Poivre Soda
-			min = 30; max = 40; break;
-		case 2370: // fennel Sooooooda
-			min = 82; max = 120; break;
-		case 2378: // banana spritzer
-			min = 40; max = 100; break;
-		case 2437: // New Cloke!
-			min = 140; max = 160; break;
-		case 2606: // palm-frond fan
-			min = 35; max = 45; break;
-		case 3357: // delicious moth
-			min = 30; max = 40; break;
-		case 3450: // cotton candy pinch
-			min = 7;  max = 15; break;
-		case 3451: // cotton candy smidgen
-			min = 11; max = 23; break;
-		case 3452: // cc skoche
-			min = 15; max = 30; break;
-		case 3453: // cc plug
-			min = 19; max = 38; break;
-		case 3454: // cc cone
-			min = 26; max = 52; break;
-		case 3455: // cc pillow
-			min = 34; max = 68; break;
-		case 3456: // cc bale
-			min = 41; max = 82; break;
-		
-		case 3697: // high-pressure seltzer bottle
-			min = 150;max = 200; break;
-		case 3727: // Nardz	-- questionable data, went with conservative (i.e. high) values.
-			min = 55; max = 85; break;
-		case 4192: // sugar shard
-			min = 5;  max = 10; break;
+		case 593: min = 46; max = 50 ; break;  	// Phonics Down
+		case 592: min = 20; max = 24; break;  	// Tiny House
+		case 882: min = 20; max = 25; break;  	// Blatantly Canadian
+		case 909:				// Wint-o-Fresh mint
+		case 1003: min = 3; max = 5; break;  	// Soda Water
+		case 1334: min = 10; max = 14; break;  	// Cloaca-Cola
+		case 1559: min = 30; max = 50; break;  	// Tonic Water
+		case 1658: case 1659: case 1660: min = 7; max = 9; break;  // Flavored Cloaca Colas
+		case 1788: min = 50; max = 60; break;  	// Unrefined Mountain Stream Syrup
+		case 1950: min = 100; max = 100; break;	// Tussin
+		case 1965: min = 45 ; max = 64; break;  // Monsieur Bubble
+		case 2616: min = 50; max = 60; break;  	// Magi-Wipes
+		case 2600: min = 60; max = 70; break;  	// Lily
+		case 2576: min = 30; max = 39; break;  	// Locust
+		case 2389:				// Monstar
+		case 2367: min = 70; max = 80; break;  	// Soy! Soy!
+		case 2639: min = 9; max = 11; break;  	// Black Cherry
+		case 2035: min = 30; max = 40; break;  	// Marquis de Poivre Soda
+		case 2370: min = 80; max = 120; break;  // fennel Sooooooda
+		case 2378: min = 40; max = 100; break;  // banana spritzer
+		case 2437: min = 140; max = 160; break; // New Cloke!
+		case 2606: min = 35; max = 45; break;  	// palm-frond fan
+		case 3357: min = 30; max = 40; break;  	// delicious moth
+		case 3450: min = 7; max = 15; break;  	// cotton candy pinch
+		case 3451: min = 11; max = 23; break;  	// cotton candy smidgen
+		case 3452: min = 15; max = 30; break;  	// cc skoche
+		case 3453: min = 19; max = 38; break;  	// cc plug
+		case 3454: min = 26; max = 52; break;  	// cc cone
+		case 3455: min = 34; max = 68; break;  	// cc pillow
+		case 3456: min = 41; max = 82; break;  	// cc bale
+		case 3697: min = 150; max = 200; break; // high-pressure seltzer bottle
+		case 3727: min = 50; max = 70; break;  	// Nardz
+		case 4192: min = 5; max = 10; break;  	// sugar shard
 
-		case 231: // Doc G's Pungent Unguent
-			min = 3; max = 5; hp = 1; break;
-		case 232: // Doc G's Ailment Ointment
-			min = 8; max = 10; hp = 1; break;
-		case 233: // Doc G's Restorative Balm
-			min = 13; max = 15; hp = 1; break;
-		case 234: // Doc G's Homeopathic Elixir
-			min = 18; max = 20; hp = 1; break;
-		case 474: // Cast
-			min = 15; max = 20; hp = 1; break;
-		case 869: // Forest Tears
-			min = 5; max = 10; hp = 1; break;
-		case 1450: case 1451: case 1452: // Wads
+		case 231: min = 3; max = 5; hp = 1; break;  // Doc G's Pungent Unguent
+		case 232: min = 8; max = 10; hp = 1; break;  // Doc G's Ailment Ointment
+		case 233: min = 13; max = 15; hp = 1; break;  // Doc G's Restorative Balm
+		case 234: min = 18; max = 20; hp = 1; break;  // Doc G's Homeopathic Elixir
+		case 474: min = 15; max = 20; hp = 1; break;  // Cast
+		case 869: min = 5; max = 10; hp = 1; break;  // Forest Tears
+
+		case 1450: case 1451: case 1452: 		// Wads
 		case 1453: case 1454: case 1455:
 			if (howMany > 15) return 15;
 			else return howMany; break;
-		case 1154: case 1261: // Air, Hatorade
+		case 1154: case 1261: 				// Air, Hatorade
 			if (howMany > 3) return 3;
 			else return howMany; break;
-		case 226: case 2096: // Minotaur, Bee Pollen
+		case 226: case 2096: 				// Minotaur, Bee Pollen
 			if (howMany > 5) return 5;
 			else return howMany; break;
+		case 5302: return 1; break;			//your own black heart
+
+		case 4255: min = 200; max = 300; break;	//Wolfman Nardz
+		case 4819: min = 80; max = 100; break;	//CRIMBCOLA
+		case 4879: min = 40; max = 40; break;	//bacon bath ball
+		case 6037: min = 35; max = 45; break; 	// creepy ginger ale
+		case 4670: min = 15; max = 20; break;	// beer-scented teddy bear
+		case 3983: min = 10; max = 20; break;	// dueling turtle
+		case 5019: case 5020:  case 5021: 	// natto, tobiko, wasabi marble soda
+			min = 5; max = 10; break;
+		case 5292:				// d6
+			min = 2.5 * GetCharData("level");
+			max = min * 1.1;
+			min = min * 0.9;
+			break;
 
 		default:
 			if (deefault == 1)
