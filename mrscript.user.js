@@ -239,12 +239,11 @@ function FindHash() {
 		var CharInfo = JSON.parse(html);
 		var hash = CharInfo["pwd"];
 		SetPwd(hash);
-	}
+	});
 }
 
 // FINDMAXQUANTITY: Figure out how many MP restoratives to use
-function FindMaxQuantity(item, howMany, deefault, safeLevel)
-{
+function FindMaxQuantity(item, howMany, deefault, safeLevel) {
 	var min, max, avg, result;
 	var hp = 0;
 
@@ -347,8 +346,7 @@ function FindMaxQuantity(item, howMany, deefault, safeLevel)
 }
 
 // GM_GET: Stolen gleefully from OneTonTomato. Tee-hee!
-function GM_get(dest, callback, errCallback)
-{	
+function GM_get(dest, callback, errCallback) {	
 	GM_xmlhttpRequest({
 	  method: 'GET',
 	  url: 'http://' + dest,
@@ -366,8 +364,7 @@ function GM_get(dest, callback, errCallback)
 }
 
 // APPENDLINK: Create link and return pointer to span
-function AppendLink(linkString, linkURL)
-{
+function AppendLink(linkString, linkURL) {
 	var font = document.createElement('font');
 
 	$(font)
@@ -390,10 +387,10 @@ function AppendLink(linkString, linkURL)
 }
 
 function AUB_KeyUp(event) {
-    if (event.which == 77 || event.which == 88) {    // 77='m', 88='x'
-	var whichItem = document.getElementsByName('whichitem')[0];
-    this.value = FindMaxQuantity(whichItem.value, 999, 0, GetPref('safemax'));
-    }
+	if (event.which == 77 || event.which == 88) {    // 77='m', 88='x'
+		var whichItem = document.getElementsByName('whichitem')[0];
+		this.value = FindMaxQuantity(whichItem.value, 999, 0, GetPref('safemax'));
+	}
 }
 
 // APPENDUSEBOX: Attach use multiple form.
@@ -434,8 +431,7 @@ function AppendUseBox(itemNumber, skillsForm, maxButton, appendHere) {
 }
 
 // APPENDBUYBOX: Return HTML for buying an item.
-function AppendBuyBox(itemNumber, whichStore, buttonText, noQuantityBox)
-{
+function AppendBuyBox(itemNumber, whichStore, buttonText, noQuantityBox) {
 	var eventString = ""; var htmlString = ""; var quantityString;
 	if (noQuantityBox == 1) quantityString = "hidden";
 	else quantityString = "text";
@@ -461,8 +457,7 @@ function AppendBuyBox(itemNumber, whichStore, buttonText, noQuantityBox)
 
 // NUMBERLINK: Fine, you think of a good function name.
 // causes clicking on a number to fill that number in to the first "quantity" or "itemquantity" field available.
-function NumberLink(b)
-{
+function NumberLink(b) {
 	var num = b.textContent.split(' ')[0];
 	while(num.indexOf(',') != -1) num = num.split(',')[0] + num.split(',')[1];
 	num = integer(num);
@@ -477,8 +472,7 @@ function NumberLink(b)
 }
 
 // APPENDOUTFITSWAP: Aren't unified interfaces just keen?
-function AppendOutfitSwap(outfitNumber, text)
-{
+function AppendOutfitSwap(outfitNumber, text) {
 	var span = document.createElement('span');
 	var button1 = 0; var hidden;
 
@@ -536,10 +530,7 @@ function AppendOutfitSwap(outfitNumber, text)
 }
 
 // ADDINVCHECK: Extra links for items, independently of where they're displayed.
-function AddInvCheck(img)
-{	// Special thanks to CMeister for the item database and much of this code, 
-	// even though we don't use his itemDB anymore and the code probably no 
-	// longer remotely resembles what he wrote originally either.
+function AddInvCheck(img) {	
 	if (img != undefined && img.getAttribute("onclick").indexOf("desc") != -1) {
 		if ($(img).parents("table.item").size() > 0) return;	// this image already has an RCM attached; don't override.
 																// (thank you, CDMoyer, for this idea!)
@@ -589,32 +580,25 @@ function InvChecker (event)
 		}
 		else addText = '('+itemqty+' in inventory)';
 		$('#span'+item).text(addText);
-//		document.getElementById('span'+item).innerHTML += addText;	
 	});
 	this.setAttribute("done","done"); event.stopPropagation(); event.preventDefault();
 }
 
 
 // ADDTOPLINK: Much easier for a function to do all the work.
-function AddTopLink(putWhere, target, href, html, space)
-{
+function AddTopLink(putWhere, target, href, html, space) {
 	if (href == "") return;
 	var a = document.createElement('a');
-	if (target != 0) $(a).attr('target',target); //a.setAttribute('target', target);
+	if (target != 0) $(a).attr('target',target); 
 	$(a).attr('href',href).html(html);
-//	a.setAttribute('href', href);
-//	a.innerHTML = html;
 	$(putWhere).append(a);
-//	putWhere.appendChild(a);
-	if (space) $(putWhere).append(document.createTextNode(" ")); //putWhere.appendChild(document.createTextNode(" "));
+	if (space) $(putWhere).append(document.createTextNode(" ")); 
 }
 
 // ADDLINKS: Extra links, etc. for items, independently of where they are.
 function AddLinks(descId, theItem, formWhere, path) {
-	// Special thanks to CMeister for the item database and much of this code
 	var itemNum = $(theItem).parents('.item');
-	if (itemNum && itemNum.attr('rel')) itemNum = parseInt(itemNum.attr('rel').match(/id=(\d+)/)[1],10);
-//	var itemNum = parseInt($(theItem).parents('.item').attr('rel').match(/id=(\d+)/)[1],10);	// yay for CDM putting item numbers where we can get 'em easily
+	if (itemNum && itemNum.attr('rel')) itemNum = integer(itemNum.attr('rel').match(/id=(\d+)/)[1]);
 	if (!itemNum) {
 		GM_log("unable to locate item number in AddLinks()");
 		return '';
@@ -917,8 +901,7 @@ function AddLinks(descId, theItem, formWhere, path) {
 }
 
 // RIGHTCLICKMP: Fill up with standard restoratives.
-function RightClickMP(event)
-{	
+function RightClickMP(event) {	
 	var json = GetCharData("mplist");
 	if (json != undefined && json != "") {
 		var num = 0; var quant = 0; var list = eval('('+json+')');
@@ -941,8 +924,7 @@ function RightClickMP(event)
 }
 
 // RIGHTCLICKHP: Heal up with spells.
-function RightClickHP(event)
-{	
+function RightClickHP(event) {	
 	var json = GetCharData("hplist");
 	if (json != undefined && json != "") {
 		var num = 0; var quant = 0; var list = eval('('+json+')');
@@ -971,8 +953,7 @@ function RightClickHP(event)
 }
 
 // PARSESELECTQUANTITY: Figure out how many of a given restorative are present.
-function ParseSelectQuantity(selectItem, endToken)
-{	
+function ParseSelectQuantity(selectItem, endToken) {	
 	var index = selectItem.selectedIndex;
 	var howMany = 1;
 	if (selectItem.options[index].textContent.indexOf("(") != -1) {
@@ -985,8 +966,7 @@ function ParseSelectQuantity(selectItem, endToken)
 }
 
 // MAKEMAXBUTTON: Wrap a "max" button around a text box.
-function MakeMaxButton(textField, maxfunction)
-{
+function MakeMaxButton(textField, maxfunction) {
 	var img = document.createElement('img');
 	var table = document.createElement('table');
 	var tr = document.createElement('tr');
@@ -1033,8 +1013,7 @@ function MakeMaxButton(textField, maxfunction)
 }
 
 // SKILLUSELIMIT: Calculate how many times various skills should be cast.
-function SkillUseLimit(skillNum)
-{	
+function SkillUseLimit(skillNum) {	
 	var limit = 999999; var min = 0; var max = 0;
 	var safeLevel = GetPref('safemax');
 	switch(integer(skillNum)) {
@@ -1065,8 +1044,7 @@ function SkillUseLimit(skillNum)
 }
 
 // ONFOCUS: Make text input boxes clear on focus
-function AddAutoClear(box, setting)
-{	
+function AddAutoClear(box, setting) {	
 	if (setting == 2) {
 		$(box)
 			.attr('onFocus', 'this.select();')
@@ -1081,8 +1059,7 @@ function AddAutoClear(box, setting)
 }
 
 // GOGOGADGETPLUNGER: Convert meat-paste links to The Plunger.
-function GoGoGadgetPlunger()
-{	
+function GoGoGadgetPlunger() {	
 	if (GetCharData("plungeraccess") == "Y") {
 		$('a[href*="craft.php?mode=combine"]').each(function() {
 			href = this.getAttribute('href');
@@ -1096,8 +1073,7 @@ function GoGoGadgetPlunger()
 }
 
 // DEFAULTS: Pay no attention to the function behind the curtain.
-function Defaults(revert)
-{
+function Defaults(revert) {
 	if (revert == 0) {
 		if (GetPref('splitinv') == undefined)	SetPref('splitinv', 1);
 		if (GetPref('splitquest') == undefined)	SetPref('splitquest', 1);
@@ -1172,8 +1148,7 @@ function Defaults(revert)
 }
 
 // ADDTOPOPTION: Add a menu option in compact mode.
-function AddTopOption(name, url, select, putBefore)
-{	
+function AddTopOption(name, url, select, putBefore) {	
 	var option = document.createElement('option');
 	option.innerHTML = name; option.value = url;
 	if (putBefore == 0) select.appendChild(option);
@@ -1187,8 +1162,7 @@ function AddTopOption(name, url, select, putBefore)
 //		-2: create 2 input boxes, first one as label, second as value.
 // pref = name of GM flag that this option is setting.
 // opt1, opt2 = labels of first 2 options to create.  (options beyond 2 must be created manually after calling this routine.)
-function MakeOption(text, num, pref, opt1, opt2)
-{
+function MakeOption(text, num, pref, opt1, opt2) {
 	var table = document.createElement('table');
 	var tr = document.createElement('tr');
 	var td = document.createElement('td');
@@ -1527,31 +1501,46 @@ function at_fight() {
 				var insultsArray = insultsList.split(";");
 				var numInsults = 0;
 				var s = $('body').text();
+				var insultText = [
+					"neither your tongue nor your wit is sharp enough",
+					"be any worse than the smell of your breath",
+					"tell your wife and sister I had a lovely time",
+					"yellow would be more your color",
+					"comfortable being compared to your girlfriend",
+					"honor to learn from such an expert in the field",
+					"do you manage to shave without using a mirror",
+					"only seems that way because you have"];
+				for (var i = 0; i < 8; i++) {
+					if (s.match(insultText[i])) {
+						insultsArray[i] = 1;
+						break;
+					}
+				}
 //				GM_log("body text="+s);
-				if (s.match("neither your tongue nor your wit is sharp enough")) {
-					insultsArray[0] = 1;
-				}
-				else if (s.match("be any worse than the smell of your breath")) {
-					insultsArray[1] = 1;
-				}
-				else if (s.match("tell your wife and sister I had a lovely time")) {
-					insultsArray[2] = 1;
-				}
-				else if (s.match("yellow would be more your color")) {
-					insultsArray[3] = 1;
-				}
-				else if (s.match("comfortable being compared to your girlfriend")) {
-					insultsArray[4] = 1;
-				}
-				else if (s.match("honor to learn from such an expert in the field")) {
-					insultsArray[5] = 1;
-				}
-				else if (s.match("do you manage to shave without using a mirror")) {
-					insultsArray[6] = 1;
-				}
-				else if (s.match("only seems that way because you have")) {
-					insultsArray[7] = 1;
-				}
+//				if (s.match("neither your tongue nor your wit is sharp enough")) {
+//					insultsArray[0] = 1;
+//				}
+//				else if (s.match("be any worse than the smell of your breath")) {
+//					insultsArray[1] = 1;
+//				}
+//				else if (s.match("tell your wife and sister I had a lovely time")) {
+//					insultsArray[2] = 1;
+//				}
+//				else if (s.match("yellow would be more your color")) {
+//					insultsArray[3] = 1;
+//				}
+//				else if (s.match("comfortable being compared to your girlfriend")) {
+//					insultsArray[4] = 1;
+//				}
+//				else if (s.match("honor to learn from such an expert in the field")) {
+//					insultsArray[5] = 1;
+//				}
+//				else if (s.match("do you manage to shave without using a mirror")) {
+//					insultsArray[6] = 1;
+//				}
+//				else if (s.match("only seems that way because you have")) {
+//					insultsArray[7] = 1;
+//				}
 				for (var i=0;i<insultsArray.length;i++) {
 					numInsults += integer(insultsArray[i]);
 				}
@@ -1571,8 +1560,9 @@ function at_fight() {
 		SetCharData("special",0);
 		var square=GetCharData("square");
 		SetCharData("square",false);
+		// Location-specific stuff:
 		if (square) {
-			GM_log("square="+square);
+//			GM_log("square="+square);
 			if (square.indexOf("hiddencity") != -1) {  // add "explore next square" link
 				link_hiddencity(square);
 
@@ -1593,6 +1583,7 @@ function at_fight() {
 				}
 			}
 		}
+		// Monster-specific stuff:
 		switch (monsterName) {
 		case "a skeletal sommelier":
 		case "a possessed wine rack":
@@ -1705,10 +1696,10 @@ function link_cellar(square) {
 	var myhrefbase = "cellar.php?action=explore&whichspot=";
 	var myhref = "";
 	// grid: 1 hex digit per square for each of the 25 squares.
-	// 		8 = display UP link
-	//		4 =         DOWN
-	// 		2 =         LEFT
-	//      1 = 		RIGHT
+	// 		8 = show UP link
+	//		4 =      DOWN
+	// 		2 =      LEFT
+	//      	1 = 	 RIGHT
 	// plus a 0 at the front because Jick uses 1-based indexing for the tavern, the bastard.
 	var grid = [0,5,7,7,6,0,13,15,15,15,6,13,15,15,15,14,13,15,15,15,14,9,11,11,11,10];
 		
@@ -1754,7 +1745,11 @@ function showYoinks(wonCombat) {
 	if (yoink != "") {
 		SetCharData("yoink", "");
 		var yoinkNode = document.createElement("table");
-		yoinkNode.innerHTML = yoink;
+		GM_log("yoink = " + yoink);
+		yoink = HTMLDecode(yoink);
+		GM_log("yoink = " + yoink);
+		yoinkNode.innerHTML = yoink; //HTMLDecode(yoink);
+		$(yoinkNode).attr('class','item');
 		if (wonCombat) {
 			var centers = document.body.getElementsByTagName("center");
 			for (var i = 0; i < centers.length; i++) {
@@ -1767,6 +1762,15 @@ function showYoinks(wonCombat) {
 			$('a:contains("Adventure Again")').parent().prepend(yoinkNode);
 		}
 	}
+}
+
+function HTMLDecode(html) {
+	    return String(html)
+            .replace(/&amp;/g, '&')
+            .replace(/&quot;/g, '"')
+            .replace(/&#39;/g, "'")
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>');
 }
 
 // LOGGEDOUT: Clear things that should only be checked once per session.
@@ -2216,8 +2220,8 @@ function at_bhh() {
 		["bits of sticky stardust","[Hole in the Sky (1)]","83"]
 	];
 	// going back to see the BHH gives the relevant text in the first <p>.
-	$('p:first').each(function()
-	{	var p = $(this);
+	$('p:first').each(function() {
+		var p = $(this);
 		var txt = p.text();
 		for (var i=0; i<bountyloc.length; i++) if (txt.indexOf(bountyloc[i][0]) != -1) {
 			p.append(AppendLink(bountyloc[i][1],"adventure.php?snarfblat="+bountyloc[i][2]));
@@ -2226,8 +2230,8 @@ function at_bhh() {
 	});
 	// visiting the BHH for the first time gives the text in the first <td> of the second <table>.
 	// going back to see the BHH subsequently also gives the text in the first <td>, but that <td> also encompasses the rest of the form.
-	$('table:eq(1) td:first').each(function()
-	{	var p = $(this);
+	$('table:eq(1) td:first').each(function() {
+		var p = $(this);
 		var txt = p.text();
 		if (txt.indexOf("Manual of Transcendent Olfaction") != -1) return;	// we'll be modifying the <p> above instead.
 		for (var i=0; i<bountyloc.length; i++) {
@@ -2285,8 +2289,7 @@ function at_mallstore() {
 }
 
 // BEERPONG: Auto-choose pirate insults.
-function at_beerpong()
-{
+function at_beerpong() {
 	var val = 0, html = $('img[src*="beerpong"]').parent().parent().html();
 	if (html) {
 		if (html.indexOf('ll flay') != -1) val = 1;
@@ -2317,8 +2320,7 @@ function at_beerpong()
 }
 
 // INVENTORY: Add shortcuts when equipping outfits
-function at_inventory()
-{
+function at_inventory() {
 //GM_log("starting at_inventory()");
 	var firstTable = document.getElementsByTagName('table')[0];
 
@@ -2664,29 +2666,11 @@ function at_store() {
 
 	// You can thank Mr. Mag for this one...
 	// right-click on the image of the shopkeeper to put on your travoltan trousers without leaving the store.
-//	GM_log("img[src*=otherimages]:" + $("img[src*='otherimages']:first").attr('src'));
-//	GM_log("img:first:" + $("img:first").attr('src'));
 
 	$("img[src*='otherimages']:first")
 	.attr('title','right-click to equip Travoltan Trousers')
 	.attr('id','proprietor')
 	.bind('contextmenu',pants);
-//	.get(0)
-//	.addEventListener('contextmenu', pants, true);
-//instead of pants, was: function(evt) {
-//		GM_get(server+'/inv_equip.php?pwd='+pwd+
-//			'&which=2&action=equip&whichitem=1792',
-//		function(txt) {
-//			var pimg = document.getElementById('proprietor');
-//			pimg.removeAttribute('id');
-//			pimg.parentNode.nextSibling.innerHTML +=
-//			'<br /><div class="tiny">' +
-//			(txt.indexOf('You equip') != -1 ?
-//			'Travoltan Trousers Equipped' :
-//			'Travoltan Trousers Could Not Be Equipped') + '</span>';
-//		}); evt.stopPropagation(); evt.preventDefault();
-//	}, true);
-//	}
 
 	if (GetPref('shortlinks') > 1 && firstTable != undefined &&
 		firstTable.children('tr:first').text() == "Market Results:" &&
@@ -2742,8 +2726,7 @@ function at_store() {
 }
 
 // CASINO: Add link for buying pass.
-function at_casino()
-{	
+function at_casino() {	
 	if (GetPref('shortlinks') > 1) {
 		if ($('table:first tr:eq(1)').text().indexOf("Casino Pass") != -1)
 			$('p:first').html(AppendBuyBox(40, 'm', 'Buy Casino Pass', 1));
@@ -2751,22 +2734,26 @@ function at_casino()
 }
 
 // CRAFT: Buttons for buying ovens, etc.
-function at_craft()
-{
+function at_craft() {
 	var mode, mlink, store;
 	var itemNeeded = 0, desc = "";
 	mode = $('input[name="mode"]').val();
 //	GM_log("at_craft: mode="+mode);
-
-// sadly for some of our efforts, the "?mode=X" part is often left off after you submit an action.  So we may be left to our own devices 
-// to determine what we were actually trying to do.
-	
+	var dtext = [	["combine","meat pastables"],["cook","foods"],["smith","arms + armor"],
+			["cocktail","booze"],["jewelry","jewelry"],["multi","miscellaneous"]];
+	var dlinks = "<tr><td><center><font size=2>Discoveries:&nbsp;";
+	for (var i = 0; i < dtext.length; i++) {
+		dlinks = dlinks + "[<a href=craft.php?mode=discoveries&what=" + dtext[i][0] + ">" + dtext[i][1] + "</a>]&nbsp;";
+	}
+	dlinks = dlinks + "</font></center></td></tr>";
+	$("table:first tr:eq(2)").after(dlinks);
 	mlink = $('b:contains("Results:")');
 	ilink = $('a[href*="inv_use"]');	// link to install an already-owned campground item.  If it exists, we won't put up our buy button.
 	var tbltext = mlink.parents('table:first').text();
 	if (tbltext.indexOf("more advanced cooking appliance") != -1) { itemNeeded = 157; desc = "Buy & Install a Dramatic Range"; }
 	else if (tbltext.indexOf("cocktail set is not advanced") != -1) { itemNeeded = 236; desc = "Buy & Install a Queue du Coq kit"; }
 	else if (tbltext.indexOf("haven't got a hammer") != -1) { itemNeeded = 338; desc = "Buy a tenderizing hammer"; }
+	// buy from the Bad Moon store if it's available, since the stuff is half-price there.
 	if (GetPref('shortlinks') > 1 && mlink.length > 0 && ilink.length == 0 && itemNeeded > 0) {
 		mlink.parent().parent().parent().find('center:first').after('<span id="buyspan"></span>');
 		GM_get(server + '/heydeze.php', function(txt)
@@ -2887,8 +2874,7 @@ function at_hermit() {
 }
 
 // MOUNTAINS: Always-visible hermit.
-function at_mountains()
-{	
+function at_mountains() {	
 	var img = $('img:last');
 	if (img.attr('src').indexOf("mount4") != -1) {
 		img.attr('border', 0).attr('src','http://images.kingdomofloathing.com/'+
@@ -3054,8 +3040,8 @@ function at_council() {
 }
 
 // QUESTLOG: Add MORE shortcut links for current quests!
-function at_questlog()
-{	// If this ever breaks, the following line will probably be why:
+function at_questlog() {
+	// If this ever breaks, the following line will probably be why:
 	if (document.links[0].href.indexOf("?which=1") == -1
 		&& GetPref('shortlinks') > 1)
 	{
@@ -3309,8 +3295,8 @@ function at_questlog()
 }
 
 // CHARPANE: Find HP, MP, do effects stuff.
-function at_charpane()
-{	// var centerThing = document.getElementsByTagName('center');
+function at_charpane() {
+	// var centerThing = document.getElementsByTagName('center');
 	var imgs = document.images;
 	if (imgs.length == 0 || imgs == null) return;
 	var compactMode = imgs[0].getAttribute('height') < 60 || imgs[0].getAttribute('src').indexOf("clancy") > -1;
@@ -3540,8 +3526,7 @@ function at_charpane()
 }
 
 // SKILLPAGE: Autofill the proper "maxed-out" number in the use box.
-function at_skills()
-{	
+function at_skills() {	
 	var miniSkills = document.location.search.indexOf("tiny=1") != -1;
 	var inputStuff = document.getElementsByTagName("input");
 	var noDisable = GetPref('nodisable');
@@ -3854,8 +3839,8 @@ function at_oldman() {
 }
 
 // MANOR: If manor is not present, redirect to town.
-function at_manor()
-{	if (document.body.textContent.length == 0)
+function at_manor() {
+	if (document.body.textContent.length == 0)
 		top.document.getElementsByName('mainpane')[0].contentDocument.location.pathname = '/town_right.php';
 	else if (GetPref('zonespoil') == 1) {
 		$('img').each(function() {	
@@ -4382,38 +4367,22 @@ function at_lair1() {
 			var ptxt = p.textContent;
 	// gate 1: 
 			if (ptxt.indexOf("Suc Rose") != -1) p.appendChild(AppendLink('[sugar rush]',inv_use(540)));
-//				'inv_use.php?pwd='+pwd+'&which=3&whichitem=540'));
 			else if (ptxt.indexOf("Hilarity") != -1) p.appendChild(AppendLink('[gremlin juice]',inv_use(2631)));
-//				'inv_use.php?pwd='+pwd+'&which=3&whichitem=2631'));
 			else if (ptxt.indexOf("Humility") != -1) p.appendChild(AppendLink('[wussiness]',inv_use(469)));
-//				'inv_use.php?pwd='+pwd+'&which=3&whichitem=469'));
 			else if (ptxt.indexOf("Morose Morbidity") != -1) p.appendChild(AppendLink('[thin black candle]',inv_use(620)));
-//				'inv_use.php?pwd='+pwd+'&which=3&whichitem=620'));
 			else if (ptxt.indexOf("Slack") != -1) p.appendChild(AppendLink('[mick\'s IVH rub]',inv_use(618)));
-//				'inv_use.php?pwd='+pwd+'&which=3&whichitem=618'));
 			else if (ptxt.indexOf("Spirit") != -1) p.appendChild(AppendLink('[pygmy pygment]',inv_use(2242)));
-//				'inv_use.php?pwd='+pwd+'&which=3&whichitem=2242'));
 			else if (ptxt.indexOf("Porcupine") != -1) p.appendChild(AppendLink('[super-spiky hair gel]',inv_use(587)));
-//				'inv_use.php?pwd='+pwd+'&which=3&whichitem=587'));
 			else if (ptxt.indexOf("Viper") != -1) p.appendChild(AppendLink('[adder bladder]',inv_use(2056)));
-//				'inv_use.php?pwd='+pwd+'&which=3&whichitem=2056'));
 			else if (ptxt.indexOf("Locked Gate") != -1) p.appendChild(AppendLink('[black no. 2]',inv_use(2069)));
-//				'inv_use.php?pwd='+pwd+'&which=3&whichitem=2059'));
 	// gate 2:
-				else if (ptxt.indexOf("Machismo") != -1) p.appendChild(AppendLink('[meleegra]',inv_use(1158)));
-//				'inv_use.php?pwd='+pwd+'&which=3&whichitem=1158'));
+			else if (ptxt.indexOf("Machismo") != -1) p.appendChild(AppendLink('[meleegra]',inv_use(1158)));
 			else if (ptxt.indexOf("Flame") != -1) p.appendChild(AppendLink('[jabanero gum]',inv_use(300)));
-//				'inv_use.php?pwd='+pwd+'&which=3&whichitem=300'));
 			else if (ptxt.indexOf("Intrigue") != -1) p.appendChild(AppendLink('[handsomeness]',inv_use(1162)));
-//				'inv_use.php?pwd='+pwd+'&which=3&whichitem=1162'));
 			else if (ptxt.indexOf("Mystery") != -1) p.appendChild(AppendLink('[pickle gum]',inv_use(299)));
-//				'inv_use.php?pwd='+pwd+'&which=3&whichitem=299'));
 			else if (ptxt.indexOf("the Dead") != -1) p.appendChild(AppendLink('[marzipan skull]',inv_use(1163)));
-//				'inv_use.php?pwd='+pwd+'&which=3&whichitem=1163'));
 			else if (ptxt.indexOf("Torment") != -1) p.appendChild(AppendLink('[tamarind gum]',inv_use(297)));
-//				'inv_use.php?pwd='+pwd+'&which=3&whichitem=297'));
 			else if (ptxt.indexOf("Zest") != -1) p.appendChild(AppendLink('[lime & chile gum]',inv_use(298)));
-//				'inv_use.php?pwd='+pwd+'&which=3&whichitem=298'));
 	// gate 3:
 			else if (ptxt.indexOf("Hidden") != -1) p.appendChild(AppendLink('[dod potion - object]','multiuse.php'));
 			else if (ptxt.indexOf("Light") != -1) p.appendChild(AppendLink('[dod potion - moxie]','multiuse.php'));
@@ -4989,20 +4958,18 @@ function spoil_place() {
 	}
 }
 
-function spoil_highlands()
-{
+function spoil_highlands() {
 	$('#peak1 > a > img').attr('title','ML: 71-78');
 	$('#peak2 > a > img').attr('title','ML: 81-93');
 	$('#peak3 > a > img').attr('title','ML: 85');
 }
 
-function spoil_orc_chasm() 
-{
+function spoil_orc_chasm() {
 	$('#smut_orc_camp > a > img').attr('title','ML: 75-85');
 }
 
-function spoil_manor2()
-{	$('img').each(function() {
+function spoil_manor2() {
+	$('img').each(function() {
 		var ml = null; var src = this.getAttribute('src');
 		if (src.indexOf("sm2_1") != -1) ml = '147-173';
 		else if (src.indexOf("sm2_7") != -1) ml = '76-100';
@@ -5011,8 +4978,7 @@ function spoil_manor2()
 	});	
 }
 
-function spoil_manor3() 
-{	
+function spoil_manor3() {
 	var msg = null; 
 	$('img').each(function() {
 		var ml = null; 
@@ -5023,8 +4989,7 @@ function spoil_manor3()
 	});	
 }
 
-function spoil_beach()
-{	
+function spoil_beach() {
 	$('img').each(function() {
 		var ml = null; var src = this.getAttribute('src');
 		if (src.indexOf("newbeach9") != -1) ml = '20-25';
@@ -5034,8 +4999,7 @@ function spoil_beach()
 	});	
 }
 
-function spoil_pyramid() 
-{	
+function spoil_pyramid() { 
 	var msg = null; 
 	$('img').each(function() {
 		var ml = null; 
@@ -5051,8 +5015,7 @@ function spoil_pyramid()
 	});	
 }
 
-function spoil_bathole()
-{	
+function spoil_bathole() {
 	// old:
 	$('img').each(function() {	
 		var ml = null; var src = this.getAttribute('src');
@@ -5080,8 +5043,7 @@ function spoil_bathole()
 	});
 }
 
-function spoil_plains()
-{	
+function spoil_plains() {
 	$('img').each(function() {
 		var ml = null; var src = this.getAttribute('src');
 		if (src.indexOf("knob1") != -1) ml = '1-2';
@@ -5089,16 +5051,11 @@ function spoil_plains()
 		else if (src.indexOf("knoll1") != -1) ml = '10-13';
 		else if (src.indexOf("cemetary") != -1) ml = '18-20 / 53-59';
 		else if (src.indexOf("dome") != -1) ml = '116-135';
-//		else if (src.indexOf("garbagegrounds") != -1)
-//		{	$(this).wrap('<a href="inv_use.php?pwd=' + pwd +
-//				'&which=3&whichitem=186" border="0"></a>');
-//		} 
 		if (ml) this.setAttribute('title','ML: '+ml);
 	});	
 }
 
-function spoil_plains2()
-{	
+function spoil_plains2() {
 	$('img').each(function() {
 		var ml = null; var src=this.getAttribute('src');
 		if (src.indexOf("battlefield") != -1) ml = '30 (in uniform)';
@@ -5106,8 +5063,7 @@ function spoil_plains2()
 	});
 }
 
-function spoil_knob()
-{	
+function spoil_knob() {
 	$('img').each(function() {
 		var ml = null; var src = this.getAttribute('src');
 		if (src.indexOf("knob3") != -1) ml = '1-2';
@@ -5119,9 +5075,9 @@ function spoil_knob()
 	});	
 }
 
-function spoil_knob2()
-{	$('img').each(function()
-	{	var ml = null; var src = this.getAttribute('src');
+function spoil_knob2() {
+	$('img').each(function() {
+		var ml = null; var src = this.getAttribute('src');
 		if (src.indexOf("knob22") != -1) ml = '40-45';
 		else if (src.indexOf("knob23") != -1) ml = '50-56';
 		else if (src.indexOf("knob26") != -1) ml = '60-66';
@@ -5130,10 +5086,8 @@ function spoil_knob2()
 		if (ml) this.setAttribute('title','ML: '+ml);
 });	}
 
-function spoil_cobbsknob()
-{
-	$('area').each(function()
-	{
+function spoil_cobbsknob() {
+	$('area').each(function() {
 		var ml = null; var alt = this.getAttribute('alt');
 		if (alt.indexOf('Outskirts') != -1) ml = '1-2';
 		else if (alt.indexOf('Barracks') != -1) ml = '22-30';
@@ -5152,21 +5106,21 @@ function spoil_cobbsknob()
 }
 
 // this is for the old, pre-revamp version of the cyrpt.
-function spoil_cyrpt()
-{	$('img').each(function()
-	{	var ml = null; var src = this.getAttribute('src');
+function spoil_cyrpt() {
+	$('img').each(function() {
+		var ml = null; var src = this.getAttribute('src');
 		if (src.indexOf("cyrpt4d") != -1) ml = '53-59 / 79';
 		else if (src.indexOf("cyrpt6d") != -1) ml = '57-58 / 77';
 		else if (src.indexOf("cyrpt7d") != -1) ml = '54-58 / 77';
 		else if (src.indexOf("cyrpt9d") != -1) ml = '54 / 79';
 		else if (src.indexOf("cyrpt2") != -1) ml = '91';
 		if (ml) this.setAttribute('title','ML: '+ml);
-});	}
+	});
+}
 
 // this is for the new, post-revamp version of the cyrpt.
-function spoil_crypt()
-{	$('img').each(function()
-	{
+function spoil_crypt() {
+	$('img').each(function() {
 		var ml = null; var src = this.getAttribute('src');
 		if (src.indexOf("ul.gif") != -1) ml = '53-57, +Item'; // nook
 		else if (src.indexOf("ur.gif") != -1) ml = '56-59, olfact dirty old lihc'; // niche
@@ -5174,17 +5128,16 @@ function spoil_crypt()
 		else if (src.indexOf("lr.gif") != -1) ml = '54-58, +Init'; //alcove
 		if (ml) this.setAttribute('title','ML: '+ml);
 	});
-	$('area').each(function()
-	{
+	$('area').each(function() {
 		var ml = null; var alt = this.getAttribute('alt');
 		if (alt.indexOf("Haert of the Cyrpt") != -1) ml = '91';
 		if (ml) this.setAttribute('title','ML: '+ml);
 	});
 }
 
-function spoil_woods()
-{	$('img').each(function()
-	{	var ml = null; var src = this.getAttribute('src');
+function spoil_woods() {
+	$('img').each(function() {
+		var ml = null; var src = this.getAttribute('src');
 		if (src.indexOf("8bitdoor") != -1) ml = '20-25';
 		else if (src.indexOf("kforest") != -1) ml = '123-133';
 		else if (src.indexOf("hiddencity") != -1) ml = '145-156';
@@ -5195,29 +5148,31 @@ function spoil_woods()
 		else if (src.indexOf("temple") != -1) ml = 'scales to 50';
 //		else if (src.indexOf("tavern") != -1) ml = '10';
 		if (ml) this.setAttribute('title','ML: '+ml);
-});	}
+	});
+}
 
-function spoil_tavern()
-{	$('area').each(function()
-	{	var ml = null; var src = this.getAttribute('title');
+function spoil_tavern() {
+	$('area').each(function() {
+		var ml = null; var src = this.getAttribute('title');
 		if (src.indexOf("A Barroom Brawl") != -1) ml = '6-10';
 		else if (src.indexOf("Tavern Cellar") != -1) ml = '10';
 		if (ml) this.setAttribute('title','ML: '+ml);
 	});
 }
 
-function spoil_island()
-{	$('img').each(function()
-	{	var ml = null; var src = this.getAttribute('src');
+function spoil_island() {
+	$('img').each(function() {
+		var ml = null; var src = this.getAttribute('src');
 		if (src.indexOf("island4") != -1) ml = '39-41';
 		else if (src.indexOf("island6") != -1) ml = '39-41';
 		else if (src.indexOf("cove") != -1) ml = '61-69';
 		if (ml) this.setAttribute('title','ML: '+ml);
-});	}
+	});
+}
 
-function spoil_cove()
-{	$('img').each(function()
-	{	var ml = null; var src = this.getAttribute('src');
+function spoil_cove() {
+	$('img').each(function() {
+		var ml = null; var src = this.getAttribute('src');
 		if (src.indexOf("cove3_2x1") != -1) ml = '80-83';
 		else if (src.indexOf("cove3_3x1b") != -1) ml = '100';
 		else if (src.indexOf("cove3_3x3b") != -1) ml = '120';
@@ -5226,8 +5181,7 @@ function spoil_cove()
 	});	
 }
 
-function spoil_da()		// dungeoneer's association, yay.
-{	
+function spoil_da() {		// dungeoneer's association, yay.
 	$('img').each(function()
 	{ 	var ml = null; var src = this.getAttribute('src');
 		if (src.indexOf('ddoom') != -1) ml = '57-61';
@@ -5239,15 +5193,16 @@ function spoil_da()		// dungeoneer's association, yay.
 	});
 }
 
-function spoil_friars()
-{	$('img').each(function()
-	{	var ml = null; var src = this.getAttribute('src');
+function spoil_friars() {
+	$('img').each(function() {
+		var ml = null; var src = this.getAttribute('src');
 		if (src.indexOf("neck") != -1) ml = '40-52';
 		else if (src.indexOf("heart") != -1) ml = '42-50';
 		else if (src.indexOf("elbow") != -1) ml = '44-48';
 		else if (src.indexOf("stones") != -1) ml = '40-52';		// post-Azazel
 		if (ml) this.setAttribute('title','ML: '+ml);
-});	}
+	});
+}
 
 function spoil_pandamonium()
 {	$('area').each(function()
@@ -5260,25 +5215,23 @@ function spoil_pandamonium()
 	});
 }
 
-function spoil_beanstalk()
-{	$('img').each(function()
-	{	var ml = null; var src = this.getAttribute('src');
+function spoil_beanstalk() {
+	$('img').each(function() {
+		var ml = null; var src = this.getAttribute('src');
 		if (src.indexOf("hole") != -1) ml = '151-169';
 		else if (src.indexOf("castle") != -1) ml = '125-146';
 		else if (src.indexOf("airship") != -1) ml = '91-120';
 		if (ml) this.setAttribute('title','ML: '+ml);
-});	}
+	});
+}
 
-function spoil_fernruin()
-{	
+function spoil_fernruin() {	
 	$('img[src*="ruins_5"]').attr('title','ML: 16-24');
 }
 
-function spoil_lair3()
-{	
+function spoil_lair3() {
 	var hedge = $('img[src*="hedgemaze.gif"]');
-	if (hedge.length>0)
-	{
+	if (hedge.length>0) {
 		hedge.attr('title','ML: 232');
 		$('img[src*="castletoptower.gif"]')
 			.before(AppendLink('[hedge puzzle]', 'hedgepuzzle.php'))
@@ -5287,16 +5240,13 @@ function spoil_lair3()
 	}
 }
 
-function spoil_mountains()
-{
+function spoil_mountains() {
 	$("img[src*='roflvalley']").attr('title','ML: 75-87');
 	$("img[src*='bigbarrel']").attr('title','ML: 15/25/35');
 }
 
-function spoil_mclargehuge()
-{	
-	$('img').each(function()
-	{	
+function spoil_mclargehuge() {	
+	$('img').each(function() {	
 		var ml = null; var src = this.getAttribute('src');
 		if (src.indexOf("goatlet") != -1) ml = '68';
 		else if (src.indexOf("lair") != -1) ml = '80-90';
@@ -5314,10 +5264,8 @@ function spoil_mclargehuge()
 	});
 }
 
-function spoil_canadia()
-{
-	$('img').each(function()
-	{	
+function spoil_canadia() {
+	$('img').each(function() {
 		var ml = null; var src = this.getAttribute('src');
 		if (src.indexOf("olcamp") != -1) ml = '2-3';
 		else if (src.indexOf("lcamp") != -1) ml = '35-40';
@@ -5325,16 +5273,13 @@ function spoil_canadia()
 	});
 }
 
-function spoil_cave()			// dark and dank and sinister cave, that is...
-{	
+function spoil_cave() {			// dark and dank and sinister cave, that is...
 	$('img[src*="chamberbottom"]').attr('title','ML: 20-25');
 	$('img[src*="chamber_door"]').attr('title','ML: 27');
 }
 
-function spoil_bigisland()
-{
-	$('img').each(function()
-	{	
+function spoil_bigisland() {
+	$('img').each(function() {
 		var ml = null; var src = this.getAttribute('src');
 		if (src.indexOf("nunnery1") != -1) ml = 'ML: 168';
 		else if (src.indexOf("bfleft") != -1) ml = this.getAttribute('title') + ' (ML: 170-210)'; // don't overwrite image number info
@@ -5364,10 +5309,8 @@ function spoil_bigisland()
 	});
 }
 
-function spoil_postwarisland()		
-{
-	$('img').each(function()
-	{
+function spoil_postwarisland() {	
+	$('img').each(function() {
 		var ml = null; var src = this.getAttribute('src');
 		// Note to wiki peoples: more spoilers, plz
 		if (src.indexOf("nunnery1") != -1) ml = '168';
@@ -5382,10 +5325,8 @@ function spoil_postwarisland()
 	});
 }
 
-function spoil_thesea()
-{
-	$('img').each(function()
-	{
+function spoil_thesea() {
+	$('img').each(function() {
 		var ml= null; var src = this.getAttribute('src');
 		if (src.indexOf("sea1") != 1) ml = '300-330';		// briny
 		if (src.indexOf("sea2") != 1) ml = '350-400';		// brinier
@@ -5395,10 +5336,8 @@ function spoil_thesea()
 	});
 }
 
-function spoil_seafloor()
-{
-	$('img').each(function()
-	{
+function spoil_seafloor() {
+	$('img').each(function() {
 		var ml= null; var src = this.getAttribute('src');
 		if (src.indexOf("garden") != 1) ml = '350-450';			// octopus's garden
 		if (src.indexOf("divebar") != 1) ml = '400-600';		// dive bar
@@ -5412,10 +5351,8 @@ function spoil_seafloor()
 	});
 }		
 
-function spoil_wormwood()
-{
-	$('img').each(function()
-	{
+function spoil_wormwood() {
+	$('img').each(function() {
 		var ml= null; var src = this.getAttribute('src');
 		if (src.indexOf("wormwood3") != -1) ml = '9-7 for skirt, STLT, myst; 5-4 for !pipe, necklace, moxie; 1 for flask, mask, muscle'; // Mansion 
 		if (src.indexOf("wormwood4") != -1) ml = '9-7 for mask, !pipe, muscle; 5-4 for skirt, flask, myst; 1 for STLT, necklace, moxie'; // dome
@@ -5425,8 +5362,8 @@ function spoil_wormwood()
 }
 
 // MTNOOB: Open letter! Yay!
-function at_tutorial()
-{	if (location.search.indexOf("toot") == -1) return;
+function at_tutorial() {
+	if (location.search.indexOf("toot") == -1) return;
 	$('b:contains("Ralph")').append(
 		AppendLink('[read]', inv_use(1155)));//'inv_use.php?pwd='+pwd + '&which=3&whichitem=1155'));
 }
@@ -5453,9 +5390,8 @@ function at_iconmenu() {
 }
 
 // TOPMENU: Add some new links to the top pane.
-function at_topmenu()
-{
-// moonslink script cheerfully borrowed from Beingeaten
+function at_topmenu() {
+	// moonslink script cheerfully borrowed from Beingeaten
 	if (GetPref('moonslink')== 1) {
 		var moons = $('img[src*="moon"]');
 		var calendarURL = 'http://noblesse-oblige.org/calendar/';
@@ -5763,14 +5699,11 @@ function at_topmenu()
 		else if (moveqs == 2) {
 			$('#themoons').parent().parent().append(if2).wrap('<td />');
 		}
-// some defensive coding:  don't assume that "javascript:skillson()" is always document.link[1].
-// go hunt it down specifically.
 		for (var i=0; i< document.links.length; i++) {
-//			GM_log("doclinks["+i+"]="+foo);
 			if (document.links[i].href.indexOf("skillson") != -1) break;
 		}
 		if (document.links[i].href.indexOf("skillson") != -1) {
-			GM_log("calling skillson");
+			//GM_log("calling skillson");
 			document.location = document.links[i];
 		}
 	}
@@ -6233,8 +6166,7 @@ function buildPrefs() {
 }
 
 // ---------------
-function at_account() // new option menu, yay
-{	
+function at_account() { // new option menu, yay
 	buildPrefs();
 	return;
 }
