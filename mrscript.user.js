@@ -1745,11 +1745,9 @@ function showYoinks(wonCombat) {
 	if (yoink != "") {
 		SetCharData("yoink", "");
 		var yoinkNode = document.createElement("table");
-		GM_log("yoink = " + yoink);
-		yoink = HTMLDecode(yoink);
-		GM_log("yoink = " + yoink);
-		yoinkNode.innerHTML = yoink; //HTMLDecode(yoink);
-		$(yoinkNode).attr('class','item');
+		yoinkNode.innerHTML = HTMLDecode(yoink);
+		var rel = yoink.match(/rel="([^">]*)">/)[1];
+		$(yoinkNode).attr('class','item').attr('style','float: none').attr('rel',rel);
 		if (wonCombat) {
 			var centers = document.body.getElementsByTagName("center");
 			for (var i = 0; i < centers.length; i++) {
@@ -2525,6 +2523,9 @@ function at_inventory() {
 				equipText.appendChild(AppendLink('[perfume]',inv_use(307)));
 //					'inv_use.php?pwd=' + pwd + '&which=3&whichitem=307'));
 				equipText.appendChild(AppendLink('[knob]', 'cobbsknob.php'));
+			}
+			else if (outfit.indexOf("Goblin Elite") != -1) {
+				equipText.appendChild(AppendLink('[knob]','cobbsknob.php'));
 			}
 			else if (outfit.indexOf("Swashbuckling") != -1) {
 				if (document.referrer.indexOf('council') == -1)
