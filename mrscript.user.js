@@ -131,13 +131,13 @@ function ResultHandler(event) {
 		var btext = $(event.target).find('b:eq(1)').text();
 		switch(btext) {
 			// equipped items:
-			case 'continuum transfunctioner':	bnode.after(AppendLink('[8-bit realm (1)]','adventure.php?snarfblat=73'));	break;
+			case 'continuum transfunctioner':	bnode.after(AppendLink('[8-bit realm (1)]',snarfblat(73)));			break;
 			case 'huge mirror shard':		bnode.after(AppendLink('[chamber]','lair6.php?place=1'));			break;
 			case 'snorkel':				bnode.after(AppendLink('[map]',inv_use(26)));					break;
 			case 'pool cue':			bnode.after(AppendLink('[chalk it!]',inv_use(1794)));				break;
 			case "Talisman o' Nam":			bnode.after(AppendLink('[Dome moD]','plains.php'));				break;
 			case 'worm-riding hooks':		bnode.after(AppendLink('[drum!]',inv_use(2328)));				break;
-			case 'Mega Gem':			bnode.after(AppendLink('[Dr. Awkward (1)]','adventure.php?snarfblat=119')); 	break;
+			case 'Mega Gem':			bnode.after(AppendLink('[Dr. Awkward (1)]',snarfblat(119))); 			break;
 			case 'dingy planks':			bnode.after(AppendLink('[boat]', inv_use(146)));				break; 
 			// outfits:
 			case 'Knob Goblin Harem Girl Disguise':	bnode.after(AppendLink('[perfume]',inv_use(307))); 
@@ -148,18 +148,18 @@ function ResultHandler(event) {
 			case 'Mining Gear':			bnode.after(AppendLink('[dwarf mine]','mining.php?mine=1')); 			break;
 			case 'Bugbear Costume':			bnode.after(AppendLink('[bakery]','store.php?whichstore=b')); 			break;
 			case 'eXtreme Cold-Weather Gear':	bnode.after(AppendLink('[Trapper]','trapper.php')); 
-								bnode.after(AppendLink('[hit the slopes (1)]','adventure.php?snarfblat=273')); 	break;
+								bnode.after(AppendLink('[hit the slopes (1)]',snarfblat(273))); 		break;
 			case 'Cloaca-Cola Uniform':	
-			case 'Dyspepsi-Cola Uniform':		bnode.after(AppendLink('[battlefield (1)]','adventure.php?snarfblat=85'));	break;
+			case 'Dyspepsi-Cola Uniform':		bnode.after(AppendLink('[battlefield (1)]',snarfblat(85)));			break;
 			case 'Frat Warrior Fatigues':
 			case 'War Hippy Fatigues':		bnode.after(AppendLink('[island]','island.php')); 				break;
 			// acquired items:
 			case 'forged identification documents':	bnode.after(AppendLink('[shore]','shore.php')); 				break;
-			case 'wet stunt nut stew':		 bnode.after(AppendLink('[visit Mr. Alarm (1)]','adventure.php?snarfblat=50')); break;
+			case 'wet stunt nut stew':		 bnode.after(AppendLink('[visit Mr. Alarm (1)]',snarfblat(50))); 		break;
 			// effects:
-			case 'Filthworm Larva Stench':		bnode.after(AppendLink('[drone chamber (1)]','adventure.php?snarfblat=128')); 	break;
-			case 'Filthworm Drone Stench':		bnode.after(AppendLink('[guard chamber (1)]','adventure.php?snarfblat=129')); 	break;
-			case 'Filthworm Guard Stench':		bnode.after(AppendLink('[Queen! (1)]','adventure.php?snarfblat=130'));		break;
+			case 'Filthworm Larva Stench':		bnode.after(AppendLink('[drone chamber (1)]',snarfblat(128))); 			break;
+			case 'Filthworm Drone Stench':		bnode.after(AppendLink('[guard chamber (1)]',snarfblat(129))); 			break;
+			case 'Filthworm Guard Stench':		bnode.after(AppendLink('[Queen! (1)]',snarfblat(130)));				break;
 		}
 	}
 }
@@ -189,6 +189,23 @@ function text(x) {
 		break;
 	}
 	throw new Error("Failed to textify "+ x);
+}
+
+// inv_use: save ourselves some typing.
+function inv_use(item) {
+	var inv_string = "inv_use.php?pwd="+pwd+"&which=3&whichitem="+item;
+//	GM_log("inv_use gives " + inv_string);
+	return inv_string;
+}
+
+// snarfblat: ditto
+function snarfblat(locNumber) {
+	return "adventure.php?snarfblat="+locNumber;
+}
+
+// place: ditto
+function place(locName) {
+	return "place.php?whichplace="+locName;
 }
 
 // Set/GetPref: store/retrieve data that applies to the script as a whole.
@@ -667,7 +684,7 @@ function AddLinks(descId, theItem, formWhere, path) {
 			
 		case  602: 																// Degrassi Knoll shopping list
 			if (GetCharData("plungeraccess") == "Y") addWhere.append(AppendLink('[gnoll store]', "store.php?whichstore=5"));
-			else addWhere.append(AppendLink('[Knoll (1)]', "adventure.php?snarfblat=18"));
+			else addWhere.append(AppendLink('[Knoll (1)]', snarfblat(18)));
 			break;
 			
 		case  727:	case 728: 																// Hedge maze puzzle piece/key
@@ -695,7 +712,7 @@ function AddLinks(descId, theItem, formWhere, path) {
 								 '&action=craft&a=2182&b=2183&pwd=' + pwd +
 								 '&quantity=1')); GoGoGadgetPlunger(); break;
 		case 2184: 																// harold's hammer
-			addWhere.append(AppendLink('[give to Harold (1)]', 'adventure.php?snarfblat=112')); break;
+			addWhere.append(AppendLink('[give to Harold (1)]', snarfblat(112))); break;
 		
 		case 1549: 																// MSG
 			addWhere.append(AppendLink('[bam!]', 'guild.php?place=wok')); break;
@@ -824,9 +841,9 @@ function AddLinks(descId, theItem, formWhere, path) {
 		case 5193:	case 5194:													// 11-inch knob sausage, exorcised sandwich
 			addWhere.append(AppendLink('[back to the guild]','guild.php?place=challenge')); break;
 		case 1764:												// spookyraven library key
-			addWhere.append(AppendLink('[library (1)]','adventure.php?snarfblat=104')); break;
+			addWhere.append(AppendLink('[library (1)]',snarfblat(104))); break;
 		case 5571:
-			addWhere.append(AppendLink('[visit the John]','place.php?whichplace=mclargehuge&action=trappercabin')); break;
+			addWhere.append(AppendLink('[visit the John]',place('mclargehuge&action=trappercabin'))); break;
 		case 4029:		// Hyboria: memory of a grappling hook
 			if (GetCharData("Krakrox") == "A") {
 				SetCharData("Krakrox","B");
@@ -1888,16 +1905,16 @@ function at_cobbsknob() {
 		var txt = $(this).text();
 //		GM_log("p text="+txt);
 		if ((txt.indexOf("I'll give it a shot") != -1) ||
-			(txt.indexOf("I'll get right on it") != -1)) $(this).append(AppendLink('[lab (1)]','adventure.php?snarfblat=50'));
+			(txt.indexOf("I'll get right on it") != -1))  { $(this).append(AppendLink('[lab (1)]',snarfblat(50))); }
 		if ((txt.indexOf("them on Menagerie level 1") != -1) ||
-			(txt.indexOf("First, I'm going to need") != -1)) $(this).append(AppendLink('[menagerie-1 (1)]','adventure.php?snarfblat=51'));
+			(txt.indexOf("First, I'm going to need") != -1)) { $(this).append(AppendLink('[menagerie-1 (1)]',snarfblat(51))); }
 		else if ((txt.indexOf("Okay, the next thing") != -1) ||
-			(txt.indexOf("flartble") != -1)) $(this).append(AppendLink('[menagerie-2 (1)]','adventure.php?snarfblat=52'));
+			(txt.indexOf("flartble") != -1)) { $(this).append(AppendLink('[menagerie-2 (1)]',snarfblat(52))); }
 		else if ((txt.indexOf("This is the last thing I need") != -1) ||
-			(txt.indexOf("be right back") != -1)) $(this).append(AppendLink('[menagerie-3 (1)]','adventure.php?snarfblat=53'));
+			(txt.indexOf("be right back") != -1)) { $(this).append(AppendLink('[menagerie-3 (1)]',snarfblat(53))); }
 	});
 	// stupid not-<p>-tagged option... >:(
-	$("td:contains('How embarrassing.'):last").append(AppendLink('[menagerie-2 (1)]','adventure.php?snarfblat=52'));
+	$("td:contains('How embarrassing.'):last").append(AppendLink('[menagerie-2 (1)]',snarfblat(52)));
 }
 
 // ADVENTURE: provide "Explore next square" link when we hit a non-combat in the Hidden City.
@@ -2001,12 +2018,12 @@ function at_guild() {
 		case "?place=paco": 
 //			GM_log("tdtext="+tdtext);
 			if (tdtext.indexOf("White Citadel") != -1) {
-				td.append(AppendLink('[Whitey\'s Grove (1)]', "adventure.php?snarfblat=100"));
-				td.append(AppendLink('[Road to WC (1)]', "adventure.php?snarfblat=99"));
+				td.append(AppendLink('[Whitey\'s Grove (1)]', snarfblat(100)));
+				td.append(AppendLink('[Road to WC (1)]', snarfblat(99)));
 			}
 			else if ((tdtext.indexOf("with the meatcar?") != -1) || (tdtext.indexOf("meatcar parts") != -1)) {
 				if (GetCharData("plungeraccess") == "Y") td.append(AppendLink('[gnoll store]', "store.php?whichstore=5"));
-				else td.append(AppendLink('[Knoll (1)]', "adventure.php?snarfblat=18"));
+				else td.append(AppendLink('[Knoll (1)]', snarfblat(18)));
 			}
 		break;
 		case "?place=ocg": 
@@ -4341,12 +4358,6 @@ function at_cave() {
 			}
 		}
 	}
-}
-
-function inv_use(item) {
-	var inv_string = "inv_use.php?pwd="+pwd+"&which=3&whichitem="+item;
-//	GM_log("inv_use gives " + inv_string);
-	return inv_string;
 }
 
 // LAIR1: More linkies.
