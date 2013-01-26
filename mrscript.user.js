@@ -2029,17 +2029,17 @@ function at_guild() {
 		case "?place=ocg": 
 //			GM_log("tdtext="+tdtext);
 			if (tdtext.indexOf("Misspelled Cemetary") != -1) {	// common opening phrase to find F's key.
-				$('p:last').append(AppendLink('[Misspelled Cemetary (1)]','adventure.php?snarfblat=21'));
+				$('p:last').append(AppendLink('[Misspelled Cemetary (1)]',snarfblat(21)));
 			} else if  ((tdtext.indexOf("brought me Fernswarthy's key") != -1) || 	// mus inter for finding F's key
 				 (tdtext.indexOf("brought the key to") != -1) ||					// mys inter	
 				 (tdtext.indexOf("haven't got Fern") != -1))						// mox inter
 			{
-				td.append(AppendLink('[Misspelled Cemetary (1)]','adventure.php?snarfblat=21'));
+				td.append(AppendLink('[Misspelled Cemetary (1)]',snarfblat(21)));
 			} else if ((tdtext.indexOf("searching the ruins") != -1) ||		// mus post-key/pre-dusty book
 				 (tdtext.indexOf("a very busy man") != -1) ||				// mys 
 				 (tdtext.indexOf("searching the tower") != -1))				// mox
 			{
-				td.append(AppendLink('[Tower Ruins (1)]','adventure.php?snarfblat=22'));
+				td.append(AppendLink('[Tower Ruins (1)]',snarfblat(22)));
 			}
 		break;
 		case "?place=scg": 
@@ -2054,12 +2054,12 @@ function at_guild() {
 				td.append(AppendLink('[hermit]','hermit.php')).append(AppendLink('[casino]','casino.php')); 
 			} else if (tdtext.indexOf("Beelzebozo") != -1) 						// EW->LEW assignment, all classes.
 			{
-				$('p:last').append(AppendLink('[Fun House (1)]','adventure.php?snarfblat=20'));
+				$('p:last').append(AppendLink('[Fun House (1)]',snarfblat(20)));
 			} else if ((tdtext.indexOf("restore the Legendary") != -1) || 			// mus inter
 					   (tdtext.indexOf("acquire the Legendary") != -1) || 			// mys inter
 					   (tdtext.indexOf("with that Legendary") != -1))				// mox inter
 			{
-				td.append(AppendLink('[Fun House (1)]','adventure.php?snarfblat=20'));
+				td.append(AppendLink('[Fun House (1)]',snarfblat(20)));
 			} else if (tdtext.indexOf("on your map") != -1) 				// Cave assignment, all classes
 			{
 				if ($('p').length) $('p:last').append(AppendLink('[nemesis cave]','cave.php'));
@@ -2073,7 +2073,7 @@ function at_guild() {
 				td.append('<p><font color="blue">(Come back after you get the Secret Tropical Volcano Lair map from a nemesis assassin.)</font>');
 			} else if (tdtext.indexOf("I was hoping you could lend me one") != -1) {	// all classes: island openable
 				$('p:last').append(AppendLink('[equip fledges]','inv_equip.php?pwd='+pwd+'&which=2&action=equip&whichitem=3033&slot=3'))
-						   .append(AppendLink('[Poop Deck (1)]','adventure.php?snarfblat=159'));
+						   .append(AppendLink('[Poop Deck (1)]',snarfblat(159)));
 			}
 		break;
 		case "?place=challenge":	
@@ -2120,26 +2120,20 @@ function at_choice() {
 
 	var inputs = $('input[name="whichchoice"]');
 	if (inputs && inputs[0]) { cNum = inputs[0].value; }
-//	GM_log("cNum = " + cNum);
 	if (cNum >= 366 && cNum <= 386) {
 		spoil_Krakrox(cNum);
 	}
-	var usemap = 0;
 	var choicetext = $('body').text(); // for finding stuff that's not in a <p> tag.  sigh.
-//	GM_log("choice text="+choicetext);
-	if (choicetext.indexOf("Procrastination Giant's turn to guard") != -1) usemap = 1;
 	var p=document.getElementsByTagName('p');
 	if (p.length) {
-//		GM_log("p.length="+p.length);
 		var p0 = p[0];
-//		GM_log("p0="+p0.textContent);
 		if (p0.textContent.indexOf("actually a book.") != -1) {	// The Oracle
 			p0.appendChild(AppendLink('[go ahead, read it already]',inv_use(818))); 
 		} else if (p0.textContent.indexOf("a new pledge") != -1) {	// Orcish Frat House Blueprints adventure
 			$('a [href="adventure.php?snarfblat=27"]').attr('href','adventure.php?snarfblat=157').text("Adventure in BARRRNEY'S BARRR");
 		} else if (p0.textContent.indexOf("go tell Bart") != -1) {  // the Tavern Faucet
 			p0.appendChild(AppendLink('[go on already]','tavern.php?place=barkeep'));
-		} else if (usemap == 1) {	// castle wheel ready for giant castle map
+		} else if (choicetext.indexOf("Procrastination Giant's turn to guard") != -1) {	// castle wheel ready for giant castle map
 			p0.appendChild(AppendLink('[use giant castle map]',inv_use(667))); 
 		} else if (p0.textContent.indexOf("You step up behind the man") != -1) {	// found Mr. Alarm
 			$('<center><a href="adventure.php?snarfblat=100">Adventure in WHITEY\'S GROVE</a></center><br />').prependTo($('a:last').parent());
@@ -2169,7 +2163,6 @@ function at_choice() {
 					["You fit the two halves of the stone","P"]
 				];
 			for (var i=0; i<kText.length; i++) { 
-//				GM_log("checking for "+kText[i][0]);
 				if (p0.textContent.indexOf(kText[i][0]) != -1) SetCharData("Krakrox",kText[i][1]);
 			}
 		}
@@ -2191,9 +2184,9 @@ function at_town_wrong() {
 		$('p').each(function()	{	
 			var p = $(this);
 			var txt = p.text();
-			if (txt.indexOf('Knob Goblin') != -1) p.append(AppendLink('[Knob outskirts (1)]','adventure.php?snarfblat=114'));
-			if (txt.indexOf('Haunted Pantry') != -1) p.append(AppendLink('[Pantry (1)]','adventure.php?snarfblat=113'));
-			if (txt.indexOf('Back Alley') != -1) p.append(AppendLink('[Alley (1)]','adventure.php?snarfblat=112'));
+			if (txt.indexOf('Knob Goblin') != -1) 		p.append(AppendLink('[Knob outskirts (1)]',snarfblat(114)));
+			if (txt.indexOf('Haunted Pantry') != -1) 	p.append(AppendLink('[Pantry (1)]',snarfblat(113)));
+			if (txt.indexOf('Back Alley') != -1) 		p.append(AppendLink('[Alley (1)]',snarfblat(112)));
 		});
 	}
 }
@@ -2231,9 +2224,11 @@ function at_bhh() {
 	$('p:first').each(function() {
 		var p = $(this);
 		var txt = p.text();
-		for (var i=0; i<bountyloc.length; i++) if (txt.indexOf(bountyloc[i][0]) != -1) {
-			p.append(AppendLink(bountyloc[i][1],"adventure.php?snarfblat="+bountyloc[i][2]));
-			break;
+		for (var i=0; i<bountyloc.length; i++) {
+			if (txt.indexOf(bountyloc[i][0]) != -1) {
+				p.append(AppendLink(bountyloc[i][1],snarfblat(bountyloc[i][2])));
+				break;
+			}
 		}
 	});
 	// visiting the BHH for the first time gives the text in the first <td> of the second <table>.
@@ -2244,7 +2239,7 @@ function at_bhh() {
 		if (txt.indexOf("Manual of Transcendent Olfaction") != -1) return;	// we'll be modifying the <p> above instead.
 		for (var i=0; i<bountyloc.length; i++) {
 			if (txt.indexOf(bountyloc[i][0]) != -1) {
-				p.append(AppendLink(bountyloc[i][1],"adventure.php?snarfblat="+bountyloc[i][2]));
+				p.append(AppendLink(bountyloc[i][1],snarfblat(bountyloc[i][2])));
 				break;
 			}
 		}
@@ -2259,7 +2254,6 @@ function at_trapper() {
 		// quest done.
 	} else if (traptext.indexOf("some kind of protection") != -1) {
 		$('p:contains("Ninja Snowmen")').parent().append('<center><p><font color="blue">You need some Cold Resistance.</font></center>');
-		// need elemental resistance.
 	} else if (traptext.indexOf("get us some provisions for the trip") != -1) {
 		$('p:contains("6 chunks of goat cheese")').append(AppendLink('[Goatlet (1)]','adventure.php?snarfblat=60'));
 	} else if (traptext.indexOf("I reckon 3 chunks of") != -1) {
@@ -4651,81 +4645,52 @@ function at_campground() {
 		resultsBar.parent().next().find('p').each(function(t) {	
 			var txt = this.textContent;
 			var snarf = false;
-			if (txt.indexOf("carving of") != -1) {
-				var gate = txt.split("carving of ")[1];
-				if (gate.indexOf("an armchair") != -1)
-					snarf = ['pygmy pygment','pigment','hiddencity.php','hidden city'];
-				else if (gate.indexOf("cowardly-l") != -1)
-					snarf = ['wussiness potion','potion5','friars.php','deep fat friars'];
-				else if (gate.indexOf("banana peel") != -1)
-					snarf = ['gremlin juice','potion6','bigisland.php?place=junkyard','island'];
-				else if (gate.indexOf("coiled viper") != -1)
-					snarf = ['adder bladder','bladder','adventure.php?snarfblat=111','black forest (1)'];
-				else if (gate.indexOf("a rose") != -1)
-					snarf = ['Angry Farmer candy','rcandy','adventure.php?snarfblat=82','castle in the sky (1)'];
-				else if (gate.indexOf("glum teenager") != -1)
-					snarf = ['thin black candle','bcandle','adventure.php?snarfblat=82','castle in the sky (1)'];
-				else if (gate.indexOf("hedgehog") != -1)
-					snarf = ['super-spiky hair gel','balm','adventure.php?snarfblat=81','fantasy airship (1)'];
-				else if (gate.indexOf("a raven") != -1)
-					snarf = ['Black No. 2','blackdye','adventure.php?snarfblat=111','black forest (1)'];
-				else if (gate.indexOf("smiling man") != -1)
-					snarf = ['Mick\'s IcyVapoHotness Rub','balm','adventure.php?snarfblat=82','castle in the sky (1)'];
-			} else if (txt.indexOf("baseball bat") != -1)
-				snarf = ['baseball','baseball','adventure.php?snarfblat=31','guano junction (1)'];
-			else if (txt.indexOf("made of Meat") != -1)
-				snarf = ['meat vortex','vortex','adventure.php?snarfblat=80','valley (1)'];
-			else if (txt.indexOf("amber waves") != -1)
-				snarf = ['bronzed locust','locust1','beach.php','beach'];
-			else if (txt.indexOf("slimy eyestalk") != -1)
-				snarf = ['fancy bath salts','potion4','adventure.php?snarfblat=107','bathroom (1)'];
-			else if (txt.indexOf("flaming katana") != -1)
-				snarf = ['frigid ninja star','ninjastars','adventure.php?snarfblat=62','ninja snowmen lair (1)'];
-			else if (txt.indexOf("translucent wing") != -1)
-				snarf = ['spider web','web','adventure.php?snarfblat=112','sleazy back alley (1)'];
-			else if (txt.indexOf("looking tophat") != -1)
-				snarf = ['sonar-in-a-biscuit','biscuit','adventure.php?snarfblat=31','guano junction (1)'];
-			else if (txt.indexOf("of albumen") != -1)
-				snarf = ['black pepper','blpepper','adventure.php?snarfblat=111','black forest (1)'];
-			else if (txt.indexOf("white ear") != -1)
-				snarf = ['pygmy blowgun','tinyblowgun','hiddencity.php','hidden city'];
-			else if (txt.indexOf("cowboy hat") != -1)
-				snarf = ['chaos butterfly','butterfly','adventure.php?snarfblat=82','castle in the sky (1)'];
-			else if (txt.indexOf("periscope") != -1)
-				snarf = ['photoprotoneutron torpedo','torpedo','adventure.php?snarfblat=81','fantasy airship (1)'];
-			else if (txt.indexOf("strange shadow") != -1)
-				snarf = ['inkwell','inkwell','adventure.php?snarfblat=104','haunted library (1)'];
-			else if (txt.indexOf("moonlight reflecting") != -1)
-				snarf = ['hair spray','spraycan','store.php?whichstore=m','General Store'];
-			else if (txt.indexOf("wooden frame") != -1)
-				snarf = ['disease','disease','adventure.php?snarfblat=42','knob harem (1)'];
-			else if (txt.indexOf("long coattails") != -1)
-				snarf = ['Knob Goblin firecracker','firecrack','adventure.php?snarfblat=114','knob outskirts (1)'];
-			else if (txt.indexOf("steam shooting") != -1)
-				snarf = ['powdered organs','scpowder','pyramid.php','pyramid'];
-			else if (txt.indexOf("holding a spatula") != -1)
-				snarf = ['leftovers of indeterminate origin','leftovers','adventure.php?snarfblat=102','haunted kitchen (1)'];
-			else if (txt.indexOf("bass guitar") != -1)
-				snarf = ['mariachi G-string','string','adventure.php?snarfblat=45','south of the border (1)'];
-			else if (txt.indexOf("North Pole") != -1)
-				snarf = ['NG','ng','adventure.php?snarfblat=80','valley (1)'];
-			else if (txt.indexOf("writing desk") != -1)
-				snarf = ['plot hole','hole','adventure.php?snarfblat=82','castle in the sky (1)'];
-			else if (txt.indexOf("cuticle") != -1)
-				snarf = ['razor-sharp can lid','canlid','adventure.php?snarfblat=113','haunted pantry (1)'];
-			else if (txt.indexOf("formidable stinger") != -1)
-				snarf = ['tropical orchid','troporchid','shore.php','shore'];
-			else if (txt.indexOf("pair of horns") != -1)
-				snarf = ['barbed-wire fence','fence','shore.php','shore'];
-			else if (txt.indexOf("wooden beam") != -1)
-				snarf = ['stick of dynamite','dynamite','shore.php','shore'];
-
+			var gateInfo = [["carving of an armchair",['pygmy pygment','pigment','hiddencity.php','hidden city']],
+					["carving of a cowardly-l",['wussiness potion','potion5','friars.php','deep fat friars']],
+					["carving of a banana peel",['gremlin juice','potion6','bigisland.php?place=junkyard','island']],
+					["carving of a coiled viper",['adder bladder','bladder','adventure.php?snarfblat=111','black forest (1)']],
+					["carving of a rose", ['Angry Farmer candy','rcandy','adventure.php?snarfblat=82','castle in the sky (1)']],
+					["carving of a glum teenager", ['thin black candle','bcandle','adventure.php?snarfblat=82','castle in the sky (1)']],
+					["carving of a hedgehog", ['super-spiky hair gel','balm','adventure.php?snarfblat=81','fantasy airship (1)']],
+					["carving of a raven", ['Black No. 2','blackdye','adventure.php?snarfblat=111','black forest (1)']],
+					["carving of a smiling man", ['Mick\'s IcyVapoHotness Rub','balm','adventure.php?snarfblat=82','castle in the sky (1)']],
+					["baseball bat", ['baseball','baseball','adventure.php?snarfblat=31','guano junction (1)']],
+					["made of Meat", ['meat vortex','vortex','adventure.php?snarfblat=80','valley (1)']],
+					["amber waves", ['bronzed locust','locust1','beach.php','beach']],
+					["slimy eyestalk", ['fancy bath salts','potion4','adventure.php?snarfblat=107','bathroom (1)']],
+					["flaming katana", ['frigid ninja star','ninjastars','adventure.php?snarfblat=62','ninja snowmen lair (1)']],
+					["translucent wing", ['spider web','web','adventure.php?snarfblat=112','sleazy back alley (1)']],
+					["looking tophat", ['sonar-in-a-biscuit','biscuit','adventure.php?snarfblat=31','guano junction (1)']],
+					["of albumen", ['black pepper','blpepper','adventure.php?snarfblat=111','black forest (1)']],
+					["white ear", ['pygmy blowgun','tinyblowgun','hiddencity.php','hidden city']],
+					["cowboy hat", ['chaos butterfly','butterfly','adventure.php?snarfblat=82','castle in the sky (1)']],
+					["periscope", ['photoprotoneutron torpedo','torpedo','adventure.php?snarfblat=81','fantasy airship (1)']],
+					["strange shadow", ['inkwell','inkwell','adventure.php?snarfblat=104','haunted library (1)']],
+					["moonlight reflecting", ['hair spray','spraycan','store.php?whichstore=m','General Store']],
+					["wooden frame", ['disease','disease','adventure.php?snarfblat=42','knob harem (1)']],
+					["long coattails", ['Knob Goblin firecracker','firecrack','adventure.php?snarfblat=114','knob outskirts (1)']],
+					["steam shooting", ['powdered organs','scpowder','pyramid.php','pyramid']],
+					["holding a spatula", ['leftovers of indeterminate origin','leftovers','adventure.php?snarfblat=102','haunted kitchen (1)']],
+					["bass guitar", ['mariachi G-string','string','adventure.php?snarfblat=45','south of the border (1)']],
+					["North Pole", ['NG','ng','adventure.php?snarfblat=80','valley (1)']],
+					["writing desk", ['plot hole','hole','adventure.php?snarfblat=82','castle in the sky (1)']],
+					["cuticle", ['razor-sharp can lid','canlid','adventure.php?snarfblat=113','haunted pantry (1)']],
+					["formidable stinger", ['tropical orchid','troporchid','shore.php','shore']],
+					["pair of horns", ['barbed-wire fence','fence','shore.php','shore']],
+					["wooden beam", ['stick of dynamite','dynamite','shore.php','shore']]
+				];
+			for (var i = 0; i<gateInfo.length; i++) {
+				if (txt.indexOf(gateInfo[i][0]) != -1) {
+					snarf = gateInfo[i][1];
+					break;
+				}
+			}
 			if (snarf)
 			{	var html =
 '<div style="width:180px; font-size:12px; margin-left:10px; vertical-align:top; text-align:right; float:right;">' +
 '<img style="float:right; margin:0 0 2px 5px;" src="http://images.kingdomofloathing.com/itemimages/'+snarf[1]+'.gif"/>' + 
-'<b class="combatitem">' + snarf[0] + '</b><br/><a class="small" href="'+snarf[2]+'" target="mainpane">[' + snarf[3] + ']</a>';
-				$(this).before(html+'</div>')
+'<b class="combatitem">' + snarf[0] + '</b><br/><a class="small" href="'+snarf[2]+'" target="mainpane">[' + snarf[3] + ']</a></div>';
+				$(this).before(html)
 					.after('<div style="clear:both;"></div>');
 			}
 		});
@@ -4834,6 +4799,20 @@ function at_basement() {
 	if (str != "") bim.parentNode.innerHTML += "<br><span class='small'><b>"+str+"</b></span>";
 }
 
+function at_place() {
+	var whichplace = document.location.search;
+	whichplace = whichplace.split('&',1)[0];	//?whichplace=foo&action=bar -> ?whichplace=foo
+	whichplace = whichplace.split('=',2)[1];	//?whichplace=foo -> foo
+	GM_log("whichplace = " + whichplace);
+	var handler = global["atplace_" + whichplace];
+	if (handler && typeof handler == "function") {
+		handler();
+	}
+}
+
+function atplace_mclargehuge() {
+	//put new trapper spoilers in here.
+}
 //Spoil_Krakrox: walk through the entire Jungles of Hyboria quest.
 function spoil_Krakrox(cNum) {
 var Krakrox = {
