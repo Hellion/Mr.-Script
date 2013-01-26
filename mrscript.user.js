@@ -127,46 +127,39 @@ function addCss(cssString) {
 function ResultHandler(event) {
 	if (event.originalEvent.animationName == 'nodeInserted') {
 		var mystuff = $(event.target).html();
-		var bnode = $(event.target).find('b:eq(1)').parent();
+		var bnode = $(event.target).find('b:eq(1)'); //.parent();
 		var btext = $(event.target).find('b:eq(1)').text();
-		if (mystuff.indexOf('You equip an item') != -1) {
-			switch(btext) {
-				case 'continuum transfunctioner': bnode.append(AppendLink('[8-bit realm (1)]','adventure.php?snarfblat=73'));	break;
-				case 'huge mirror shard':	  bnode.append(AppendLink('[chamber]','lair6.php?place=1'));		break;
-				case 'snorkel':			  bnode.append(AppendLink('[map]',inv_use(26)));			break;
-				case 'pool cue':		  bnode.append(AppendLink('[chalk it!]',inv_use(1794)));		break;
-				case "Talisman o' Nam":		  bnode.append(AppendLink('[Dome moD]','plains.php'));			break;
-				case 'worm-riding hooks':	  bnode.append(AppendLink('[drum!]',inv_use(2328)));			break;
-				case 'Mega Gem':		bnode.append(AppendLink('[Dr. Awkward (1)]','adventure.php?snarfblat=119')); 	break;
-				case 'dingy planks':		bnode.append(AppendLink('[boat]', inv_use(146)));			break; 
-			}
-		} else if (mystuff.indexOf('You put on an Outfit:') != -1) {
-			switch (btext) {
-				case 'Knob Goblin Harem Girl Disguise':	bnode.append(AppendLink('[perfume]',inv_use(307))); 
-									bnode.append(AppendLink('[knob]','cobbsknob.php')); break;
-				case 'Knob Goblin Elite Guard Uniform':	bnode.append(AppendLink('[knob]','cobbsknob.php')); break;
-				case 'Swashbuckling Getup':		bnode.append(AppendLink('[island]','island.php')); break;
-				case 'Filthy Hippy Disguise':		bnode.append(AppendLink('[buy fruit]','store.php?whichstore=h')); break;
-				case 'Mining Gear':			bnode.append(AppendLink('[dwarf mine]','mining.php?mine=1')); break;
-				case 'Bugbear Costume':			bnode.append(AppendLink('[bakery]','store.php?whichstore=b')); break;
-				case 'eXtreme Cold-Weather Gear':	bnode.append(AppendLink('[Trapper]','trapper.php')); 
-									bnode.append(AppendLink('[hit the slopes (1)]','adventure.php?snarfblat=273')); break;
-				case 'Cloaca-Cola Uniform':	
-				case 'Dyspepsi-Cola Uniform':		bnode.append(AppendLink('[battlefield (1)]','adventure.php?snarfblat=85'));break;
-				case 'Frat Warrior Fatigues':
-				case 'War Hippy Fatigues':		bnode.append(AppendLink('[island]','island.php')); break;
-			}
-		} else if (mystuff.indexOf('You acquire an item:') != -1) {
-			switch (btext) {
-				case 'forged identification documents':	bnode.append(AppendLink('[shore]','shore.php')); break;
-				case 'wet stunt nut stew': bnode.append(AppendLink('[visit Mr. Alarm (1)]','adventure.php?snarfblat=50')); break;
-			}
-		} else if (mystuff.indexOf('You acquire an effect:') != -1) {
-			switch (btext) {
-				case 'Filthworm Larva Stench':		bnode.append(AppendLink('[drone chamber (1)]','adventure.php?snarfblat=128')); break;
-				case 'Filthworm Drone Stench':		bnode.append(AppendLink('[guard chamber (1)]','adventure.php?snarfblat=129')); break;
-				case 'Filthworm Guard Stench':		bnode.append(AppendLink('[Queen! (1)]','adventure.php?snarfblat=130'));	break;
-			}
+		switch(btext) {
+			// equipped items:
+			case 'continuum transfunctioner':	bnode.after(AppendLink('[8-bit realm (1)]','adventure.php?snarfblat=73'));	break;
+			case 'huge mirror shard':		bnode.after(AppendLink('[chamber]','lair6.php?place=1'));			break;
+			case 'snorkel':				bnode.after(AppendLink('[map]',inv_use(26)));					break;
+			case 'pool cue':			bnode.after(AppendLink('[chalk it!]',inv_use(1794)));				break;
+			case "Talisman o' Nam":			bnode.after(AppendLink('[Dome moD]','plains.php'));				break;
+			case 'worm-riding hooks':		bnode.after(AppendLink('[drum!]',inv_use(2328)));				break;
+			case 'Mega Gem':			bnode.after(AppendLink('[Dr. Awkward (1)]','adventure.php?snarfblat=119')); 	break;
+			case 'dingy planks':			bnode.after(AppendLink('[boat]', inv_use(146)));				break; 
+			// outfits:
+			case 'Knob Goblin Harem Girl Disguise':	bnode.after(AppendLink('[perfume]',inv_use(307))); 
+								bnode.after(AppendLink('[knob]','cobbsknob.php')); 				break;
+			case 'Knob Goblin Elite Guard Uniform':	bnode.after(AppendLink('[knob]','cobbsknob.php')); 				break;
+			case 'Swashbuckling Getup':		bnode.after(AppendLink('[island]','island.php')); 				break;
+			case 'Filthy Hippy Disguise':		bnode.after(AppendLink('[buy fruit]','store.php?whichstore=h')); 		break;
+			case 'Mining Gear':			bnode.after(AppendLink('[dwarf mine]','mining.php?mine=1')); 			break;
+			case 'Bugbear Costume':			bnode.after(AppendLink('[bakery]','store.php?whichstore=b')); 			break;
+			case 'eXtreme Cold-Weather Gear':	bnode.after(AppendLink('[Trapper]','trapper.php')); 
+								bnode.after(AppendLink('[hit the slopes (1)]','adventure.php?snarfblat=273')); 	break;
+			case 'Cloaca-Cola Uniform':	
+			case 'Dyspepsi-Cola Uniform':		bnode.after(AppendLink('[battlefield (1)]','adventure.php?snarfblat=85'));	break;
+			case 'Frat Warrior Fatigues':
+			case 'War Hippy Fatigues':		bnode.after(AppendLink('[island]','island.php')); 				break;
+			// acquired items:
+			case 'forged identification documents':	bnode.after(AppendLink('[shore]','shore.php')); 				break;
+			case 'wet stunt nut stew':		 bnode.after(AppendLink('[visit Mr. Alarm (1)]','adventure.php?snarfblat=50')); break;
+			// effects:
+			case 'Filthworm Larva Stench':		bnode.after(AppendLink('[drone chamber (1)]','adventure.php?snarfblat=128')); 	break;
+			case 'Filthworm Drone Stench':		bnode.after(AppendLink('[guard chamber (1)]','adventure.php?snarfblat=129')); 	break;
+			case 'Filthworm Guard Stench':		bnode.after(AppendLink('[Queen! (1)]','adventure.php?snarfblat=130'));		break;
 		}
 	}
 }
