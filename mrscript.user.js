@@ -129,6 +129,8 @@ function ResultHandler(event) {
 		var mystuff = $(event.target).html();
 		var bnode = $(event.target).find('b:eq(1)'); //.parent();
 		var btext = $(event.target).find('b:eq(1)').text();
+		if (mystuff.indexOf('You unequip an item') != -1) return;	//no linkies for taking stuff off.
+		if (mystuff.indexOf('Item unequipped') != -1) return;
 		switch(btext) {
 			// equipped items:
 			case 'continuum transfunctioner':	bnode.after(AppendLink('[8-bit realm (1)]',snarfblat(73)));			break;
@@ -4645,39 +4647,39 @@ function at_campground() {
 		resultsBar.parent().next().find('p').each(function(t) {	
 			var txt = this.textContent;
 			var snarf = false;
-			var gateInfo = [["carving of an armchair",['pygmy pygment','pigment','hiddencity.php','hidden city']],
-					["carving of a cowardly-l",['wussiness potion','potion5','friars.php','deep fat friars']],
-					["carving of a banana peel",['gremlin juice','potion6','bigisland.php?place=junkyard','island']],
-					["carving of a coiled viper",['adder bladder','bladder','adventure.php?snarfblat=111','black forest (1)']],
-					["carving of a rose", ['Angry Farmer candy','rcandy','adventure.php?snarfblat=82','castle in the sky (1)']],
-					["carving of a glum teenager", ['thin black candle','bcandle','adventure.php?snarfblat=82','castle in the sky (1)']],
-					["carving of a hedgehog", ['super-spiky hair gel','balm','adventure.php?snarfblat=81','fantasy airship (1)']],
-					["carving of a raven", ['Black No. 2','blackdye','adventure.php?snarfblat=111','black forest (1)']],
-					["carving of a smiling man", ['Mick\'s IcyVapoHotness Rub','balm','adventure.php?snarfblat=82','castle in the sky (1)']],
-					["baseball bat", ['baseball','baseball','adventure.php?snarfblat=31','guano junction (1)']],
-					["made of Meat", ['meat vortex','vortex','adventure.php?snarfblat=80','valley (1)']],
-					["amber waves", ['bronzed locust','locust1','beach.php','beach']],
-					["slimy eyestalk", ['fancy bath salts','potion4','adventure.php?snarfblat=107','bathroom (1)']],
-					["flaming katana", ['frigid ninja star','ninjastars','adventure.php?snarfblat=62','ninja snowmen lair (1)']],
-					["translucent wing", ['spider web','web','adventure.php?snarfblat=112','sleazy back alley (1)']],
-					["looking tophat", ['sonar-in-a-biscuit','biscuit','adventure.php?snarfblat=31','guano junction (1)']],
-					["of albumen", ['black pepper','blpepper','adventure.php?snarfblat=111','black forest (1)']],
-					["white ear", ['pygmy blowgun','tinyblowgun','hiddencity.php','hidden city']],
-					["cowboy hat", ['chaos butterfly','butterfly','adventure.php?snarfblat=82','castle in the sky (1)']],
-					["periscope", ['photoprotoneutron torpedo','torpedo','adventure.php?snarfblat=81','fantasy airship (1)']],
-					["strange shadow", ['inkwell','inkwell','adventure.php?snarfblat=104','haunted library (1)']],
-					["moonlight reflecting", ['hair spray','spraycan','store.php?whichstore=m','General Store']],
-					["wooden frame", ['disease','disease','adventure.php?snarfblat=42','knob harem (1)']],
-					["long coattails", ['Knob Goblin firecracker','firecrack','adventure.php?snarfblat=114','knob outskirts (1)']],
-					["steam shooting", ['powdered organs','scpowder','pyramid.php','pyramid']],
-					["holding a spatula", ['leftovers of indeterminate origin','leftovers','adventure.php?snarfblat=102','haunted kitchen (1)']],
-					["bass guitar", ['mariachi G-string','string','adventure.php?snarfblat=45','south of the border (1)']],
-					["North Pole", ['NG','ng','adventure.php?snarfblat=80','valley (1)']],
-					["writing desk", ['plot hole','hole','adventure.php?snarfblat=82','castle in the sky (1)']],
-					["cuticle", ['razor-sharp can lid','canlid','adventure.php?snarfblat=113','haunted pantry (1)']],
-					["formidable stinger", ['tropical orchid','troporchid','shore.php','shore']],
-					["pair of horns", ['barbed-wire fence','fence','shore.php','shore']],
-					["wooden beam", ['stick of dynamite','dynamite','shore.php','shore']]
+			var gateInfo = [["carving of an armchair",['pygmy pygment','pigment','hiddencity.php','hidden city','2242']],
+					["carving of a cowardly-l",['wussiness potion','potion5','friars.php','deep fat friars','469']],
+					["carving of a banana peel",['gremlin juice','potion6','bigisland.php?place=junkyard','island','2631']],
+					["carving of a coiled viper",['adder bladder','bladder','adventure.php?snarfblat=111','black forest (1)','2056']],
+					["carving of a rose", ['Angry Farmer candy','rcandy','adventure.php?snarfblat=82','castle in the sky (1)','617']],
+					["carving of a glum teenager", ['thin black candle','bcandle','adventure.php?snarfblat=82','castle in the sky (1)','620']],
+					["carving of a hedgehog", ['super-spiky hair gel','balm','adventure.php?snarfblat=81','fantasy airship (1)','587']],
+					["carving of a raven", ['Black No. 2','blackdye','adventure.php?snarfblat=111','black forest (1)','2059']],
+					["carving of a smiling man", ['Mick\'s IcyVapoHotness Rub','balm','adventure.php?snarfblat=82','castle in the sky (1)','618']],
+					["baseball bat", ['baseball','baseball','adventure.php?snarfblat=31','guano junction (1)','181']],
+					["made of Meat", ['meat vortex','vortex','adventure.php?snarfblat=80','valley (1)','546']],
+					["amber waves", ['bronzed locust','locust1','beach.php','beach','2575']],
+					["slimy eyestalk", ['fancy bath salts','potion4','adventure.php?snarfblat=107','bathroom (1)','2091']],
+					["flaming katana", ['frigid ninja stars','ninjastars','adventure.php?snarfblat=62','ninja snowmen lair (1)','353']],
+					["translucent wing", ['spider web','web','adventure.php?snarfblat=112','sleazy back alley (1)','27']],
+					["looking tophat", ['sonar-in-a-biscuit','biscuit','adventure.php?snarfblat=31','guano junction (1)','563']],
+					["of albumen", ['black pepper','blpepper','adventure.php?snarfblat=111','black forest (1)','2341']],
+					["white ear", ['pygmy blowgun','tinyblowgun','hiddencity.php','hidden city','2237']],
+					["cowboy hat", ['chaos butterfly','butterfly','adventure.php?snarfblat=82','castle in the sky (1)','615']],
+					["periscope", ['photoprotoneutron torpedo','torpedo','adventure.php?snarfblat=81','fantasy airship (1)','630']],
+					["strange shadow", ['inkwell','inkwell','adventure.php?snarfblat=104','haunted library (1)','1958']],
+					["moonlight reflecting", ['hair spray','spraycan','store.php?whichstore=m','General Store','744']],
+					["wooden frame", ['disease','disease','adventure.php?snarfblat=42','knob harem (1)','452']],
+					["long coattails", ['Knob Goblin firecracker','firecrack','adventure.php?snarfblat=114','knob outskirts (1)','747']],
+					["steam shooting", ['powdered organs','scpowder','pyramid.php','pyramid','2538']],
+					["holding a spatula", ['leftovers of indeterminate origin','leftovers','adventure.php?snarfblat=102','haunted kitchen (1)','1777']],
+					["bass guitar", ['mariachi G-string','string','adventure.php?snarfblat=45','south of the border (1)','1159']],
+					["North Pole", ['NG','ng','adventure.php?snarfblat=80','valley (1)','624']],
+					["writing desk", ['plot hole','hole','adventure.php?snarfblat=82','castle in the sky (1)','613']],
+					["cuticle", ['razor-sharp can lid','canlid','adventure.php?snarfblat=113','haunted pantry (1)','559']],
+					["formidable stinger", ['tropical orchid','troporchid','shore.php','shore','2492']],
+					["pair of horns", ['barbed-wire fence','fence','shore.php','shore','145']],
+					["wooden beam", ['stick of dynamite','dynamite','shore.php','shore','2493']]
 				];
 			for (var i = 0; i<gateInfo.length; i++) {
 				if (txt.indexOf(gateInfo[i][0]) != -1) {
@@ -4685,21 +4687,23 @@ function at_campground() {
 					break;
 				}
 			}
-			if (snarf)
-			{	var html =
+			if (snarf) {
+				var html =
 '<div style="width:180px; font-size:12px; margin-left:10px; vertical-align:top; text-align:right; float:right;">' +
 '<img style="float:right; margin:0 0 2px 5px;" src="http://images.kingdomofloathing.com/itemimages/'+snarf[1]+'.gif"/>' + 
-'<b class="combatitem">' + snarf[0] + '</b><br/><a class="small" href="'+snarf[2]+'" target="mainpane">[' + snarf[3] + ']</a></div>';
+'<b class="combatitem" itemno="'+snarf[4]+'">' + snarf[0] + '</b><br/><a class="small" href="'+snarf[2] +
+'" target="mainpane">[' + snarf[3] + ']</a></div>';
 				$(this).before(html)
 					.after('<div style="clear:both;"></div>');
 			}
 		});
-//TODO: replace this with a call to the inventory API.
-		GM_get(server + '/inventory.php?which=3', function(txt) {	
-			$('b[class=combatitem]').each(function() {	
-				if (txt.indexOf('>'+this.innerHTML) != -1) this.setAttribute('style','color:green;');
-				else this.setAttribute('style','color:red;');
-			});	
+		GM_get(server + '/api.php?what=inventory&for=MrScript', function(txt) {
+			var inventory = $.parseJSON(txt);
+			$('b[class=combatitem]').each(function() {
+				var itemno = $(this).attr('itemno');
+				if (inventory[itemno] != undefined) $(this).attr('style','color:green;');
+				else $(this).attr('style','color:red;');
+			});
 		});
 	}	
 }
