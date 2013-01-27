@@ -1282,7 +1282,7 @@ function at_game() {
 	GM_get("noblesse-oblige.org/hellion/scripts/MrScript.version.json",
 		function(txt)
 		{	txt = txt.replace(/\n/,'');		// strip carriage returns so that eval() doesn't blow up
-			var json = eval('('+txt+')');
+			var json = $.parseJSON(txt); //eval('('+txt+')');
 			if (!json.version) return;
 			var vnum = json.version.replace(/\./g, "");	// strip points: 1.4.3 => 143.
 			if (!vnum) return;
@@ -2073,7 +2073,7 @@ function at_arcade() {
 			var i1 = response.split('inventory = ')[1].split(';')[0];	// should get everything from { to }, inclusive.
 			response = i1;
 		}
-		var invcache = eval('('+response+')');
+		var invcache = $.parseJSON(response); //eval('('+response+')');
 		var tokens = ((invcache[4621] === undefined) ? "no" : invcache[4621]) + " token" + ((invcache[4621] == 1) ? " " : "s ");
 		var tickets = ((invcache[4622] === undefined) ? "no" : invcache[4622]) + " ticket" + ((invcache[4622] == 1) ? ". " : "s. ");
 		var arcadeInfo = document.createElement('div');
@@ -2827,7 +2827,7 @@ function at_hermit() {
 		}
 		else if (txt.indexOf("disappointed") != -1)	{			// no trinkets
 			GM_get(server+'/api.php?what=inventory&for=MrScript',function(response) {		// Check gum and permit counts.
-				var invcache = eval('('+response+')');
+				var invcache = $.parseJSON(response); // eval('('+response+')');
 				var gum = invcache[23]; if (gum === undefined) gum = 0;
 				var hpermit = invcache[42]; if (hpermit === undefined) hpermit = 0;
 				
@@ -3440,7 +3440,7 @@ function at_charpane() {
 			img.addEventListener('contextmenu', function(event)	{	
 				document.getElementsByName('poison')[0].childNodes[1].innerHTML = "<i><span style='font-size:10px;'>Un-un-unpoisoning...</span></i>";
 				GM_get(server+'/api.php?what=inventory&for=MrScript',function(response) {			// see if we have some anti-anti-antidote onhand
-					var invcache = eval('('+response+')');
+					var invcache = $.parseJSON(response); //eval('('+response+')');
 					var antianti = invcache[829]; 
 					if (antianti === undefined) antianti = 0;
 					if (antianti > 0) {
@@ -4005,7 +4005,7 @@ function at_manor3() {
 				var i1 = response.split('inventory = ')[1].split(';')[0];	// should get everything from { to }, inclusive.
 				response = i1;
 			}
-			var invcache = eval('('+response+')');
+			var invcache = $.parseJSON(response); //eval('('+response+')');
 			var dustyX;
 			var dustylist = new Array();
 			for (var i=2271; i<2277; i++) {
@@ -4251,7 +4251,7 @@ function at_pyramid() {
 				var i1 = response.split('inventory = ')[1].split(';')[0];	// should get everything from { to }, inclusive.
 				response = i1;
 			}
-			var invcache = eval('('+response+')');
+			var invcache = $.parseJSON(response); //eval('('+response+')');
 			var ratchet = invcache[2540]; if (ratchet === undefined) ratch = 0;
 			var token = invcache[2317]; if (token === undefined) token = 0;
 			var bomb = invcache[2318]; if (bomb === undefined) bomb = 0;
