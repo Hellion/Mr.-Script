@@ -571,23 +571,23 @@ function InvChecker (event)
 			var i1 = details.split('inventory = ')[1].split(';')[0];	// should get everything from { to }, inclusive.
 			details = i1;
 		}
-		var invcache = eval('('+details+')');		//there must be a better way.  TODO: un-eval this code.
+		var invcache = $.parseJSON(details); //eval('('+details+')');		//there must be a better way.  TODO: un-eval this code.
 		var itemqty = invcache[item];	
 		if (itemqty === undefined) itemqty = 0;
 
 		var addText = "";
 		if (item == 1605) {		// catalysts
-			var reagents = invcache[346]; if (reagents === undefined) reagents = 0;
+			var reagents = invcache[346]; 	if (reagents === undefined) reagents = 0;
 			var solutions = invcache[1635]; if (solutions === undefined) solutions = 0;
-			addText = "(" + reagents + " reagent"; if (reagents != 1) addText += "s";
-			addText += ", " + itemqty + " catalyst"; if (itemqty != 1) addText += "s";
-			addText += " and " + solutions + " scrummie"; if (solutions != 1) addText += "s";
+			addText = "(" + reagents + " reagent"; 		if (reagents != 1) addText += "s";
+			addText += ", " + itemqty + " catalyst"; 	if (itemqty != 1) addText += "s";
+			addText += " and " + solutions + " scrummie"; 	if (solutions != 1) addText += "s";
 			addText += " in inventory)";
 		}
 		else if (item == 1549) {	// MSG
 			var noodles = invcache[304]; if (noodles === undefined) noodles = 0;
-			addText = "(" + noodles + " noodle"; if (noodles != 1) addText += "s";
-			addText += " and " + itemqty + " MSG"; if (itemqty != 1) addText += "s";
+			addText = "(" + noodles + " noodle"; 		if (noodles != 1) addText += "s";
+			addText += " and " + itemqty + " MSG"; 		if (itemqty != 1) addText += "s";
 			addText += " in inventory)";
 		}
 		else addText = '('+itemqty+' in inventory)';
@@ -644,7 +644,7 @@ function AddLinks(descId, theItem, formWhere, path) {
 		case 2963: case 2964: case 2965: case 3353:
 			doWhat = 'oneuse'; break;
 
-			case  146: 															// dinghy plans
+		case  146: 															// dinghy plans
 			SetCharData("insults","0;0;0;0;0;0;0;0");
 			doWhat = 'oneuse'; break;
 
@@ -721,7 +721,6 @@ function AddLinks(descId, theItem, formWhere, path) {
 			
 		case 2441: 																// KG encryption key
 			addWhere.append(AppendLink('[use map]',inv_use(2442))); break;
-//'inv_use.php?pwd=' + pwd + '&which=3&whichitem=2442')); break;
 			
 		case 2277: 																// Fernswarthy's key
 			if (place == 'adventure') addWhere.append(AppendLink('[visit guild]','guild.php?place=ocg'));
@@ -740,9 +739,8 @@ function AddLinks(descId, theItem, formWhere, path) {
 		case   23: 																// gum
 			if (document.referrer.indexOf('hermit') != -1 && path == "/store.php") {	// came to the store from the hermit?  use it automatically.
 				top.document.getElementsByName('mainpane')[0].contentDocument.location.pathname = inv_use(23);
-//'inv_use.php?pwd='+pwd+'&which=3&whichitem=23';
 			} else 	{	
-				addWhere.append(AppendLink('[use]', 'inv_use.php?pwd='+pwd+'&which=3&whichitem=23'));
+				addWhere.append(AppendLink('[use]', inv_use.php(23)));
 			}
 			break;
 
@@ -794,7 +792,6 @@ function AddLinks(descId, theItem, formWhere, path) {
 
 		case  140: 																// dingy Planks
 			addWhere.append(AppendLink('[boat]', inv_use(146))); 
-//'inv_use.php?pwd=' + pwd + '&which=3&whichitem=146')); 
 			break;
 
 		case   47: 																// Roll
@@ -916,8 +913,10 @@ function AddLinks(descId, theItem, formWhere, path) {
 function RightClickMP(event) {	
 	var json = GetCharData("mplist");
 	if (json != undefined && json != "") {
-		var num = 0; var quant = 0; var list = eval('('+json+')');
-			 if (list['518'])  num = "518";	// MMJ
+		var num = 0; 
+		var quant = 0; 
+		var list = $.parseJSON(json); //eval('('+json+')');
+		if 	(list['518'])  num = "518";	// MMJ
 		else if (list['344'])  num = "344";	// KG seltzer
 		else if (list['2639']) num = "2639";// BCSoda
 		else if (list['1658']) num = "1658";// Cherry Cloaca
@@ -939,8 +938,11 @@ function RightClickMP(event) {
 function RightClickHP(event) {	
 	var json = GetCharData("hplist");
 	if (json != undefined && json != "") {
-		var num = 0; var quant = 0; var list = eval('('+json+')');
-		var order; var heal = GetCharData("maxHP") - GetCharData("currentHP");
+		var num = 0; 
+		var quant = 0; 
+		var list = $.parseJSON(json); //eval('('+json+')');
+		var order; 
+		var heal = GetCharData("maxHP") - GetCharData("currentHP");
 
 		if (heal == 0) {
 			GM_log("no healing needed.");
@@ -952,10 +954,8 @@ function RightClickHP(event) {
 		else order = ['3012','5011','1010','3009','5007','1007'];
 
 		for(i=0; i<6; i++) if (list[order[i]]) { num = order[i]; break; }
-//		GM_log("num="+num);
 		if (num > 0) {
 			var url = server+'/skills.php?action=Skillz&whichskill='+num+"&quantity="+1+'&pwd='+pwd;
-//			GM_log("RC-HP: url="+url);
 			GM_get(url, function(result) {
 				document.location.reload(); 
 			});
@@ -1086,77 +1086,58 @@ function GoGoGadgetPlunger() {
 
 // DEFAULTS: Pay no attention to the function behind the curtain.
 function Defaults(revert) {
-	if (revert == 0) {
-		if (GetPref('splitinv') == undefined)	SetPref('splitinv', 1);
-		if (GetPref('splitquest') == undefined)	SetPref('splitquest', 1);
-		if (GetPref('splitmsg') == undefined)	SetPref('splitmsg', 0);
-		if (GetPref('outfitmenu') == undefined)	SetPref('outfitmenu', 1);
-		if (GetPref('shortlinks') == undefined) SetPref('shortlinks', 3);
-		if (GetPref('autoclear') == undefined)	SetPref('autoclear', 1);
-		if (GetPref('toprow') == undefined) 	SetPref('toprow', 1);
-		if (GetPref('safemax') == undefined) 	SetPref('safemax', 1);
-		if (GetPref('moveqs') == undefined) 	SetPref('moveqs', 2);
-		if (GetPref('logout') == undefined) 	SetPref('logout', 1);
-		if (GetPref('zonespoil') == undefined) 	SetPref('zonespoil', 1);
-		if (GetPref('klaw') == undefined) 	SetPref('klaw', 1);
-		if (GetPref('quickequip') == undefined)	SetPref('quickequip', 0);
-		if (GetPref('nodisable') == undefined)	SetPref('nodisable', 0);
-		if (GetPref('docuse') == undefined) 	SetPref('docuse', 0);
-		if (GetPref('swordguy') == undefined) 	SetPref('swordguy', 'skills.php');
-		if (GetPref('backup') == undefined) 	SetPref('backup', 'Backup');
-		if (GetPref('telescope') == undefined) 	SetPref('telescope', 1);
-//		if (GetPref('eatagain') == undefined) 	SetPref('eatagain', 0);
-		if (GetPref('lairspoil') == undefined)	SetPref('lairspoil', 1);
-		if (GetPref('moonslink') == undefined)  SetPref('moonslink', 1);
-		if (GetPref('malllink') == undefined)   SetPref('malllink', 1);
-		
-		if (GetPref('ascension_list') == undefined) SetPref('ascension_list','cooked key pies, exploded chef, exploded bartender, discarded karma, bought a skill');
+	var basePrefs = [["splitinv",1],
+			 ["splitquest",1],
+			 ["splitmsg",0],
+			 ["outfitmenu",1],
+			 ["shortlinks",3],
+			 ["autoclear",1],
+		   	 ['toprow', 1],
+		   	 ['safemax', 1],
+		   	 ['moveqs', 2],
+		   	 ['logout', 1],
+		   	 ['zonespoil', 1],
+		   	 ['klaw', 1],
+		  	 ['quickequip', 0],
+		  	 ['nodisable', 0],
+		   	 ['docuse', 0],
+		   	 ['swordguy', 'skills.php'],
+		   	 ['backup', 'Backup'],
+		   	 ['telescope', 1],
+		  	 ['lairspoil', 1],
+		 	 ['moonslink', 1],
+			 ['malllink', 1],
+			 ['ascension_list','cooked key pies, exploded chef, exploded bartender, discarded karma, bought a skill']
+			];
+	var menu1 = ['market;town_market.php','hermit;hermit.php',
+		'untinker;forestvillage.php?place=untinker',
+		'mystic;forestvillage.php?action=mystic',
+		'hunter;bhh.php',
+		'guildstore',
+		'general;store.php?whichstore=m',
+		'doc;galaktik.php',
+		'lab;cobbsknob.php?action=dispensary',
+		'fruit;store.php?whichstore=h']
 
-		if (GetPref('menu1link0') == undefined) SetPref('menu1link0', 'market;town_market.php');
-		if (GetPref('menu1link1') == undefined) SetPref('menu1link1', 'hermit;hermit.php');
-		if (GetPref('menu1link2') == undefined) SetPref('menu1link2', 'untinker;forestvillage.php?place=untinker');
-		if (GetPref('menu1link3') == undefined) SetPref('menu1link3', 'mystic;forestvillage.php?action=mystic');
-		if (GetPref('menu1link4') == undefined) SetPref('menu1link4', 'hunter;bhh.php');
-		if (GetPref('menu1link5') == undefined) SetPref('menu1link5', 'guildstore');
-		if (GetPref('menu1link6') == undefined) SetPref('menu1link6', 'general;store.php?whichstore=m');
-		if (GetPref('menu1link7') == undefined) SetPref('menu1link7', 'doc;galaktik.php');
-		if (GetPref('menu1link8') == undefined) SetPref('menu1link8', 'lab;cobbsknob.php?action=dispensary'); // store.php?whichstore=g');
-		if (GetPref('menu1link9') == undefined) SetPref('menu1link9', 'fruit;store.php?whichstore=h');
+	var menu2 = ['buy;searchmall.php',
+		'trade;makeoffer.php',
+		'sell;managestore.php',
+		'collection;managecollection.php',
+		'closet;closet.php',
+		'hagnk\'s;storage.php',
+		'attack;pvp.php',
+		'wiki;http://kol.coldfront.net/thekolwiki/index.php/Main_Page',
+		'calendar;http://noblesse-oblige.org/calendar',
+		 ';'];
+	var i;
 
-		if (GetPref('menu2link0') == undefined) SetPref('menu2link0', 'buy;searchmall.php');
-		if (GetPref('menu2link1') == undefined) SetPref('menu2link1', 'trade;makeoffer.php');
-		if (GetPref('menu2link2') == undefined) SetPref('menu2link2', 'sell;managestore.php');
-		if (GetPref('menu2link3') == undefined) SetPref('menu2link3', 'collection;managecollection.php');
-		if (GetPref('menu2link4') == undefined) SetPref('menu2link4', 'closet;closet.php');
-		if (GetPref('menu2link5') == undefined) SetPref('menu2link5', 'hagnk\'s;storage.php');
-		if (GetPref('menu2link6') == undefined) SetPref('menu2link6', 'attack;pvp.php');
-		if (GetPref('menu2link7') == undefined) SetPref('menu2link7', 'wiki;http://kol.coldfront.net/thekolwiki/index.php/Main_Page');
-		if (GetPref('menu2link8') == undefined) SetPref('menu2link8', 'calendar;http://noblesse-oblige.org/calendar');
-		if (GetPref('menu2link9') == undefined) SetPref('menu2link9', ';');
-	}
-	else if (revert==1) {
-		SetPref('menu1link0', 'market;town_market.php');
-		SetPref('menu1link1', 'hermit;hermit.php');
-		SetPref('menu1link2', 'untinker;forestvillage.php?place=untinker');
-		SetPref('menu1link3', 'mystic;forestvillage.php?action=mystic');
-		SetPref('menu1link4', 'hunter;bhh.php');
-		SetPref('menu1link5', 'guildstore');
-		SetPref('menu1link6', 'general;store.php?whichstore=m');
-		SetPref('menu1link7', 'doc;galaktik.php');
-		SetPref('menu1link8', 'lab;cobbsknob.php?action=dispensary'); // store.php?whichstore=g');
-		SetPref('menu1link9', 'fruit;store.php?whichstore=h');
-	} else if (revert==2) {
-		SetPref('menu2link0', 'buy;searchmall.php');
-		SetPref('menu2link1', 'trade;makeoffer.php');
-		SetPref('menu2link2', 'sell;managestore.php');
-		SetPref('menu2link3', 'collection;managecollection.php');
-		SetPref('menu2link4', 'closet;closet.php');
-		SetPref('menu2link5', 'hagnk\'s;storage.php');
-		SetPref('menu2link6', 'attack;pvp.php');
-		SetPref('menu2link7', 'wiki;http://kol.coldfront.net/thekolwiki/index.php/Main_Page');
-		SetPref('menu2link8', 'calendar;http://noblesse-oblige.org/calendar');
-		SetPref('menu2link9', ';');
-	}	
+	if (revert == 0) { 
+		for (i = 0; i < basePrefs.length; i++)	{ if (GetPref(basePrefs[i][0]) == undefined) SetPref(basePrefs[i][0], basePrefs[i][1]) } 
+		for (i = 0; i < menu1.length; i++) 	{ if (GetPref("menu1link"+i) == undefined) SetPref("menu1link"+i,menu1[i]) }
+		for (i = 0; i < menu2.length; i++) 	{ if (GetPref("menu2link"+i) == undefined) SetPref("menu2link"+i,menu2[i]) }
+	}			 
+	else if (revert == 1) { for (i = 0; i < menu1.length; i++) { SetPref("menu1link"+i,menu1[i]) } }
+	else if (revert == 2) { for (i = 0; i < menu2.length; i++) { SetPref("menu2link"+i,menu2[i]) } }
 }
 
 // ADDTOPOPTION: Add a menu option in compact mode.
