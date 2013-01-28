@@ -127,41 +127,49 @@ function addCss(cssString) {
 function ResultHandler(event) {
 	if (event.originalEvent.animationName == 'nodeInserted') {
 		var mystuff = $(event.target).html();
+GM_log("handling inserted HTML of: " + mystuff);
+// we need to check multiple <b> nodes here, for cases where there is, for example, multi-stage crafting.
+// TODO:
+// insert a ('b').each() call; define subroutines for items, outfit, equippings, unequippings, and effects.
 		var bnode = $(event.target).find('b:eq(1)'); //.parent();
 		var btext = $(event.target).find('b:eq(1)').text();
-		if (mystuff.indexOf('You unequip an item') != -1) return;	//no linkies for taking stuff off.
-		if (mystuff.indexOf('Item unequipped') != -1) return;
-		switch(btext) {
-			// equipped items:
-			case 'continuum transfunctioner':	bnode.after(AppendLink('[8-bit realm (1)]',snarfblat(73)));			break;
-			case 'huge mirror shard':		bnode.after(AppendLink('[chamber]','lair6.php?place=1'));			break;
-			case 'snorkel':				bnode.after(AppendLink('[map]',inv_use(26)));					break;
-			case 'pool cue':			bnode.after(AppendLink('[chalk it!]',inv_use(1794)));				break;
-			case "Talisman o' Nam":			bnode.after(AppendLink('[Dome moD]','plains.php'));				break;
-			case 'worm-riding hooks':		bnode.after(AppendLink('[drum!]',inv_use(2328)));				break;
-			case 'Mega Gem':			bnode.after(AppendLink('[Dr. Awkward (1)]',snarfblat(119))); 			break;
-			case 'dingy planks':			bnode.after(AppendLink('[boat]', inv_use(146)));				break; 
-			// outfits:
-			case 'Knob Goblin Harem Girl Disguise':	bnode.after(AppendLink('[perfume]',inv_use(307))); 
-								bnode.after(AppendLink('[knob]','cobbsknob.php')); 				break;
-			case 'Knob Goblin Elite Guard Uniform':	bnode.after(AppendLink('[knob]','cobbsknob.php')); 				break;
-			case 'Swashbuckling Getup':		bnode.after(AppendLink('[island]','island.php')); 				break;
-			case 'Filthy Hippy Disguise':		bnode.after(AppendLink('[buy fruit]','store.php?whichstore=h')); 		break;
-			case 'Mining Gear':			bnode.after(AppendLink('[dwarf mine]','mining.php?mine=1')); 			break;
-			case 'Bugbear Costume':			bnode.after(AppendLink('[bakery]','store.php?whichstore=b')); 			break;
-			case 'eXtreme Cold-Weather Gear':	bnode.after(AppendLink('[Trapper]','trapper.php')); 
-								bnode.after(AppendLink('[hit the slopes (1)]',snarfblat(273))); 		break;
-			case 'Cloaca-Cola Uniform':	
-			case 'Dyspepsi-Cola Uniform':		bnode.after(AppendLink('[battlefield (1)]',snarfblat(85)));			break;
-			case 'Frat Warrior Fatigues':
-			case 'War Hippy Fatigues':		bnode.after(AppendLink('[island]','island.php')); 				break;
-			// acquired items:
-			case 'forged identification documents':	bnode.after(AppendLink('[shore]','shore.php')); 				break;
-			case 'wet stunt nut stew':		 bnode.after(AppendLink('[visit Mr. Alarm (1)]',snarfblat(50))); 		break;
-			// effects:
-			case 'Filthworm Larva Stench':		bnode.after(AppendLink('[drone chamber (1)]',snarfblat(128))); 			break;
-			case 'Filthworm Drone Stench':		bnode.after(AppendLink('[guard chamber (1)]',snarfblat(129))); 			break;
-			case 'Filthworm Guard Stench':		bnode.after(AppendLink('[Queen! (1)]',snarfblat(130)));				break;
+		if (mystuff.indexOf("You equip an item:") != -1) {
+			switch(btext) {
+				case 'continuum transfunctioner':	bnode.after(AppendLink('[8-bit realm (1)]',snarfblat(73)));			break;
+				case 'huge mirror shard':		bnode.after(AppendLink('[chamber]','lair6.php?place=1'));			break;
+				case 'snorkel':				bnode.after(AppendLink('[map]',inv_use(26)));					break;
+				case 'pool cue':			bnode.after(AppendLink('[chalk it!]',inv_use(1794)));				break;
+				case "Talisman o' Nam":			bnode.after(AppendLink('[Dome moD]','plains.php'));				break;
+				case 'worm-riding hooks':		bnode.after(AppendLink('[drum!]',inv_use(2328)));				break;
+				case 'Mega Gem':			bnode.after(AppendLink('[Dr. Awkward (1)]',snarfblat(119))); 			break;
+				case 'dingy planks':			bnode.after(AppendLink('[boat]', inv_use(146)));				break; 
+			} 
+		} else if (mystuff.indexOf("You equip an Outfit:") != -1) {
+			switch(btext) {
+				case 'Knob Goblin Harem Girl Disguise':	bnode.after(AppendLink('[perfume]',inv_use(307))); 
+									bnode.after(AppendLink('[knob]','cobbsknob.php')); 				break;
+				case 'Knob Goblin Elite Guard Uniform':	bnode.after(AppendLink('[knob]','cobbsknob.php')); 				break;
+				case 'Swashbuckling Getup':		bnode.after(AppendLink('[island]','island.php')); 				break;
+				case 'Filthy Hippy Disguise':		bnode.after(AppendLink('[buy fruit]','store.php?whichstore=h')); 		break;
+				case 'Mining Gear':			bnode.after(AppendLink('[dwarf mine]','mining.php?mine=1')); 			break;
+				case 'Bugbear Costume':			bnode.after(AppendLink('[bakery]','store.php?whichstore=b')); 			break;
+				case 'eXtreme Cold-Weather Gear':	bnode.after(AppendLink('[Trapper]','trapper.php')); 
+									bnode.after(AppendLink('[hit the slopes (1)]',snarfblat(273))); 		break;
+				case 'Cloaca-Cola Uniform':	
+				case 'Dyspepsi-Cola Uniform':		bnode.after(AppendLink('[battlefield (1)]',snarfblat(85)));			break;
+				case 'Frat Warrior Fatigues':
+				case 'War Hippy Fatigues':		bnode.after(AppendLink('[island]','island.php')); 				break;
+			} 
+		} else if (mystuff.indexOf("You acquire an item:") != -1) {
+			var theItem = $(bnode).parent().parent().get(0);
+			AddLinks(null, theItem, null, thePath);	
+		} else if (mystuff.indexOf("You acquire an effect:") != -1) {
+			switch(btext) {
+				case 'Filthworm Larva Stench':		bnode.after(AppendLink('[drone chamber (1)]',snarfblat(128))); 			break;
+				case 'Filthworm Drone Stench':		bnode.after(AppendLink('[guard chamber (1)]',snarfblat(129))); 			break;
+				case 'Filthworm Guard Stench':		bnode.after(AppendLink('[Queen! (1)]',snarfblat(130)));				break;
+				case 'Stone-faced':			bnode.after(AppendLink('[hidden temple (1)]',snarfblat(280)));			break;
+			}
 		}
 	}
 }
@@ -738,6 +746,7 @@ function AddLinks(descId, theItem, formWhere, path) {
 
 		case   23: 																// gum
 			if (document.referrer.indexOf('hermit') != -1 && path == "/store.php") {	// came to the store from the hermit?  use it automatically.
+				//TODO: use the entire purchased amount, instead of just 1.
 				top.document.getElementsByName('mainpane')[0].contentDocument.location.pathname = inv_use(23);
 			} else 	{	
 				addWhere.append(AppendLink('[use]', inv_use.php(23)));
@@ -828,6 +837,8 @@ function AddLinks(descId, theItem, formWhere, path) {
 
 		case 2064: 																// Forged documents
 			addWhere.append(AppendLink('[shore]','shore.php')); break;
+		case 2266:							
+			addWhere.append(AppendLink('[visit Mr. Alarm (1)]',snarfblat(50))); 		break;				// wet stunt nut stew
 			
 		case 4621: 																// Game Grid Token
 			addWhere.append(AppendLink('[arcade]','arcade.php')); break;
@@ -1710,10 +1721,11 @@ function link_cellar(square) {
 function showYoinks(wonCombat) {
 	var yoink = GetCharData("yoink");
 	if (yoink == undefined) yoink = "";
+	yoink = HTMLDecode(yoink);
 	if (yoink != "") {
 		SetCharData("yoink", "");
 		var yoinkNode = document.createElement("table");
-		yoinkNode.innerHTML = HTMLDecode(yoink);
+		yoinkNode.innerHTML = yoink;
 		var rel = yoink.match(/rel="([^">]*)">/)[1];
 		$(yoinkNode).attr('class','item').attr('style','float: none').attr('rel',rel);
 		if (wonCombat) {
@@ -2636,7 +2648,7 @@ function at_store() {
 		var acquireString = firstTable.children('tr:eq(1)').text();
 		var acquireText = firstTable.find('tr:eq(1) td:first *:first');
 		var bText = $('b:eq(1)').attr('valign','baseline');
-
+	GM_log("aS="+acquireString+"\naT="+acquireText+"\nbText="+bText);
 		switch(whichstore) {
 			case 'b':		// everything from the bugbear bakery is cookable.
 				bText.parent().append(AppendLink('[cook]', '/craft.php?mode=cook')); break;
@@ -3155,7 +3167,7 @@ function at_questlog() {
 					break;
 				case "A Bugbear of a Problem":
 					b.append(AppendLink('[bugbear pens (1)]',snarfblat(47)));
-					b.append(AppendLink('[barrow (1)]', snarfblat=48)));
+					b.append(AppendLink('[barrow (1)]', snarfblat(48)));
 					b.append(AppendLink('[shrooms]', 'knoll_mushrooms.php'));
 					break;
 				case "Out of Your Gourd":
