@@ -214,7 +214,7 @@ function snarfblat(locNumber) {
 }
 
 // place: ditto
-function place(locName) {
+function to_place(locName) {
 	return "place.php?whichplace="+locName;
 }
 
@@ -853,7 +853,7 @@ function AddLinks(descId, theItem, formWhere, path) {
 		case 1764:												// spookyraven library key
 			addWhere.append(AppendLink('[library (1)]',snarfblat(104))); break;
 		case 5571:
-			addWhere.append(AppendLink('[visit the John]',place('mclargehuge&action=trappercabin'))); break;
+			addWhere.append(AppendLink('[visit the John]',to_place('mclargehuge&action=trappercabin'))); break;
 		case 4029:		// Hyboria: memory of a grappling hook
 			if (GetCharData("Krakrox") == "A") {
 				SetCharData("Krakrox","B");
@@ -2924,12 +2924,12 @@ function at_council() {
 			else if (txt.indexOf("Cyrpt") != -1)
 				p.append(AppendLink('[cyrpt]', 'cyrpt.php'));
 			else if (txt.indexOf("the Trapper,") != -1)
-				p.append(AppendLink('[John, M.D.]', place('mclargehuge&action=trappercabin')));
+				p.append(AppendLink('[John, M.D.]', to_place('mclargehuge&action=trappercabin')));
 			else if (txt.indexOf("Chasm") != -1)
 				p.append(AppendLink('[mountains]', 'mountains.php'));
 			else if (txt.indexOf("Highland Lord") != -1) {
-				p.append(AppendLink('[chasm]',place('orc_chasm')));
-				p.append(AppendLink('[highlands]',place('highlands')));
+				p.append(AppendLink('[chasm]',to_place('orc_chasm')));
+				p.append(AppendLink('[highlands]',to_place('highlands')));
 			}
 			if (txt.indexOf("invaded!") != -1 || txt.indexOf("pirates") != -1)
 			{	
@@ -2955,7 +2955,7 @@ function at_council() {
 				&& txt.indexOf("Thanks") == -1)
 			{	
 				if (txt.indexOf("sky") != -1) {
-					p.append(AppendLink('[plant bean]',place('plains&action=garbage_grounds')));
+					p.append(AppendLink('[plant bean]',to_place('plains&action=garbage_grounds')));
 					top.frames[0].location.reload();
 				} else p.append(AppendLink('[beanstalk]', 'beanstalk.php'));
 			}
