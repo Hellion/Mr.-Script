@@ -66,6 +66,8 @@ var spoilers = GetPref('zonespoil') == 1;
 //in our case, the AJAX 'Results:' boxes are always starting with <center><center>....
 addCss('@-moz-keyframes nodeInserted { from { clip: rect(1px,auto,auto,auto) } to { clip: rect(0px,auto,auto,auto) } }');
 addCss('center > center { animation-duration: 0.001s; animation-name: nodeInserted }');
+//addCss('#effdiv { animation-duration: 0.001s; animation-name: nodeInserted }');
+
 $(document).on('animationstart',ResultHandler);
 
 anywhere(); // stuff we always add where we can
@@ -126,6 +128,11 @@ function addCss(cssString) {
 
 function ResultHandler(event) {
 	if (event.originalEvent.animationName == 'nodeInserted') {
+		if ($(event.target).parents("#effdiv").length === 0) {
+			GM_log("Not in EffDiv, so not processing.");
+			return;
+		}
+//		$('div center').each(function() { $(this).attr('handled','yes'); });
 		var mystuff = $(event.target).html();
 GM_log("handling inserted HTML of: " + mystuff);
 // we need to check multiple <b> nodes here, for cases where there is, for example, multi-stage crafting.
@@ -169,6 +176,8 @@ GM_log("handling inserted HTML of: " + mystuff);
 				case 'Filthworm Drone Stench':		bnode.after(AppendLink('[guard chamber (1)]',snarfblat(129))); 			break;
 				case 'Filthworm Guard Stench':		bnode.after(AppendLink('[Queen! (1)]',snarfblat(130)));				break;
 				case 'Stone-faced':			bnode.after(AppendLink('[hidden temple (1)]',snarfblat(280)));			break;
+				case 'Down the Rabbit Hole':		bnode.after(AppendLink('[go down]','rabbithole.php'))
+										.after(AppendLink('[tea party!]','rabbithole.php?action=teaparty'));	break;
 			}
 		}
 	}
