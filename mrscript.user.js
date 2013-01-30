@@ -194,10 +194,18 @@ function process_outfit(outfitname, jnode) {
 		case 'Knob Goblin Harem Girl Disguise':	jnode.after(AppendLink('[perfume]',inv_use(307))) 
 								.after(AppendLink('[knob]','cobbsknob.php')); 				break;
 		case 'Knob Goblin Elite Guard Uniform':	jnode.after(AppendLink('[knob]','cobbsknob.php')); 				break;
-		case 'Swashbuckling Getup':		jnode.after(AppendLink('[island]','island.php')); 				break;
-		case 'Filthy Hippy Disguise':		jnode.after(AppendLink('[buy fruit]','store.php?whichstore=h')); 		break;
+		case 'Swashbuckling Getup':		jnode.after(AppendLink('[island]','island.php'));				break;
+		case 'Filthy Hippy Disguise':		if (document.referrer.indexOf('store.php') != -1) {
+								parent.frames[2].location = 'http://' + server + '/store.php?whichstore=h';
+							} else  {
+								jnode.after(AppendLink('[buy fruit]','store.php?whichstore=h'));
+							}								 		break;
 		case 'Mining Gear':			jnode.after(AppendLink('[dwarf mine]','mining.php?mine=1')); 			break;
-		case 'Bugbear Costume':			jnode.after(AppendLink('[bakery]','store.php?whichstore=b')); 			break;
+		case 'Bugbear Costume':			if (document.referrer.indexOf('store.php') != -1) {
+								parent.frames[2].location = 'http://' + server + '/store.php?whichstore=b';
+							} else {
+								jnode.after(AppendLink('[bakery]','store.php?whichstore=b'));
+							}							 			break;
 		case 'eXtreme Cold-Weather Gear':	jnode.after(AppendLink('[Trapper]','trapper.php')); 
 							jnode.after(AppendLink('[hit the slopes (1)]',snarfblat(273))); 		break;
 		case 'Cloaca-Cola Uniform':	
@@ -2487,49 +2495,17 @@ function at_inventory() {
 // and this is where we add all the nifty little links after equipping something.
 		else if (resultsText.indexOf("You equip an item") != -1) {
 			bText = document.getElementsByTagName('b')[1];
-			//var item = resultsText.substring(14);
 			var item = bText.textContent;
-			GM_log("item="+item);
 			process_equip(bText, $('b:eq(1)'));
 		}
 		else if (resultsText.indexOf("Outfit:") != -1) {
-			var outfit = resultsText.split(": ")[1];
-			var equipText = firstTable.rows[1].cells[0]
-				.firstChild.firstChild.firstChild.firstChild;
-			equipText.setAttribute('valign', 'baseline');
+			var outfit = $('b:eq(1)').text();
+//			var outfit = resultsText.split(": ")[1];
+//			var equipText = firstTable.rows[1].cells[0]
+//				.firstChild.firstChild.firstChild.firstChild;
+//			equipText.setAttribute('valign', 'baseline');
+			process_outfit(outfit, $('b:eq(1)'));
 
-			if (outfit.indexOf("Harem Girl") != -1) {
-				equipText.appendChild(AppendLink('[perfume]',inv_use(307)));
-				equipText.appendChild(AppendLink('[knob]', 'cobbsknob.php'));
-			}
-			else if (outfit.indexOf("Goblin Elite") != -1) {
-				equipText.appendChild(AppendLink('[knob]','cobbsknob.php'));
-			}
-			else if (outfit.indexOf("Swashbuckling") != -1) {
-				if (document.referrer.indexOf('council') == -1)
-					equipText.appendChild(AppendLink('[council]', 'council.php'));
-				equipText.appendChild(AppendLink('[island]', 'island.php'));
-			}
-			else if (outfit.indexOf("Filthy Hippy") != -1) {
-				if (document.referrer.indexOf('store.php') != -1)
-					parent.frames[2].location = 'http://' + server + '/store.php?whichstore=h';
-				else equipText.appendChild(AppendLink('[fruit]', 'store.php?whichstore=h'));
-			}
-			else if (outfit.indexOf("Mining Gear") != -1)
-				equipText.appendChild(AppendLink('[mine]', 'mining.php?mine=1'));
-			else if (outfit.indexOf("Bugbear") != -1) {
-				if (document.referrer.indexOf('store.php') != -1)
-					parent.frames[2].location = 'http://' + server + '/store.php?whichstore=b';
-				else equipText.appendChild(AppendLink('[bakery]', 'store.php?whichstore=b'));
-			}
-			else if (outfit.indexOf("eXtreme") != -1)
-				equipText.appendChild(AppendLink('[trapz0r]', 'trapper.php'));
-			else if (outfit.indexOf("Cloaca-Cola") != -1)
-				equipText.appendChild(AppendLink('[battlefield]', snarfblat(85)));
-			else if (outfit.indexOf("Dyspepsi-Cola") != -1)
-				equipText.appendChild(AppendLink('[battlefield]', snarfblat(85)));
-			else if (outfit.indexOf("Frat Warrior") != -1 || outfit.indexOf("War Hippy") != -1)
-				equipText.appendChild(AppendLink('[island]', 'island.php'));
 		}	
 	}
 }
