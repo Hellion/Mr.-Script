@@ -1,4 +1,4 @@
-{	"version":"1.7.2",
+{	"version":"1.7.3",
 	"url1":"http://userscripts.org/scripts/source/65705.user.js",
 	"url2":"http://noblesse-oblige.org/hellion/scripts/MrScript.user.js",
-	"desc":"<b>Fixed:</b>improved detection of crafting mode (specifically smithing)<br/>ultrahydration notice<br/>link from slopes to peak when eXXXtremity is good<br/>potential bug with travoltan trousers post-purchase<br/>map of mining results works again<br/><br/><b>New:</b>link from Groar to trapper<br/>spoiler links for Mourn<br/>link from bridge to new chasm<br/>"}
+	"desc":"<b>New:</b><br/>convenience links on gaining certain effects<br/>spoilers for Krakrox's Hyboria Quest<br/>links to discoveries on crafting page<br/><b>Fixed:</b>yoinked items' RCM menus work again<br/>all links to the Crackpot Mystic point to his new location<br/>some code refactoring and cleanup<br/>"}
