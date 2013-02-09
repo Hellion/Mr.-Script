@@ -38,7 +38,7 @@
 
 var place = location.pathname.replace(/\/|\.(php|html)$/gi, "").toLowerCase();
 //console.time("Mr. Script @ " + place);
-//GM_log("at:" + place);
+GM_log("at:" + place);
 
 // n.b. version number should always be a 3-digit number.  If you move to 1.9, call it 1.9.0.  Don't go to 1.8.10 or some such.
 var VERSION = 173;
@@ -1872,6 +1872,13 @@ function at_cobbsknob() {
 // ADVENTURE: provide "Explore next square" link when we hit a non-combat in the Hidden City.
 // Also provide extra functionality for certain other noncombats.
 function at_adventure() {
+	//fix for kolproxy futzing with the URL on the first round of combat.
+	if (document.location.search.indexOf("snarfblat") !== -1) {
+		if ($('input').length > 0) {
+			at_fight();
+			return;
+		}
+	}
 	var square=GetCharData("square");
 	SetCharData("square",false);
 	if (square) {
@@ -1883,8 +1890,9 @@ function at_adventure() {
 	switch ($(NCTitle).text()) {
 	case "Rotting Matilda":
 		var cardlink = document.createElement('table');
-		cardlink.innerHTML = '<table class="item" style="float: none" rel="id=1963&s=55&q=0&d=1&g=0&t=1&n=1&m=0&u=u"><tr><td><img src="http://images.kingdomofloathing.com/itemimages/guildapp.gif" alt="dance card" title="dance card" class=hand onClick="descitem(223939661)"></td></tr></table>';
+		cardlink.innerHTML = '<table id="cardlink" class="item" style="float: none" rel="id=1963&s=55&q=0&d=1&g=0&t=1&n=1&m=0&u=u"><tr><td><img src="http://images.kingdomofloathing.com/itemimages/guildapp.gif" alt="dance card" title="dance card" class=hand onClick="descitem(223939661)"></td></tr></table>';
 		NCTitle.append(cardlink);
+		$('#cardlink').attr('rel','id=1963&s=55&q=0&d=1&g=0&t=1&n=1&m=0&p=0&u=u').addClass('item');
 		break;
 	case "It's Always Swordfish":
 		$('<center><br /><a href="adventure.php?snarfblat=160">Adventure Belowdecks</a></center><br />').prependTo($('a:last').parent());
@@ -2414,9 +2422,21 @@ function at_inventory() {
 //				.firstChild.firstChild.firstChild.firstChild;
 //			equipText.setAttribute('valign', 'baseline');
 			process_outfit(outfit, $('b:eq(1)'));
-
-		}	
+		}
+		else if (resultsText.indexOf('acquire an item') != -1) {
+			bText = document.getElementsByTagName('b')[1];
+			var theItem = $(bText).parent().parent().get(0);
+			AddLinks(null, theItem, null, thePath);	
+		}
 	}
+}
+
+//helper function for kolproxy
+function at_inv_use() {
+	at_inventory();
+}
+function at_inv_equip() {
+	at_inventory();
 }
 
 // GALAKTIK: Add use boxes when buying
@@ -3196,7 +3216,10 @@ function at_charpane() {
 		advcount = integer($('a:contains("Adv"):first').parent().next().text());
 
 		var lvlblock = $("center:contains('Lvl.'):first").text();	// this text is always present in compact mode
-		level = lvlblock.match(/Lvl. (\d+)/)[1];
+		//kolproxy fix: icon is suppressed.  look for level the other way if needed.
+		if (lvlblock === undefined) lvlblock = $('td:contains("Level"):first').text();
+		level = 13;
+		if (lvlblock) level = lvlblock.match(/Lvl. (\d+)/)[1];
 		SetCharData("level", level);
 
 		SetCharData("currentHP", curHP); SetCharData("maxHP", maxHP);
@@ -3245,9 +3268,9 @@ function at_charpane() {
 		if (bEff.length>0) bEff.get(0).setAttribute("oncontextmenu",
 			"top.mainpane.location.href='http://" + server +
 			"/uneffect.php'; return false;");
-		if ($('#nudgeblock div:contains("a work in progress")').length > 0) $('#nudgeblock').hide();
 	}	// end full mode processing
 
+	if ($('#nudgeblock div:contains("a work in progress")').length > 0) $('#nudgeblock').hide();
 	// Re-hydrate (0)
 	var temphydr = integer(GetCharData('hydrate'));
 
