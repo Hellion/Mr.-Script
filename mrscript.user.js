@@ -181,7 +181,7 @@ function process_equip(itemname, jnode) {
 							}										break;
 		case "Victor, the Insult Comic Hellhound Puppet":
 		case "observational glasses":
-		case "hilarious comedy prop"		jnode.after(AppendLink('[visit Mourn]','pandamonium.php?action=mourn')); 	break;
+		case "hilarious comedy prop":		jnode.after(AppendLink('[visit Mourn]','pandamonium.php?action=mourn')); 	break;
 	} 
 }	
 
