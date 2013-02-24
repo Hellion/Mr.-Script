@@ -1124,7 +1124,7 @@ function Defaults(revert) {
 		'lab;cobbsknob.php?action=dispensary',
 		'fruit;store.php?whichstore=h']
 
-	var menu2 = ['buy;searchmall.php',
+	var menu2 = ['buy;mall.php',
 		'trade;makeoffer.php',
 		'sell;managestore.php',
 		'collection;managecollection.php',
@@ -1890,9 +1890,9 @@ function at_adventure() {
 	switch ($(NCTitle).text()) {
 	case "Rotting Matilda":
 		var cardlink = document.createElement('table');
-		cardlink.innerHTML = '<table id="cardlink" class="item" style="float: none" rel="id=1963&s=55&q=0&d=1&g=0&t=1&n=1&m=0&u=u"><tr><td><img src="http://images.kingdomofloathing.com/itemimages/guildapp.gif" alt="dance card" title="dance card" class=hand onClick="descitem(223939661)"></td></tr></table>';
+		cardlink.innerHTML = '<table class="item" style="float: none" rel="id=1963&s=55&q=0&d=1&g=0&t=1&n=1&m=0&u=u"><tr><td><img src="http://images.kingdomofloathing.com/itemimages/guildapp.gif" alt="dance card" title="dance card" class=hand onClick="descitem(223939661)"></td></tr></table>';
 		NCTitle.append(cardlink);
-		$('#cardlink').attr('rel','id=1963&s=55&q=0&d=1&g=0&t=1&n=1&m=0&p=0&u=u').addClass('item');
+		$(cardlink).attr('rel','id=1963&s=55&q=0&d=1&g=0&t=1&n=1&m=0&p=0&u=u').addClass('item');
 		break;
 	case "It's Always Swordfish":
 		$('<center><br /><a href="adventure.php?snarfblat=160">Adventure Belowdecks</a></center><br />').prependTo($('a:last').parent());
@@ -1940,7 +1940,8 @@ function at_adventure() {
 		$('<center><a href="manor.php">Go on inside</a></center><br />').prependTo($('a:last').parent());
 		break;
 	case "3 eXXXtreme 4ever 6pack":
-		$('<center><a href="place.php?whichplace=mclargehuge&action=cloudypeak">Open the Peak!</a></center><br />').prependTo($('a:last').parent());
+		$('<center><a href="place.php?whichplace=mclargehuge&action=cloudypeak">Open the Peak!</a></center><br />').appendTo($('p:last').parent());
+//		$('<center><a href="place.php?whichplace=mclargehuge&action=cloudypeak">Open the Peak!</a></center><br />').prependTo($('a:last').parent());
 		break;
 	case "":	// got a "You shouldn't be here" or other reject message... (or an untitled Limerick Dungeon adventure, sigh)
 		$('center table tr td').each(function(){
@@ -2200,12 +2201,12 @@ function at_bhh() {
 	});
 }
 
-function at_searchmall() {
+function at_mall() {
 	$('center table tr td center table:first').prepend('<tr><td><center><a href=managestore.php>Manage your Store</a><br /><br /></center></td></tr>');
 }
 
 function at_managestore() {
-	$('a[href="storelog.php"]').parent().append('<br /><br /><a href=searchmall.php>Search the Mall</a><br />');
+	$('a[href="storelog.php"]').parent().append('<br /><br /><a href=mall.php>Search the Mall</a><br />');
 }
 
 // MALLSTORE: add fun links to (some of) the things you buy!
@@ -5304,7 +5305,7 @@ function at_topmenu() {
 		if (txt == "mountains") a.html("mtns");
 		
 		// change default mall link
-		if ((txt == "mall") && GetPref("malllink") == 1) a.attr("href","searchmall.php");
+		//if ((txt == "mall") && GetPref("malllink") == 1) a.attr("href","searchmall.php");
 
 		// Lair
 		if (txt == "lair") haveLair = 1;
@@ -5656,9 +5657,9 @@ function at_compactmenu() {
 				AddTopOption("Spookyraven Manor", "manor.php", selectItem, selectItem.options[i+2]);
 				len += 2;	// extend loop to cover new options just added.
 			}	
-			if (GetPref('malllink') == 1 && selectItem.options[i].innerHTML == "The Mall") {
-				selectItem.options[i].value = "searchmall.php";
-			}
+//			if (GetPref('malllink') == 1 && selectItem.options[i].innerHTML == "The Mall") {
+//				selectItem.options[i].value = "searchmall.php";
+//			}
 			if (selectItem.options[i].innerHTML.indexOf("Seaside Town") != -1) {
 				AddTopOption("Town: Wrong side","town_wrong.php", selectItem, selectItem.options[i+1]);
 				AddTopOption("Town: Right side","town_right.php", selectItem, selectItem.options[i+2]);
