@@ -153,10 +153,11 @@ function process_effect(effectname, jnode) {
 	switch(effectname) {
 		case 'Filthworm Larva Stench':		jnode.after(AppendLink('[drone chamber (1)]',snarfblat(128))); 			break;
 		case 'Filthworm Drone Stench':		jnode.after(AppendLink('[guard chamber (1)]',snarfblat(129))); 			break;
-		case 'Filthworm Guard Stench':		jnode.after(AppendLink('[Queen! (1)]',snarfblat(130)));				break;
-		case 'Stone-faced':			jnode.after(AppendLink('[hidden temple (1)]',snarfblat(280)));			break;
+		case 'Filthworm Guard Stench':		jnode.after(AppendLink('[Queen! (1)]',snarfblat(130)));				    break;
+		case 'Stone-faced':			        jnode.after(AppendLink('[hidden temple (1)]',snarfblat(280)));			break;
 		case 'Down the Rabbit Hole':		jnode.after(AppendLink('[go down]','rabbithole.php'))
-								.after(AppendLink('[tea party!]','rabbithole.php?action=teaparty'));	break;
+            								.after(AppendLink('[tea party!]','rabbithole.php?action=teaparty'));	break;
+		case 'Knob Goblin Perfume':		    jnode.after(AppendLink('[knob]','cobbsknob.php'));				        break;
 	}
 }
 
@@ -165,22 +166,25 @@ function process_equip(itemname, jnode) {
 	GM_log("doc.ref="+document.referrer);
 	GM_log("itemname="+itemname);
 	switch(itemname) {
-		case 'continuum transfunctioner':	jnode.after(AppendLink('[8-bit realm (1)]',snarfblat(73)));			break;
-		case 'huge mirror shard':		jnode.after(AppendLink('[chamber]','lair6.php?place=1'));			break;
-		case 'snorkel':				jnode.after(AppendLink('[map]',inv_use(26)));					break;
-		case 'pool cue':			jnode.after(AppendLink('[chalk it!]',inv_use(1794)));				break;
-		case "Talisman o' Nam":			jnode.after(AppendLink('[Dome moD]','plains.php'));				break;
-		case 'worm-riding hooks':		jnode.after(AppendLink('[drum!]',inv_use(2328)));				break;
-		case 'Mega Gem':			jnode.after(AppendLink('[Dr. Awkward (1)]',snarfblat(119))); 			break;
-		case 'dingy planks':			jnode.after(AppendLink('[boat]', inv_use(146)));				break; 
-		case "makeshift SCUBA gear": 		jnode.after(AppendLink('[odor]', 'lair2.php?action=odor'));			break;
-		case "Lord SpookyRaven's spectacles": 	if (document.referrer.indexOf('manor3') != -1) {
-								mainpane_goto('/manor3.php');	
-							}										break;
+		case 'continuum transfunctioner':	jnode.after(AppendLink('[8-bit realm (1)]',snarfblat(73)));		break;
+		case 'huge mirror shard':		    jnode.after(AppendLink('[chamber]','lair6.php?place=1'));	    break;
+		case 'snorkel':				        jnode.after(AppendLink('[map]',inv_use(26)));					break;
+		case 'pool cue':			        jnode.after(AppendLink('[chalk it!]',inv_use(1794)));			break;
+		case "Talisman o' Nam":			    jnode.after(AppendLink('[Dome moD]','plains.php'));				break;
+		case 'worm-riding hooks':		    jnode.after(AppendLink('[drum!]',inv_use(2328)));				break;
+		case 'Mega Gem':			        jnode.after(AppendLink('[Dr. Awkward (1)]',snarfblat(119)));	break;
+		case 'dingy planks':			    jnode.after(AppendLink('[boat]', inv_use(146)));				break; 
+		case "makeshift SCUBA gear": 		jnode.after(AppendLink('[odor]', 'lair2.php?action=odor'));		break;
+		case "Lord SpookyRaven's spectacles":
+            if (document.referrer.indexOf('manor3') != -1) {
+            	mainpane_goto('/manor3.php');	
+			}
+            break;
 		case "swashbuckling pants": 	
-							if (document.referrer.indexOf("choice.php") != -1) {
-								bText.parentNode.appendChild(AppendLink('[visit Caronch (1)]',snarfblat(157)));
-							}										break;
+			if (document.referrer.indexOf("choice.php") != -1) {
+				jnode.after(AppendLink('[visit Caronch (1)]',snarfblat(157)));
+			}
+            break;
 		case "Victor, the Insult Comic Hellhound Puppet":
 		case "observational glasses":
 		case "hilarious comedy prop":		jnode.after(AppendLink('[visit Mourn]','pandamonium.php?action=mourn')); 	break;
@@ -190,27 +194,36 @@ function process_equip(itemname, jnode) {
 function process_outfit(outfitname, jnode) {
 //	jnode = $(jnode).parent();
 	switch(outfitname) {
-		case 'Knob Goblin Harem Girl Disguise':	jnode.after(AppendLink('[perfume]',inv_use(307))) 
+		case 'Knob Goblin Harem Girl Disguise':	
+                            jnode.after(AppendLink('[perfume]',inv_use(307))) 
 								.after(AppendLink('[knob]','cobbsknob.php')); 				break;
-		case 'Knob Goblin Elite Guard Uniform':	jnode.after(AppendLink('[knob]','cobbsknob.php')); 				break;
-		case 'Swashbuckling Getup':		jnode.after(AppendLink('[island]','island.php'));				break;
-		case 'Filthy Hippy Disguise':		if (document.referrer.indexOf('store.php') != -1) {
+		case 'Knob Goblin Elite Guard Uniform':	
+                            jnode.after(AppendLink('[knob]','cobbsknob.php')); 				break;
+		case 'Swashbuckling Getup':		
+                            jnode.after(AppendLink('[island]','island.php'));				break;
+		case 'Filthy Hippy Disguise':		
+                            if (document.referrer.indexOf('store.php') != -1) {
 								parent.frames[2].location = 'http://' + server + '/store.php?whichstore=h';
 							} else  {
 								jnode.after(AppendLink('[buy fruit]','store.php?whichstore=h'));
 							}								 		break;
-		case 'Mining Gear':			jnode.after(AppendLink('[dwarf mine]','mining.php?mine=1')); 			break;
-		case 'Bugbear Costume':			if (document.referrer.indexOf('store.php') != -1) {
+		case 'Mining Gear':			
+                            jnode.after(AppendLink('[dwarf mine]','mining.php?mine=1')); 			break;
+		case 'Bugbear Costume':			
+                            if (document.referrer.indexOf('store.php') != -1) {
 								parent.frames[2].location = 'http://' + server + '/store.php?whichstore=b';
 							} else {
 								jnode.after(AppendLink('[bakery]','store.php?whichstore=b'));
 							}							 			break;
-		case 'eXtreme Cold-Weather Gear':	jnode.after(AppendLink('[Trapper]','trapper.php')); 
+		case 'eXtreme Cold-Weather Gear':	
+                            jnode.after(AppendLink('[Trapper]','trapper.php')); 
 							jnode.after(AppendLink('[hit the slopes (1)]',snarfblat(273))); 		break;
 		case 'Cloaca-Cola Uniform':	
-		case 'Dyspepsi-Cola Uniform':		jnode.after(AppendLink('[battlefield (1)]',snarfblat(85)));			break;
+		case 'Dyspepsi-Cola Uniform':		
+                            jnode.after(AppendLink('[battlefield (1)]',snarfblat(85)));			break;
 		case 'Frat Warrior Fatigues':
-		case 'War Hippy Fatigues':		jnode.after(AppendLink('[island]','island.php')); 				break;
+		case 'War Hippy Fatigues':		
+                            jnode.after(AppendLink('[island]','island.php')); 				break;
 	} 
 }
 
@@ -407,9 +420,10 @@ function FindMaxQuantity(item, howMany, deefault, safeLevel) {
 // GM_GET: Stolen gleefully from OneTonTomato. Tee-hee!
 function GM_get(dest, callback, errCallback) {	
 	GM_xmlhttpRequest({
-	  method: 'GET',
-	  url: 'http://' + dest,
-	  	onerror:function(error) {
+	    method: 'GET',
+	    url: 'http://' + dest,
+        headers: {"Referer": "http://" + location.host + "/game.php"},
+    	onerror:function(error) {
 			if (typeof(errCallback)=='function' ) {
 				callback(details.responseText);
 			} else { 
@@ -2274,6 +2288,10 @@ function at_beerpong() {
 
 // INVENTORY: Add shortcuts when equipping outfits
 function at_inventory() {
+//    var body = $('body');
+//    for (var foo = 0; foo < 10; foo++) {
+//        body.append(AppendLink('[f'+foo+']','inventory.php?which=f'+foo));
+//    }
 	var firstTable = document.getElementsByTagName('table')[0];
 
 	var gearpage = 0; // Man, this is annoying.
@@ -4235,7 +4253,7 @@ function at_lair1() {
 			else if (ptxt.indexOf("Spirit") != -1) p.appendChild(AppendLink('[pygmy pygment]',inv_use(2242)));
 			else if (ptxt.indexOf("Porcupine") != -1) p.appendChild(AppendLink('[super-spiky hair gel]',inv_use(587)));
 			else if (ptxt.indexOf("Viper") != -1) p.appendChild(AppendLink('[adder bladder]',inv_use(2056)));
-			else if (ptxt.indexOf("Locked Gate") != -1) p.appendChild(AppendLink('[black no. 2]',inv_use(2069)));
+			else if (ptxt.indexOf("Locked Gate") != -1) p.appendChild(AppendLink('[Black No. 2]',inv_use(2059)));
 	// gate 2:
 			else if (ptxt.indexOf("Machismo") != -1) p.appendChild(AppendLink('[meleegra]',inv_use(1158)));
 			else if (ptxt.indexOf("Flame") != -1) p.appendChild(AppendLink('[jabanero gum]',inv_use(300)));
@@ -5382,7 +5400,7 @@ function at_topmenu() {
 					'target="mainpane">inv</a>')
 				.before('<a href="inventory.php?which=2" ' +
 					'target="mainpane">ent</a>');
-			a.after(' <a href="inventory.php?which=4" target="mainpane">fav</a>');	// 21Dec09 Hellion: added favorites link.
+			a.after(' <a href="inventory.php?which=f0" target="mainpane">fav</a>');	// 21Dec09 Hellion: added favorites link.
 		}
 
 		// Quests
@@ -5623,7 +5641,7 @@ function at_compactmenu() {
 				selectItem.options[i].value = "inventory.php?which=1";
 				AddTopOption("Equipment", "inventory.php?which=2", selectItem, selectItem.options[i+1]);
 				AddTopOption("Miscellaneous", "inventory.php?which=3", selectItem, selectItem.options[i+2]);
-				AddTopOption("Favorites","inventory.php?which=4",selectItem,selectItem.options[i+3]);
+				AddTopOption("Favorites","inventory.php?which=f0",selectItem,selectItem.options[i+3]);
 				if (GetPref('shortlinks') % 2 == 0) break;
 			}
 // if splitquest pref is set, make Quests go to Current Quests and add a Notes entry.
