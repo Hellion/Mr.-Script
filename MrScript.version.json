@@ -1,4 +1,4 @@
-{	"version":"1.7.3",
+{	"version":"1.7.4",
 	"url1":"http://userscripts.org/scripts/source/65705.user.js",
 	"url2":"http://noblesse-oblige.org/hellion/scripts/MrScript.user.js",
-	"desc":"<b>New:</b><br/>convenience links on gaining certain effects<br/>spoilers for Krakrox's Hyboria Quest<br/>links to discoveries on crafting page<br/><b>Fixed:</b>yoinked items' RCM menus work again<br/>all links to the Crackpot Mystic point to his new location<br/>some code refactoring and cleanup<br/>"}
+	"desc":"<b>Fixed:</b><br/>references to Giant Castle point to new castle locations<br/>fix bug with GMOB counter<br/>remove searchmall.php<br/>fix 'open-the-peak' link after exxxtremity<br/>black no. 2 had wrong ID in tower spoilers<br/>add referer in GM_Get header for KoLMafia<br/>change 'fav' inventory link to use new f0 ID<br/>"}
