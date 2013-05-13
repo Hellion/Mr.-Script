@@ -709,7 +709,9 @@ function AddLinks(descId, theItem, formWhere, path) {
 			else addWhere.append(AppendLink('[Knoll (1)]', snarfblat(18)));
 			break;
 			
-		case  727:	case 728: 																// Hedge maze puzzle piece/key
+        case  609:                                                              // S.O.C.K
+            addWhere.append(AppendLink('[giant Basement (1)]',snarfblat(322)));     break;
+		case  727:	case 728: 													// Hedge maze puzzle piece/key
 
 			addWhere.append(AppendLink('[maze]', 'hedgepuzzle.php')); break;
 
@@ -2119,8 +2121,12 @@ function at_choice() {
 			$('a [href="adventure.php?snarfblat=27"]').attr('href',snarfblat(157)).text("Adventure in BARRRNEY'S BARRR");
 		} else if (p0text.indexOf("go tell Bart") != -1) {  // the Tavern Faucet
 			p0.appendChild(AppendLink('[go on already]','tavern.php?place=barkeep'));
-		} else if (choicetext.indexOf("Procrastination Giant's turn to guard") != -1) {	// castle wheel ready for giant castle map
-			p0.appendChild(AppendLink('[use giant castle map]',inv_use(667))); 
+//		} else if (choicetext.indexOf("Procrastination Giant's turn to guard") != -1) {	// castle wheel ready for giant castle map
+//			p0.appendChild(AppendLink('[use giant castle map]',inv_use(667))); 
+        } else if (choicetext.indexOf("Goth Giant's turn to take out") != -1) { // finished new castle wheel
+            $('a:contains("Adventure Again")')
+                .prepend('<center><a href=' + snarfblat(324) +
+                '>Adventure Again (The Castle in the Clouds in the Sky (Top Floor))</a></center>');
 		} else if (p0text.indexOf("You step up behind the man") != -1) {	// found Mr. Alarm
 			$('<center><a href="adventure.php?snarfblat=100">Adventure in WHITEY\'S GROVE</a></center><br />').prependTo($('a:last').parent());
 			// add a link to cooking here.
@@ -5491,7 +5497,6 @@ function at_topmenu() {
 				AddTopLink(toprow1, tarjay, zplit[1], zplit[0], 1);
 			} else break;
 		}
-
 		toprow1.appendChild(document.createElement('br'));
 		var poop = document.createElement('span'); poop.innerHTML = "&nbsp;";
 		toprow1.appendChild(poop);
@@ -5505,13 +5510,34 @@ function at_topmenu() {
 		AddTopLink(toprow1, 'mainpane', 'guild.php', 'guild', 1);
 		if (haveLair == 1 && integer(GetCharData('level')) == 13)
 			AddTopLink(toprow1, 'mainpane', 'lair2.php?action=door', 'door', 1);
-		a = document.createElement('a'); a.innerHTML = "more"; a.setAttribute('href','#');
+
+        a = document.createElement('a');
+        a.innerHTML = '';
+        a.setAttribute('id','florist');
+        a.setAttribute('href','#');
+        a.setAttribute('target','mainpane');
+        toprow1.appendChild(a);
+        GM_get(server+'/forestvillage.php?action=floristfriar', function(t) {
+            GM_log('friar='+t);
+            if (t.length>10 && t.indexOf("Back to the Distant Woods") == -1) {
+                $('#florist').html('florist')
+                    .attr('href','forestvillage.php?action=floristfriar');
+            }
+        });
+        toprow1.appendChild(document.createTextNode(" "));
+
+		a = document.createElement('a'); 
+        a.innerHTML = "more"; 
+        a.setAttribute('href','#');
 		a.addEventListener('click', function(event) {
 			var tr1 = document.getElementsByName("toprow1")[0];
 			var tr2 = document.getElementsByName("toprow2")[0];
-			tr1.style.display = "none"; tr2.style.display = "inline";
+			tr1.style.display = "none";
+            tr2.style.display = "inline";
 			SetPref('toprow', 2);
-		}, true); toprow1.appendChild(a);
+		}, true);
+        toprow1.appendChild(a);
+        toprow1.appendChild(document.createTextNode(" "));
 
 		toprow2.setAttribute("name","toprow2");
 		if (front != 2) toprow2.setAttribute("style","display: none;");
@@ -5531,13 +5557,18 @@ function at_topmenu() {
 		AddTopLink(toprow2, '_blank', 'donatepopup.php', 'donate', 1);
 		AddTopLink(toprow2, '_blank', 'http://forums.kingdomofloathing.com', 'forums', 1);
 		AddTopLink(toprow2, '_blank', 'radio.php', 'radio', 1);
-		a = document.createElement('a'); a.innerHTML = "more"; a.setAttribute('href','#');
+		
+        a = document.createElement('a');
+        a.innerHTML = "more";
+        a.setAttribute('href','#');
 		a.addEventListener('click', function(event) {
 			var tr2 = document.getElementsByName("toprow2")[0];
 			var tr1 = document.getElementsByName("toprow1")[0];
-			tr2.style.display = "none"; tr1.style.display = "inline";
+			tr2.style.display = "none";
+            tr1.style.display = "inline";
 			SetPref('toprow', 1);
-		}, true); toprow2.appendChild(a);
+		}, true); 
+        toprow2.appendChild(a);
 
 		// Actually add the stuffy-stuff to the span we grabbed earlier
 		weBuildHere.appendChild(toprow1);
