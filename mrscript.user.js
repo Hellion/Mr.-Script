@@ -4827,6 +4827,19 @@ function spoil_place() {
 	}
 }
 
+function spoil_bugbearship() {
+    $('#bb_waste').attr('title','ML:5-8; get/use juicy garbage until comm badge, equip it and adv once more');
+    $('#bb_medbay').attr('title','ML:8-15; kill anesthesiologists until robo-surgeon');
+    $('#bb_sonar').attr('title','ML:25; knobs = 2 / 4 / 8');
+    $('#bb_science').attr('title','ML:45-55; use 10 quantum webs on scientists');
+    $('#bb_morgue').attr('title','ML:60-65; collect tweezers, use in NC');
+    $('#bb_specops').attr('title','ML:90; use UV monocular, flaregun, fluorescent lightbulb, rain-doh green lantern to get more fights');
+    $('#bb_engineering').attr('title','ML:125-140; use 6 drone self-destruct chips on liquid metal bugbears');
+    $('#bb_navigation').attr('title','ML:140-175; defeat 10 N-space assistants');
+    $('#bb_galley').attr('title','ML:220 (+20 per "very"); defeat 10,000(?) ML worth of cavebugbears');
+    $('#bb_bridge').attr('title','ML:280');
+}
+
 function spoil_highlands() {
 	$('#peak1 > a > img').attr('title','ML: 71-78');
 	$('#peak2 > a > img').attr('title','ML: 81-93');
