@@ -714,6 +714,8 @@ function AddLinks(descId, theItem, formWhere, path) {
 		case  727:	case 728: 													// Hedge maze puzzle piece/key
 
 			addWhere.append(AppendLink('[maze]', 'hedgepuzzle.php')); break;
+        case 1766:                                                              // ballroom key
+            addWhere.append(AppendLink('[ballroom (1)]',snarfblat(109))); break;
 
 		case 2267: 																// Mega Gem
 			addWhere.append(AppendLink('[equip as acc2]', 'inv_equip.php?pwd='+ pwd +'&'+
@@ -865,6 +867,8 @@ function AddLinks(descId, theItem, formWhere, path) {
 			addWhere.append(AppendLink('[visit 37]','cobbsknob.php?level=3&action=cell37')); break;
 		case 5193:	case 5194:													// 11-inch knob sausage, exorcised sandwich
 			addWhere.append(AppendLink('[back to the guild]','guild.php?place=challenge')); break;
+        case 5221:                                                              // fat loot token
+            addWhere.append(AppendLink('[spend it!]','shop.php?whichshop=damachine'));       break;
 		case 1764:												// spookyraven library key
 			addWhere.append(AppendLink('[library (1)]',snarfblat(104))); break;
 		case 5571:
@@ -1554,6 +1558,12 @@ function at_fight() {
 		SetCharData("special",0);
 		var square=GetCharData("square");
 		SetCharData("square",false);
+        //special: friar check:
+        if (GetCharData("hasflorist") === true) {
+            if ($('img[src*=friarplant]').length == 0) {
+                $('#monpic').parent().parent().append('<td><a href="forestvillage.php?action=floristfriar">Flower Power!</a></td>');
+            }
+        }
 		// Location-specific stuff:
 		if (square) {
 			if (square.indexOf("hiddencity") != -1) {  // add "explore next square" link
@@ -2124,9 +2134,9 @@ function at_choice() {
 //		} else if (choicetext.indexOf("Procrastination Giant's turn to guard") != -1) {	// castle wheel ready for giant castle map
 //			p0.appendChild(AppendLink('[use giant castle map]',inv_use(667))); 
         } else if (choicetext.indexOf("Goth Giant's turn to take out") != -1) { // finished new castle wheel
-            $('a:contains("Adventure Again")')
+            $('a:last').parent()
                 .prepend('<center><a href=' + snarfblat(324) +
-                '>Adventure Again (The Castle in the Clouds in the Sky (Top Floor))</a></center>');
+                '>Adventure Again (The Castle in the Clouds in the Sky (Top Floor))</a></center><br/>');
 		} else if (p0text.indexOf("You step up behind the man") != -1) {	// found Mr. Alarm
 			$('<center><a href="adventure.php?snarfblat=100">Adventure in WHITEY\'S GROVE</a></center><br />').prependTo($('a:last').parent());
 			// add a link to cooking here.
@@ -4822,22 +4832,23 @@ function spoil_place() {
 	whichplace = whichplace.split('&',1)[0];	//?whichplace=foo&action=bar -> ?whichplace=foo
 	whichplace = whichplace.split('=',2)[1];	//?whichplace=foo -> foo
 	var handler = global["spoil_" + whichplace];
+    GM_log("spoiling place: " + whichplace);
 	if (handler && typeof handler == "function") {
 		handler();
 	}
 }
 
 function spoil_bugbearship() {
-    $('#bb_waste').attr('title','ML:5-8; get/use juicy garbage until comm badge, equip it and adv once more');
-    $('#bb_medbay').attr('title','ML:8-15; kill anesthesiologists until robo-surgeon');
-    $('#bb_sonar').attr('title','ML:25; knobs = 2 / 4 / 8');
-    $('#bb_science').attr('title','ML:45-55; use 10 quantum webs on scientists');
-    $('#bb_morgue').attr('title','ML:60-65; collect tweezers, use in NC');
-    $('#bb_specops').attr('title','ML:90; use UV monocular, flaregun, fluorescent lightbulb, rain-doh green lantern to get more fights');
-    $('#bb_engineering').attr('title','ML:125-140; use 6 drone self-destruct chips on liquid metal bugbears');
-    $('#bb_navigation').attr('title','ML:140-175; defeat 10 N-space assistants');
-    $('#bb_galley').attr('title','ML:220 (+20 per "very"); defeat 10,000(?) ML worth of cavebugbears');
-    $('#bb_bridge').attr('title','ML:280');
+    $('#bb_waste > a > img').attr('title','ML:5-8; get/use juicy garbage until comm badge, equip it and adv once more');
+    $('#bb_medbay > a > img').attr('title','ML:8-15; kill anesthesiologists until robo-surgeon');
+    $('#bb_sonar > a > img').attr('title','ML:25; knobs = 2 / 4 / 8');
+    $('#bb_science > a > img').attr('title','ML:45-55; use 10 quantum webs on scientists');
+    $('#bb_morgue > a > img').attr('title','ML:60-65; collect tweezers, use in NC');
+    $('#bb_specops > a > img').attr('title','ML:90; use UV monocular, flaregun, fluorescent lightbulb, rain-doh green lantern to get more fights');
+    $('#bb_engineering > a > img').attr('title','ML:125-140; use 6 drone self-destruct chips on liquid metal bugbears');
+    $('#bb_navigation > a > img').attr('title','ML:140-175; defeat 10 N-space assistants');
+    $('#bb_galley > a > img').attr('title','ML:220 (+20 per "very"); defeat 10,000(?) ML worth of cavebugbears');
+    $('#bb_bridge > a > img').attr('title','ML:280');
 }
 
 function spoil_highlands() {
@@ -5535,6 +5546,9 @@ function at_topmenu() {
             if (t.length>10 && t.indexOf("Back to the Distant Woods") == -1) {
                 $('#florist').html('florist')
                     .attr('href','forestvillage.php?action=floristfriar');
+                SetCharData("hasflorist",true);
+            } else {
+                SetCharData("hasflorist",false);
             }
         });
         toprow1.appendChild(document.createTextNode(" "));
