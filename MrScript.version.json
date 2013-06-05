@@ -1,4 +1,4 @@
-{	"version":"1.7.4",
+{	"version":"1.7.5",
 	"url1":"http://userscripts.org/scripts/source/65705.user.js",
 	"url2":"http://noblesse-oblige.org/hellion/scripts/MrScript.user.js",
-	"desc":"<b>Fixed:</b><br/>references to Giant Castle point to new castle locations<br/>fix bug with GMOB counter<br/>remove searchmall.php<br/>fix 'open-the-peak' link after exxxtremity<br/>black no. 2 had wrong ID in tower spoilers<br/>add referer in GM_Get header for KoLMafia<br/>change 'fav' inventory link to use new f0 ID<br/>"}
+	"desc":"<b>New</b><br/>link to Florist in topmenu<br/>link to florist after combat if no flowers present<br/>bugbear spoilers<br/>fat loot token links to vending machine<br/>"}
