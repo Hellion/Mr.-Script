@@ -871,6 +871,8 @@ function AddLinks(descId, theItem, formWhere, path) {
             addWhere.append(AppendLink('[spend it!]','shop.php?whichshop=damachine'));       break;
 		case 1764:												// spookyraven library key
 			addWhere.append(AppendLink('[library (1)]',snarfblat(104))); break;
+        case 5570:                                                              // ninja carabiner
+            addWhere.append(AppendLink('[Open the Peak!]',to_place('mclargehuge&action=cloudypeak'))); break;
 		case 5571:
 			addWhere.append(AppendLink('[visit the John]',to_place('mclargehuge&action=trappercabin'))); break;
 		case 4029:		// Hyboria: memory of a grappling hook
@@ -2128,7 +2130,9 @@ function at_choice() {
 		if (p0text.indexOf("actually a book.") != -1) {	// The Oracle
 			p0.appendChild(AppendLink('[go ahead, read it already]',inv_use(818))); 
 		} else if (p0text.indexOf("a new pledge") != -1) {	// Orcish Frat House Blueprints adventure
-			$('a [href="adventure.php?snarfblat=27"]').attr('href',snarfblat(157)).text("Adventure in BARRRNEY'S BARRR");
+			$('a [href="adventure.php?snarfblat=27"]')
+                .attr('href',snarfblat(157))
+                .text("Adventure in BARRRNEY'S BARRR");
 		} else if (p0text.indexOf("go tell Bart") != -1) {  // the Tavern Faucet
 			p0.appendChild(AppendLink('[go on already]','tavern.php?place=barkeep'));
 //		} else if (choicetext.indexOf("Procrastination Giant's turn to guard") != -1) {	// castle wheel ready for giant castle map
@@ -2138,7 +2142,8 @@ function at_choice() {
                 .prepend('<center><a href=' + snarfblat(324) +
                 '>Adventure Again (The Castle in the Clouds in the Sky (Top Floor))</a></center><br/>');
 		} else if (p0text.indexOf("You step up behind the man") != -1) {	// found Mr. Alarm
-			$('<center><a href="adventure.php?snarfblat=100">Adventure in WHITEY\'S GROVE</a></center><br />').prependTo($('a:last').parent());
+			$('<center><a href="adventure.php?snarfblat=100">Adventure in WHITEY\'S GROVE</a></center><br />')
+                .prependTo($('a:last').parent());
 			// add a link to cooking here.
 		} else if (p0text.indexOf("clutching your pants triumphantly") != -1) { // AT guild-opening quest
 			p0.appendChild(AppendLink('[back to the guild]','guild.php?place=challenge'));
@@ -2146,11 +2151,14 @@ function at_choice() {
 			$('a:contains("Adventure Again (McMillicancuddy")')
 				.prepend('<center><a href=adventure.php?snarfblat=141>Go to the Pond</a></center><br />');
 		} else if (p0text.indexOf('children Stephen and Elizabeth') != -1) {
-			$('<center><a href="adventure.php?snarfblat=103">Adventure in The Conservatory</a></center><br />').prependTo($('a:last').parent());
+			$('<center><a href="adventure.php?snarfblat=103">Adventure in The Conservatory</a></center><br />')
+                .prependTo($('a:last').parent());
 		} else if (p0text.indexOf("you find yourself face to face with... yourself") != -1) {
 			var saidgmob = GetCharData("saidbeeguy");
 			if (saidgmob == undefined) saidgmob = 0;
-			$('p:last').append("<br /><font color='blue'>You have said 'Guy made of bees' " + saidgmob + " times.</font><br />");
+			$('p:last')
+                .append("<br /><font color='blue'>You have said 'Guy made of bees' " 
+                    + saidgmob + " times.</font><br />");
 		} else if (choicetext.indexOf("Guy made of bees.") != -1) {
 			var gmob = GetCharData("saidbeeguy");
 			if ((gmob == undefined) || (gmob == 0)) gmob = 1;
@@ -2158,6 +2166,9 @@ function at_choice() {
 			SetCharData("saidbeeguy",gmob);
 		} else if (p0text.indexOf("metal staircase descending from") != -1) {
 			p0.appendChild(AppendLink('[go upstairs]','manor2.php'));
+        } else if (p0text.indexOf("weird pink-headed guys") != -1) { // big brother sea monkey
+            $('<center><a href="monkeycastle.php?who=1">See Little Brother</a></center><br />')
+                .prependTo($('a:contains("Adventure Again")').parent());
 		} else {
 			var kText = [["The lever slides down and stops","L"],
 					["some sort of intervention was called","N"],
@@ -3240,7 +3251,9 @@ function at_charpane() {
 	'c69907':297,	// temporary amnesia
 	'9a12b9':301,	// Cunctatitis
 	'ebaff6':357,	// Absinthe-minded
-	'91635b':331	// On The Trail
+	'91635b':331,	// On The Trail
+    'aa5dbf':510,   // Shape Of...Mole!
+    '17c22c':549    // Fishy
 	};
 
 	SetData("charname",bText[0].textContent);
@@ -3419,6 +3432,16 @@ function at_charpane() {
 					else { fontA = ''; fontB = ''; }
 					img.parentNode.nextSibling.innerHTML = '<a target=mainpane href=wormwood.php>' + fontA + '<b>' + img.parentNode.nextSibling.innerHTML + '</b>' + fontB + '</a>';
 					break;
+                case 510:
+                    GM_log("molehill!");
+                    $(img).parent().next().children('font').wrap('<a target=mainpane href="mountains.php" />');
+                    break;
+                case 549: 
+                    var fishyturns = img.parentNode.nextSibling.textContent;
+                    if (/\(1\)/.test(fishyturns)) {  // last turn of fishy?
+                        $(img).parent().next().wrap('<font color="red" />');
+                    }
+
 					
 				case 189: case 190: case 191: case 192: case 193: 
 					SetCharData("phial", effNum);
@@ -4832,10 +4855,25 @@ function spoil_place() {
 	whichplace = whichplace.split('&',1)[0];	//?whichplace=foo&action=bar -> ?whichplace=foo
 	whichplace = whichplace.split('=',2)[1];	//?whichplace=foo -> foo
 	var handler = global["spoil_" + whichplace];
-    GM_log("spoiling place: " + whichplace);
+    GM_log("spoiling place: [" + whichplace + "]");
 	if (handler && typeof handler == "function") {
 		handler();
 	}
+}
+
+function spoil_canadia() {
+    $('#lc_outskirts > a > img').attr('title','ML: 2-3');
+    $('#lc_camp > a > img').attr('title','ML: 35-40');
+}
+
+function spoil_marais() { 
+    $('#swamp1 > a > img').attr('title','ML: 14-20');
+    $('#swamp2 > a > img').attr('title','ML: 14-20');
+    $('#swamp3 > a > img').attr('title','ML: 14-20');
+    $('#swamp4 > a > img').attr('title','ML: 14-20');
+    $('#swamp5 > a > img').attr('title','ML: 14-20');
+    $('#swamp6 > a > img').attr('title','ML: 14-20');
+    $('#swamp7 > a > img').attr('title','ML: 14-20');
 }
 
 function spoil_bugbearship() {
@@ -5157,14 +5195,14 @@ function spoil_mclargehuge() {
 	});
 }
 
-function spoil_canadia() {
-	$('img').each(function() {
-		var ml = null; var src = this.getAttribute('src');
-		if (src.indexOf("olcamp") != -1) ml = '2-3';
-		else if (src.indexOf("lcamp") != -1) ml = '35-40';
-		if (ml) this.setAttribute('title','ML: '+ml);
-	});
-}
+//function spoil_canadia() {
+//	$('img').each(function() {
+//		var ml = null; var src = this.getAttribute('src');
+//		if (src.indexOf("olcamp") != -1) ml = '2-3';
+//		else if (src.indexOf("lcamp") != -1) ml = '35-40';
+//		if (ml) this.setAttribute('title','ML: '+ml);
+//	});
+//}
 
 function spoil_cave() {			// dark and dank and sinister cave, that is...
 	$('img[src*="chamberbottom"]').attr('title','ML: 20-25');
