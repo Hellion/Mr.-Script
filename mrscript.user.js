@@ -2077,6 +2077,10 @@ function at_guild() {
 		break;
 		case "?place=challenge":	
 			//add links here for going to haunted pantry, sleazy back alley, or Cobb's Knob.
+            if ((tdtext.indexOf("So you wanna join the Department of Shadowy") != -1) ||    // quest opener
+                (tdtext.indexOf("manage to steal your own pants") != -1)) {                 // not-done-yet
+                $('p:last').append(AppendLink('[back alley (1)]',snarfblat(112)));
+            } 
 		break;
 	}
 }
@@ -4867,13 +4871,13 @@ function spoil_canadia() {
 }
 
 function spoil_marais() { 
-    $('#swamp1 > a > img').attr('title','ML: 14-20');
-    $('#swamp2 > a > img').attr('title','ML: 14-20');
-    $('#swamp3 > a > img').attr('title','ML: 14-20');
-    $('#swamp4 > a > img').attr('title','ML: 14-20');
-    $('#swamp5 > a > img').attr('title','ML: 14-20');
-    $('#swamp6 > a > img').attr('title','ML: 14-20');
-    $('#swamp7 > a > img').attr('title','ML: 14-20');
+    $('#swamp1 > a > img').attr('title','ML: 14-20; open swamp, sanctuargh');   //edge
+    $('#swamp2 > a > img').attr('title','ML: 19-36; open bog, tower');          //swamp
+    $('#swamp3 > a > img').attr('title','ML: 34-51; fight Bunion (axe)');       //bog
+    $('#swamp4 > a > img').attr('title','ML: 27-55; get navigator for beaver maze');    //wizard tower
+    $('#swamp5 > a > img').attr('title','ML: 19-37; open beavers, village');    //sanctuarrrrgh
+    $('#swamp6 > a > img').attr('title','ML: 27-54; fight hippy (wood)');       //beaver
+    $('#swamp7 > a > img').attr('title','ML: 36-58; fight skunk (bouquet)');    //village
 }
 
 function spoil_bugbearship() {
@@ -5822,6 +5826,14 @@ function at_compactmenu() {
 		AddTopOption("Hippy Store", "store.php?whichstore=h", selectItem, 0);
 		AddTopOption("Display Case", "managecollection.php", selectItem, 0);
 		AddTopOption("Hagnk","storage.php",selectItem,0);
+        GM_get(server+'/forestvillage.php?action=floristfriar', function(t) {
+            if (t.length>10 && t.indexOf("Back to the Distant Woods") == -1) {
+                AddTopOption("Florist","forestvillage.php?action=floristfriar",selectItem, 0);
+                SetCharData("hasflorist",true);
+            } else {
+                SetCharData("hasflorist",false);
+            }
+        });
 	}
 }
 
