@@ -136,7 +136,10 @@ function ResultHandler(event) {
 // we need to check multiple <b> nodes here, for cases where there is, for example, multi-stage crafting.
 		var bnode = $(event.target).find('b:eq(1)'); //.parent();
 		var btext = $(event.target).find('b:eq(1)').text();
-		if (mystuff.indexOf("You equip an item:") != -1) {
+        var goHere = checkForRedirects($(event.target).text());
+        if (goHere != "") {
+            mainpane_goto(goHere);
+        } else if (mystuff.indexOf("You equip an item:") != -1) {
 			process_equip(btext, bnode);
 		} else if (mystuff.indexOf("You put on an Outfit:") != -1) {
 			process_outfit(btext, bnode);
@@ -145,7 +148,10 @@ function ResultHandler(event) {
 			AddLinks(null, theItem, null, thePath);	
 		} else if (mystuff.indexOf("You acquire an effect:") != -1) {
 			process_effect(btext, bnode);
-		}
+		} else { // some non-equip/acquire event took place, such as a quest item opening a zone.
+            GM_log("event: resultHandler got " + mystuff);
+            GM_log("btext = " + btext);
+        }
 	}
 }
 
@@ -175,13 +181,17 @@ function process_equip(itemname, jnode) {
 		case 'Mega Gem':			        jnode.after(AppendLink('[Dr. Awkward (1)]',snarfblat(119)));	break;
 		case 'dingy planks':			    jnode.after(AppendLink('[boat]', inv_use(146)));				break; 
 		case "makeshift SCUBA gear": 		jnode.after(AppendLink('[odor]', 'lair2.php?action=odor'));		break;
+        case 'worthless gew-gaw':
+        case 'worthless knick-knack':
+        case 'worthless trinket':           jnode.after(AppendLink('[hermit]','hermit.php'));               break;
+
 		case "Lord SpookyRaven's spectacles":
-            if (document.referrer.indexOf('manor3') != -1) {
+            if (weCameFrom('manor3')) {
             	mainpane_goto('/manor3.php');	
 			}
             break;
 		case "swashbuckling pants": 	
-			if (document.referrer.indexOf("choice.php") != -1) {
+			if (weCameFrom("choice.php")) {
 				jnode.after(AppendLink('[visit Caronch (1)]',snarfblat(157)));
 			}
             break;
@@ -202,16 +212,18 @@ function process_outfit(outfitname, jnode) {
 		case 'Swashbuckling Getup':		
                             jnode.after(AppendLink('[island]','island.php'));				break;
 		case 'Filthy Hippy Disguise':		
-                            if (document.referrer.indexOf('store.php') != -1) {
-								parent.frames[2].location = 'http://' + server + '/store.php?whichstore=h';
+                            if (weCameFrom('store.php')) {
+                                mainpane_goto('/store.php?whichstore=h');
+//								parent.frames[2].location = 'http://' + server + '/store.php?whichstore=h';
 							} else  {
 								jnode.after(AppendLink('[buy fruit]','store.php?whichstore=h'));
 							}								 		break;
 		case 'Mining Gear':			
                             jnode.after(AppendLink('[dwarf mine]','mining.php?mine=1')); 			break;
 		case 'Bugbear Costume':			
-                            if (document.referrer.indexOf('store.php') != -1) {
-								parent.frames[2].location = 'http://' + server + '/store.php?whichstore=b';
+                            if (weCameFrom('store.php')) {
+                                mainpane_goto('/store.php?whichstore=b');
+//								parent.frames[2].location = 'http://' + server + '/store.php?whichstore=b';
 							} else {
 								jnode.after(AppendLink('[bakery]','store.php?whichstore=b'));
 							}							 			break;
@@ -662,6 +674,7 @@ function AddLinks(descId, theItem, formWhere, path) {
 		case 1274: case 1622: case 1650: case 1794: case 1963: case 2258:
 		case 2344: case 2345: case 2346: case 2655: case 2660: case 2950:
 		case 2963: case 2964: case 2965: case 3353:
+        case 3808:                                                              //mer-kin trailmap
 			doWhat = 'oneuse'; break;
 
 		case  146: 															// dinghy plans
@@ -761,7 +774,7 @@ function AddLinks(descId, theItem, formWhere, path) {
 			addWhere.append(AppendLink("[visit Mourn]","pandamonium.php?action=mourn")); break;
 
 		case   23: 																// gum
-			if (document.referrer.indexOf('hermit') != -1 && path == "/store.php") {	// came to the store from the hermit?  use it automatically.
+			if (weCameFrom('hermit') && path == "/store.php") {	// came to the store from the hermit?  use it automatically.
 				//TODO: use the entire purchased amount, instead of just 1.
 				mainpane_goto(inv_use(23));
 			} else 	{	
@@ -770,7 +783,7 @@ function AddLinks(descId, theItem, formWhere, path) {
 			break;
 
 		case   42: 																// hermit permit
-			if (document.referrer.indexOf('hermit') != -1 && path == "/store.php") {
+			if (weCameFrom('hermit') && path == "/store.php") {
 				mainpane_goto('/hermit.php');
 			} else {
 				addWhere.append(AppendLink('[hermit]', 'hermit.php'));
@@ -784,7 +797,7 @@ function AddLinks(descId, theItem, formWhere, path) {
 			break;
 
 		case   40: 																// casino pass
-			if (document.referrer.indexOf('casino') != -1 && path == "/store.php") {
+			if (weCameFrom('casino') && path == "/store.php") {
 				mainpane_goto('/casino.php');
 			} else {
 				addWhere.append(AppendLink('[casino]', 'casino.php'));
@@ -792,7 +805,7 @@ function AddLinks(descId, theItem, formWhere, path) {
 			break;
 
 		case  236: 																// cocktailcrafting kit
-			if (document.referrer.indexOf('craft') != -1 && path == "/store.php") {		// bought via Mr. Script button? auto-use.
+			if (weCameFrom('craft') && path == "/store.php") {		// bought via Mr. Script button? auto-use.
 				mainpane_goto(inv_use(236) + '&bounce=craft.php?a=1');
 			} else {
 				doWhat = 'oneuse';
@@ -800,7 +813,7 @@ function AddLinks(descId, theItem, formWhere, path) {
 			break;
 
 		case  157: 																// E-Z cook oven
-			if (document.referrer.indexOf('craft') != -1 && path == "/store.php") {		// bought via Mr. Script button?  auto-use.
+			if (weCameFrom('craft') && path == "/store.php") {		// bought via Mr. Script button?  auto-use.
 				mainpane_goto(inv_use(157) + '&bounce=craft.php?a=1');
 			} else {
 				doWhat = 'oneuse';
@@ -853,10 +866,12 @@ function AddLinks(descId, theItem, formWhere, path) {
 
 		case 2064: 																// Forged documents
 			addWhere.append(AppendLink('[shore]','shore.php')); break;
-		case 2266:							
-			addWhere.append(AppendLink('[visit Mr. Alarm (1)]',snarfblat(50))); 		break;				// wet stunt nut stew
-		case 2347:	//heart of the filthworm queen
+		case 2266:							                                    // wet stunt nut stew
+			addWhere.append(AppendLink('[visit Mr. Alarm (1)]',snarfblat(50))); break;
+		case 2347:	                                                            //heart of the filthworm queen
 			addWhere.append(AppendLink('[turn it in!]','bigisland.php?place=orchard&action=stand&pwd='+pwd)); break;		
+        case 3471:                                                              // damp old boot
+            addWhere.append(AppendLink('[old man, see?]','oldman.php')); break;
 		case 4621: 																// Game Grid Token
 			addWhere.append(AppendLink('[arcade]','arcade.php')); break;
 			
@@ -869,7 +884,7 @@ function AddLinks(descId, theItem, formWhere, path) {
 			addWhere.append(AppendLink('[back to the guild]','guild.php?place=challenge')); break;
         case 5221:                                                              // fat loot token
             addWhere.append(AppendLink('[spend it!]','shop.php?whichshop=damachine'));       break;
-		case 1764:												// spookyraven library key
+		case 1764:												                // spookyraven library key
 			addWhere.append(AppendLink('[library (1)]',snarfblat(104))); break;
         case 5570:                                                              // ninja carabiner
             addWhere.append(AppendLink('[Open the Peak!]',to_place('mclargehuge&action=cloudypeak'))); break;
@@ -1269,8 +1284,8 @@ function AddToTopOfMain(newElement,refDocument) {
 // was main_c
 function at_main() {
 	FindHash();
-	setTimeout("if (frames[0].location == 'about:blank')" +
-             "  frames[0].location = 'topmenu.php'", 1500);	// fix for top menu not always loading properly
+	setTimeout("if (top.frames[0].location == 'about:blank')" +
+             " top.frames[0].location = 'topmenu.php'", 1500);	// fix for top menu not always loading properly
 	if (GetCharData("plungeraccess") == undefined || GetCharData("plungeraccess") == 0) {	// not set yet?  go check.
 		GM_get(server + "/knoll.php",function(response) {
 			if (response != "")	{	
@@ -1863,7 +1878,7 @@ function at_hiddencity() {
 		if ((stone != undefined) && (stone != '')) {
 			$('option:not([value="'+stone+'"]):not([value="'+ball[altar]+'"])').remove();
 			$('select[name="whichitem"]').attr('style','color:green');	// mark as ID'd
-			$('option:[value="'+stone+'"]').attr('selected','selected');// select the right stone
+			$('option[value="'+stone+'"]').attr('selected','selected');// select the right stone
 		} else {
 			$('option:not([value="2174"]):not([value="2175"]):not([value="2176"]):not([value="2177"]):not([value="'+ball[altar]+'"])').remove();
 		}
@@ -2319,10 +2334,6 @@ function at_beerpong() {
 
 // INVENTORY: Add shortcuts when equipping outfits
 function at_inventory() {
-//    var body = $('body');
-//    for (var foo = 0; foo < 10; foo++) {
-//        body.append(AppendLink('[f'+foo+']','inventory.php?which=f'+foo));
-//    }
 	var firstTable = document.getElementsByTagName('table')[0];
 
 	var gearpage = 0; // Man, this is annoying.
@@ -2432,63 +2443,22 @@ function at_inventory() {
 			}	
 		}
 	} // equippage
+// this is where we go back to a useful location if we've done/used something elsewhere that caused the inventory page to load.
 	if (GetPref('shortlinks') > 1 && firstTable.rows[0].textContent == "Results:") {
 		var resultsText = firstTable.rows[1].textContent, bText;
-// this is where we go back to a useful location if we've done/used something elsewhere that caused the inventory page to load.
-		if (resultsText.indexOf("ladder into the Bat Hole") != -1 &&
-			document.referrer.indexOf('bathole.php') != -1)	// used a sonar at the bathole
-			parent.frames[2].location =
-				'http://' + server + '/bathole.php';
-		else if (resultsText.indexOf("cheap ratchet") != -1 &&
-			document.referrer.indexOf('pyramid.php') != -1)	// used a tomb ratchet at the pyramid
-			parent.frames[2].location =
-				'http://' + server + '/pyramid.php';
-		else if (resultsText.indexOf("duck talk") != -1) {	// used the giant castle map successfully
-			bText = document.getElementsByTagName('b')[1];
-			if (bText.textContent == "quantum egg") {
-				bText.parentNode.appendChild(AppendLink('[rowboat]',
-				'craft.php?mode=combine&action=craft&a=652&b=609&pwd=' + pwd + '&quantity=1'));
-				GoGoGadgetPlunger();
-			}	
-		}
-		else if (resultsText.indexOf("All items unequipped") != -1 &&
-			document.referrer.indexOf('lair6.php') != -1)	// clicked the 'get nekkid' link at the gash
-		{	
-			parent.frames[2].location = 'http://'+ server + '/lair6.php';
-		} 
-		else if (resultsText.indexOf("All items unequipped") != -1 &&
-			document.referrer.indexOf('lair1.php') != -1)	// clicked the 'get nekkid' link at the NS entrance cavern
-		{	
-			parent.frames[2].location = 'http://'+ server + '/lair1.php';
-		}
- 		else if (resultsText.indexOf("You discard your Instant Karma") != -1 && 
-			document.referrer.indexOf('lair6.php') != -1)	// clicked the 'discard karma' link at the gash
-		{	
-			parent.frames[2].location = 'http://' + server + '/lair6.php';
-		}
-		else if (resultsText.indexOf("worthless") != -1)	// acquire a worthless item from chewing-gum-on-a-string
-		{	
-			bText = document.getElementsByTagName('b')[1];
-			bText.parentNode.appendChild(AppendLink('[hermit]','hermit.php'));
-		}
-		else if (resultsText.indexOf("a tiny black hut with a sign") != -1)	// successfully used black market map
-		{
-			bText = document.getElementsByTagName('blockquote')[0];
-			bText.appendChild(AppendLink('[to market, to market]','store.php?whichstore=l'));
-		}
+        var goHere = checkForRedirects(resultsText);
+        if (goHere != "") {
+            mainpane_goto(goHere);
+//            parent.frames[2].location = 'http://' + server + goHere;
+        } 
 // and this is where we add all the nifty little links after equipping something.
 		else if (resultsText.indexOf("You equip an item") != -1) {
 			GM_log("calling process_equip from at_inventory");
 			bText = document.getElementsByTagName('b')[1];
-			//var item = bText.textContent;
 			process_equip(bText.textContent, $('b:eq(1)'));
 		}
 		else if (resultsText.indexOf("Outfit:") != -1) {
 			var outfit = $('b:eq(1)').text();
-//			var outfit = resultsText.split(": ")[1];
-//			var equipText = firstTable.rows[1].cells[0]
-//				.firstChild.firstChild.firstChild.firstChild;
-//			equipText.setAttribute('valign', 'baseline');
 			process_outfit(outfit, $('b:eq(1)'));
 		}
 		else if (resultsText.indexOf('acquire an item') != -1) {
@@ -2497,6 +2467,34 @@ function at_inventory() {
 			AddLinks(null, theItem, null, thePath);	
 		}
 	}
+}
+
+function checkForRedirects(resultsText) {
+    var goloc = "";
+
+    if (resultsText.indexOf("ladder into the Bat Hole") != -1 &&
+		weCameFrom('bathole.php'))	// used a sonar at the bathole
+	        goloc = '/bathole.php';
+	else if (resultsText.indexOf("cheap ratchet") != -1 &&
+		weCameFrom('pyramid.php'))	// used a tomb ratchet at the pyramid
+    		goloc = '/pyramid.php';
+	else if (resultsText.indexOf("All items unequipped") != -1 &&
+		weCameFrom('lair6.php'))	// clicked the 'get nekkid' link at the gash
+		    goloc = '/lair6.php';
+	else if (resultsText.indexOf("All items unequipped") != -1 &&
+		weCameFrom('lair1.php'))	// clicked the 'get nekkid' link at the NS entrance cavern
+	    	goloc = '/lair1.php';
+	else if (resultsText.indexOf("You discard your Instant Karma") != -1 && 
+		weCameFrom('lair6.php'))	// clicked the 'discard karma' link at the gash
+    		goloc = '/lair6.php';
+	else if (resultsText.indexOf("a tiny black hut with a sign") != -1)	// successfully used black market map
+        goloc = '/store.php?whichstore=l';
+    return goloc;
+}
+
+function weCameFrom(somepage) {
+    if (document.referrer.indexOf(somepage) != -1) return true;
+    else return false;
 }
 
 //helper function for kolproxy
@@ -2519,9 +2517,11 @@ function at_galaktik() {
 		if (GetPref('docuse') == 1 && docG < 233) {	// 231=unguent, 232=ointment.  we can auto-use those.
 			var sanitycheck = FindMaxQuantity(docG, num, 0, 0) + 1;
 			if (num > sanitycheck) num = sanitycheck;
-			parent.frames[2].location = 'http://' + server +
+//			parent.frames[2].location = 'http://' + server +
+            mainpane_goto(
 			'/multiuse.php?action=useitem&quantity=' + num +
-			'&pwd=' + pwd + '&whichitem=' + docG;
+			'&pwd=' + pwd + '&whichitem=' + docG
+            );
 		} else {
 	//		AppendUseBox(docG, 0, 1, row.find('td center').get(0));
 	//		if (num > 1) NumberLink($('b:eq(1)').get(0));
@@ -2637,8 +2637,9 @@ function at_store() {
 				bText.parent().append(AppendLink('[ply]', 'craft.php?mode=jewelry'));
 				break;
 			case 's':		// everything from the meatsmith is smithable.
-				if (document.referrer.indexOf('craft') != -1)
-					parent.frames[2].location = 'http://' + server + '/craft.php?mode=smith';
+				if (weCameFrom('craft'))    //did we just buy a hammer?  go smithing.
+                    mainpane_goto('/craft.php?mode=smith');
+//					parent.frames[2].location = 'http://' + server + '/craft.php?mode=smith';
 				bText.parent().append(AppendLink('[smith]', 'craft.php?mode=smith'));
 				break;
 			case 'h':		// everything from the hippy is cook/mix/stillable.
@@ -5151,13 +5152,22 @@ function spoil_pandamonium()
 }
 
 function spoil_beanstalk() {
-	$('img').each(function() {
-		var ml = null; var src = this.getAttribute('src');
-		if (src.indexOf("hole") != -1) ml = '151-169';
-		else if (src.indexOf("castle") != -1) ml = '125-146';
-		else if (src.indexOf("airship") != -1) ml = '91-120';
-		if (ml) this.setAttribute('title','ML: '+ml);
-	});
+    $('#stalk_airship > a > img').attr('title','ML: 91-120');
+    $('#stalk_hole > a > img').attr('title','ML: 151-169');
+// old beanstalk:
+//	$('img').each(function() {
+//		var ml = null; var src = this.getAttribute('src');
+//		if (src.indexOf("hole") != -1) ml = '151-169';
+//		else if (src.indexOf("castle") != -1) ml = '125-146';
+//		else if (src.indexOf("airship") != -1) ml = '91-120';
+//		if (ml) this.setAttribute('title','ML: '+ml);
+//	});
+}
+
+function spoil_giantcastle() {
+    $('#castle_basement > a > img').attr('title','ML: 125-150');
+    $('#castle_groundfloor > a > img').attr('title','ML: 125-130');
+    $('#castle_topfloor > a > img').attr('title','ML: 130-150');
 }
 
 function spoil_fernruin() {	
@@ -5263,9 +5273,9 @@ function spoil_postwarisland() {
 function spoil_thesea() {
 	$('img').each(function() {
 		var ml= null; var src = this.getAttribute('src');
-		if (src.indexOf("sea1") != 1) ml = '300-330';		// briny
-		if (src.indexOf("sea2") != 1) ml = '350-400';		// brinier
-		if (src.indexOf("sea3") != 1) ml = '375-425';		// briniest
+		if      (src.indexOf("sea1") != 1) ml = '300-330';		// briny
+		else if (src.indexOf("sea2") != 1) ml = '350-400';		// brinier
+		else if (src.indexOf("sea3") != 1) ml = '375-425';		// briniest
 //		if (src.indexOf("") != 1) ml = '';
 		if (ml) this.setAttribute('title','ML: '+ml);
 	});
@@ -5274,17 +5284,36 @@ function spoil_thesea() {
 function spoil_seafloor() {
 	$('img').each(function() {
 		var ml= null; var src = this.getAttribute('src');
-		if (src.indexOf("garden") != 1) ml = '350-450';			// octopus's garden
-		if (src.indexOf("divebar") != 1) ml = '400-600';		// dive bar
-		if (src.indexOf("mine") != 1) ml = '400-500';			// anemone mine
-		if (src.indexOf("trench") != 1) ml = '400-550';			// marinara trench
-		if (src.indexOf("utpost") != 1) ml = '650-750';			// mer-kin outpost
-		if (src.indexOf("shipwreck") != 1) ml = '400-700';		// Fitzsimmons
-		if (src.indexOf("reef") != 1) ml = '400-500';			// Madness Reef
-//		if (src.indexOf("") != 1) ml = '';
+		if      (src.indexOf("garden") != -1) ml = '350-450';		// octopus's garden
+		else if (src.indexOf("divebar") != -1) ml = '400-600';		// dive bar
+		else if (src.indexOf("mine") != -1) ml = '400-500';			// anemone mine
+		else if (src.indexOf("trench") != -1) ml = '400-550';		// marinara trench
+		else if (src.indexOf("utpost") != -1) ml = '650-750';		// mer-kin outpost
+		else if (src.indexOf("shipwreck") != -1) ml = '400-700';	// Fitzsimmons
+		else if (src.indexOf("reef") != -1) ml = '400-500';			// Madness Reef
+		else if (src.indexOf("abyss") != -1) ml = '600-650';        // Calyginous Abyss
+		else if (src.indexOf("corral") != -1) ml = '600-750';       // Coral Corral
+//		else if (src.indexOf("") != -1) ml = '';
 		if (ml) this.setAttribute('title','ML: '+ml);
+        GM_log("src="+src+",ML="+ml);
 	});
 }		
+function spoil_sea_merkin() {
+    $('area').each(function() {
+        var ml = null;
+        var title = this.getAttribute('title');
+        if      (title.indexOf('Mer-kin Colosseum') != -1) ml = '800-1300';
+        else if (title.indexOf('Mer-kin Gymnasium (1)') != -1) ml = '720-780';
+        else if (title.indexOf('Mer-kin Elementary School (1)') != -1 ) ml = '600-700';
+        else if (title.indexOf('Mer-kin Library (1)') != -1) ml = '750-850';
+        else if (title.indexOf('Mer-kin Temple (1)') != -1) ml = '4000 (as gladiator), 400 (as scholar), 42000 (Dad)';
+        if (ml) this.setAttribute('title','ML: '+ml);
+    });
+}
+
+function spoil_skatepark() {
+
+}
 
 function spoil_wormwood() {
 	$('img').each(function() {
