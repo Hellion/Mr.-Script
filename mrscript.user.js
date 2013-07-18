@@ -2466,7 +2466,16 @@ function at_inventory() {
 			var theItem = $(bText).parent().parent().get(0);
 			AddLinks(null, theItem, null, thePath);	
 		}
+        else {
+            process_results(resultsText, $(firstTable.rows[1]));
+        }
 	}
+}
+
+function process_results(rText, insLoc) {
+    if (rText.indexOf("You can easily climb the branches") != -1) {
+        insLoc.append(AppendLink('[temple (1)]',snarfblat(280)));
+    }
 }
 
 function checkForRedirects(resultsText) {
@@ -3368,6 +3377,7 @@ function at_charpane() {
 	for (i=0,len=imgs.length; i<len; i++) {
 		var img = imgs[i], imgClick = img.getAttribute('onclick');
 		var imgSrc = img.src.substr(img.src.lastIndexOf('/')+1);
+        GM_log("imgClick="+imgClick+", imgSrc="+imgSrc);
 		if (imgSrc == 'mp.gif')
 			img.addEventListener('contextmenu', RightClickMP, false);
 		else if (imgSrc == 'hp.gif')
@@ -3400,12 +3410,14 @@ function at_charpane() {
 				}); event.stopPropagation(); event.preventDefault();					
 			}, false);
 		}
-		else if (img.getAttribute('oncontextmenu') == null) {
+		else // if (img.getAttribute('oncontextmenu') == null) 
+        {
 			var hydr = false;
 
 			// Effect descIDs are 32 characters?? Bah, I'm not using strings that long. Six characters will do.
 			var effNum = effectsDB[imgClick.substr(5,6)];
 			if (effNum == undefined) continue;
+            GM_log("effNum="+effNum);
 			switch (effNum) {
 				case 275: // hydrated
 					var hydtxt = img.parentNode.nextSibling.textContent;
@@ -3427,7 +3439,7 @@ function at_charpane() {
 				case 221: // chalk: right-click to use more
 					var func = "top.mainpane.location.href = 'http://";
 					func += server + '/' + inv_use(1794) + '; return false; ';
-					img.setAttribute('oncontextmenu', func); 
+					if (img.getAttribute('oncontextmenu') == null) img.setAttribute('oncontextmenu', func); 
 					break;
 					
 				case 357:	// absinthe-minded: link to wormwood; light up on 9/5/1 turns left.
@@ -3455,7 +3467,7 @@ function at_charpane() {
 					if (effName == undefined) effName = "";
 					func = "if (confirm('Uneffect "+effName+"?')) top.mainpane.location.href = 'http://";
 					func += server + "/uneffect.php?using=Yep.&whicheffect="+effNum+"&pwd="+pwd+"';return false;";
-					img.setAttribute('oncontextmenu', func); 
+					if (img.getAttribute('oncontextmenu') == null) img.setAttribute('oncontextmenu', func); 
 					break;
 			}
 		}
@@ -4735,9 +4747,6 @@ function at_place() {
 	}
 }
 
-function atplace_mclargehuge() {
-	//put new trapper spoilers in here.
-}
 //Spoil_Krakrox: walk through the entire Jungles of Hyboria quest.
 function spoil_Krakrox(cNum) {
 var Krakrox = {
@@ -5311,8 +5320,18 @@ function spoil_sea_merkin() {
     });
 }
 
-function spoil_skatepark() {
+function spoil_sea_skatepark() {
+    $('img').each(function() {
+        var ml = null;
+        var src = this.getAttribute('src');
+        if      (src.indexOf("rumble") != -1) ml = "ML: 350-450";
+        else if (src.indexOf("ice_territory") != -1) ml = "ML: 350-400";
+        else if (src.indexOf("roller_territory") != -1) ml = "ML: 350-450";
+        else if (src.indexOf("lutz") != -1) ml = "receive 30 turns of Fishy (underwater adventures take only 1 turn)";
+        else if (src.indexOf("comet") != -1) ml = "receive 30 turns of Finstrong (reduce diving penalty by 30)";
 
+        if (ml) this.setAttribute('title',ml);
+    });
 }
 
 function spoil_wormwood() {
