@@ -904,6 +904,8 @@ function AddLinks(descId, theItem, formWhere, path) {
             addWhere.append(AppendLink('[Open the Peak!]',to_place('mclargehuge&action=cloudypeak'))); break;
 		case 5571:
 			addWhere.append(AppendLink('[visit the John]',to_place('mclargehuge&action=trappercabin'))); break;
+        case 5782:  case 5783:  case 5784:  case 5785:  case 5786:  case 5787:  //smut orc building materials
+            addWhere.append(AppendLink('[build!]',to_place('orc_chasm&action=bridge0')));    break;
 		case 4029:		// Hyboria: memory of a grappling hook
 			if (GetCharData("Krakrox") == "A") {
 				SetCharData("Krakrox","B");
