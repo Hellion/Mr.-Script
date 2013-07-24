@@ -64,8 +64,17 @@ var spoilers = GetPref('zonespoil') == 1;
 //after the document is loaded, slap an invisible animation onto any "interesting" new elements that arrive.
 //bind a handler to the animation-start event which then does whatever needs doing with the new elements.
 //in our case, the AJAX 'Results:' boxes are always starting with <center><center> and are in a div named effdiv.
+
 addCss('@-moz-keyframes nodeInserted { from { clip: rect(1px,auto,auto,auto) } to { clip: rect(0px,auto,auto,auto) } }');
-addCss('center > center { animation-duration: 0.001s; animation-name: nodeInserted }');
+
+//specify what an "interesting" element is... any "Results:" block has this form.
+//addCss('center > center { animation-duration: 0.001s; animation-name: nodeInserted }');
+
+addCss('center > center > table > tbody > tr > td > b { animation-duration: 0.001s; animation-name: nodeInserted }');
+//this gets us right down to a <b>Results:</b> header, I hope.
+//
+//this would only fire on the FIRST Ajax event, which is the one that creates the effdiv;
+//every subsequent Ajax simply adds to it.
 //addCss('#effdiv { animation-duration: 0.001s; animation-name: nodeInserted }');
 
 $(document).on('animationstart',ResultHandler);
@@ -127,16 +136,20 @@ function addCss(cssString) {
 }
 
 function ResultHandler(event) {
+//  GM_log("ResultHander Target:" + $(event.target).html());
 	if (event.originalEvent.animationName == 'nodeInserted') {
 		if ($(event.target).parents("#effdiv").length === 0) {
+            GM_log("ResultHandler: not it!");
 			return;
 		}
-		var mystuff = $(event.target).html();
+        GM_log("ResultHandler: got something!");
+		var mystuff = $(event.target).parents('#effdiv').children('center:first').html();
+        var effdiv = $(event.target).parents('#effdiv');
 // TODO:
 // we need to check multiple <b> nodes here, for cases where there is, for example, multi-stage crafting.
-		var bnode = $(event.target).find('b:eq(1)'); //.parent();
-		var btext = $(event.target).find('b:eq(1)').text();
-        var goHere = checkForRedirects($(event.target).text());
+        var bnode = effdiv.find('b:eq(1)');
+        var btext = bnode.text();
+        var goHere = checkForRedirects(mystuff);
         if (goHere != "") {
             mainpane_goto(goHere);
         } else if (mystuff.indexOf("You equip an item:") != -1) {
@@ -149,8 +162,9 @@ function ResultHandler(event) {
 		} else if (mystuff.indexOf("You acquire an effect:") != -1) {
 			process_effect(btext, bnode);
 		} else { // some non-equip/acquire event took place, such as a quest item opening a zone.
-            GM_log("event: resultHandler got " + mystuff);
-            GM_log("btext = " + btext);
+            GM_log("event: resultHandler got unrecognized input: " + mystuff);
+            GM_log("event: btext = " + btext);
+            process_results(btext,$(bnode).children(':last'));
         }
 	}
 }
@@ -160,7 +174,7 @@ function process_effect(effectname, jnode) {
 		case 'Filthworm Larva Stench':		jnode.after(AppendLink('[drone chamber (1)]',snarfblat(128))); 			break;
 		case 'Filthworm Drone Stench':		jnode.after(AppendLink('[guard chamber (1)]',snarfblat(129))); 			break;
 		case 'Filthworm Guard Stench':		jnode.after(AppendLink('[Queen! (1)]',snarfblat(130)));				    break;
-		case 'Stone-faced':			        jnode.after(AppendLink('[hidden temple (1)]',snarfblat(280)));			break;
+		case 'Stone-Faced':			        jnode.after(AppendLink('[hidden temple (1)]',snarfblat(280)));			break;
 		case 'Down the Rabbit Hole':		jnode.after(AppendLink('[go down]','rabbithole.php'))
             								.after(AppendLink('[tea party!]','rabbithole.php?action=teaparty'));	break;
 		case 'Knob Goblin Perfume':		    jnode.after(AppendLink('[knob]','cobbsknob.php'));				        break;
@@ -1653,6 +1667,10 @@ function at_fight() {
 		case "a giant jungle python":
 			SetCharData("Krakrox","J");
 			break;
+        case "a wild seahorse":
+            $('<center><a href="seafloor.php?action=currents">Go to Mer-Kin DeepCity</a></center><br><br>')
+                .prependTo($("p:contains('Adventure')"));
+            break;
 		}
 		showYoinks(true);
 		dropped_item();
@@ -2188,6 +2206,18 @@ function at_choice() {
         } else if (p0text.indexOf("weird pink-headed guys") != -1) { // big brother sea monkey
             $('<center><a href="monkeycastle.php?who=1">See Little Brother</a></center><br />')
                 .prependTo($('a:contains("Adventure Again")').parent());
+        } else if (choicetext.indexOf("You glimpse a giant chore wheel on the wall") != -1) {
+            $('<center><a href="'+snarfblat(323)+'">Adventure on the GROUND FLOOR</a></center><br />')
+                .prependTo($('a:contains("Adventure Again")').parent());
+        } else if (p0text.indexOf("The ground floor is lit much better") != -1) {
+            $('<center><a href="'+snarfblat(324)+'">Adventure on the TOP FLOOR</a></center><br />')
+                .prependTo($('a:contains("Go back to")').parent());
+        } else if (choicetext.indexOf("You give the wheel a mighty turn") != -1) {
+            mainpane_goto('pyramid.php');
+        } else if (choicetext.indexOf("hacienda. You do find an") != -1) {
+            var clueText = /You do find an (\.*?),/.match(choicetext)[1];
+            clueText = "<br /><font color='blue'>You found <b>" + clueText + "</b></font><br/>";
+            $(clueText).appendTo($(p).find(':last'));
 		} else {
 			var kText = [["The lever slides down and stops","L"],
 					["some sort of intervention was called","N"],
@@ -2467,14 +2497,19 @@ function at_inventory() {
 			AddLinks(null, theItem, null, thePath);	
 		}
         else {
-            process_results(resultsText, $(firstTable.rows[1]));
+            process_results(resultsText, $(firstTable.rows[1]).children(':last'));
         }
 	}
 }
 
 function process_results(rText, insLoc) {
+    GM_log("process_results!");
     if (rText.indexOf("You can easily climb the branches") != -1) {
         insLoc.append(AppendLink('[temple (1)]',snarfblat(280)));
+    } else if (rText.indexOf("You should go to A-Boo Peak") != -1) {
+        insLoc.append(AppendLink('[A-Boo! (1)]',snarfblat(296)));
+    } else if (rText.indexOf("You give the wheel a mighty turn") != -1) {
+        mainpane_goto('pyramid.php');
     }
 }
 
@@ -2779,6 +2814,7 @@ function at_hermit() {
 			GM_get(server+'/api.php?what=inventory&for=MrScript',function(response) {		// Check gum and permit counts.
 				var invcache = $.parseJSON(response); // eval('('+response+')');
 				var gum = invcache[23]; if (gum === undefined) gum = 0;
+                gum = integer(gum);
 				var hpermit = invcache[42]; if (hpermit === undefined) hpermit = 0;
 				
 				if (gum == 0) { 
@@ -2787,13 +2823,22 @@ function at_hermit() {
 				p.append('<br><br><center><font color="blue">You have '+(gum==0?" no ":gum)+(gum!=1?" gums ":" gum ")
 //					+" and "+(hpermit==0?" no ":hpermit)+(hpermit!=1?" permits ":" permit ")
 					+"in inventory.</font></center><br>");
-				if (gum != 0) {
-					switch (gum) {
-					case 1: p.append('<br><center><a href="'+inv_use(23)+'">Use a chewing gum</a></center>'); break;
-					case 2: p.append('<br><center><a href="multiuse.php?whichitem=23&quantity=2&action=useitem&pwd='+pwd+'">Use 2 chewing gums</a></center>'); break;
-					default: p.append('<br><center><a href="multiuse.php?whichitem=23&action=useitem&quantity=3&pwd='+pwd+'">Use 3 chewing gums</a></center>'); break;
-					}
+				switch (gum) {
+                case 0: //do nothing
+                    break;
+				case 1: 
+                    p.append('<br><center><a href="'+inv_use(23)+'">Use a chewing gum</a></center>'); 
+                    break;
+				case 2: 
+                    p.append('<br><center><a href="multiuse.php?whichitem=23&quantity=2&action=useitem&pwd='
+                            +pwd+'">Use 2 chewing gums</a></center>'); 
+                    break;
+				default: 
+                    p.append('<br><center><a href="multiuse.php?whichitem=23&action=useitem&quantity=3&pwd='
+                            +pwd+'">Use 3 chewing gums</a></center>'); 
+                    break;
 				}
+				
 			});
 		}
 
@@ -3377,7 +3422,7 @@ function at_charpane() {
 	for (i=0,len=imgs.length; i<len; i++) {
 		var img = imgs[i], imgClick = img.getAttribute('onclick');
 		var imgSrc = img.src.substr(img.src.lastIndexOf('/')+1);
-        GM_log("imgClick="+imgClick+", imgSrc="+imgSrc);
+        //GM_log("imgClick="+imgClick+", imgSrc="+imgSrc);
 		if (imgSrc == 'mp.gif')
 			img.addEventListener('contextmenu', RightClickMP, false);
 		else if (imgSrc == 'hp.gif')
@@ -3417,7 +3462,7 @@ function at_charpane() {
 			// Effect descIDs are 32 characters?? Bah, I'm not using strings that long. Six characters will do.
 			var effNum = effectsDB[imgClick.substr(5,6)];
 			if (effNum == undefined) continue;
-            GM_log("effNum="+effNum);
+            //GM_log("effNum="+effNum);
 			switch (effNum) {
 				case 275: // hydrated
 					var hydtxt = img.parentNode.nextSibling.textContent;
@@ -3450,7 +3495,7 @@ function at_charpane() {
 					img.parentNode.nextSibling.innerHTML = '<a target=mainpane href=wormwood.php>' + fontA + '<b>' + img.parentNode.nextSibling.innerHTML + '</b>' + fontB + '</a>';
 					break;
                 case 510:
-                    GM_log("molehill!");
+                    //GM_log("molehill!");
                     $(img).parent().next().children('font').wrap('<a target=mainpane href="mountains.php" />');
                     break;
                 case 549: 
@@ -4737,15 +4782,17 @@ function at_basement() {
 	if (str != "") bim.parentNode.innerHTML += "<br><span class='small'><b>"+str+"</b></span>";
 }
 
-function at_place() {
-	var whichplace = document.location.search;
-	whichplace = whichplace.split('&',1)[0];	//?whichplace=foo&action=bar -> ?whichplace=foo
-	whichplace = whichplace.split('=',2)[1];	//?whichplace=foo -> foo
-	var handler = global["atplace_" + whichplace];
-	if (handler && typeof handler == "function") {
-		handler();
-	}
-}
+//at_place: general function for handling locations in the newer "place.php?whichplace=" format.
+//nothing much to do here yet, really.
+//function at_place() {
+//	var whichplace = document.location.search;
+//	whichplace = whichplace.split('&',1)[0];	//?whichplace=foo&action=bar -> ?whichplace=foo
+//	whichplace = whichplace.split('=',2)[1];	//?whichplace=foo -> foo
+//	var handler = global["atplace_" + whichplace];
+//	if (handler && typeof handler == "function") {
+//		handler();
+//	}
+//}
 
 //Spoil_Krakrox: walk through the entire Jungles of Hyboria quest.
 function spoil_Krakrox(cNum) {
