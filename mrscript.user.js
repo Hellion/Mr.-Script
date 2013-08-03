@@ -38,7 +38,7 @@
 
 var place = location.pathname.replace(/\/|\.(php|html)$/gi, "").toLowerCase();
 //console.time("Mr. Script @ " + place);
-GM_log("at:" + place);
+//GM_log("at:" + place);
 
 // n.b. version number should always be a 3-digit number.  If you move to 1.9, call it 1.9.0.  Don't go to 1.8.10 or some such.
 var VERSION = 175;
@@ -139,10 +139,10 @@ function ResultHandler(event) {
 //  GM_log("ResultHander Target:" + $(event.target).html());
 	if (event.originalEvent.animationName == 'nodeInserted') {
 		if ($(event.target).parents("#effdiv").length === 0) {
-            GM_log("ResultHandler: not it!");
+//            GM_log("ResultHandler: not it!");
 			return;
 		}
-        GM_log("ResultHandler: got something!");
+//        GM_log("ResultHandler: got something!");
 		var mystuff = $(event.target).parents('#effdiv').children('center:first').html();
         var effdiv = $(event.target).parents('#effdiv');
 // TODO:
@@ -163,13 +163,16 @@ function ResultHandler(event) {
 			process_effect(btext, bnode);
 		} else { // some non-equip/acquire event took place, such as a quest item opening a zone.
             GM_log("event: resultHandler got unrecognized input: " + mystuff);
+            btext = $(event.target).parents('#effdiv').children('center:first').text();
             GM_log("event: btext = " + btext);
-            process_results(btext,$(bnode).children(':last'));
+            process_results(btext,$(event.target).parents('#effdiv').children('center:first').find('tr:last'));
+//            process_results(btext,$(bnode).children(':last'));
         }
 	}
 }
 
 function process_effect(effectname, jnode) {
+//    GM_log("processing effect: " + effectname);
 	switch(effectname) {
 		case 'Filthworm Larva Stench':		jnode.after(AppendLink('[drone chamber (1)]',snarfblat(128))); 			break;
 		case 'Filthworm Drone Stench':		jnode.after(AppendLink('[guard chamber (1)]',snarfblat(129))); 			break;
@@ -183,8 +186,8 @@ function process_effect(effectname, jnode) {
 
 
 function process_equip(itemname, jnode) {
-	GM_log("doc.ref="+document.referrer);
-	GM_log("itemname="+itemname);
+//	GM_log("doc.ref="+document.referrer);
+//	GM_log("itemname="+itemname);
 	switch(itemname) {
 		case 'continuum transfunctioner':	jnode.after(AppendLink('[8-bit realm (1)]',snarfblat(73)));		break;
 		case 'huge mirror shard':		    jnode.after(AppendLink('[chamber]','lair6.php?place=1'));	    break;
@@ -217,6 +220,7 @@ function process_equip(itemname, jnode) {
 
 function process_outfit(outfitname, jnode) {
 //	jnode = $(jnode).parent();
+//    GM_log("processing outfit: "+outfitname);
 	switch(outfitname) {
 		case 'Knob Goblin Harem Girl Disguise':	
                             jnode.after(AppendLink('[perfume]',inv_use(307))) 
@@ -709,7 +713,7 @@ function AddLinks(descId, theItem, formWhere, path) {
 			itemNum = 74; doWhat = 'oneuse'; break;
 
 		case  275: case  191: case  313: case 1244: case 1245:	case 675:		// larva, boss bat bandana, KGKing items, dagon skull,
-		case 2334: case	2766: 																// MacGuffin, solid gold bowling ball
+		case 2334: case	2766: case  2829:										// MacGuffin, solid gold bowling ball, really dense meat stack
 			addWhere.append(AppendLink('[council]','council.php')); break;
 			
 		case   32: case   50: case   54: case   57: case   60: case   68: 		// EWs
@@ -790,7 +794,7 @@ function AddLinks(descId, theItem, formWhere, path) {
 		case   23: 																// gum
 			if (weCameFrom('hermit') && path == "/store.php") {	// came to the store from the hermit?  use it automatically.
 				//TODO: use the entire purchased amount, instead of just 1.
-				mainpane_goto(inv_use(23));
+//				mainpane_goto(inv_use(23));
 			} else 	{	
 				addWhere.append(AppendLink('[use]', inv_use.php(23)));
 			}
@@ -877,6 +881,9 @@ function AddLinks(descId, theItem, formWhere, path) {
 		case 2338: 																// Black Pudding
 			addWhere.append(AppendLink('[eat]','inv_eat.php?pwd='+ pwd +
                                  '&which=1&whichitem='+itemNum)); break;
+        case 2054:                                                              // black market map
+            //add link to switch to blackbird or crow
+            break;
 
 		case 2064: 																// Forged documents
 			addWhere.append(AppendLink('[shore]','shore.php')); break;
@@ -905,7 +912,7 @@ function AddLinks(descId, theItem, formWhere, path) {
 		case 5571:
 			addWhere.append(AppendLink('[visit the John]',to_place('mclargehuge&action=trappercabin'))); break;
         case 5782:  case 5783:  case 5784:  case 5785:  case 5786:  case 5787:  //smut orc building materials
-            addWhere.append(AppendLink('[build!]',to_place('orc_chasm&action=bridge0')));    break;
+            addWhere.append(AppendLink('[build!]',to_place('orc_chasm&action=bridge')));    break;
 		case 4029:		// Hyboria: memory of a grappling hook
 			if (GetCharData("Krakrox") == "A") {
 				SetCharData("Krakrox","B");
@@ -2477,7 +2484,9 @@ function at_inventory() {
 	} // equippage
 // this is where we go back to a useful location if we've done/used something elsewhere that caused the inventory page to load.
 	if (GetPref('shortlinks') > 1 && firstTable.rows[0].textContent == "Results:") {
-		var resultsText = firstTable.rows[1].textContent, bText;
+		var resultsText = firstTable.rows[1].textContent;
+        var jb = $('b:eq(1)');
+        var bText = jb.text();
         var goHere = checkForRedirects(resultsText);
         if (goHere != "") {
             mainpane_goto(goHere);
@@ -2485,19 +2494,18 @@ function at_inventory() {
         } 
 // and this is where we add all the nifty little links after equipping something.
 		else if (resultsText.indexOf("You equip an item") != -1) {
-			GM_log("calling process_equip from at_inventory");
-			bText = document.getElementsByTagName('b')[1];
-			process_equip(bText.textContent, $('b:eq(1)'));
+			process_equip(bText, jb);
 		}
 		else if (resultsText.indexOf("Outfit:") != -1) {
-			var outfit = $('b:eq(1)').text();
-			process_outfit(outfit, $('b:eq(1)'));
+			process_outfit(bText, jb);
 		}
-		else if (resultsText.indexOf('acquire an item') != -1) {
-			bText = document.getElementsByTagName('b')[1];
-			var theItem = $(bText).parent().parent().get(0);
+		else if (resultsText.indexOf('You acquire an item') != -1) {
+			var theItem = jb.parent().parent().get(0);
 			AddLinks(null, theItem, null, thePath);	
 		}
+        else if (resultsText.indexOf('acquire an effect') != -1) {
+            process_effect(bText, jb);
+        }
         else {
             process_results(resultsText, $(firstTable.rows[1]).children(':last'));
         }
@@ -2505,14 +2513,21 @@ function at_inventory() {
 }
 
 function process_results(rText, insLoc) {
-    GM_log("process_results!");
+    GM_log("process_results: rText = " + rText);
     if (rText.indexOf("You can easily climb the branches") != -1) {
         insLoc.append(AppendLink('[temple (1)]',snarfblat(280)));
     } else if (rText.indexOf("You should go to A-Boo Peak") != -1) {
         insLoc.append(AppendLink('[A-Boo! (1)]',snarfblat(296)));
     } else if (rText.indexOf("You give the wheel a mighty turn") != -1) {
         mainpane_goto('pyramid.php');
+    } else if (rText.indexOf("it just seemed like a cool spy thing") != -1) {
+        insLoc.append(AppendLink('[venture into the Knob]','cobbsknob.php'));
+    } else if (rText.indexOf("At least now you know where the pyramid is") != -1) {
+        insLoc.append(AppendLink('[$64,000 pyramid, baby]','beach.php?action=woodencity'));
+    } else if (rText.indexOf("named Mr. Alarm that Dr. Awkward") != -1) {
+        insLoc.append(AppendLink('[knob lab (1)',snarfblat(50)));
     }
+
 }
 
 function checkForRedirects(resultsText) {
@@ -3424,7 +3439,6 @@ function at_charpane() {
 	for (i=0,len=imgs.length; i<len; i++) {
 		var img = imgs[i], imgClick = img.getAttribute('onclick');
 		var imgSrc = img.src.substr(img.src.lastIndexOf('/')+1);
-        //GM_log("imgClick="+imgClick+", imgSrc="+imgSrc);
 		if (imgSrc == 'mp.gif')
 			img.addEventListener('contextmenu', RightClickMP, false);
 		else if (imgSrc == 'hp.gif')
@@ -3497,7 +3511,6 @@ function at_charpane() {
 					img.parentNode.nextSibling.innerHTML = '<a target=mainpane href=wormwood.php>' + fontA + '<b>' + img.parentNode.nextSibling.innerHTML + '</b>' + fontB + '</a>';
 					break;
                 case 510:
-                    //GM_log("molehill!");
                     $(img).parent().next().children('font').wrap('<a target=mainpane href="mountains.php" />');
                     break;
                 case 549: 
@@ -4918,7 +4931,6 @@ function spoil_place() {
 	whichplace = whichplace.split('&',1)[0];	//?whichplace=foo&action=bar -> ?whichplace=foo
 	whichplace = whichplace.split('=',2)[1];	//?whichplace=foo -> foo
 	var handler = global["spoil_" + whichplace];
-    GM_log("spoiling place: [" + whichplace + "]");
 	if (handler && typeof handler == "function") {
 		handler();
 	}
@@ -5353,7 +5365,6 @@ function spoil_seafloor() {
 		else if (src.indexOf("corral") != -1) ml = '600-750';       // Coral Corral
 //		else if (src.indexOf("") != -1) ml = '';
 		if (ml) this.setAttribute('title','ML: '+ml);
-        GM_log("src="+src+",ML="+ml);
 	});
 }		
 function spoil_sea_merkin() {
@@ -5681,7 +5692,6 @@ function at_topmenu() {
         a.setAttribute('target','mainpane');
         toprow1.appendChild(a);
         GM_get(server+'/forestvillage.php?action=floristfriar', function(t) {
-            GM_log('friar='+t);
             if (t.length>10 && t.indexOf("Back to the Distant Woods") == -1) {
                 $('#florist').html('florist')
                     .attr('href','forestvillage.php?action=floristfriar');
