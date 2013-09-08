@@ -38,7 +38,7 @@
 
 var place = location.pathname.replace(/\/|\.(php|html)$/gi, "").toLowerCase();
 //console.time("Mr. Script @ " + place);
-//GM_log("at:" + place);
+GM_log("at:" + place);
 
 // n.b. version number should always be a 3-digit number.  If you move to 1.9, call it 1.9.0.  Don't go to 1.8.10 or some such.
 var VERSION = 175;
@@ -68,21 +68,16 @@ var spoilers = GetPref('zonespoil') == 1;
 addCss('@-moz-keyframes nodeInserted { from { clip: rect(1px,auto,auto,auto) } to { clip: rect(0px,auto,auto,auto) } }');
 
 //specify what an "interesting" element is... any "Results:" block has this form.
-//addCss('center > center { animation-duration: 0.001s; animation-name: nodeInserted }');
 
 addCss('center > center > table > tbody > tr > td > b { animation-duration: 0.001s; animation-name: nodeInserted }');
 //this gets us right down to a <b>Results:</b> header, I hope.
-//
-//this would only fire on the FIRST Ajax event, which is the one that creates the effdiv;
-//every subsequent Ajax simply adds to it.
-//addCss('#effdiv { animation-duration: 0.001s; animation-name: nodeInserted }');
 
 $(document).on('animationstart',ResultHandler);
 
 anywhere(); // stuff we always add where we can
 
 // town_right to cover gourds, and forestvillage for untinkered results...
-if (/^(adventure|choice|craft|knoll|shore|town_right|forestvillage)$/.test(place)) {
+if (/^(adventure|choice|craft|knoll|shore|town_right|forestvillage|place)$/.test(place)) {
 	dropped_item();
 }
 // where are we and what do we thus want to do?
@@ -98,6 +93,18 @@ global = null;
 handler = null;
 
 // no imperative top-level code below here; the rest is function definitions:
+
+//at_place: general function for handling locations in the newer "place.php?whichplace=" format.
+function at_place() {
+	var whichplace = document.location.search;
+    whichplace = whichplace.split('&',1)[0];	//?whichplace=foo&action=bar -> ?whichplace=foo
+	whichplace = whichplace.split('=',2)[1];	//?whichplace=foo -> foo
+	var handler = global["at_" + whichplace];
+    GM_log("at_place: at " + whichplace);
+	if (handler && typeof handler == "function") {
+		handler();
+	}
+}
 
 jQuery.prototype.toString = function() {
   return "[jQuery:" + this.length + "]";
@@ -193,7 +200,7 @@ function process_equip(itemname, jnode) {
 		case 'huge mirror shard':		    jnode.after(AppendLink('[chamber]','lair6.php?place=1'));	    break;
 		case 'snorkel':				        jnode.after(AppendLink('[map]',inv_use(26)));					break;
 		case 'pool cue':			        jnode.after(AppendLink('[chalk it!]',inv_use(1794)));			break;
-		case "Talisman o' Nam":			    jnode.after(AppendLink('[Dome moD]','plains.php'));				break;
+		case "Talisman o' Nam":			    jnode.after(AppendLink('[Dome moD]',to_place('plains')));		break;
 		case 'worm-riding hooks':		    jnode.after(AppendLink('[drum!]',inv_use(2328)));				break;
 		case 'Mega Gem':			        jnode.after(AppendLink('[Dr. Awkward (1)]',snarfblat(119)));	break;
 		case 'dingy planks':			    jnode.after(AppendLink('[boat]', inv_use(146)));				break; 
@@ -357,12 +364,12 @@ function FindMaxQuantity(item, howMany, deefault, safeLevel) {
 		case 357: min = 6; max = 9; break;  	// Mountain Stream Soda
 		case 465: min = 55; max = 79; break;  	// Blue Pixel Potion
 		case 466: min = 31; max = 40; break;  	// Green Pixel Potion
-		case 518: 				// Magical Mystery Juice
+		case 518: 				                // Magical Mystery Juice
 			min = 4 + (1.5 * GetCharData("level")); max = min + 2; break;
 		case 593: min = 46; max = 50 ; break;  	// Phonics Down
 		case 592: min = 20; max = 24; break;  	// Tiny House
 		case 882: min = 20; max = 25; break;  	// Blatantly Canadian
-		case 909:				// Wint-o-Fresh mint
+		case 909:				                // Wint-o-Fresh mint
 		case 1003: min = 3; max = 5; break;  	// Soda Water
 		case 1334: min = 10; max = 14; break;  	// Cloaca-Cola
 		case 1559: min = 30; max = 50; break;  	// Tonic Water
@@ -373,7 +380,7 @@ function FindMaxQuantity(item, howMany, deefault, safeLevel) {
 		case 2616: min = 50; max = 60; break;  	// Magi-Wipes
 		case 2600: min = 60; max = 70; break;  	// Lily
 		case 2576: min = 30; max = 39; break;  	// Locust
-		case 2389:				// Monstar
+		case 2389:				                // Monstar
 		case 2367: min = 70; max = 80; break;  	// Soy! Soy!
 		case 2639: min = 9; max = 11; break;  	// Black Cherry
 		case 2035: min = 30; max = 40; break;  	// Marquis de Poivre Soda
@@ -695,7 +702,7 @@ function AddLinks(descId, theItem, formWhere, path) {
         case 3808:                                                              //mer-kin trailmap
 			doWhat = 'oneuse'; break;
 
-		case  146: 															// dinghy plans
+		case  146: 															    // dinghy plans
 			SetCharData("insults","0;0;0;0;0;0;0;0");
 			doWhat = 'oneuse'; break;
 
@@ -719,7 +726,7 @@ function AddLinks(descId, theItem, formWhere, path) {
 		case   32: case   50: case   54: case   57: case   60: case   68: 		// EWs
 		case 2556: case 2557: case 2558: case 2559: case 2560: case 2561: 		// LEWs
 		case  150: case  151: case  152: case  153: case  154: case  155:		// Epic Hats
-		case 4504: case 3291:								// heart of volcano, secret tropical map
+		case 4504: case 3291:								                    // heart of volcano, secret tropical map
 			addWhere.append(AppendLink('[take to guild]','guild.php?place=scg')); break; 
 		case 2550: case 2551: case 2552: case 2553: case 2554: case 2555:		// LEW parts
 			addWhere.append(AppendLink('[smith]','craft.php?mode=smith')); break;
@@ -733,7 +740,7 @@ function AddLinks(descId, theItem, formWhere, path) {
 			addWhere.append(AppendLink('[mystic]','forestvillage.php?action=mystic')); break;
 			
 		case  535: 																// bridge
-			addWhere.append(AppendLink('[chasm]','place.php?whichplace=orc_chasm&action=bridge0')); break;
+			addWhere.append(AppendLink('[chasm]',to_place('orc_chasm&action=bridge0'))); break;
 			
 		case  602: 																// Degrassi Knoll shopping list
 			if (GetCharData("plungeraccess") == "Y") addWhere.append(AppendLink('[gnoll store]', "store.php?whichstore=5"));
@@ -886,7 +893,7 @@ function AddLinks(descId, theItem, formWhere, path) {
             break;
 
 		case 2064: 																// Forged documents
-			addWhere.append(AppendLink('[shore]','shore.php')); break;
+			addWhere.append(AppendLink('[shore]',to_place('desertbeach'))); break;
 		case 2266:							                                    // wet stunt nut stew
 			addWhere.append(AppendLink('[visit Mr. Alarm (1)]',snarfblat(50))); break;
 		case 2347:	                                                            //heart of the filthworm queen
@@ -945,7 +952,7 @@ function AddLinks(descId, theItem, formWhere, path) {
       break;
 
     case "oneuse":
-      addWhere.append(AppendLink('[use]',inv_use(itemNum))); //'inv_use.php?pwd=' + pwd + '&which=3&whichitem='+itemNum));
+      addWhere.append(AppendLink('[use]',inv_use(itemNum))); 
       break;
 
     case "use":
@@ -1310,7 +1317,8 @@ function at_main() {
 	setTimeout("if (top.frames[0].location == 'about:blank')" +
              " top.frames[0].location = 'topmenu.php'", 1500);	// fix for top menu not always loading properly
 	if (GetCharData("plungeraccess") == undefined || GetCharData("plungeraccess") == 0) {	// not set yet?  go check.
-		GM_get(server + "/knoll.php",function(response) {
+		GM_get(server + to_place("knoll_friendly&action=dk_plunger"),function(response) {
+            GM_log("plunger response:"+response);
 			if (response != "")	{	
 				SetCharData("plungeraccess","Y");
 			} else {
@@ -1383,51 +1391,51 @@ function at_fight() {
 	// monster name:[preferred combat item, funkslinging item, is this lair-spoilery, special treatment flag]
 	// special treatment: 0=nothing; 1=any gremlin; 2=non-tool gremlin; 3=hidden city; 4=pirate insults.
 	var MonsterArray = {
-	"a Beer Batter":["baseball","",1,0],
-	"a best-selling novelist":["plot hole","",1,0],
-	"a Big Meat Golem":["meat vortex","",1,0],
-	"a Bowling Cricket":["sonar-in-a-biscuit","",1,0],
-	"a Bronze Chef":["leftovers of indeterminate origin","",1,0],
+	"a Beer Batter":            ["baseball","",1,0],
+	"a best-selling novelist":  ["plot hole","",1,0],
+	"a Big Meat Golem":         ["meat vortex","",1,0],
+	"a Bowling Cricket":        ["sonar-in-a-biscuit","",1,0],
+	"a Bronze Chef":            ["leftovers of indeterminate origin","",1,0],
 	"a collapsed mineshaft golem":["stick of dynamite","",1,0],
-	"a concert pianist":["Knob Goblin firecracker","",1,0],
-	"the darkness":["inkwell","",1,0],
-	" El Diablo":["mariachi G-string","",1,0],		// note: leading space is very important.  do not remove it.
-	"an Electron Submarine":["photoprotoneutron torpedo","",1,0],
+	"a concert pianist":        ["Knob Goblin firecracker","",1,0],
+	"the darkness":             ["inkwell","",1,0],
+	" El Diablo":               ["mariachi G-string","",1,0],		// note: leading space is very important.  do not remove it.
+	"an Electron Submarine":    ["photoprotoneutron torpedo","",1,0],
 	"an endangered inflatable white tiger":["pygmy blowgun","",1,0],
-	"an Enraged Cow":["barbed-wire fence","",1,0],
-	"a fancy bath slug":["fancy bath salts","",1,0],
-	"the Fickle Finger of F8":["razor-sharp can lid","",1,0],
-	"a Flaming Samurai":["frigid ninja stars","",1,0],
-	"a giant bee":["tropical orchid","",1,0],
-	"a giant fried egg":["black pepper","",1,0],
-	"a Giant Desktop Globe":["NG (","",1,0],
-	"an Ice Cube":["hair spray","",1,0],
-	"a malevolent crop circle":["bronzed locust","",1,0],
-	"a possessed pipe-organ":["powdered organs","",1,0],
-	"a Pretty Fly":["spider web","",1,0],
-	"a Tyrannosaurus Tex":["chaos butterfly","",1,0],
-	"a Vicious Easel":["disease","",1,0],
-	"The Guy Made Of Bees":["antique hand mirror","",0,0],
-	"an erudite gremlin":["band flyers","molybdenum magnet",0,1],
-	"a vegetable gremlin":["band flyers","molybdenum magnet",0,1],
-	"an A.M.C. gremlin":["band flyers","",0,1],
-	"a spider gremlin":["band flyers","molybdenum magnet",0,1],
-	"a batwinged gremlin":["band flyers","molybdenum magnet",0,1],
-	" Ed the Undying":["band flyers","",0,0],
-	"a pygmy headhunter":["--","",0,3],
-	"a boaraffe":["--","",0,3],
-	"a pygmy blowgunner":["--","",0,3],
-	"a pygmy assault squad":["--","",0,3],
+	"an Enraged Cow":           ["barbed-wire fence","",1,0],
+	"a fancy bath slug":        ["fancy bath salts","",1,0],
+	"the Fickle Finger of F8":  ["razor-sharp can lid","",1,0],
+	"a Flaming Samurai":        ["frigid ninja stars","",1,0],
+	"a giant bee":              ["tropical orchid","",1,0],
+	"a giant fried egg":        ["black pepper","",1,0],
+	"a Giant Desktop Globe":    ["NG (","",1,0],
+	"an Ice Cube":              ["hair spray","",1,0],
+	"a malevolent crop circle": ["bronzed locust","",1,0],
+	"a possessed pipe-organ":   ["powdered organs","",1,0],
+	"a Pretty Fly":             ["spider web","",1,0],
+	"a Tyrannosaurus Tex":      ["chaos butterfly","",1,0],
+	"a Vicious Easel":          ["disease","",1,0],
+	"The Guy Made Of Bees":     ["antique hand mirror","",0,0],
+	"an erudite gremlin":       ["band flyers","molybdenum magnet",0,1],
+	"a vegetable gremlin":      ["band flyers","molybdenum magnet",0,1],
+	"an A.M.C. gremlin":        ["band flyers","",0,1],
+	"a spider gremlin":         ["band flyers","molybdenum magnet",0,1],
+	"a batwinged gremlin":      ["band flyers","molybdenum magnet",0,1],
+	" Ed the Undying":          ["band flyers","",0,0],
+	"a pygmy headhunter":       ["--","",0,3],
+	"a boaraffe":               ["--","",0,3],
+	"a pygmy blowgunner":       ["--","",0,3],
+	"a pygmy assault squad":    ["--","",0,3],
 	"an ancient protector spirit":["--","",0,3],
-	"a clingy pirate":["cocktail napkin","",0,0],
-	"a sassy pirate":["The Big Book of Pirate Insults","",0,4],
-	"a shady pirate":["The Big Book of Pirate Insults","",0,4],
-	"a shifty pirate":["The Big Book of Pirate Insults","",0,4],
-	"a smarmy pirate":["The Big Book of Pirate Insults","",0,4],
-	"a swarthy pirate":["The Big Book of Pirate Insults","",0,4],
-	"a tetchy pirate":["The Big Book of Pirate Insults","",0,4],
-	"a toothy pirate":["The Big Book of Pirate Insults","",0,4],
-	"a tipsy pirate":["The Big Book of Pirate Insults","",0,4]
+	"a clingy pirate":          ["cocktail napkin","",0,0],
+	"a sassy pirate":           ["The Big Book of Pirate Insults","",0,4],
+	"a shady pirate":           ["The Big Book of Pirate Insults","",0,4],
+	"a shifty pirate":          ["The Big Book of Pirate Insults","",0,4],
+	"a smarmy pirate":          ["The Big Book of Pirate Insults","",0,4],
+	"a swarthy pirate":         ["The Big Book of Pirate Insults","",0,4],
+	"a tetchy pirate":          ["The Big Book of Pirate Insults","",0,4],
+	"a toothy pirate":          ["The Big Book of Pirate Insults","",0,4],
+	"a tipsy pirate":           ["The Big Book of Pirate Insults","",0,4]
 	};
 	
 	var monsterName = document.getElementById('monname').innerHTML;
@@ -2019,8 +2027,7 @@ function at_adventure() {
 		$('<center><a href="manor.php">Go on inside</a></center><br />').prependTo($('a:last').parent());
 		break;
 	case "3 eXXXtreme 4ever 6pack":
-		$('<center><a href="place.php?whichplace=mclargehuge&action=cloudypeak">Open the Peak!</a></center><br />').appendTo($('p:last').parent());
-//		$('<center><a href="place.php?whichplace=mclargehuge&action=cloudypeak">Open the Peak!</a></center><br />').prependTo($('a:last').parent());
+		$('<center><a href="'+to_place('mclargehuge&action=cloudypeak') + '">Open the Peak!</a></center><br />').appendTo($('p:last').parent());
 		break;
 	case "The Journey Continues":
 		var p1 = $('p:contains("Having finally fought")').text;
@@ -2223,6 +2230,8 @@ function at_choice() {
                 .prependTo($('a:contains("Go back to")').parent());
         } else if (choicetext.indexOf("You give the wheel a mighty turn") != -1) {
             mainpane_goto('pyramid.php');
+        } else if (p0text.indexOf("You make your way up into") != -1) {
+            p0.appendChild(AppendLink('[hidden city]',to_place('hiddencity')));
         } else if (choicetext.indexOf("hacienda. You do find an") != -1) {
             var clueText = /You do find an (\.*?),/.match(choicetext)[1];
             clueText = "<br /><font color='blue'>You found <b>" + clueText + "</b></font><br/>";
@@ -2266,30 +2275,30 @@ function at_town_wrong() {
 function at_bhh() {
 	var bountyloc = [
 		//item name, link display, adventure location ID
-		["bloodstained briquettes","[Knob Outskirts (1)]","114"],
-		["empty greasepaint tubes","[Funhouse (1)]","20"],
-		["chunks of hobo gristle","[Back Alley (1)]","112"],
-		["oily rags","[Knoll (1)]","18"],
-		["pink bat eyes","[Bathole Entry (1)]","30"],
-		["shredded can labels","[Pantry (1)]","113"],
-		["triffid barks","[spooky forest (1)]","15"],
-		["bits of wilted lettuce","[Fern's Tower (1)]","22"],
-		["broken petri dishes","[Knob Lab (1)]","50"],
-		["bundles of receipts","[Knob Treasury (1)]","260"],
-		["callused fingerbones","[South Of Border (1)]","45"],
-		["empty aftershave bottles","[frat house (1)]","27"],
-		["greasy dreadlocks","[hippy camp (1)]","26"],
-		["vials of pirate sweat","[pirate's cove (1)]","66"],
-		["balls of white lint","[Whitey's Grove (1)]","100"],
+		["bloodstained briquettes",         "[Knob Outskirts (1)]", "114"],
+		["empty greasepaint tubes",         "[Funhouse (1)]",       "20"],
+		["chunks of hobo gristle",          "[Back Alley (1)]",     "112"],
+		["oily rags",                       "[Knoll (1)]",          "18"],
+		["pink bat eyes",                   "[Bathole Entry (1)]",  "30"],
+		["shredded can labels",             "[Pantry (1)]",         "113"],
+		["triffid barks",                   "[spooky forest (1)]",  "15"],
+		["bits of wilted lettuce",          "[Fern's Tower (1)]",   "22"],
+		["broken petri dishes",             "[Knob Lab (1)]",       "50"],
+		["bundles of receipts",             "[Knob Treasury (1)]",  "260"],
+		["callused fingerbones",            "[South Of Border (1)]","45"],
+		["empty aftershave bottles",        "[frat house (1)]",     "27"],
+		["greasy dreadlocks",               "[hippy camp (1)]",     "26"],
+		["vials of pirate sweat",           "[pirate's cove (1)]",  "66"],
+		["balls of white lint",             "[Whitey's Grove (1)]", "100"],
 		["worthless pieces of yellow glass","[Dungeons of Doom (1)]","39"],
-		["billy idols","[Goatlet (1)]","271"],
-		["burned-out arcanodiodes","[Airship (1)]","81"],
-		["coal buttons","[Ninja Snowmen (1)]","272"],
-		["discarded pacifiers","[Castle:Top (1)]","324"],
-		["disintegrating corks","[Wine Cellar (1)]","178"],
-		["non-Euclidean hooves","[Louvre (1)]","106"],
-		["sammich crusts","[Roflmfao (1)]","80"],
-		["bits of sticky stardust","[Hole in the Sky (1)]","83"]
+		["billy idols",                     "[Goatlet (1)]",        "271"],
+		["burned-out arcanodiodes",         "[Airship (1)]",        "81"],
+		["coal buttons",                    "[Ninja Snowmen (1)]",  "272"],
+		["discarded pacifiers",             "[Castle:Top (1)]",     "324"],
+		["disintegrating corks",            "[Wine Cellar (1)]",    "178"],
+		["non-Euclidean hooves",            "[Louvre (1)]",         "106"],
+		["sammich crusts",                  "[Roflmfao (1)]",       "80"],
+		["bits of sticky stardust",         "[Hole in the Sky (1)]","83"]
 	];
 	// going back to see the BHH gives the relevant text in the first <p>.
 	$('p:first').each(function() {
@@ -2367,7 +2376,7 @@ function at_beerpong() {
 			.html(' '));
 	}	
 	if ($('p:first').text().indexOf("You laugh as Ricket") != -1) {		// insert only upon beerpong success.
-		$('a[href="cove.php"]').parent().prepend("<center><a href=adventure.php?snarfblat=158>Adventure in the F'c'le</a></center><br />");
+		$('a[href="cove.php"]').parent().prepend("<center><a href='"+snarfblat(158)+"'>Adventure in the F'c'le</a></center><br />");
 	}
 }
 
@@ -2578,10 +2587,9 @@ function at_galaktik() {
 		if (GetPref('docuse') == 1 && docG < 233) {	// 231=unguent, 232=ointment.  we can auto-use those.
 			var sanitycheck = FindMaxQuantity(docG, num, 0, 0) + 1;
 			if (num > sanitycheck) num = sanitycheck;
-//			parent.frames[2].location = 'http://' + server +
             mainpane_goto(
-			'/multiuse.php?action=useitem&quantity=' + num +
-			'&pwd=' + pwd + '&whichitem=' + docG
+			    '/multiuse.php?action=useitem&quantity=' + num +
+    			'&pwd=' + pwd + '&whichitem=' + docG
             );
 		} else {
 	//		AppendUseBox(docG, 0, 1, row.find('td center').get(0));
@@ -2829,7 +2837,7 @@ function at_hermit() {
 		}
 		else if (txt.indexOf("disappointed") != -1)	{			// no trinkets
 			GM_get(server+'/api.php?what=inventory&for=MrScript',function(response) {		// Check gum and permit counts.
-				var invcache = $.parseJSON(response); // eval('('+response+')');
+				var invcache = $.parseJSON(response); 
 				var gum = invcache[23]; if (gum === undefined) gum = 0;
                 gum = integer(gum);
 				var hpermit = invcache[42]; if (hpermit === undefined) hpermit = 0;
@@ -2936,32 +2944,34 @@ function at_council() {
 				p.append(derr);	
 				if (GetPref('backup') != "") {
 					$(derr).children('*:last')
-						.attr('href', 'javascript:void(0);').click(function()
-					//bink.addEventListener('click',function(event)
-					{	GM_get(server + '/inv_equip.php' +
-							'?action=customoutfit&which=2&outfitname=' +
-						GetPref('backup'), function(response)
-						{	parent.frames[2].location = 'http://' + server
-						+  "/inv_equip.php?action=outfit&which=2&whichoutfit=4";
-						}); return false;
-						//event.stopPropagation(); event.preventDefault();
-					});
+						.attr('href', 'javascript:void(0);').click(function() {
+        					GM_get(server + '/inv_equip.php' +
+		        				'?action=customoutfit&which=2&outfitname=' +
+				        		GetPref('backup'), function(response) {
+						        	parent.frames[2].location = 'http://' + server
+        						    +  "/inv_equip.php?action=outfit&which=2&whichoutfit=4";
+		        				}); 
+                                return false;
+				        		//event.stopPropagation(); event.preventDefault();
+        					}
+                        );
 				}
 				derr = AppendLink('[guard outfit]', "inv_equip.php" +
 					"?action=outfit&which=2&whichoutfit=5");
 				p.append(derr);	
 				if (GetPref('backup') != "") {
 					$(derr).children('*:last')
-						.attr('href', 'javascript:void(0);').click(function()
-					//bink.addEventListener('click',function(event)
-					{	GM_get(server + '/inv_equip.php' +
-							'?action=customoutfit&which=2&outfitname=' +
-						GetPref('backup'), function(response)
-						{	parent.frames[2].location = 'http://' + server
-						+  "/inv_equip.php?action=outfit&which=2&whichoutfit=5";
-						}); return false;
-						//event.stopPropagation(); event.preventDefault();
-					});
+						.attr('href', 'javascript:void(0);').click(function() {
+        					GM_get(server + '/inv_equip.php' +
+		        				'?action=customoutfit&which=2&outfitname=' +
+				        		GetPref('backup'), function(response) {
+						        	parent.frames[2].location = 'http://' + server
+        						    +  "/inv_equip.php?action=outfit&which=2&whichoutfit=5";
+		        				}); 
+                                return false;
+				        		//event.stopPropagation(); event.preventDefault();
+        					}
+                        );
 				}
 				p.append(AppendLink('[perfume]', inv_use(307)));
 				p.append(AppendLink('[knob]', 'cobbsknob.php'));
@@ -3008,7 +3018,7 @@ function at_council() {
 				if (txt.indexOf("sky") != -1) {
 					p.append(AppendLink('[plant bean]',to_place('plains&action=garbage_grounds')));
 					top.frames[0].location.reload();
-				} else p.append(AppendLink('[beanstalk]', 'beanstalk.php'));
+				} else p.append(AppendLink('[beanstalk]', to_place('beanstalk')));
 			}
 			else if (txt.indexOf("her Lair") != -1)
 				p.append(AppendLink('[lair]', 'lair.php'));
@@ -3024,7 +3034,7 @@ function at_council() {
 			if (txt.indexOf("leaflet") != -1)
 				b.append(AppendLink('[read]', 'leaflet.php'));
 			else if (txt.indexOf("Knob map") != -1) 
-				b.append(AppendLink('[use map+key]',inv_use(2442))); // 'inv_use.php?pwd=' + pwd + '&which=3&whichitem=2442'));
+				b.append(AppendLink('[use map+key]',inv_use(2442))); 
 			else if ((txt.indexOf("dragonbone") != -1) || (txt.indexOf("batskin") != -1)) {
 				b.append(AppendLink('[make belt]', 'craft.php?mode=combine&action=craft&a=676&b=192&pwd=' +
 					pwd + '&quantity=1'));
@@ -3070,7 +3080,7 @@ function at_questlog() {
 							//event.stopPropagation(); event.preventDefault();
 						});
 					}
-					b.append(AppendLink('[perfume]', inv_use(307))); //'inv_use.php?pwd=' +	pwd + '&which=3&whichitem=307'));
+					b.append(AppendLink('[perfume]', inv_use(307)));
 					b.append(AppendLink('[knob]', 'cobbsknob.php'));
 					break;
 				case "Trial By Friar":
@@ -3103,7 +3113,7 @@ function at_questlog() {
 					b.append(AppendLink('[bookstore]', 'store.php?whichstore=r'));
 					break;
 				case "The Rain on the Plains is Mainly Garbage":
-					b.append(AppendLink('[beanstalk]', 'beanstalk.php'));
+					b.append(AppendLink('[beanstalk]', to_place('beanstalk')));
 					break;
 				case "Never Odd Or Even":
 					var subtext = $(this).parent().text(); // contents().get(2).data;
@@ -3140,10 +3150,10 @@ function at_questlog() {
 					break;
 				case "My Other Car is Made of Meat":
 					b.append(AppendLink('[untinker]', 'forestvillage.php?place=untinker'));
-					b.append(AppendLink('[plains]', 'plains.php'));
+					b.append(AppendLink('[plains]', to_place('plains')));
 					break;
 				case "The Wizard of Ego": 
-					b.append(AppendLink('[plains]', 'plains.php'));
+					b.append(AppendLink('[plains]', to_place('plains')));
 					break;
 				case "Me and My Nemesis":		
 					var subtext = $(this).parent().text(); 
@@ -3176,7 +3186,7 @@ function at_questlog() {
 					b.append(AppendLink("[Cemetery (1)]",snarfblat(58)));
 					break;
 				case "Driven Crazy":
-					b.append(AppendLink('[plains]', 'plains.php'));
+					b.append(AppendLink('[plains]', to_place('plains')));
 					break;
 				case "The Final Ultimate Epic Final Conflict":
 					b.html("The Ultimate Showdown Of Ultimate Destiny");
@@ -3283,7 +3293,7 @@ function at_questlog() {
 				if (subtext.indexOf("find the Black Market") != -1)
 					b.append(AppendLink("[black forest (1)]",snarfblat(111)));
 				else if (subtext.indexOf("now to hit the Travel Agency") != -1)
-					b.append(AppendLink("[shore]","shore.php"));
+					b.append(AppendLink("[shore]",to_place('desertbeach')));
 			}
 			else if (txt.indexOf("Delivery Service") != -1) {
 				b.append(AppendLink("[guild]","guild.php?place=paco"));
@@ -3878,7 +3888,7 @@ function at_manor3() {
 
 // new way: use the glyph info we scraped once while building the wine list.
 	$('select:first').change(function()	{	
-	var winelist = eval('('+GetCharData("winelist")+')');	// {2271:["name",glyphid], 2272:["name",glyphid], etc.}
+	var winelist = $.parseJSON(GetCharData("winelist"));	// {2271:["name",glyphid], 2272:["name",glyphid], etc.}
 	var wine = this.childNodes[this.selectedIndex].value;
 		if (wine > 0) {
 			var glyph = $('#daglyph');
@@ -4025,7 +4035,7 @@ function at_manor3() {
 				var i1 = response.split('inventory = ')[1].split(';')[0];	// should get everything from { to }, inclusive.
 				response = i1;
 			}
-			var invcache = $.parseJSON(response); //eval('('+response+')');
+			var invcache = $.parseJSON(response); 
 			var dustyX;
 			var dustylist = new Array();
 			for (var i=2271; i<2277; i++) {
@@ -4080,8 +4090,8 @@ function at_manor3() {
 	var winesneeded;
 	if (wineHTML != undefined && wineHTML.length > 0) {	// If we already did this the long way, just display the saved results.
 		wineDisplay.innerHTML = wineHTML;
-		winelist = eval('('+GetCharData("winelist")+')');
-		winesneeded = eval('('+GetCharData("winesNeeded")+')');
+		winelist = $.parseJSON(GetCharData("winelist"));
+		winesneeded = $.parseJSON(GetCharData("winesNeeded"));
 		document.body.appendChild(wineDisplay);
 		countWines(winelist, winesneeded); 
 	} else {											// No saved results: Better do it the long way.... 
@@ -4133,7 +4143,7 @@ function at_manor3() {
 									json = json + "}"; json2 = json2 + "}";
 									SetCharData("winesNeeded",json);
 									SetCharData("winelist",json2);
-									winesneeded = eval('('+json+')');
+									winesneeded = $.parseJSON(json);
 									countWines(winelist, winesneeded);
 								});
 							});
@@ -4641,41 +4651,43 @@ function at_campground() {
 		resultsBar.parent().next().find('p').each(function(t) {	
 			var txt = this.textContent;
 			var snarf = false;
-			var gateInfo = [["carving of an armchair",['pygmy pygment','pigment','hiddencity.php','hidden city','2242']],
-					["carving of a cowardly-l",['wussiness potion','potion5','friars.php','deep fat friars','469']],
-					["carving of a banana peel",['gremlin juice','potion6','bigisland.php?place=junkyard','island','2631']],
-					["carving of a coiled viper",['adder bladder','bladder','adventure.php?snarfblat=111','black forest (1)','2056']],
-					["carving of a rose", ['Angry Farmer candy','rcandy','adventure.php?snarfblat=324','castle top floor (1)','617']],
-					["carving of a glum teenager", ['thin black candle','bcandle','adventure.php?snarfblat=324','castle top floor (1)','620']],
-					["carving of a hedgehog", ['super-spiky hair gel','balm','adventure.php?snarfblat=81','fantasy airship (1)','587']],
-					["carving of a raven", ['Black No. 2','blackdye','adventure.php?snarfblat=111','black forest (1)','2059']],
-					["carving of a smiling man", ['Mick\'s IcyVapoHotness Rub','balm','adventure.php?snarfblat=324','castle top floor (1)','618']],
-					["baseball bat", ['baseball','baseball','adventure.php?snarfblat=31','guano junction (1)','181']],
-					["made of Meat", ['meat vortex','vortex','adventure.php?snarfblat=80','valley (1)','546']],
-					["amber waves", ['bronzed locust','locust1','beach.php','beach','2575']],
-					["slimy eyestalk", ['fancy bath salts','potion4','adventure.php?snarfblat=107','bathroom (1)','2091']],
-					["flaming katana", ['frigid ninja stars','ninjastars','adventure.php?snarfblat=272','ninja snowmen lair (1)','353']],
-					["translucent wing", ['spider web','web','adventure.php?snarfblat=112','sleazy back alley (1)','27']],
-					["looking tophat", ['sonar-in-a-biscuit','biscuit','adventure.php?snarfblat=31','guano junction (1)','563']],
-					["of albumen", ['black pepper','blpepper','adventure.php?snarfblat=111','black forest (1)','2341']],
-					["white ear", ['pygmy blowgun','tinyblowgun','hiddencity.php','hidden city','2237']],
-					["cowboy hat", ['chaos butterfly','butterfly','adventure.php?snarfblat=323','castle ground floor (1)','615']],
-					["periscope", ['photoprotoneutron torpedo','torpedo','adventure.php?snarfblat=81','fantasy airship (1)','630']],
-					["strange shadow", ['inkwell','inkwell','adventure.php?snarfblat=104','haunted library (1)','1958']],
-					["moonlight reflecting", ['hair spray','spraycan','store.php?whichstore=m','General Store','744']],
-					["wooden frame", ['disease','disease','adventure.php?snarfblat=259','knob harem (1)','452']],
-					["long coattails", ['Knob Goblin firecracker','firecrack','adventure.php?snarfblat=114','knob outskirts (1)','747']],
-					["steam shooting", ['powdered organs','scpowder','pyramid.php','pyramid','2538']],
-					["holding a spatula", ['leftovers of indeterminate origin','leftovers','adventure.php?snarfblat=102','haunted kitchen (1)','1777']],
-					["bass guitar", ['mariachi G-string','string','adventure.php?snarfblat=45','south of the border (1)','1159']],
-					["North Pole", ['NG','ng','adventure.php?snarfblat=80','valley (1)','624']],
-					["writing desk", ['plot hole','hole','adventure.php?snarfblat=323','castle ground floor (1)','613']],
-					["cuticle", ['razor-sharp can lid','canlid','adventure.php?snarfblat=113','haunted pantry (1)','559']],
-					["formidable stinger", ['tropical orchid','troporchid','shore.php','shore','2492']],
-					["pair of horns", ['barbed-wire fence','fence','shore.php','shore','145']],
-					["wooden beam", ['stick of dynamite','dynamite','shore.php','shore','2493']]
-				];
-			for (var i = 0; i<gateInfo.length; i++) {
+			var gateInfo = [
+                //identifying text              item required           image           where to go                     link text               item ID
+                ["carving of an armchair",      ['pygmy pygment',       'pigment',      'hiddencity.php',               'hidden city',          '2242']],
+				["carving of a cowardly-l",     ['wussiness potion',    'potion5',      'friars.php',                   'deep fat friars',      '469']],
+				["carving of a banana peel",    ['gremlin juice',       'potion6',      'bigisland.php?place=junkyard', 'island',               '2631']],
+				["carving of a coiled viper",   ['adder bladder',       'bladder',      snarfblat(111),                 'black forest (1)',     '2056']],
+				["carving of a rose",           ['Angry Farmer candy',  'rcandy',       snarfblat(324),                 'castle top floor (1)', '617']],
+				["carving of a glum teenager",  ['thin black candle',   'bcandle',      snarfblat(324),                 'castle top floor (1)', '620']],
+				["carving of a hedgehog",       ['super-spiky hair gel','balm',         snarfblat(81),                  'fantasy airship (1)',  '587']],
+				["carving of a raven",          ['Black No. 2',         'blackdye',     snarfblat(111),                 'black forest (1)',     '2059']],
+				["carving of a smiling man",    ['Mick\'s IcyVapoHotness Rub','balm',   snarfblat(324),                 'castle top floor (1)', '618']],
+				["baseball bat",                ['baseball',            'baseball',     snarfblat(31),                  'guano junction (1)',   '181']],
+				["made of Meat",                ['meat vortex',         'vortex',       snarfblat(80),                  'valley (1)',           '546']],
+				["amber waves",                 ['bronzed locust',      'locust1',      to_place('desertbeach'),        'beach',                '2575']],
+				["slimy eyestalk",              ['fancy bath salts',    'potion4',      snarfblat(107),                 'bathroom (1)',         '2091']],
+				["flaming katana",              ['frigid ninja stars',  'ninjastars',   snarfblat(272),                 'ninja snowmen lair (1)','353']],
+				["translucent wing",            ['spider web',          'web',          snarfblat(112),                 'sleazy back alley (1)','27']],
+				["looking tophat",              ['sonar-in-a-biscuit',  'biscuit',      snarfblat(31),                  'guano junction (1)',   '563']],
+				["of albumen",                  ['black pepper',        'blpepper',     snarfblat(111),                 'black forest (1)',     '2341']],
+				["white ear",                   ['pygmy blowgun',       'tinyblowgun',  'hiddencity.php',               'hidden city',          '2237']],
+				["cowboy hat",                  ['chaos butterfly',     'butterfly',    snarfblat(323),                 'castle ground floor (1)','615']],
+				["periscope",                   ['photoprotoneutron torpedo','torpedo', snarfblat(81),                  'fantasy airship (1)',  '630']],
+				["strange shadow",              ['inkwell',             'inkwell',      snarfblat(104),                 'haunted library (1)',  '1958']],
+				["moonlight reflecting",        ['hair spray',          'spraycan',     'store.php?whichstore=m',       'General Store',        '744']],
+				["wooden frame",                ['disease',             'disease',      snarfblat(259),                 'knob harem (1)',       '452']],
+				["long coattails",              ['Knob Goblin firecracker','firecrack', snarfblat(114),                 'knob outskirts (1)',   '747']],
+				["steam shooting",              ['powdered organs',     'scpowder',     'pyramid.php',                  'pyramid',              '2538']],
+				["holding a spatula",           ['leftovers of indeterminate origin','leftovers',snarfblat(102),        'haunted kitchen (1)',  '1777']],
+				["bass guitar",                 ['mariachi G-string',   'string',       snarfblat(45),                  'south of the border (1)','1159']],
+				["North Pole",                  ['NG',                  'ng',           snarfblat(80),                  'valley (1)',           '624']],
+				["writing desk",                ['plot hole',           'hole',         snarfblat(323),                 'castle ground floor (1)','613']],
+				["cuticle",                     ['razor-sharp can lid', 'canlid',       snarfblat(113),                 'haunted pantry (1)',   '559']],
+				["formidable stinger",          ['tropical orchid',     'troporchid',   to_place('desertbeach'),        'shore',                '2492']],
+				["pair of horns",               ['barbed-wire fence',   'fence',        to_place('desertbeach'),        'shore',                '145']],
+				["wooden beam",                 ['stick of dynamite',   'dynamite',     to_place('desertbeach'),        'shore',                '2493']]
+			];
+			for (var i = 0; i < gateInfo.length; i++) {
 				if (txt.indexOf(gateInfo[i][0]) != -1) {
 					snarf = gateInfo[i][1];
 					break;
@@ -4797,17 +4809,6 @@ function at_basement() {
 	if (str != "") bim.parentNode.innerHTML += "<br><span class='small'><b>"+str+"</b></span>";
 }
 
-//at_place: general function for handling locations in the newer "place.php?whichplace=" format.
-//nothing much to do here yet, really.
-//function at_place() {
-//	var whichplace = document.location.search;
-//	whichplace = whichplace.split('&',1)[0];	//?whichplace=foo&action=bar -> ?whichplace=foo
-//	whichplace = whichplace.split('=',2)[1];	//?whichplace=foo -> foo
-//	var handler = global["atplace_" + whichplace];
-//	if (handler && typeof handler == "function") {
-//		handler();
-//	}
-//}
 
 //Spoil_Krakrox: walk through the entire Jungles of Hyboria quest.
 function spoil_Krakrox(cNum) {
@@ -4936,6 +4937,19 @@ function spoil_place() {
 	}
 }
 
+function spoil_hiddencity() {
+    $('#hc_altar1 > a > img').attr('title','ML: xa1; do y');
+    $('#hc_altar2 > a > img').attr('title','ML: xa2; do y');
+    $('#hc_altar3 > a > img').attr('title','ML: xa3; do y');
+    $('#hc_altar4 > a > img').attr('title','ML: xa4; do y');
+    $('#hc_zone1 > a > img').attr('title','ML: x1; get thrice-cursed effect');
+    $('#hc_zone2 > a > img').attr('title','ML: x2; get/wear surgeon gear');
+    $('#hc_zone3 > a > img').attr('title','ML: x3; assemble McClusky file (5 parts + binder)');
+    $('#hc_zone4 > a > img').attr('title','ML: x4; get bowling balls');
+    $('#hc_zone5 > a > img').attr('title','ML: x5; ?');
+    $('#hc_final > a > img').attr('title','ML: xfinal; get stone triangles from altars to fight boss here');
+}
+
 function spoil_canadia() {
     $('#lc_outskirts > a > img').attr('title','ML: 2-3');
     $('#lc_camp > a > img').attr('title','ML: 35-40');
@@ -5031,7 +5045,7 @@ function spoil_bathole() {
 		else if (src.indexOf("batbean") != -1) ml = '22';
 		else if (src.indexOf("batboss") != -1) ml = '26-35';
 		else if (src.indexOf("batrock") != -1)
-			this.parentNode.href = inv_use(563); // "inv_use.php?pwd=" + pwd + "&which=3&whichitem=563";
+			this.parentNode.href = inv_use(563); 
 		if (ml) this.setAttribute('title','ML: '+ml);
 	});
 	// new:	
@@ -5043,8 +5057,7 @@ function spoil_bathole() {
 		else if (alt.indexOf('Batrat') != -1) ml = '23-25';
 		else if (alt.indexOf('Beanbat') != -1) ml = '22';
 		else if (alt.indexOf('Boss Bat') != -1) ml = '26-35';
-		else if (alt.indexOf('Blocked') != -1) 
-			this.href = inv_use(563); // "inv_use.php?pwd=" + pwd + "&which=3&whichitem=563";
+		else if (alt.indexOf('Blocked') != -1) this.href = inv_use(563); 
 		if (ml) this.setAttribute('title','ML: '+ml);
 	});
 }
@@ -5408,7 +5421,7 @@ function spoil_wormwood() {
 function at_tutorial() {
 	if (location.search.indexOf("toot") == -1) return;
 	$('b:contains("Ralph")').append(
-		AppendLink('[read]', inv_use(1155)));//'inv_use.php?pwd='+pwd + '&which=3&whichitem=1155'));
+		AppendLink('[read]', inv_use(1155)));
 }
 
 // DESC_ITEM: Add use boxes/links to item descriptions
@@ -5527,7 +5540,7 @@ function at_topmenu() {
 		if (txt == "lair") haveLair = 1;
 
 		// bugbear challenge run
-		if (txt == "ship") a.attr("href","place.php?whichplace=bugbearship");
+		if (txt == "ship") a.attr("href",to_place("bugbearship"));
 
 		// Confirm logout
 		if (txt == "log out" && logoutconf == 1) {
@@ -5543,7 +5556,7 @@ function at_topmenu() {
 			a.after(' <a href="manor.php" target="mainpane">manor</a>');
 
 			if (integer(GetCharData('level')) > 9) 
-				a.after(' <a href="beanstalk.php" target="mainpane">stalk</a>');
+				a.after(' <a href="' + to_place('beanstalk') + '" target="mainpane">stalk</a>');
 
 			// This is as good a place as any; get span for adding links later.
 			weBuildHere = a.parent().get(0);
@@ -5861,7 +5874,7 @@ function at_compactmenu() {
 				else selectItem.options[i].value="questlog.php?which=4";
 			}
 
-			if (selectItem.options[i].innerHTML == "Options") { // Account Menu") {	
+			if (selectItem.options[i].innerHTML == "Options") { 	
 				AddTopOption("-", "nothing", selectItem, selectItem.options[i+1]);
 				AddTopOption("Multi-Use", "multiuse.php", selectItem, selectItem.options[i+2]);
 				AddTopOption("Combine", "craft.php?mode=combine", selectItem, selectItem.options[i+3]);
@@ -5896,7 +5909,7 @@ function at_compactmenu() {
 		selectItem.parentNode.parentNode.setAttribute('nowrap','nowrap');
 		for (var i=0, len = selectItem.options.length; i<len; i++) {
 			if (selectItem.options[i].innerHTML.indexOf("Nearby Plains") != -1) {
-				AddTopOption("The Beanstalk", "beanstalk.php", selectItem, selectItem.options[i+1]);
+				AddTopOption("The Beanstalk", to_place("beanstalk"), selectItem, selectItem.options[i+1]);
 				AddTopOption("Spookyraven Manor", "manor.php", selectItem, selectItem.options[i+2]);
 				len += 2;	// extend loop to cover new options just added.
 			}	
@@ -6005,7 +6018,6 @@ function buildPrefs() {
 		select.options[2].innerHTML = "On (Right)";
 		prefSpan.appendChild(choice);
 
-//		prefSpan.appendChild(MakeOption("Quick-Equip: ", 2, 'quickequip', "Off", "On"));
 		prefSpan.appendChild(MakeOption("Split Inventory Link: ", 2, 'splitinv', "Off", "On"));
 		prefSpan.appendChild(MakeOption("Split Quest Link: ", 2, 'splitquest', "Off", "On"));
 		choice = MakeOption("Split Messages Link: ", 5, 'splitmsg', "Off", "New Message");
@@ -6021,7 +6033,6 @@ function buildPrefs() {
 		prefSpan.appendChild(MakeOption("1-Klick Klaw: ", 2, 'klaw', "Off", "On"));
 		prefSpan.appendChild(MakeOption("Logout Confirmation: ", 2, 'logout', "Off", "On"));
 		prefSpan.appendChild(MakeOption("Telescope Spoilers: ", 2, 'telescope', "Off", "On"));
-//			prefSpan.appendChild(MakeOption("Eat/Drink Again: ", 2, 'eatagain', "Off", "On"));
 		prefSpan.appendChild(MakeOption("Lair Spoilers: ", 2, 'lairspoil', "Off", "On"));
 		prefSpan.appendChild(MakeOption("Moons link to NO Calendar: ", 2, 'moonslink', "Off", "On"));
 		prefSpan.appendChild(MakeOption("Sword-Guy Link: ", -1, 'swordguy', 0, 0));
@@ -6135,13 +6146,6 @@ function buildPrefs() {
 				}	
 			}); event.stopPropagation(); event.preventDefault();
 		}, true);
-//		var ul2 = document.createElement('a');
-//		ul2.setAttribute('href','javascript:void(0);');
-//		ul2.innerHTML = "Update Item DB";
-//		ul2.addEventListener('click',function(event)
-//		{	if (confirm("Are you sure? You should only perform this action if Mr. Script is not functioning properly."))
-//			{	UpdateItemDB(0); alert("Database will attempt to update. Please contact Hellion if the problem persists.");
-//		}	}, true);
 
 		var ul4 = document.createElement('a');
 		ul4.setAttribute('href','javascript:void(0);');
@@ -6157,8 +6161,6 @@ function buildPrefs() {
 		ulspan.setAttribute('class','tiny');
 		ulspan.setAttribute('name','updatespan');
 		ulspan.appendChild(ul);
-		ulspan.appendChild(document.createTextNode(' - '));
-//		ulspan.appendChild(ul2);
 		ulspan.appendChild(document.createTextNode(' - '));
 		ulspan.appendChild(ul4);
 		ulspan.appendChild(document.createElement('br'));
