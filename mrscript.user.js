@@ -731,13 +731,13 @@ function AddLinks(descId, theItem, formWhere, path) {
 		case 2550: case 2551: case 2552: case 2553: case 2554: case 2555:		// LEW parts
 			addWhere.append(AppendLink('[smith]','craft.php?mode=smith')); break;
 		case 454: 																// rusty screwdriver
-			addWhere.append(AppendLink('[untinker]','forestvillage.php?place=untinker')); break;
+			addWhere.append(AppendLink('[untinker]',to_place('forestvillage&action=fv_untinker'))); break;
 			
 		case 134: 																// bitchin' meatcar
 			addWhere.append(AppendLink('[guild]','guild.php?place=paco')); break;
 			
 		case  459: case  460: case  461: case  462: case  463:					// pixels
-			addWhere.append(AppendLink('[mystic]','forestvillage.php?action=mystic')); break;
+			addWhere.append(AppendLink('[mystic]','forestvillage.php?action=fv_mystic')); break;
 			
 		case  535: 																// bridge
 			addWhere.append(AppendLink('[chasm]',to_place('orc_chasm&action=bridge0'))); break;
@@ -918,9 +918,13 @@ function AddLinks(descId, theItem, formWhere, path) {
             addWhere.append(AppendLink('[Open the Peak!]',to_place('mclargehuge&action=cloudypeak'))); break;
 		case 5571:
 			addWhere.append(AppendLink('[visit the John]',to_place('mclargehuge&action=trappercabin'))); break;
-        case 5782:  case 5783:  case 5784:  case 5785:  case 5786:  case 5787:  //smut orc building materials
+        case 5690:                                                              // bugbear invasion: goldblum larva
+            addWhere.append(AppendLink('[mothership!]',to_place('bugbearship&action=bb_bridge'))); break;
+        case 5782:  case 5783:  case 5784:  case 5785:  case 5786:  case 5787:  // smut orc building materials
             addWhere.append(AppendLink('[build!]',to_place('orc_chasm&action=bridge')));    break;
-		case 4029:		// Hyboria: memory of a grappling hook
+        case 6693:                                                              // McClusky file, page 5
+            addWhere.append(AppendLink('[bind!]',inv_use(6694)));   break;
+		case 4029:		                                                        // Hyboria: memory of a grappling hook
 			if (GetCharData("Krakrox") == "A") {
 				SetCharData("Krakrox","B");
 			} else {
@@ -1186,8 +1190,8 @@ function Defaults(revert) {
 			 ['ascension_list','cooked key pies, exploded chef, exploded bartender, discarded karma, bought a skill']
 			];
 	var menu1 = ['market;town_market.php','hermit;hermit.php',
-		'untinker;forestvillage.php?place=untinker',
-		'mystic;forestvillage.php?action=mystic',
+		'untinker;place.php?whichplace=forestvillage&action=fv_untinker',
+		'mystic;place.php?whichplace=forestvillage&action=fv_mystic',
 		'hunter;bhh.php',
 		'guildstore',
 		'general;store.php?whichstore=m',
@@ -1317,7 +1321,7 @@ function at_main() {
 	setTimeout("if (top.frames[0].location == 'about:blank')" +
              " top.frames[0].location = 'topmenu.php'", 1500);	// fix for top menu not always loading properly
 	if (GetCharData("plungeraccess") == undefined || GetCharData("plungeraccess") == 0) {	// not set yet?  go check.
-		GM_get(server + to_place("knoll_friendly&action=dk_plunger"),function(response) {
+		GM_get(server + '/' + to_place("knoll_friendly&action=dk_plunger"),function(response) {
             GM_log("plunger response:"+response);
 			if (response != "")	{	
 				SetCharData("plungeraccess","Y");
@@ -1605,11 +1609,12 @@ function at_fight() {
 		SetCharData("infight","N");
 		SetCharData("special",0);
 		var square=GetCharData("square");
+        GM_log("square="+square);
 		SetCharData("square",false);
         //special: friar check:
         if (GetCharData("hasflorist") === true) {
             if ($('img[src*=friarplant]').length == 0) {
-                $('#monpic').parent().parent().append('<td><a href="forestvillage.php?action=floristfriar">Flower Power!</a></td>');
+                $('#monpic').parent().parent().append('<td><a href="'+to_place('forestvillage&action=fv_friar')+'">Flower Power!</a></td>');
             }
         }
 		// Location-specific stuff:
@@ -1756,6 +1761,7 @@ function link_cellar(square) {
 	// plus a 0 at the front because Jick uses 1-based indexing for the tavern, the bastard.
 	var grid = [0,5,7,7,6,0,13,15,15,15,6,13,15,15,15,14,13,15,15,15,14,9,11,11,11,10];
 	var sqlist = GetCharData("squarelist") + ";" ;
+    GM_log("sqlist="+sqlist);
 
 	// I should probably put all these in a table to make a proper grid of the directions.
 	if ((grid[thissquare] & 4) == 4) {
@@ -2532,7 +2538,7 @@ function process_results(rText, insLoc) {
     } else if (rText.indexOf("it just seemed like a cool spy thing") != -1) {
         insLoc.append(AppendLink('[venture into the Knob]','cobbsknob.php'));
     } else if (rText.indexOf("At least now you know where the pyramid is") != -1) {
-        insLoc.append(AppendLink('[$64,000 pyramid, baby]','beach.php?action=woodencity'));
+        insLoc.append(AppendLink('[$64,000 pyramid, baby]','place.php?whichplace=desertbeach&action=db_pyramid1'));
     } else if (rText.indexOf("named Mr. Alarm that Dr. Awkward") != -1) {
         insLoc.append(AppendLink('[knob lab (1)',snarfblat(50)));
     }
@@ -2719,7 +2725,7 @@ function at_store() {
 				break;
 			case 'r':		// pirate store: untinker the dictionary.
 				if (acquireString.indexOf('dictionary') != -1)
-					bText.parent().append(AppendLink('[untinker]', 'forestvillage.php?place=untinker'));
+					bText.parent().append(AppendLink('[untinker]', to_place('forestvillage&action=fv_untinker')));
 				break;
 		}
 
@@ -3149,7 +3155,7 @@ function at_questlog() {
 					b.append(AppendLink('[tavern]', 'cellar.php'));
 					break;
 				case "My Other Car is Made of Meat":
-					b.append(AppendLink('[untinker]', 'forestvillage.php?place=untinker'));
+					b.append(AppendLink('[untinker]', to_place('forestvillage&action=fv_untinker')));
 					b.append(AppendLink('[plains]', to_place('plains')));
 					break;
 				case "The Wizard of Ego": 
@@ -5704,10 +5710,11 @@ function at_topmenu() {
         a.setAttribute('href','#');
         a.setAttribute('target','mainpane');
         toprow1.appendChild(a);
-        GM_get(server+'/forestvillage.php?action=floristfriar', function(t) {
+        GM_log("florist at:"+to_place('forestvillage&action=fv_friar'));
+        GM_get(server+'/'+to_place('forestvillage&action=fv_friar'), function(t) {
             if (t.length>10 && t.indexOf("Back to the Distant Woods") == -1) {
                 $('#florist').html('florist')
-                    .attr('href','forestvillage.php?action=floristfriar');
+                    .attr('href',to_place('forestvillage&action=fv_friar'));
                 SetCharData("hasflorist",true);
             } else {
                 SetCharData("hasflorist",false);
@@ -5935,8 +5942,8 @@ function at_compactmenu() {
 		AddTopOption("Class Guild", "guild.php", selectItem, 0);
 		AddTopOption("Market Square", "town_market.php", selectItem, 0);
 		AddTopOption("Hermitage", "hermit.php", selectItem, 0);
-		AddTopOption("Untinker", "forestvillage.php?place=untinker", selectItem, 0);
-		AddTopOption("Mystic Crackpot", "forestvillage.php?place=mystic", selectItem, 0);
+		AddTopOption("Untinker",to_place('forestvillage&action=fv_untinker'), selectItem, 0);
+		AddTopOption("Mystic Crackpot", to_place("forestvillage&action=fv_mystic"), selectItem, 0);
 		AddTopOption("Bounty Hunter", "bhh.php", selectItem, 0);
 		AddTopOption("Gouda's Grocery", "store.php?whichstore=2", selectItem, 0);
 		AddTopOption("Smacketeria", "store.php?whichstore=3", selectItem, 0);
@@ -5946,9 +5953,9 @@ function at_compactmenu() {
 		AddTopOption("Hippy Store", "store.php?whichstore=h", selectItem, 0);
 		AddTopOption("Display Case", "managecollection.php", selectItem, 0);
 		AddTopOption("Hagnk","storage.php",selectItem,0);
-        GM_get(server+'/forestvillage.php?action=floristfriar', function(t) {
+        GM_get(server+'/'+to_place('forestvillage&action=fv_friar'), function(t) {
             if (t.length>10 && t.indexOf("Back to the Distant Woods") == -1) {
-                AddTopOption("Florist","forestvillage.php?action=floristfriar",selectItem, 0);
+                AddTopOption("Florist",to_place('forestvillage&action=fv_friar'),selectItem, 0);
                 SetCharData("hasflorist",true);
             } else {
                 SetCharData("hasflorist",false);
