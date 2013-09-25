@@ -686,10 +686,10 @@ function AddLinks(descId, theItem, formWhere, path) {
 			doWhat = 'use'; break;
 
 		case   20: case   21: case   22: case   33: case   59: case   71:		// various gear... RCM should make this obsolete.
-		case  634: case 1465: case 1466: case 1467: case 1468: case 1469:
+		case 1465: case 1466: case 1467: case 1468: case 1469:
 		case 1470: case 1471: case 1472: case 1473: case 1474: case 1475:
 		case 1476: case 1477: case 1478: case 1479: case 1480: case 1481:
-		case 1482: case 1483: case 1484: case 2302:
+		case 1482: case 1483: case 1484: case 2302: case 6679: 
 			doWhat = 'equip'; break;
 
 		case  486: case 1916:													// talisman o' nam, spookyraven's specs.
@@ -737,7 +737,7 @@ function AddLinks(descId, theItem, formWhere, path) {
 			addWhere.append(AppendLink('[guild]','guild.php?place=paco')); break;
 			
 		case  459: case  460: case  461: case  462: case  463:					// pixels
-			addWhere.append(AppendLink('[mystic]','forestvillage.php?action=fv_mystic')); break;
+			addWhere.append(AppendLink('[mystic]',to_place('forestvillage&action=fv_mystic'))); break;
 			
 		case  535: 																// bridge
 			addWhere.append(AppendLink('[chasm]',to_place('orc_chasm&action=bridge0'))); break;
@@ -1159,7 +1159,7 @@ function GoGoGadgetPlunger() {
 			href = href.replace('&b=','&item2=');
 			href = href.replace('action=craft','action=combine');
 			this.setAttribute("href", href.replace(
-				"craft.php?mode=combine", "knoll.php?place=paster"));
+				"craft.php?mode=combine", to_place("knoll_friendly&action=dk_plunger")));
 		});
 	}	
 }
@@ -2040,6 +2040,9 @@ function at_adventure() {
 		nextZoneName = p1.match(/This must be (\w+),/)[1];
 		$('a:contains("Adventure Again")').replaceWith('<a href="adventure.php?snarfblat=320">Adventure in '+nextZoneName+'</a>');
 		break;
+    case "Top of the Castle, Ma":
+        $('<center><a href="'+snarfblat(323)+'">Adventure on the TOP FLOOR</a></center><br />').prependTo($('a:last').parent());
+        break;
 	case "":	// got a "You shouldn't be here" or other reject message... (or an untitled Limerick Dungeon adventure, sigh)
 		$('center table tr td').each(function(){
 //			GM_log("NCTitle check:"+$(this).text());
@@ -2258,7 +2261,7 @@ function at_choice() {
 // Forest Village: Untinker linker.
 function at_forestvillage() {
 	var plunger = GetCharData("plungeraccess") == "Y" ? true: false;
-	var linkloc = plunger ? "knoll.php?place=smith" :"adventure.php?snarfblat=18";
+	var linkloc = plunger ? to_place("knoll_friendly&action=dk_innabox") :snarfblat(18);
 	var linkname = plunger ? "[get it from Innabox]" : "[degrassi knoll (1)]";
 	$('td:contains("just lost without my"):last').append(AppendLink(linkname,linkloc));
 	$('td:contains("luck finding my screw"):last').append(AppendLink(linkname,linkloc));
@@ -3345,6 +3348,7 @@ function at_charpane() {
 	'ebaff6':357,	// Absinthe-minded
 	'91635b':331,	// On The Trail
     'aa5dbf':510,   // Shape Of...Mole!
+    '8c2bea':846,   // Transpondent
     '17c22c':549    // Fishy
 	};
 
@@ -3383,11 +3387,12 @@ function at_charpane() {
 		SetCharData("currentHP", curHP); SetCharData("maxHP", maxHP);
 		SetCharData("currentMP", curMP); SetCharData("maxMP", maxMP);
 	} else { // Full Mode
-		function parse_cur_and_max(names) {
+		function parse_cur_and_max(names, data) {
 			for each (var name in names) {
 				var cur_max = data.shift().split('/').map(integer);
 				SetCharData("current"+ name, cur_max[0]);
 				SetCharData("max"    + name, cur_max[1]);
+                GM_log(name + ": " + cur_max[0] + ", " + cur_max[1]);
 			}
 		}
 		var lvlblock = $("td:contains('Level'):first").text();	
@@ -3401,9 +3406,25 @@ function at_charpane() {
 		}
 
 		var data = $.makeArray($('td[align="center"]').slice(0, 4)).map(text);
-		parse_cur_and_max(["HP", "MP"]);
-		data.shift(); // meat
-		advcount = integer(data.shift());
+        GM_log("arraysize = " + data.length);
+        if (data.length == 2) {
+            data = $.makeArray($('td[valign="center"]').slice(1, 5)).map(text);
+            GM_log("data = " + data);
+//            data.shift();
+            GM_log("new arraysize = " + data.length);
+        }
+//        if (isNaN(integer(data[4]))) {
+//            // parse slim hp/mp display
+//            GM_log ("must be slim display.");
+//            data = $('#red, #black'); // .slice(0,4)).map(text);
+//            for each (var i in data) GM_log("data="+data.text());
+//        } else {
+            // parse regular hp/mp display
+    		parse_cur_and_max(["HP", "MP"], data);
+		    data.shift(); // meat
+	    	advcount = integer(data.shift());
+            GM_log("advcount = " + advcount);
+//        }
 
 		// Change image link for costumes
 		var img = imgs[0];
@@ -3494,12 +3515,15 @@ function at_charpane() {
 			// Effect descIDs are 32 characters?? Bah, I'm not using strings that long. Six characters will do.
 			var effNum = effectsDB[imgClick.substr(5,6)];
 			if (effNum == undefined) continue;
-            //GM_log("effNum="+effNum);
+            GM_log("effNum="+effNum);
 			switch (effNum) {
 				case 275: // hydrated
 					var hydtxt = img.parentNode.nextSibling.textContent;
-					if (/\(1\)/.test(hydtxt))			// 1 turn left?  set marker to add rehydrate link next adventure.
+                    GM_log("hydtxt = " +hydtxt);
+					if (/\(1\)/.test(hydtxt)) {			// 1 turn left?  set marker to add rehydrate link next adventure.
 						SetCharData('hydrate', advcount-1);
+                        GM_log("1 turn left, hydrate should be " + advcount-1);
+                    }
 					else if (/\(5\)/.test(hydtxt) || /\(20\)/.test(hydtxt))		// got 5 turns (or 20 from clover) now?  add Desert link.
 					{	if (compactMode) $('a[href="adventure.php?snarfblat=122"]')
 						.after(':<br /><a href="adventure.php?' +
@@ -3539,6 +3563,11 @@ function at_charpane() {
 				case 189: case 190: case 191: case 192: case 193: 
 					SetCharData("phial", effNum);
 					break;
+                case 846:
+                    var transtext = img.parentNode.nextSibling.textContent;
+                    img.parentNode.nextSibling.innerHTML = '<a target=mainpane href="' + to_place('spaaace&arrive=1') + 
+                        '">' + img.parentNode.nextSibling.innerHTML + '</a>';
+                    break;
 				default:
 					if (effName == undefined) effName = "";
 					func = "if (confirm('Uneffect "+effName+"?')) top.mainpane.location.href = 'http://";
@@ -5571,7 +5600,7 @@ function at_topmenu() {
 		
 		if (txt == "beach") {
 			if (integer(GetCharData('level')) > 12) 
-			a.after(' <a href="thesea.php" target="mainpane">sea</a>');
+			a.after(' <a href="' + to_place("thesea") +'" target="mainpane">sea</a>');
 		}
 		
 		if (txt == "town") {
@@ -5931,7 +5960,7 @@ function at_compactmenu() {
 			}
 			if (selectItem.options[i].innerHTML.indexOf("Desert Beach") != -1) {
 				if (integer(GetCharData('level')) > 12) {
-					AddTopOption("The Sea","thesea.php",selectItem, selectItem.options[i+1]);
+					AddTopOption("The Sea",to_place("thesea"),selectItem, selectItem.options[i+1]);
 					// len++;
 				}
 			}
