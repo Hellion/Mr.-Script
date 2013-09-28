@@ -99,8 +99,9 @@ function at_place() {
 	var whichplace = document.location.search;
     whichplace = whichplace.split('&',1)[0];	//?whichplace=foo&action=bar -> ?whichplace=foo
 	whichplace = whichplace.split('=',2)[1];	//?whichplace=foo -> foo
-	var handler = global["at_" + whichplace];
-    GM_log("at_place: at " + whichplace);
+    place = whichplace;                         //set global variable for other functions.
+	var handler = global["at_" + place];
+    GM_log("at_place: at " + place);
 	if (handler && typeof handler == "function") {
 		handler();
 	}
@@ -2552,19 +2553,19 @@ function checkForRedirects(resultsText) {
     var goloc = "";
 
     if (resultsText.indexOf("ladder into the Bat Hole") != -1 &&
-		weCameFrom('bathole.php'))	// used a sonar at the bathole
-	        goloc = '/bathole.php';
+		weCameFrom('bathole'))	// used a sonar at the bathole
+	        goloc = to_place("bathole"); // '/bathole.php';
 	else if (resultsText.indexOf("cheap ratchet") != -1 &&
-		weCameFrom('pyramid.php'))	// used a tomb ratchet at the pyramid
+		weCameFrom('pyramid'))	// used a tomb ratchet at the pyramid
     		goloc = '/pyramid.php';
 	else if (resultsText.indexOf("All items unequipped") != -1 &&
-		weCameFrom('lair6.php'))	// clicked the 'get nekkid' link at the gash
+		weCameFrom('lair6'))	// clicked the 'get nekkid' link at the gash
 		    goloc = '/lair6.php';
 	else if (resultsText.indexOf("All items unequipped") != -1 &&
-		weCameFrom('lair1.php'))	// clicked the 'get nekkid' link at the NS entrance cavern
+		weCameFrom('lair1'))	// clicked the 'get nekkid' link at the NS entrance cavern
 	    	goloc = '/lair1.php';
 	else if (resultsText.indexOf("You discard your Instant Karma") != -1 && 
-		weCameFrom('lair6.php'))	// clicked the 'discard karma' link at the gash
+		weCameFrom('lair6'))	// clicked the 'discard karma' link at the gash
     		goloc = '/lair6.php';
 	else if (resultsText.indexOf("a tiny black hut with a sign") != -1)	// successfully used black market map
         goloc = '/store.php?whichstore=l';
@@ -2942,7 +2943,7 @@ function at_council() {
 			else if (txt.indexOf("Typical Tavern") != -1)
 				p.append(AppendLink('[Bart Ender]','tavern.php?place=barkeep'));
 			else if (txt.indexOf("Boss Bat") != -1)
-				p.append(AppendLink('[bat hole]', 'bathole.php'));
+				p.append(AppendLink('[bat hole]', to_place("bathole")));
 			else if (txt.indexOf("Guild") != -1)
 				p.append(AppendLink('[guild]', 'guild.php'));
 			else if (txt.indexOf("Goblin King") != -1 &&
@@ -3073,7 +3074,7 @@ function at_questlog() {
 					b.append(AppendLink('[woods]', 'woods.php'));
 					break;
 				case "Ooh, I Think I Smell a Bat.":
-					b.append(AppendLink('[bat hole]', 'bathole.php'));
+					b.append(AppendLink('[bat hole]', to_place("bathole")));
 					break;
 				case "The Goblin Who Wouldn't Be King":
 					var derr = AppendLink('[disguise]', "inv_equip.php?action=outfit&which=2&whichoutfit=4");
@@ -3548,7 +3549,9 @@ function at_charpane() {
 					var fontA, fontB;
 					if (/\(9/.test(abstxt) || /\(5/.test(abstxt) || /\(1\)/.test(abstxt)) { fontA = '<font color="red">'; fontB = '</font>'; }
 					else { fontA = ''; fontB = ''; }
-					img.parentNode.nextSibling.innerHTML = '<a target=mainpane href=wormwood.php>' + fontA + '<b>' + img.parentNode.nextSibling.innerHTML + '</b>' + fontB + '</a>';
+					img.parentNode.nextSibling.innerHTML = '<a target=mainpane href="' +
+                        to_place("wormwood") + '">' + fontA + '<b>' + 
+                        img.parentNode.nextSibling.innerHTML + '</b>' + fontB + '</a>';
 					break;
                 case 510:
                     $(img).parent().next().children('font').wrap('<a target=mainpane href="mountains.php" />');
@@ -4844,6 +4847,17 @@ function at_basement() {
 	if (str != "") bim.parentNode.innerHTML += "<br><span class='small'><b>"+str+"</b></span>";
 }
 
+function at_bathole() {
+    GM_get(server + "/api.php?what=inventory&for=MrScript", function(rv) {
+        GM_log("rv="+rv);
+        var inv = $.parseJSON(rv);
+        var sonar = inv['563'];
+        if (sonar === undefined) sonar = 0;
+        if (sonar) {
+            $("a:last").append("<br /><center><a href='"+inv_use('563')+"'><font color='blue'>Use a sonar</font></a></center>");
+        }
+    });
+}
 
 //Spoil_Krakrox: walk through the entire Jungles of Hyboria quest.
 function spoil_Krakrox(cNum) {
@@ -4907,7 +4921,7 @@ var Krakrox = {
 		372: {	D:"Climb down well (fight giant octopus)",
 			E:"Take grappling hook"
 		},
-		373: {	K:"Place both blocks and pull lever",
+		373: {	K:"Place both blocks and pull lever, then go south",
 			L:"Go South",
 			N:"Kick down the gate",
 			O:"Go North",
@@ -5072,29 +5086,36 @@ function spoil_pyramid() {
 
 function spoil_bathole() {
 	// old:
-	$('img').each(function() {	
-		var ml = null; var src = this.getAttribute('src');
-		if (src.indexOf("batrat") != -1) ml = '23-25';
-		else if (src.indexOf("batentry") != -1) ml = '11-16';
-		else if (src.indexOf("junction") != -1) ml = '14-18';
-		else if (src.indexOf("batbean") != -1) ml = '22';
-		else if (src.indexOf("batboss") != -1) ml = '26-35';
-		else if (src.indexOf("batrock") != -1)
-			this.parentNode.href = inv_use(563); 
-		if (ml) this.setAttribute('title','ML: '+ml);
-	});
+//	$('img').each(function() {	
+//		var ml = null; var src = this.getAttribute('src');
+//		if (src.indexOf("batrat") != -1) ml = '23-25';
+//		else if (src.indexOf("batentry") != -1) ml = '11-16';
+//		else if (src.indexOf("junction") != -1) ml = '14-18';
+//		else if (src.indexOf("batbean") != -1) ml = '22';
+//		else if (src.indexOf("batboss") != -1) ml = '26-35';
+//		else if (src.indexOf("batrock") != -1)
+//			this.parentNode.href = inv_use(563); 
+//		if (ml) this.setAttribute('title','ML: '+ml);
+//	});
 	// new:	
-	$('area').each(function() {
-		var ml = null;
-		var alt = this.getAttribute('alt');
-		if (alt.indexOf('Entryway') != -1) ml = '11-16';
-		else if (alt.indexOf('Guano') != -1) ml = '14-18';
-		else if (alt.indexOf('Batrat') != -1) ml = '23-25';
-		else if (alt.indexOf('Beanbat') != -1) ml = '22';
-		else if (alt.indexOf('Boss Bat') != -1) ml = '26-35';
-		else if (alt.indexOf('Blocked') != -1) this.href = inv_use(563); 
-		if (ml) this.setAttribute('title','ML: '+ml);
-	});
+//    $('area').each(function() {
+//		var ml = null;
+//		var alt = this.getAttribute('alt');
+//        GM_log("alt="+alt);
+//		if (alt.indexOf('Entryway') != -1) ml = '11-16';
+//		else if (alt.indexOf('Guano') != -1) ml = '14-18';
+//		else if (alt.indexOf('Batrat') != -1) ml = '23-25';
+//		else if (alt.indexOf('Beanbat') != -1) ml = '22';
+//		else if (alt.indexOf('Boss Bat') != -1) ml = '26-35';
+//		else if (alt.indexOf('Blocked') != -1) this.href = inv_use(563); 
+//		if (ml) this.setAttribute('title','ML: '+ml);
+//	});
+//	even newer:
+    $('#bathole_entryway > a > img').attr('title','ML: 11-16');
+    $('#bathole_junction > a > img').attr('title','ML: 14-18');
+    $('#bathole_burrow > a > img').attr('title','ML: 16-20');
+    $('#bathole_chamber > a > img').attr('title','ML: 22');
+    $('#bathole_lair > a > img').attr('title','ML: 26-35');
 }
 
 function spoil_plains() {
