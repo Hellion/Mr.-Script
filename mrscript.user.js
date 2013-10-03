@@ -2042,7 +2042,7 @@ function at_adventure() {
 		$('a:contains("Adventure Again")').replaceWith('<a href="adventure.php?snarfblat=320">Adventure in '+nextZoneName+'</a>');
 		break;
     case "Top of the Castle, Ma":
-        $('<center><a href="'+snarfblat(323)+'">Adventure on the TOP FLOOR</a></center><br />').prependTo($('a:last').parent());
+        $('<center><a href="'+snarfblat(324)+'">Adventure on the TOP FLOOR</a></center><br />').prependTo($('a:last').parent());
         break;
 	case "":	// got a "You shouldn't be here" or other reject message... (or an untitled Limerick Dungeon adventure, sigh)
 		$('center table tr td').each(function(){
@@ -3403,16 +3403,16 @@ function at_charpane() {
 		} else {
 			SetCharData("level",13);		// failsafe setting if we couldn't find the level block, generally due to a custom title.
 			level = 13;
-			GM_log("level defaulted in fullmode to 13");
+//			GM_log("level defaulted in fullmode to 13");
 		}
 
 		var data = $.makeArray($('td[align="center"]').slice(0, 4)).map(text);
-        GM_log("arraysize = " + data.length);
+//        GM_log("arraysize = " + data.length);
         if (data.length == 2) {
             data = $.makeArray($('td[valign="center"]').slice(1, 5)).map(text);
-            GM_log("data = " + data);
+//            GM_log("data = " + data);
 //            data.shift();
-            GM_log("new arraysize = " + data.length);
+//            GM_log("new arraysize = " + data.length);
         }
 //        if (isNaN(integer(data[4]))) {
 //            // parse slim hp/mp display
@@ -3422,9 +3422,10 @@ function at_charpane() {
 //        } else {
             // parse regular hp/mp display
     		parse_cur_and_max(["HP", "MP"], data);
-		    data.shift(); // meat
-	    	advcount = integer(data.shift());
-            GM_log("advcount = " + advcount);
+		    //data.shift(); // meat
+	    	advcount = integer(data[1]); // was data.shift());
+            if (isNaN(advcount)) advcount = integer(data[0]);
+//            GM_log("advcount = " + advcount);
 //        }
 
 		// Change image link for costumes
@@ -4993,7 +4994,7 @@ function spoil_hiddencity() {
     $('#hc_altar4 > a > img').attr('title','ML: xa4; do y');
     $('#hc_zone1 > a > img').attr('title','ML: x1; get thrice-cursed effect');
     $('#hc_zone2 > a > img').attr('title','ML: x2; get/wear surgeon gear');
-    $('#hc_zone3 > a > img').attr('title','ML: x3; assemble McClusky file (5 parts + binder)');
+    $('#hc_zone3 > a > img').attr('title','ML: x3; assemble McClusky file (5 parts + binder)\n(parts drop from accountants)');
     $('#hc_zone4 > a > img').attr('title','ML: x4; get bowling balls');
     $('#hc_zone5 > a > img').attr('title','ML: x5; ?');
     $('#hc_final > a > img').attr('title','ML: xfinal; get stone triangles from altars to fight boss here');
@@ -5626,7 +5627,7 @@ function at_topmenu() {
 		
 		if (txt == "town") {
 			a.html("town:");
-			a.after(' <a href="dungeons.php" target="mainpane">dungeons</a>');
+			a.after(' <a href="da.php" target="mainpane">dungeons</a>');
 //			a.after(' <a href="forestvillage.php" target="mainpane">F-ville</a>');
 			a.after(' <a href="bordertown.php" target="mainpane">B-town</a>');
 			a.after(' <a href="town_right.php" target="mainpane">R)</a>');
@@ -5976,7 +5977,7 @@ function at_compactmenu() {
 			if (selectItem.options[i].innerHTML.indexOf("Seaside Town") != -1) {
 				AddTopOption("Town: Wrong side","town_wrong.php", selectItem, selectItem.options[i+1]);
 				AddTopOption("Town: Right side","town_right.php", selectItem, selectItem.options[i+2]);
-				AddTopOption("Town: Dungeons","dungeons.php", selectItem, selectItem.options[i+3]);
+				AddTopOption("Town: Dungeons","da.php", selectItem, selectItem.options[i+3]);
 				len += 3;
 			}
 			if (selectItem.options[i].innerHTML.indexOf("Desert Beach") != -1) {
