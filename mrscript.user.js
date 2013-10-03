@@ -4988,15 +4988,15 @@ function spoil_place() {
 }
 
 function spoil_hiddencity() {
-    $('#hc_altar1 > a > img').attr('title','ML: xa1; do y');
-    $('#hc_altar2 > a > img').attr('title','ML: xa2; do y');
-    $('#hc_altar3 > a > img').attr('title','ML: xa3; do y');
-    $('#hc_altar4 > a > img').attr('title','ML: xa4; do y');
-    $('#hc_zone1 > a > img').attr('title','ML: x1; get thrice-cursed effect');
-    $('#hc_zone2 > a > img').attr('title','ML: x2; get/wear surgeon gear');
-    $('#hc_zone3 > a > img').attr('title','ML: x3; assemble McClusky file (5 parts + binder)\n(parts drop from accountants)');
-    $('#hc_zone4 > a > img').attr('title','ML: x4; get bowling balls');
-    $('#hc_zone5 > a > img').attr('title','ML: x5; ?');
+    $('#hc_altar1 > a > img').attr('title','ML: 144; do y');
+    $('#hc_altar2 > a > img').attr('title','ML: 144; do y');
+    $('#hc_altar3 > a > img').attr('title','ML: 144; do y');
+    $('#hc_altar4 > a > img').attr('title','ML: 144; do y');
+    $('#hc_zone1 > a > img').attr('title','ML: 142-150; get thrice-cursed effect');
+    $('#hc_zone2 > a > img').attr('title','ML: 142-152; get/wear surgeon gear');
+    $('#hc_zone3 > a > img').attr('title','ML: 142-150; assemble McClusky file (5 parts + binder)\n(parts drop from accountants)');
+    $('#hc_zone4 > a > img').attr('title','ML: 142-154; get bowling balls');
+    $('#hc_zone5 > a > img').attr('title','ML: 145-156; acquire antique machete');
     $('#hc_final > a > img').attr('title','ML: xfinal; get stone triangles from altars to fight boss here');
 }
 
