@@ -38,7 +38,7 @@
 
 var place = location.pathname.replace(/\/|\.(php|html)$/gi, "").toLowerCase();
 //console.time("Mr. Script @ " + place);
-GM_log("at:" + place);
+//GM_log("at:" + place);
 
 // n.b. version number should always be a 3-digit number.  If you move to 1.9, call it 1.9.0.  Don't go to 1.8.10 or some such.
 var VERSION = 175;
@@ -101,7 +101,7 @@ function at_place() {
 	whichplace = whichplace.split('=',2)[1];	//?whichplace=foo -> foo
     place = whichplace;                         //set global variable for other functions.
 	var handler = global["at_" + place];
-    GM_log("at_place: at " + place);
+//    GM_log("at_place: at " + place);
 	if (handler && typeof handler == "function") {
 		handler();
 	}
@@ -144,13 +144,10 @@ function addCss(cssString) {
 }
 
 function ResultHandler(event) {
-//  GM_log("ResultHander Target:" + $(event.target).html());
 	if (event.originalEvent.animationName == 'nodeInserted') {
 		if ($(event.target).parents("#effdiv").length === 0) {
-//            GM_log("ResultHandler: not it!");
 			return;
 		}
-//        GM_log("ResultHandler: got something!");
 		var mystuff = $(event.target).parents('#effdiv').children('center:first').html();
         var effdiv = $(event.target).parents('#effdiv');
 // TODO:
@@ -170,9 +167,9 @@ function ResultHandler(event) {
 		} else if (mystuff.indexOf("You acquire an effect:") != -1) {
 			process_effect(btext, bnode);
 		} else { // some non-equip/acquire event took place, such as a quest item opening a zone.
-            GM_log("event: resultHandler got unrecognized input: " + mystuff);
+//            GM_log("event: resultHandler got unrecognized input: " + mystuff);
             btext = $(event.target).parents('#effdiv').children('center:first').text();
-            GM_log("event: btext = " + btext);
+//            GM_log("event: btext = " + btext);
             process_results(btext,$(event.target).parents('#effdiv').children('center:first').find('tr:last'));
 //            process_results(btext,$(bnode).children(':last'));
         }
@@ -180,7 +177,6 @@ function ResultHandler(event) {
 }
 
 function process_effect(effectname, jnode) {
-//    GM_log("processing effect: " + effectname);
 	switch(effectname) {
 		case 'Filthworm Larva Stench':		jnode.after(AppendLink('[drone chamber (1)]',snarfblat(128))); 			break;
 		case 'Filthworm Drone Stench':		jnode.after(AppendLink('[guard chamber (1)]',snarfblat(129))); 			break;
@@ -194,8 +190,6 @@ function process_effect(effectname, jnode) {
 
 
 function process_equip(itemname, jnode) {
-//	GM_log("doc.ref="+document.referrer);
-//	GM_log("itemname="+itemname);
 	switch(itemname) {
 		case 'continuum transfunctioner':	jnode.after(AppendLink('[8-bit realm (1)]',snarfblat(73)));		break;
 		case 'huge mirror shard':		    jnode.after(AppendLink('[chamber]','lair6.php?place=1'));	    break;
@@ -227,8 +221,6 @@ function process_equip(itemname, jnode) {
 }	
 
 function process_outfit(outfitname, jnode) {
-//	jnode = $(jnode).parent();
-//    GM_log("processing outfit: "+outfitname);
 	switch(outfitname) {
 		case 'Knob Goblin Harem Girl Disguise':	
                             jnode.after(AppendLink('[perfume]',inv_use(307))) 
@@ -240,7 +232,6 @@ function process_outfit(outfitname, jnode) {
 		case 'Filthy Hippy Disguise':		
                             if (weCameFrom('store.php')) {
                                 mainpane_goto('/store.php?whichstore=h');
-//								parent.frames[2].location = 'http://' + server + '/store.php?whichstore=h';
 							} else  {
 								jnode.after(AppendLink('[buy fruit]','store.php?whichstore=h'));
 							}								 		break;
@@ -249,7 +240,6 @@ function process_outfit(outfitname, jnode) {
 		case 'Bugbear Costume':			
                             if (weCameFrom('store.php')) {
                                 mainpane_goto('/store.php?whichstore=b');
-//								parent.frames[2].location = 'http://' + server + '/store.php?whichstore=b';
 							} else {
 								jnode.after(AppendLink('[bakery]','store.php?whichstore=b'));
 							}							 			break;
@@ -294,8 +284,7 @@ function text(x) {
 
 // inv_use: save ourselves some typing.
 function inv_use(item) {
-	var inv_string = "inv_use.php?pwd="+pwd+"&which=3&whichitem="+item;
-	return inv_string;
+	return "inv_use.php?pwd="+pwd+"&which=3&whichitem="+item;
 }
 
 // snarfblat: ditto
@@ -1323,9 +1312,12 @@ function at_main() {
              " top.frames[0].location = 'topmenu.php'", 1500);	// fix for top menu not always loading properly
 	if (GetCharData("plungeraccess") == undefined || GetCharData("plungeraccess") == 0) {	// not set yet?  go check.
 		GM_get(server + '/' + to_place("knoll_friendly&action=dk_plunger"),function(response) {
-            GM_log("plunger response:"+response);
-			if (response != "")	{	
-				SetCharData("plungeraccess","Y");
+//            GM_log("plunger response:"+response);
+			if (response != "")	{
+                if (response.indexOf("the heck out of Dodge") == -1) {  //zombie plunger not available message
+    				SetCharData("plungeraccess","Y");
+                } else {
+                    SetCharData("plungeraccess","N");
 			} else {
 				SetCharData("plungeraccess","N");
 			}
@@ -1610,7 +1602,7 @@ function at_fight() {
 		SetCharData("infight","N");
 		SetCharData("special",0);
 		var square=GetCharData("square");
-        GM_log("square="+square);
+//        GM_log("square="+square);
 		SetCharData("square",false);
         //special: friar check:
         if (GetCharData("hasflorist") === true) {
@@ -1762,7 +1754,7 @@ function link_cellar(square) {
 	// plus a 0 at the front because Jick uses 1-based indexing for the tavern, the bastard.
 	var grid = [0,5,7,7,6,0,13,15,15,15,6,13,15,15,15,14,13,15,15,15,14,9,11,11,11,10];
 	var sqlist = GetCharData("squarelist") + ";" ;
-    GM_log("sqlist="+sqlist);
+//    GM_log("sqlist="+sqlist);
 
 	// I should probably put all these in a table to make a proper grid of the directions.
 	if ((grid[thissquare] & 4) == 4) {
@@ -2532,7 +2524,7 @@ function at_inventory() {
 }
 
 function process_results(rText, insLoc) {
-    GM_log("process_results: rText = " + rText);
+//    GM_log("process_results: rText = " + rText);
     if (rText.indexOf("You can easily climb the branches") != -1) {
         insLoc.append(AppendLink('[temple (1)]',snarfblat(280)));
     } else if (rText.indexOf("You should go to A-Boo Peak") != -1) {
@@ -3393,7 +3385,7 @@ function at_charpane() {
 				var cur_max = data.shift().split('/').map(integer);
 				SetCharData("current"+ name, cur_max[0]);
 				SetCharData("max"    + name, cur_max[1]);
-                GM_log(name + ": " + cur_max[0] + ", " + cur_max[1]);
+//                GM_log(name + ": " + cur_max[0] + ", " + cur_max[1]);
 			}
 		}
 		var lvlblock = $("td:contains('Level'):first").text();	
@@ -3403,30 +3395,17 @@ function at_charpane() {
 		} else {
 			SetCharData("level",13);		// failsafe setting if we couldn't find the level block, generally due to a custom title.
 			level = 13;
-//			GM_log("level defaulted in fullmode to 13");
 		}
 
 		var data = $.makeArray($('td[align="center"]').slice(0, 4)).map(text);
-//        GM_log("arraysize = " + data.length);
         if (data.length == 2) {
             data = $.makeArray($('td[valign="center"]').slice(1, 5)).map(text);
-//            GM_log("data = " + data);
-//            data.shift();
-//            GM_log("new arraysize = " + data.length);
         }
-//        if (isNaN(integer(data[4]))) {
-//            // parse slim hp/mp display
-//            GM_log ("must be slim display.");
-//            data = $('#red, #black'); // .slice(0,4)).map(text);
-//            for each (var i in data) GM_log("data="+data.text());
-//        } else {
-            // parse regular hp/mp display
-    		parse_cur_and_max(["HP", "MP"], data);
-		    //data.shift(); // meat
-	    	advcount = integer(data[1]); // was data.shift());
-            if (isNaN(advcount)) advcount = integer(data[0]);
-//            GM_log("advcount = " + advcount);
-//        }
+        // parse regular hp/mp display
+  		parse_cur_and_max(["HP", "MP"], data);
+	    //data.shift(); // meat, if MP are present
+    	advcount = integer(data[1]); // data[1] will be adv if HP/MP are present
+        if (isNaN(advcount)) advcount = integer(data[0]); // data[0] is adv if no MP is on display (e.g. ZombieMaster)
 
 		// Change image link for costumes
 		var img = imgs[0];
@@ -3517,14 +3496,14 @@ function at_charpane() {
 			// Effect descIDs are 32 characters?? Bah, I'm not using strings that long. Six characters will do.
 			var effNum = effectsDB[imgClick.substr(5,6)];
 			if (effNum == undefined) continue;
-            GM_log("effNum="+effNum);
+//            GM_log("effNum="+effNum);
 			switch (effNum) {
 				case 275: // hydrated
 					var hydtxt = img.parentNode.nextSibling.textContent;
-                    GM_log("hydtxt = " +hydtxt);
+//                    GM_log("hydtxt = " +hydtxt);
 					if (/\(1\)/.test(hydtxt)) {			// 1 turn left?  set marker to add rehydrate link next adventure.
 						SetCharData('hydrate', advcount-1);
-                        GM_log("1 turn left, hydrate should be " + advcount-1);
+//                        GM_log("1 turn left, hydrate should be " + advcount-1);
                     }
 					else if (/\(5\)/.test(hydtxt) || /\(20\)/.test(hydtxt))		// got 5 turns (or 20 from clover) now?  add Desert link.
 					{	if (compactMode) $('a[href="adventure.php?snarfblat=122"]')
@@ -4604,7 +4583,6 @@ function at_mining() {
 	});
 	//also add onclick() to the "Find new cavern" button to wipe out our stored values.
 	$('input').click(function() {
-//		GM_log("Clearing mine-tracking info due to new cavern");
 		clearwhiches();
 	});		// if mining_which is set, it's because we just reloaded the page after clicking on a square.
 	var which = GetCharData("mining_which");
@@ -4850,7 +4828,6 @@ function at_basement() {
 
 function at_bathole() {
     GM_get(server + "/api.php?what=inventory&for=MrScript", function(rv) {
-        GM_log("rv="+rv);
         var inv = $.parseJSON(rv);
         var sonar = inv['563'];
         if (sonar === undefined) sonar = 0;
@@ -5086,32 +5063,6 @@ function spoil_pyramid() {
 }
 
 function spoil_bathole() {
-	// old:
-//	$('img').each(function() {	
-//		var ml = null; var src = this.getAttribute('src');
-//		if (src.indexOf("batrat") != -1) ml = '23-25';
-//		else if (src.indexOf("batentry") != -1) ml = '11-16';
-//		else if (src.indexOf("junction") != -1) ml = '14-18';
-//		else if (src.indexOf("batbean") != -1) ml = '22';
-//		else if (src.indexOf("batboss") != -1) ml = '26-35';
-//		else if (src.indexOf("batrock") != -1)
-//			this.parentNode.href = inv_use(563); 
-//		if (ml) this.setAttribute('title','ML: '+ml);
-//	});
-	// new:	
-//    $('area').each(function() {
-//		var ml = null;
-//		var alt = this.getAttribute('alt');
-//        GM_log("alt="+alt);
-//		if (alt.indexOf('Entryway') != -1) ml = '11-16';
-//		else if (alt.indexOf('Guano') != -1) ml = '14-18';
-//		else if (alt.indexOf('Batrat') != -1) ml = '23-25';
-//		else if (alt.indexOf('Beanbat') != -1) ml = '22';
-//		else if (alt.indexOf('Boss Bat') != -1) ml = '26-35';
-//		else if (alt.indexOf('Blocked') != -1) this.href = inv_use(563); 
-//		if (ml) this.setAttribute('title','ML: '+ml);
-//	});
-//	even newer:
     $('#bathole_entryway > a > img').attr('title','ML: 11-16');
     $('#bathole_junction > a > img').attr('title','ML: 14-18');
     $('#bathole_burrow > a > img').attr('title','ML: 16-20');
@@ -5761,7 +5712,6 @@ function at_topmenu() {
         a.setAttribute('href','#');
         a.setAttribute('target','mainpane');
         toprow1.appendChild(a);
-        GM_log("florist at:"+to_place('forestvillage&action=fv_friar'));
         GM_get(server+'/'+to_place('forestvillage&action=fv_friar'), function(t) {
             if (t.length>10 && t.indexOf("Back to the Distant Woods") == -1) {
                 $('#florist').html('florist')
