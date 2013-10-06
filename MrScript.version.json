@@ -1,4 +1,4 @@
-{	"version":"1.7.5",
-	"url1":"http://userscripts.org/scripts/source/65705.user.js",
-	"url2":"http://noblesse-oblige.org/hellion/scripts/MrScript.user.js",
-	"desc":"<b>New</b><br/>link to Florist in topmenu<br/>link to florist after combat if no flowers present<br/>bugbear spoilers<br/>fat loot token links to vending machine<br/>"}
+{"version":"1.7.6",
+"url1":"http://userscripts.org/scripts/source/65705.user.js",
+"url2":"http://noblesse-oblige.org/hellion/scripts/MrScript.user.js",
+"desc":"<b>New</b><br/>spoilers for new hidden city<br/>link to chasm bridge from dropped bridge parts<br/>spoilers for DeepCity, Skate Park, Marais<br/>Moleform effect links to molehill<br/>Transpondent effect links to Spaaaace<br />Fishy effect turns red with 1 turn left<br /><br /><b>Fixed:</b><br />wrong snarfblat after opening top floor of castle<br />fixed many places that now use place.php<br />correctly detect lack of plunger in Zombie Slayer path<br />"}
