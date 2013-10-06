@@ -1318,6 +1318,7 @@ function at_main() {
     				SetCharData("plungeraccess","Y");
                 } else {
                     SetCharData("plungeraccess","N");
+                }
 			} else {
 				SetCharData("plungeraccess","N");
 			}
