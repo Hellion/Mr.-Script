@@ -680,9 +680,10 @@ function AddLinks(descId, theItem, formWhere, path) {
 		case 1470: case 1471: case 1472: case 1473: case 1474: case 1475:
 		case 1476: case 1477: case 1478: case 1479: case 1480: case 1481:
 		case 1482: case 1483: case 1484: case 2302: case 6679: 
+        case 3526: case 3508:
 			doWhat = 'equip'; break;
 
-		case  486: case 1916:													// talisman o' nam, spookyraven's specs.
+		case  486: case 458: case 1916:											// talisman o' nam, spookyraven's specs, continuum
 			doWhat = 'equipacc'; break;
 
 		case   69: case  438: case  440: case  678: case  829:					// various items and campground gear... RCM again?
@@ -781,6 +782,9 @@ function AddLinks(descId, theItem, formWhere, path) {
 
 		case 2279: 																// Dusty Old Book
 			addWhere.append(AppendLink('[take back to guild]','guild.php?place=ocg')); break;
+
+        case 2326:                                                              // stone rose
+            addWhere.append(AppendLink('[Gnasir]',to_place('desertbeach&action=db_gnasir'))); break;
 			
 		case 3000: 																// Caronch's dentures
 			addWhere.append(AppendLink("[equip swashbuckling pants]",'inv_equip.php?pwd='+pwd+'&which=2&action=equip&whichitem=402')); break;
@@ -880,6 +884,7 @@ function AddLinks(descId, theItem, formWhere, path) {
                                  '&which=1&whichitem='+itemNum)); break;
         case 2054:                                                              // black market map
             //add link to switch to blackbird or crow
+            addWhere.append(AppendLink('[switch to blackbird]','familiar.php?action=newfam&newfam=59'));
             break;
 
 		case 2064: 																// Forged documents
@@ -1312,9 +1317,11 @@ function at_main() {
              " top.frames[0].location = 'topmenu.php'", 1500);	// fix for top menu not always loading properly
 	if (GetCharData("plungeraccess") == undefined || GetCharData("plungeraccess") == 0) {	// not set yet?  go check.
 		GM_get(server + '/' + to_place("knoll_friendly&action=dk_plunger"),function(response) {
-//            GM_log("plunger response:"+response);
+            GM_log("plunger response:"+response);
 			if (response != "")	{
-                if (response.indexOf("the heck out of Dodge") == -1) {  //zombie plunger not available message
+                if ((response.indexOf("the heck out of Dodge") == -1) ||    //zombie plunger not available
+                    (response.indexOf("No, no, no.") == -1))                //regular not available
+                {
     				SetCharData("plungeraccess","Y");
                 } else {
                     SetCharData("plungeraccess","N");
@@ -1382,6 +1389,11 @@ function at_game() {
 		});
 	}
 }
+
+function at_bedazzle() {
+    dropped_item();
+}
+    
 
 // FIGHT: special processing for certain critters
 function at_fight() {
@@ -2034,6 +2046,9 @@ function at_adventure() {
 		nextZoneName = p1.match(/This must be (\w+),/)[1];
 		$('a:contains("Adventure Again")').replaceWith('<a href="adventure.php?snarfblat=320">Adventure in '+nextZoneName+'</a>');
 		break;
+    case "Sphinx for the Memories":
+		$('a:contains("Adventure Again")').replaceWith('<a href="adventure.php?snarfblat=320">Adventure in the next zone</a>');
+
     case "Top of the Castle, Ma":
         $('<center><a href="'+snarfblat(324)+'">Adventure on the TOP FLOOR</a></center><br />').prependTo($('a:last').parent());
         break;
@@ -2129,10 +2144,13 @@ function at_guild() {
 		break;
 		case "?place=challenge":	
 			//add links here for going to haunted pantry, sleazy back alley, or Cobb's Knob.
-            if ((tdtext.indexOf("So you wanna join the Department of Shadowy") != -1) ||    // quest opener
-                (tdtext.indexOf("manage to steal your own pants") != -1)) {                 // not-done-yet
+            if ((tdtext.indexOf("So you wanna join the Department of Shadowy") != -1) ||    // moxie quest opener
+                (tdtext.indexOf("manage to steal your own pants") != -1)) {                 // moxie not-done-yet
                 $('p:last').append(AppendLink('[back alley (1)]',snarfblat(112)));
-            } 
+            } else if ((tdtext.indexOf("particularly the big ones") != -1) ||               // muscle opener
+                       (tdtext.indexOf("it has to be a really big one") != -1)) {           // muscle not-done-yet
+                $('p:last').append(AppendLink('[knob outskirts (1)]',snarfblat(114)));
+            }
 		break;
 	}
 }
@@ -2179,10 +2197,13 @@ function at_choice() {
 		spoil_Krakrox(cNum);
 	}
 	var choicetext = $('body').text(); // for finding stuff that's not in a <p> tag.  sigh.
-	var p=document.getElementsByTagName('p');
+    $('div[style*="green"] > p').addClass("greenP");
+	var p=$("p").not(".greenP")
+    //document.getElementsByTagName('p');
 	if (p.length) {
-		var p0 = p[0];
+		var p0 = p.get(0); //p[0];
 		var p0text = p0.textContent;
+        GM_log("p0text="+p0text);
 		if (p0text.indexOf("actually a book.") != -1) {	// The Oracle
 			p0.appendChild(AppendLink('[go ahead, read it already]',inv_use(818))); 
 		} else if (p0text.indexOf("a new pledge") != -1) {	// Orcish Frat House Blueprints adventure
@@ -2239,6 +2260,14 @@ function at_choice() {
             var clueText = /You do find an (\.*?),/.match(choicetext)[1];
             clueText = "<br /><font color='blue'>You found <b>" + clueText + "</b></font><br/>";
             $(clueText).appendTo($(p).find(':last'));
+        } else if (choicetext.indexOf('Having finally fought your way') != -1) {
+		    var p1 = $('p:contains("Having finally fought")').text;
+    		nextZoneName = p1.match(/This must be (\w+),/)[1];
+            GM_log("zone name = " + nextZoneName);
+	    	$('a:contains("Adventure Again")').replaceWith('<a href="adventure.php?snarfblat=320">Adventure in '+nextZoneName+'</a>');
+        } else if (p0text.indexOf("Then good luck to you on your travels") != -1) { 
+            //probably got something from Gnasir!
+            p0.appendChild(AppendLink('[use pamphlet]',inv_use(6854)));
 		} else {
 			var kText = [["The lever slides down and stops","L"],
 					["some sort of intervention was called","N"],
@@ -2529,7 +2558,13 @@ function process_results(rText, insLoc) {
     if (rText.indexOf("You can easily climb the branches") != -1) {
         insLoc.append(AppendLink('[temple (1)]',snarfblat(280)));
     } else if (rText.indexOf("You should go to A-Boo Peak") != -1) {
-        insLoc.append(AppendLink('[A-Boo! (1)]',snarfblat(296)));
+        if (insLoc.parent().find('p').length === 0) {
+            GM_log("no p!");
+            insLoc.append(AppendLink('[A-Boo! (1)]',snarfblat(296)));
+        } else {
+            GM_log("p.last found!");
+            insLoc.parent().find('p').append(AppendLink('[A-Boo! (1)]',snarfblat(296)));
+        }
     } else if (rText.indexOf("You give the wheel a mighty turn") != -1) {
         mainpane_goto('pyramid.php');
     } else if (rText.indexOf("it just seemed like a cool spy thing") != -1) {
@@ -2745,6 +2780,16 @@ function at_store() {
 			$('p:first').append(swap);
 		}
 	}
+}
+
+function at_monkeycastle() {
+
+	$('img:first').each(function()
+	{	
+		var onclick = this.getAttribute('onclick');
+		if (onclick != undefined && onclick.indexOf("desc") != -1) AddLinks(onclick, this.parentNode.parentNode, null, thePath);
+    });
+    //addWhere.append(AppendLink('[old man, see?]','oldman.php')); break;
 }
 
 // CASINO: Add link for buying pass.
@@ -3834,8 +3879,10 @@ function at_charsheet() {
 
 // THESEA: if the sea is not present, talk to the old man.
 function at_thesea() {
-	if (document.body.textContent.length == 0)
-		mainpane_goto('/oldman.php?action=talk');
+//    GM_log("body="+document.body.textContent);
+	if (document.body.textContent.indexOf("Uh Oh!") != -1)
+        mainpane_goto(to_place("sea_oldman&action=oldman_oldman"));
+//		mainpane_goto('/oldman.php?action=talk');
 }
 
 // OLDMAN: If the old man is not present, put up a SCUBA gear reminder.
@@ -3873,6 +3920,30 @@ function at_oldman() {
 			.append(tabl);
 		$('body').append(centre);
 	}
+}
+
+function at_spookyraven1() {
+    if (document.body.textContent.indexOf("Nope.") != -1) {
+        mainpane_goto('/town_right.php');
+    }
+	else if (GetPref('zonespoil') == 1) {
+		$('img').each(function() {	
+			var img = $(this);
+			var src = img.attr('src');
+			if (src.indexOf("sm1.gif") != -1)
+				img.attr('title','ML: 105-115');
+			else if (src.indexOf("sm4.gif") != -1)
+				img.attr('title','ML: 20');
+			else if (src.indexOf("sm3.gif") != -1)
+				img.attr('title','ML: 7-9');
+			else if (src.indexOf("sm6.gif") != -1)
+				img.attr('title','ML: 3-5');
+			else if (src.indexOf("sm7.gif") != -1)
+				img.attr('title','ML: 49-57');
+			else if (src.indexOf("sm9.gif") != -1)
+				img.attr('title','ML: 1-2');
+		});
+	}	
 }
 
 // MANOR: If manor is not present, redirect to town.
@@ -4529,10 +4600,13 @@ function at_lair6() {
 }
 
 // FAMILIAR: Blackbird singing in the dead of night.
-//function at_familiar() {
-//	if ($('img:first').attr('src').indexOf('blackbird2') != -1 ||
-//		$('input[value=59]').length > 0)
-//	{
+function at_familiar() {
+	if ($('img:first').attr('src').indexOf('blackbird') != -1)
+	{
+        GM_log("blackbird!");
+        $('img:first').nextAll('b:first').after(AppendLink('[map it!]',inv_use(2054)));
+    }
+}
 //		var fly = document.createElement('a');
 //		fly.innerHTML = '[fly, fly, fly]';
 //		fly.setAttribute('href', 'javascript:void(0);');
