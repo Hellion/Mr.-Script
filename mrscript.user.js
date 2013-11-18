@@ -52,7 +52,8 @@ var global = this; //, mr = unsafeWindow.top.mr = global;
 
 // server variable lets you be logged on to different servers with different characters and keep them straight.
 // not nearly so nifty now that there's only www and dev....
-var server = location.host, serverNo = (server.match(/(.)\./) || {1:"L"})[1]; 	// the "7" in www7.X, or an "L" if no . is in the hostname.
+var server = location.host + "/";
+var serverNo = (server.match(/(.)\./) || {1:"L"})[1]; 	// the "7" in www7.X, or an "L" if no . is in the hostname.
 
 var pwd = GM_getValue('hash.' + server.split('.')[0]);
 
@@ -223,35 +224,35 @@ function process_equip(itemname, jnode) {
 function process_outfit(outfitname, jnode) {
 	switch(outfitname) {
 		case 'Knob Goblin Harem Girl Disguise':	
-                            jnode.after(AppendLink('[perfume]',inv_use(307))) 
-								.after(AppendLink('[knob]','cobbsknob.php')); 				break;
+			jnode.after(AppendLink('[perfume]',inv_use(307))) 
+				.after(AppendLink('[knob]','cobbsknob.php')); 				break;
 		case 'Knob Goblin Elite Guard Uniform':	
-                            jnode.after(AppendLink('[knob]','cobbsknob.php')); 				break;
+            jnode.after(AppendLink('[knob]','cobbsknob.php')); 				break;
 		case 'Swashbuckling Getup':		
-                            jnode.after(AppendLink('[island]','island.php'));				break;
+            jnode.after(AppendLink('[island]','island.php'));				break;
 		case 'Filthy Hippy Disguise':		
-                            if (weCameFrom('store.php')) {
-                                mainpane_goto('/store.php?whichstore=h');
-							} else  {
-								jnode.after(AppendLink('[buy fruit]','store.php?whichstore=h'));
-							}								 		break;
+			if (weCameFrom('store.php')) {
+				mainpane_goto('/store.php?whichstore=h');
+			} else  {
+				jnode.after(AppendLink('[buy fruit]','store.php?whichstore=h'));
+			}								 								break;
 		case 'Mining Gear':			
-                            jnode.after(AppendLink('[dwarf mine]','mining.php?mine=1')); 			break;
+			jnode.after(AppendLink('[dwarf mine]','mining.php?mine=1')); 	break;
 		case 'Bugbear Costume':			
-                            if (weCameFrom('store.php')) {
-                                mainpane_goto('/store.php?whichstore=b');
-							} else {
-								jnode.after(AppendLink('[bakery]','store.php?whichstore=b'));
-							}							 			break;
+			if (weCameFrom('store.php')) {
+				mainpane_goto('/store.php?whichstore=b');
+			} else {
+				jnode.after(AppendLink('[bakery]','store.php?whichstore=b'));
+			}							 									break;
 		case 'eXtreme Cold-Weather Gear':	
-                            jnode.after(AppendLink('[Trapper]','trapper.php')); 
-							jnode.after(AppendLink('[hit the slopes (1)]',snarfblat(273))); 		break;
+			jnode.after(AppendLink('[Trapper]','trapper.php')); 
+			jnode.after(AppendLink('[hit the slopes (1)]',snarfblat(273))); break;
 		case 'Cloaca-Cola Uniform':	
 		case 'Dyspepsi-Cola Uniform':		
-                            jnode.after(AppendLink('[battlefield (1)]',snarfblat(85)));			break;
+			jnode.after(AppendLink('[battlefield (1)]',snarfblat(85)));		break;
 		case 'Frat Warrior Fatigues':
 		case 'War Hippy Fatigues':		
-                            jnode.after(AppendLink('[island]','island.php')); 				break;
+			jnode.after(AppendLink('[island]','island.php')); 				break;
 	} 
 }
 
@@ -297,6 +298,16 @@ function to_place(locName) {
 	return "place.php?whichplace="+locName;
 }
 
+function equip(o) {
+    var ie = "inv_equip.php?pwd=" + pwd + "&which=2";
+    ie = ie + "&action=" + (o.a || 'equip'); 
+    if (o.oname !== undefined) ie += "&outfitname=" + o.oname;
+    if (o.onum !== undefined) ie += "&whichoutfit=" + o.onum;
+    if (o.i !== undefined) ie += "&whichitem=" + o.i;
+    if (o.s !== undefined) ie += "&slot=" + o.s;
+    return ie;
+}
+
 // Set/GetPref: store/retrieve data that applies to the script as a whole.
 function SetPref(which, value) {
 	persist("pref." + which, value);
@@ -334,7 +345,7 @@ function SetPwd(hash) {
 	persist('hash.' + server.split('.')[0], hash);
 }
 function FindHash() {
-	GM_get(server + '/api.php?what=status&for=MrScript', function(html) {
+	GM_get(server + 'api.php?what=status&for=MrScript', function(html) {
 		var CharInfo = JSON.parse(html);
 		var hash = CharInfo["pwd"];
 		SetPwd(hash);
@@ -549,10 +560,12 @@ function AppendOutfitSwap(outfitNumber, text) {
 		var backup = GetPref('backup');
 		var which = $('input[name="swap"]').val();
 		if (which <= 0 || backup == "") {
-			mainpane_goto('/inv_equip.php?action=outfit&which=2&whichoutfit=' + which + '&pwd=' + pwd);
+			mainpane_goto(equip({a:'outfit',oid:which}));
+			//('/inv_equip.php?action=outfit&which=2&whichoutfit=' + which + '&pwd=' + pwd);
 		} else {
 			GM_get(server +
-			'/inv_equip.php?action=customoutfit&which=2&outfitname=' + backup + '&pwd=' + pwd,
+			equip({a:'customoutfit',oname:backup}),
+			//'inv_equip.php?action=customoutfit&which=2&outfitname=' + backup + '&pwd=' + pwd,
 			function(response) {
 				var which = $('input[name="swap"]').val();
 				mainpane_goto('/inv_equip.php?action=outfit&which=2&whichoutfit=' + which + '&pwd=' + pwd);
@@ -566,7 +579,7 @@ function AppendOutfitSwap(outfitNumber, text) {
 
 	// Revert to backup
 	if (outfitNumber == 0) {
-		GM_get(server + "/account_manageoutfits.php", function(response) {
+		GM_get(server + "account_manageoutfits.php", function(response) {
 			var swap = $('input[name="swap"]');
 			var val; var index2; var backup = GetPref('backup');
 			var index = response.indexOf(' value="' + backup + '"');
@@ -608,7 +621,7 @@ function InvChecker (event)
 	$(add).attr('class','tiny').attr('id','span'+item).text("checking...");
 	$(this).parent().next().append(br).append(add);
 
-	GM_get(server+'/api.php?what=inventory&for=MrScript',function(details) {
+	GM_get(server+'api.php?what=inventory&for=MrScript',function(details) {
 		// this call will get us the raw invcache data in the form of {"id":"qty","id":"qty",etc}
 		// n.b. JS source file version should no longer arrive as of 11Jan10, but we'll play it safe.
 		if (details[0] != '{') {		
@@ -680,10 +693,10 @@ function AddLinks(descId, theItem, formWhere, path) {
 		case 1470: case 1471: case 1472: case 1473: case 1474: case 1475:
 		case 1476: case 1477: case 1478: case 1479: case 1480: case 1481:
 		case 1482: case 1483: case 1484: case 2302: case 6679: 
-        case 3526: case 3508:
+		case 3526: case 3508:
 			doWhat = 'equip'; break;
 
-		case  486: case 458: case 1916:											// talisman o' nam, spookyraven's specs, continuum
+		case  486: case  458: case 1916:													// talisman o' nam, spookyraven's specs, continuum
 			doWhat = 'equipacc'; break;
 
 		case   69: case  438: case  440: case  678: case  829:					// various items and campground gear... RCM again?
@@ -747,8 +760,10 @@ function AddLinks(descId, theItem, formWhere, path) {
             addWhere.append(AppendLink('[ballroom (1)]',snarfblat(109))); break;
 
 		case 2267: 																// Mega Gem
-			addWhere.append(AppendLink('[equip as acc2]', 'inv_equip.php?pwd='+ pwd +'&'+
-				 'which=2&action=equip&whichitem=2267&slot=2'));
+			addWhere.append(AppendLink('[equip as acc2]', 
+				equip({i:2267,s:2})));
+//				'inv_equip.php?pwd='+ pwd +'&'+
+//				'which=2&action=equip&whichitem=2267&slot=2'));
 			break;
 
 		case 2052: 																// Blackbird
@@ -782,12 +797,14 @@ function AddLinks(descId, theItem, formWhere, path) {
 
 		case 2279: 																// Dusty Old Book
 			addWhere.append(AppendLink('[take back to guild]','guild.php?place=ocg')); break;
-
-        case 2326:                                                              // stone rose
-            addWhere.append(AppendLink('[Gnasir]',to_place('desertbeach&action=db_gnasir'))); break;
+			
+		case 2326:																// stone rose
+			addWhere.append(AppendLink('[Gnasir]',to_place('desertbeach&action=db_gnasir'))); break;
 			
 		case 3000: 																// Caronch's dentures
-			addWhere.append(AppendLink("[equip swashbuckling pants]",'inv_equip.php?pwd='+pwd+'&which=2&action=equip&whichitem=402')); break;
+			addWhere.append(AppendLink("[equip swashbuckling pants]",
+				equip({i:402}))); break;
+//			'inv_equip.php?pwd='+pwd+'&which=2&action=equip&whichitem=402')); break;
 			
 		case 4668: 																// observational glasses
 			addWhere.append(AppendLink("[visit Mourn]","pandamonium.php?action=mourn")); break;
@@ -941,13 +958,15 @@ function AddLinks(descId, theItem, formWhere, path) {
 
   switch (doWhat) {
     case "equip":
-		addWhere.append(AppendLink('[equip]', 'inv_equip.php?pwd='+ pwd + '&which=2&action=equip&whichitem=' + itemNum));
+		addWhere.append(AppendLink('[equip]', equip({i:itemNum})));
+			//'inv_equip.php?pwd='+ pwd + '&which=2&action=equip&whichitem=' + itemNum));
       break;
 
     case "equipacc":
-		addWhere.append(AppendLink('[equip]', 'inv_equip.php?pwd='+ pwd +
-                                 '&which=2&action=equip&whichitem='+ itemNum +
-                                 "&slot=3"));
+		addWhere.append(AppendLink('[equip]', equip({i:itemNum,s:3})));	
+//		'inv_equip.php?pwd='+ pwd +
+//                                 '&which=2&action=equip&whichitem='+ itemNum +
+//                                 "&slot=3"));
       break;
 
     case "oneuse":
@@ -1000,7 +1019,7 @@ function RightClickMP(event) {
 		else if (list['1660']) num = "1660";// Regular Cloaca
 		if (num > 0) {
 			quant = FindMaxQuantity(integer(num), list[num], 0, GetPref("safemax"));
-			var url = server + '/inv_use.php?pwd='+ pwd +
+			var url = server + 'inv_use.php?pwd='+ pwd +
 			    '&action=useitem&bounce=skills.php?action=useditem&itemquantity='+quant+'&whichitem='+num;
 			GM_get(url, function(result)
 				{	document.location.reload(); });
@@ -1030,7 +1049,7 @@ function RightClickHP(event) {
 
 		for(i=0; i<6; i++) if (list[order[i]]) { num = order[i]; break; }
 		if (num > 0) {
-			var url = server+'/skills.php?action=Skillz&whichskill='+num+"&quantity="+1+'&pwd='+pwd;
+			var url = server+'skills.php?action=Skillz&whichskill='+num+"&quantity="+1+'&pwd='+pwd;
 			GM_get(url, function(result) {
 				document.location.reload(); 
 			});
@@ -1316,12 +1335,12 @@ function at_main() {
 	setTimeout("if (top.frames[0].location == 'about:blank')" +
              " top.frames[0].location = 'topmenu.php'", 1500);	// fix for top menu not always loading properly
 	if (GetCharData("plungeraccess") == undefined || GetCharData("plungeraccess") == 0) {	// not set yet?  go check.
-		GM_get(server + '/' + to_place("knoll_friendly&action=dk_plunger"),function(response) {
-            GM_log("plunger response:"+response);
+		GM_get(server + to_place("knoll_friendly&action=dk_plunger"),function(response) {
+//            GM_log("plunger response:"+response);
 			if (response != "")	{
-                if ((response.indexOf("the heck out of Dodge") == -1) ||    //zombie plunger not available
-                    (response.indexOf("No, no, no.") == -1))                //regular not available
-                {
+                if ((response.indexOf("the heck out of Dodge") == -1)  ||	//zombie plunger not available message
+					(response.indexOf("No, no, no.") == -1))
+				{
     				SetCharData("plungeraccess","Y");
                 } else {
                     SetCharData("plungeraccess","N");
@@ -1393,7 +1412,6 @@ function at_game() {
 function at_bedazzle() {
     dropped_item();
 }
-    
 
 // FIGHT: special processing for certain critters
 function at_fight() {
@@ -1630,6 +1648,8 @@ function at_fight() {
 
 			} else if (square.indexOf("cellar.php") != -1) {	// add "explore L/R/U/D" links
 				link_cellar(square);
+			} else if (square.indexOf("choice.php?whichchoice=804") != -1) { //new trick-or-treating
+				link_trickortreat(square);
 			} else {	// handling adventure.php?snarfblat=X options.
 				var location = integer(square.match(/(\d+)/)[1]);	// the 185 in "adventure.php?snarfblat=185"
 				switch (location)	{
@@ -1756,7 +1776,7 @@ function link_hiddencity(square) {
 
 function link_cellar(square) {
 	var thissquare = square.match(/(\d+)/)[1]; // get number from "cellar.php?action=explore&whichspot=19"
-	thissquare = parseInt(thissquare,10);
+	thissquare = integer(thissquare);
 	var myhrefbase = "cellar.php?action=explore&whichspot=";
 	var myhref = "";
 	// grid: 1 hex digit per square for each of the 25 squares.
@@ -2048,7 +2068,7 @@ function at_adventure() {
 		break;
     case "Sphinx for the Memories":
 		$('a:contains("Adventure Again")').replaceWith('<a href="adventure.php?snarfblat=320">Adventure in the next zone</a>');
-
+		break;
     case "Top of the Castle, Ma":
         $('<center><a href="'+snarfblat(324)+'">Adventure on the TOP FLOOR</a></center><br />').prependTo($('a:last').parent());
         break;
@@ -2138,7 +2158,8 @@ function at_guild() {
 			} else if (tdtext.indexOf("volcano lair or something") != -1) {	// all classes: start of assassin encounters
 				td.append('<p><font color="blue">(Come back after you get the Secret Tropical Volcano Lair map from a nemesis assassin.)</font>');
 			} else if (tdtext.indexOf("I was hoping you could lend me one") != -1) {	// all classes: island openable
-				$('p:last').append(AppendLink('[equip fledges]','inv_equip.php?pwd='+pwd+'&which=2&action=equip&whichitem=3033&slot=3'))
+				$('p:last').append(AppendLink('[equip fledges]',equip({i:3033,s:3})))
+//				'inv_equip.php?pwd='+pwd+'&which=2&action=equip&whichitem=3033&slot=3'))
 						   .append(AppendLink('[Poop Deck (1)]',snarfblat(159)));
 			}
 		break;
@@ -2150,7 +2171,7 @@ function at_guild() {
             } else if ((tdtext.indexOf("particularly the big ones") != -1) ||               // muscle opener
                        (tdtext.indexOf("it has to be a really big one") != -1)) {           // muscle not-done-yet
                 $('p:last').append(AppendLink('[knob outskirts (1)]',snarfblat(114)));
-            }
+            } 
 		break;
 	}
 }
@@ -2158,7 +2179,7 @@ function at_guild() {
 
 // ARCADE: display # of tokens and tickets on the main arcade screen.
 function at_arcade() {
-	GM_get(server+'/api.php?what=inventory&for=MrScript',function(response) {
+	GM_get(server+'api.php?what=inventory&for=MrScript',function(response) {
 		if (response[0] != '{') {		
 			var i1 = response.split('inventory = ')[1].split(';')[0];	// should get everything from { to }, inclusive.
 			response = i1;
@@ -2171,7 +2192,6 @@ function at_arcade() {
 		document.body.appendChild(arcadeInfo);
 	});
 }
-
 
 // CHOICE: special functions for choice adventure text.
 function at_choice() {
@@ -2197,13 +2217,12 @@ function at_choice() {
 		spoil_Krakrox(cNum);
 	}
 	var choicetext = $('body').text(); // for finding stuff that's not in a <p> tag.  sigh.
-    $('div[style*="green"] > p').addClass("greenP");
-	var p=$("p").not(".greenP")
-    //document.getElementsByTagName('p');
+	$('div[style*="green"] > p').addClass("greenP");
+	var p = $("p").not(".greenP");
+//	var p=document.getElementsByTagName('p');
 	if (p.length) {
 		var p0 = p.get(0); //p[0];
 		var p0text = p0.textContent;
-        GM_log("p0text="+p0text);
 		if (p0text.indexOf("actually a book.") != -1) {	// The Oracle
 			p0.appendChild(AppendLink('[go ahead, read it already]',inv_use(818))); 
 		} else if (p0text.indexOf("a new pledge") != -1) {	// Orcish Frat House Blueprints adventure
@@ -2246,7 +2265,9 @@ function at_choice() {
         } else if (p0text.indexOf("weird pink-headed guys") != -1) { // big brother sea monkey
             $('<center><a href="monkeycastle.php?who=1">See Little Brother</a></center><br />')
                 .prependTo($('a:contains("Adventure Again")').parent());
-        } else if (choicetext.indexOf("You glimpse a giant chore wheel on the wall") != -1) {
+        } else if ((choicetext.indexOf("You glimpse a giant chore wheel on the wall") != -1) ||
+				(choicetext.indexOf("You see a chore wheel hanging high on the wall") != -1))
+		{
             $('<center><a href="'+snarfblat(323)+'">Adventure on the GROUND FLOOR</a></center><br />')
                 .prependTo($('a:contains("Adventure Again")').parent());
         } else if (p0text.indexOf("The ground floor is lit much better") != -1) {
@@ -2267,7 +2288,7 @@ function at_choice() {
 	    	$('a:contains("Adventure Again")').replaceWith('<a href="adventure.php?snarfblat=320">Adventure in '+nextZoneName+'</a>');
         } else if (p0text.indexOf("Then good luck to you on your travels") != -1) { 
             //probably got something from Gnasir!
-            p0.appendChild(AppendLink('[use pamphlet]',inv_use(6854)));
+            p0.appendChild(AppendLink('[use pamphlet]',inv_use(6854)));		
 		} else {
 			var kText = [["The lever slides down and stops","L"],
 					["some sort of intervention was called","N"],
@@ -2487,7 +2508,8 @@ function at_inventory() {
 						//{	alert('pow!');}, false);
 						newlink.addEventListener('click',function(event) {
 							this.innerHTML = "[backing up...]";
-							GM_get(server + '/inv_equip.php?action=customoutfit&which=2&outfitname=' + GetPref('backup'),
+							GM_get(server + equip({a:'customoutfit',oname:GetPref('backup')}),
+//							'/inv_equip.php?action=customoutfit&which=2&outfitname=' + GetPref('backup'),
 							function(response) {
 								for (var i=0, len=document.links.length; i<len; i++) {
 									if (document.links[i].text.indexOf("...") != -1) {
@@ -2510,7 +2532,8 @@ function at_inventory() {
 						if (opty.text == backup) {
 							nunewlink = document.createElement('a');
 							nunewlink.innerHTML = "[revert to " + backup.toLowerCase() + "]";
-							nunewlink.href = "inv_equip.php?action=outfit&which=2&whichoutfit=" + opty.value;
+							nunewlink.href = equip({a:'outfit',oid:opty.value});
+							//"inv_equip.php?action=outfit&which=2&whichoutfit=" + opty.value;
 						}	
 					}
 
@@ -2558,13 +2581,11 @@ function process_results(rText, insLoc) {
     if (rText.indexOf("You can easily climb the branches") != -1) {
         insLoc.append(AppendLink('[temple (1)]',snarfblat(280)));
     } else if (rText.indexOf("You should go to A-Boo Peak") != -1) {
-        if (insLoc.parent().find('p').length === 0) {
-            GM_log("no p!");
-            insLoc.append(AppendLink('[A-Boo! (1)]',snarfblat(296)));
-        } else {
-            GM_log("p.last found!");
-            insLoc.parent().find('p').append(AppendLink('[A-Boo! (1)]',snarfblat(296)));
-        }
+		if (insLoc.parent().find('p').length === 0) {
+			insLoc.append(AppendLink('[A-Boo! (1)]',snarfblat(296)));
+		} else {
+			insLoc.parent().find('p').append(AppendLink('[A-Boo! (1)]',snarfblat(296)));
+		}
     } else if (rText.indexOf("You give the wheel a mighty turn") != -1) {
         mainpane_goto('pyramid.php');
     } else if (rText.indexOf("it just seemed like a cool spy thing") != -1) {
@@ -2621,7 +2642,7 @@ function at_galaktik() {
 		txt = row.text();
 		if (txt.indexOf("an item:") == -1)
 			num = $('b:eq(1)').text().split(" ")[0];
-		var docG = parseInt($('table.item').attr('rel').match(/id=(\d+)/)[1],10);
+		var docG = integer($('table.item').attr('rel').match(/id=(\d+)/)[1]);
 		if (GetPref('docuse') == 1 && docG < 233) {	// 231=unguent, 232=ointment.  we can auto-use those.
 			var sanitycheck = FindMaxQuantity(docG, num, 0, 0) + 1;
 			if (num > sanitycheck) num = sanitycheck;
@@ -2687,7 +2708,7 @@ function at_bigisland() {
 }
 
 function pants(evt) {
-    GM_get(server+'/inv_equip.php?pwd='+pwd+'&which=2&action=equip&whichitem=1792',
+    GM_get('http://'+server+equip({i:1792}), //inv_equip.php?pwd='+pwd+'&which=2&action=equip&whichitem=1792',
 	function(txt) {
 	    var pimg = document.getElementById('proprietor');
 	    pimg.removeAttribute('id');
@@ -2746,7 +2767,7 @@ function at_store() {
 			case 's':		// everything from the meatsmith is smithable.
 				if (weCameFrom('craft'))    //did we just buy a hammer?  go smithing.
                     mainpane_goto('/craft.php?mode=smith');
-//					parent.frames[2].location = 'http://' + server + '/craft.php?mode=smith';
+//					parent.frames[2].location = 'http://' + server + 'craft.php?mode=smith';
 				bText.parent().append(AppendLink('[smith]', 'craft.php?mode=smith'));
 				break;
 			case 'h':		// everything from the hippy is cook/mix/stillable.
@@ -2792,6 +2813,7 @@ function at_monkeycastle() {
     //addWhere.append(AppendLink('[old man, see?]','oldman.php')); break;
 }
 
+
 // CASINO: Add link for buying pass.
 function at_casino() {	
 	if (GetPref('shortlinks') > 1) {
@@ -2822,7 +2844,7 @@ function at_craft() {
 	// buy from the Bad Moon store if it's available, since the stuff is half-price there.
 	if (GetPref('shortlinks') > 1 && mlink.length > 0 && ilink.length == 0 && itemNeeded > 0) {
 		mlink.parent().parent().parent().find('center:first').after('<span id="buyspan"></span>');
-		GM_get(server + '/heydeze.php', function(txt)
+		GM_get(server + 'heydeze.php', function(txt)
 		{	if (txt != '') store = 'y';
 			$('#buyspan').html(AppendBuyBox(itemNeeded, store, desc, 1));
 		});
@@ -2884,7 +2906,7 @@ function at_hermit() {
 			a.parent().prepend('<br>' + AppendBuyBox(42, 'm', 'Buy Permit', 1)+'<br>');
 		}
 		else if (txt.indexOf("disappointed") != -1)	{			// no trinkets
-			GM_get(server+'/api.php?what=inventory&for=MrScript',function(response) {		// Check gum and permit counts.
+			GM_get(server+'api.php?what=inventory&for=MrScript',function(response) {		// Check gum and permit counts.
 				var invcache = $.parseJSON(response); 
 				var gum = invcache[23]; if (gum === undefined) gum = 0;
                 gum = integer(gum);
@@ -2987,17 +3009,18 @@ function at_council() {
 			else if (txt.indexOf("Goblin King") != -1 &&
 				txt.indexOf("slaying") == -1)
 			{	
-				var derr = AppendLink('[harem outfit]', "inv_equip.php" +
-					"?action=outfit&which=2&whichoutfit=4");
+				var derr = AppendLink('[harem outfit]', equip({a:'outfit',oid:4}));
+				//"inv_equip.php?action=outfit&which=2&whichoutfit=4");
 				p.append(derr);	
 				if (GetPref('backup') != "") {
 					$(derr).children('*:last')
 						.attr('href', 'javascript:void(0);').click(function() {
-        					GM_get(server + '/inv_equip.php' +
-		        				'?action=customoutfit&which=2&outfitname=' +
-				        		GetPref('backup'), function(response) {
+        					GM_get(server + equip({a:'customoutfit',oname:GetPref('backup')}),
+//							'inv_equip.php?action=customoutfit&which=2&outfitname=' + GetPref('backup'), 
+							function(response) {
 						        	parent.frames[2].location = 'http://' + server
-        						    +  "/inv_equip.php?action=outfit&which=2&whichoutfit=4";
+									+ equip({a:'outfit',oid:4});
+//        						    +  "inv_equip.php?action=outfit&which=2&whichoutfit=4";
 		        				}); 
                                 return false;
 				        		//event.stopPropagation(); event.preventDefault();
@@ -3010,11 +3033,12 @@ function at_council() {
 				if (GetPref('backup') != "") {
 					$(derr).children('*:last')
 						.attr('href', 'javascript:void(0);').click(function() {
-        					GM_get(server + '/inv_equip.php' +
-		        				'?action=customoutfit&which=2&outfitname=' +
-				        		GetPref('backup'), function(response) {
-						        	parent.frames[2].location = 'http://' + server
-        						    +  "/inv_equip.php?action=outfit&which=2&whichoutfit=5";
+        					GM_get(server + equip({a:'customoutfit',oname:GetPref('backup')}),
+//								'inv_equip.php?action=customoutfit&which=2&outfitname=' +
+//				        		GetPref('backup'), 
+									function(response) {
+										parent.frames[2].location = 'http://' + server + equip({a:'outfit',oid:5});
+//										+  "inv_equip.php?action=outfit&which=2&whichoutfit=5";
 		        				}); 
                                 return false;
 				        		//event.stopPropagation(); event.preventDefault();
@@ -3042,18 +3066,19 @@ function at_council() {
 			}
 			if (txt.indexOf("invaded!") != -1 || txt.indexOf("pirates") != -1)
 			{	
-				var derr = AppendLink('[swashbuckle]', "inv_equip.php" +
-					"?action=outfit&which=2&whichoutfit=9");
+				var derr = AppendLink('[swashbuckle]',equip({a:'outfit',oid:9}));
+//				"inv_equip.php?action=outfit&which=2&whichoutfit=9");
 				p.append(derr);
 				if (GetPref('backup') != "") {
 					$(derr).children('*:last').attr('href', '#')
 					.click(function(event) {
-						GM_get(server + '/inv_equip.php' +
-							'?action=customoutfit&which=2&outfitname=' +
-						GetPref('backup'), function(response)
+						GM_get(server + equip({a:'customoutfit',oname:GetPref('backup')}),
+//						'/inv_equip.php?action=customoutfit&which=2&outfitname='+GetPref('backup'), 
+						function(response)
 						{	
 							parent.frames[2].location = 'http://'+server+
-							"/inv_equip.php?action=outfit&which=2&whichoutfit=9";
+							equip({a:'outfit',oid:9});
+//							"/inv_equip.php?action=outfit&which=2&whichoutfit=9";
 						}); return false;
 						//event.stopPropagation(); event.preventDefault();
 					});
@@ -3120,10 +3145,11 @@ function at_questlog() {
 					if (GetPref('backup') != "") {
 						$(derr).children('*:last')
 						.attr('href', 'javascript:void(0);').click(function() {
-							GM_get(server + '/inv_equip.php?action=customoutfit&which=2&outfitname=' +
-							GetPref('backup'),function(response) {
-								parent.frames[2].location = 'http://'+server +
-							"/inv_equip.php?action=outfit&which=2&whichoutfit=4";
+							GM_get(server + equip({a:'customoutfit',oname:GetPref('backup')}),
+//							'/inv_equip.php?action=customoutfit&which=2&outfitname=' + GetPref('backup'),
+							function(response) {
+								parent.frames[2].location = 'http://'+server + equip({a:'outfit',oid:4});
+//							"/inv_equip.php?action=outfit&which=2&whichoutfit=4";
 							}); return false;
 							//event.stopPropagation(); event.preventDefault();
 						});
@@ -3142,17 +3168,18 @@ function at_questlog() {
 					break;
 				case "A Quest, LOL":				
 					b.append(AppendLink('[mountains]', 'mountains.php'));
-					var derr = AppendLink('[swashbuckle]', "inv_equip.php?action=outfit&which=2&whichoutfit=9");
+					var derr = AppendLink('[swashbuckle]', equip({a:'outfit',oid:9}));
+					//"inv_equip.php?action=outfit&which=2&whichoutfit=9");
 					b.append(derr);
 					if (GetPref('backup') != "") {
 						$(derr).children('*:last')
 						.attr('href', 'javascript:void(0);')
 						.click(function(event) {
-							GM_get(server + '/inv_equip.php' +
-								'?action=customoutfit&which=2&outfitname=' +
-							GetPref('backup'), function(response) {
-								parent.frames[2].location = 'http://'+server +
-								"/inv_equip.php?action=outfit&which=2&whichoutfit=9";
+							GM_get(server + equip({a:'customoutfit',oname:GetPref('backup')}), 
+//							'/inv_equip.php?action=customoutfit&which=2&outfitname=' + GetPref('backup'), 
+							function(response) {
+								parent.frames[2].location = 'http://'+server + equip({a:'outfit',oid:9});
+//								"/inv_equip.php?action=outfit&which=2&whichoutfit=9";
 							}); return false;
 							//event.stopPropagation(); event.preventDefault();
 						});
@@ -3246,7 +3273,7 @@ function at_questlog() {
 //					b.append(AppendLink('[woods]', 'woods.php'));
 //					break;
 				case "I Rate, You Rate":
-					var derr = AppendLink('[swashbuckle]', "inv_equip.php?action=outfit&which=2&whichoutfit=9");
+					var derr = AppendLink('[swashbuckle]', equip({a:'outfit',oid:9})); // "inv_equip.php?action=outfit&which=2&whichoutfit=9");
 					b.append(derr);
 					if (GetPref('backup') != "")
 					{	
@@ -3254,11 +3281,11 @@ function at_questlog() {
 						.attr('href', 'javascript:void(0);')
 						.click(function(event)
 						{	
-							GM_get(server + '/inv_equip.php' +
-								'?action=customoutfit&which=2&outfitname=' +
-							GetPref('backup'), function(response)
-							{	parent.frames[2].location = 'http://'+server +
-							"/inv_equip.php?action=outfit&which=2&whichoutfit=9";
+							GM_get(server + equip({a:'customoutfit',oname:GetPref('backup')}), function(response)
+//							'inv_equip.php?action=customoutfit&which=2&outfitname=' +
+//							GetPref('backup'), function(response)
+							{	parent.frames[2].location = 'http://'+server + equip({a:'outfit',oid:9});
+//							"inv_equip.php?action=outfit&which=2&whichoutfit=9";
 							}); return false;
 							//event.stopPropagation(); event.preventDefault();
 						});
@@ -3459,7 +3486,7 @@ function at_charpane() {
 			img.parentNode.parentNode.nextSibling
 				.setAttribute('id','outfitbkup');
 			img.addEventListener('contextmenu',function(event)
-			{	GM_get(server + '/inv_equip.php?action=customoutfit&which=2&outfitname=' +
+			{	GM_get(server + 'inv_equip.php?action=customoutfit&which=2&outfitname=' +
 				GetPref('backup'),function(response)
 				{	var msg; if (response.indexOf("custom outfits") == -1) msg = "Outfit Backed Up";
 					else msg = "Too Many Outfits";
@@ -3473,7 +3500,7 @@ function at_charpane() {
 		var bEff = $('b:gt(4):contains(Effects)');
 		if (bEff.length>0) bEff.get(0).setAttribute("oncontextmenu",
 			"top.mainpane.location.href='http://" + server +
-			"/uneffect.php'; return false;");
+			"uneffect.php'; return false;");
 	}	// end full mode processing
 
 	if ($('#nudgeblock div:contains("a work in progress")').length > 0) $('#nudgeblock').hide();
@@ -3514,21 +3541,21 @@ function at_charpane() {
 			img.parentNode.parentNode.setAttribute('name','poison');
 			img.addEventListener('contextmenu', function(event)	{	
 				document.getElementsByName('poison')[0].childNodes[1].innerHTML = "<i><span style='font-size:10px;'>Un-un-unpoisoning...</span></i>";
-				GM_get(server+'/api.php?what=inventory&for=MrScript',function(response) {			// see if we have some anti-anti-antidote onhand
+				GM_get(server+'api.php?what=inventory&for=MrScript',function(response) {			// see if we have some anti-anti-antidote onhand
 					var invcache = $.parseJSON(response); //eval('('+response+')');
 					var antianti = invcache[829]; 
 					if (antianti === undefined) antianti = 0;
 					if (antianti > 0) {
-						GM_get(server + '/' + inv_use(829),function(event)	// yes: use it.
+						GM_get(server + inv_use(829),function(event)	// yes: use it.
 						{	
 							top.frames[1].location.reload(); 
 						});
 					}	else {																		// no: buy it
-						GM_get(server+'/galaktik.php?howmany=1&action=buyitem&whichitem=829&pwd='+pwd,
+						GM_get(server+'galaktik.php?howmany=1&action=buyitem&whichitem=829&pwd='+pwd,
 						function(result)
 						{	
 							if (result.indexOf('acquire') != -1)									// buy success: use it.
-								GM_get(server + '/' +inv_use(829),function(event)
+								GM_get(server + inv_use(829),function(event)
 								{	top.frames[1].location.reload(); });
 						});
 					}
@@ -3566,7 +3593,7 @@ function at_charpane() {
 					
 				case 221: // chalk: right-click to use more
 					var func = "top.mainpane.location.href = 'http://";
-					func += server + '/' + inv_use(1794) + '; return false; ';
+					func += server + inv_use(1794) + '; return false; ';
 					if (img.getAttribute('oncontextmenu') == null) img.setAttribute('oncontextmenu', func); 
 					break;
 					
@@ -3600,7 +3627,7 @@ function at_charpane() {
 				default:
 					if (effName == undefined) effName = "";
 					func = "if (confirm('Uneffect "+effName+"?')) top.mainpane.location.href = 'http://";
-					func += server + "/uneffect.php?using=Yep.&whicheffect="+effNum+"&pwd="+pwd+"';return false;";
+					func += server + "uneffect.php?using=Yep.&whicheffect="+effNum+"&pwd="+pwd+"';return false;";
 					if (img.getAttribute('oncontextmenu') == null) img.setAttribute('oncontextmenu', func); 
 					break;
 			}
@@ -3797,7 +3824,7 @@ function at_clan_rumpus() {
 				txt.indexOf("broken down") == -1 &&
 				txt.indexOf("claw slowly descends") != -1)
 			window.setTimeout('self.location = "http://' + server +
-				'/clan_rumpus.php?action=click&spot=3&furni=3";',500);
+				'clan_rumpus.php?action=click&spot=3&furni=3";',500);
 		}
 	}
 }
@@ -3811,7 +3838,7 @@ function at_clan_viplounge() {
 			txt = tr.next().text();
 			if (txt.indexOf("You probably shouldn't play") == -1)  {
 				window.setTimeout('self.location = "http://' + server + 
-				'/clan_viplounge.php?action=klaw";',500);
+				'clan_viplounge.php?action=klaw";',500);
 			}
 		}
 	}
@@ -3879,9 +3906,9 @@ function at_charsheet() {
 
 // THESEA: if the sea is not present, talk to the old man.
 function at_thesea() {
-//    GM_log("body="+document.body.textContent);
 	if (document.body.textContent.indexOf("Uh Oh!") != -1)
         mainpane_goto(to_place("sea_oldman&action=oldman_oldman"));
+//	if (document.body.textContent.length == 0)
 //		mainpane_goto('/oldman.php?action=talk');
 }
 
@@ -3945,7 +3972,6 @@ function at_spookyraven1() {
 		});
 	}	
 }
-
 // MANOR: If manor is not present, redirect to town.
 function at_manor() {
 	if (document.body.textContent.length == 0)
@@ -4120,7 +4146,7 @@ function at_manor3() {
 	// helper function 2: check player inventory for quantity of wines.
 	function countWines(wl, needs) {	
 	// wl is an array of bInfo's from the scrape() function; needs is an array of the wine IDs that are required for the altar.
-		GM_get(server+'/api.php?what=inventory&for=MrScript',function(response) {	// was: js_inv.php?for=MrScript
+		GM_get(server+'api.php?what=inventory&for=MrScript',function(response) {	// was: js_inv.php?for=MrScript
 			if (response[0] != '{') {		
 				var i1 = response.split('inventory = ')[1].split(';')[0];	// should get everything from { to }, inclusive.
 				response = i1;
@@ -4185,7 +4211,7 @@ function at_manor3() {
 		document.body.appendChild(wineDisplay);
 		countWines(winelist, winesneeded); 
 	} else {											// No saved results: Better do it the long way.... 
-		GM_get(server+"/manor3.php?place=goblet", function (atext) {	// check the altar for the glyphs we need
+		GM_get(server+"manor3.php?place=goblet", function (atext) {	// check the altar for the glyphs we need
 			var pdiv = document.createElement('div');
 			pdiv.innerHTML = atext;
 			var glimgs = pdiv.getElementsByTagName('img');
@@ -4201,17 +4227,17 @@ function at_manor3() {
 							//glimgs[2] is the big encircled-triangle in the middle.
 				glyphids[2] = glimgs[3].getAttribute('src').match(/(?:otherimages\/manor\/glyph)(\d)/)[1];
 			}
-			GM_get(server+"/desc_item.php?whichitem="+wineDB[2271], function(b1) {	// get the glyph number off the wine descriptions
+			GM_get(server+"desc_item.php?whichitem="+wineDB[2271], function(b1) {	// get the glyph number off the wine descriptions
 				winelist[2271]=scrape(b1);
-				GM_get(server+"/desc_item.php?whichitem="+wineDB[2272], function(b2) {
+				GM_get(server+"desc_item.php?whichitem="+wineDB[2272], function(b2) {
 					winelist[2272] = scrape(b2);
-					GM_get(server+"/desc_item.php?whichitem="+wineDB[2273], function(b3) {
+					GM_get(server+"desc_item.php?whichitem="+wineDB[2273], function(b3) {
 						winelist[2273] = scrape(b3);
-						GM_get(server+"/desc_item.php?whichitem="+wineDB[2274], function(b4) {
+						GM_get(server+"desc_item.php?whichitem="+wineDB[2274], function(b4) {
 							winelist[2274] = scrape(b4);
-							GM_get(server+"/desc_item.php?whichitem="+wineDB[2275], function(b5) {
+							GM_get(server+"desc_item.php?whichitem="+wineDB[2275], function(b5) {
 								winelist[2275] = scrape(b5);
-								GM_get(server+"/desc_item.php?whichitem="+wineDB[2276], function(b6) {
+								GM_get(server+"desc_item.php?whichitem="+wineDB[2276], function(b6) {
 									winelist[2276] = scrape(b6);
 									wineDisplay.innerHTML = "<tr><th>Name:</th><th>Glyph:</th><th>Effect:</th></tr>";
 									for (var i=2271;i<2277;i++) {
@@ -4272,7 +4298,7 @@ function at_pandamonium() {
 			var bear = false, paper = false, marsh = false;
 			var cake = false, cherry = false, pillow = false;
 			itemlist.children().each(function(){
-				var myval = parseInt(this.value,10);
+				var myval = integer(this.value);
 				switch (myval) {
 					case 4670: set1++; bear = true; break;
 					case 4673: set1++; marsh = true; break;
@@ -4359,7 +4385,7 @@ function at_pyramid() {
 	checkInv.setAttribute('href', '#');
 	checkInv.addEventListener('click', function(evt) {
 		checkInv.innerHTML = '<font size="2">[checking...]</font>';
-		GM_get(server+'/api.php?what=inventory&for=MrScript',function(response) {
+		GM_get(server+'api.php?what=inventory&for=MrScript',function(response) {
 			if (response[0] != '{') {		
 				var i1 = response.split('inventory = ')[1].split(';')[0];	// should get everything from { to }, inclusive.
 				response = i1;
@@ -4607,6 +4633,9 @@ function at_familiar() {
         $('img:first').nextAll('b:first').after(AppendLink('[map it!]',inv_use(2054)));
     }
 }
+//	if ($('img:first').attr('src').indexOf('blackbird2') != -1 ||
+//		$('input[value=59]').length > 0)
+//	{
 //		var fly = document.createElement('a');
 //		fly.innerHTML = '[fly, fly, fly]';
 //		fly.setAttribute('href', 'javascript:void(0);');
@@ -4632,7 +4661,7 @@ function at_mining() {
 			var founditem = $('.item').attr("rel");	
 			var foundamount = 0;
 			if (founditem) { 
-				founditem = parseInt(founditem.match(/id=(\d+)/)[1],10);
+				founditem = integer(founditem.match(/id=(\d+)/)[1]);
 				if (founditem >= 363) {
 					foundamount = GetCharData("ore"+founditem);
 					foundamount++;
@@ -4795,7 +4824,7 @@ function at_campground() {
 					.after('<div style="clear:both;"></div>');
 			}
 		});
-		GM_get(server + '/api.php?what=inventory&for=MrScript', function(txt) {
+		GM_get(server + 'api.php?what=inventory&for=MrScript', function(txt) {
 			var inventory = $.parseJSON(txt);
 			$('b[class=combatitem]').each(function() {
 				var itemno = $(this).attr('itemno');
@@ -4826,19 +4855,20 @@ function at_basement() {
 			var phnames = {"1637":"Hot","1638":"Cold","1639":"Spooky","1640":"Stench","1641":"Sleaze"};
 			aa.innerHTML = "Use " + phnames[phial] + " Phial"; aa.setAttribute('href','#');
 			aa.setAttribute('id','usephial'); 
-			if (curphial > 0)
-				aa.setAttribute('curphial',"/uneffect.php?using=Yep.&pwd=" + pwd + "&whicheffect=" + curphial);
+			if (curphial > 0)	//if the charpane sez we're already phialed, then we have to unphial first.
+				aa.setAttribute('curphial',"uneffect.php?using=Yep.&pwd=" + pwd + "&whicheffect=" + curphial);
 			aa.setAttribute('phial',inv_use(phial)); // "/inv_use.php?pwd=" + pwd + "&which=3&whichitem=" + phial);
 			aa.addEventListener('click',function(event) {
 				this.innerHTML = "Using Phial...";
-				if (this.getAttribute('curphial'))
+				if (this.getAttribute('curphial'))	//remove old phial effect if present
 				GM_get(server + this.getAttribute('curphial'),function(details) {
 					var ph = document.getElementById('usephial');
-					if (details.indexOf("Effect removed.") != -1)
-					GM_get(server + ph.getAttribute('phial'),function(details2) {
-						var ph = document.getElementById('usephial'); ph.innerHTML = "";
-						top.frames[1].location.reload();
-					});	
+					if (details.indexOf("Effect removed.") != -1) {
+						GM_get(server + ph.getAttribute('phial'),function(details2) {
+							var ph = document.getElementById('usephial'); ph.innerHTML = "";
+							top.frames[1].location.reload();
+						});
+					}
 				});
 				else GM_get(server + this.getAttribute('phial'),function(details) {
 					var ph = document.getElementById('usephial'); ph.innerHTML = "";
@@ -4902,10 +4932,10 @@ function at_basement() {
 }
 
 function at_bathole() {
-    GM_get(server + "/api.php?what=inventory&for=MrScript", function(rv) {
+    GM_get(server + "api.php?what=inventory&for=MrScript", function(rv) {
         var inv = $.parseJSON(rv);
         var sonar = inv['563'];
-        if (sonar === undefined) sonar = 0;
+//        if (sonar === undefined) sonar = 0;
         if (sonar) {
             $("a:last").append("<br /><center><a href='"+inv_use('563')+"'><font color='blue'>Use a sonar</font></a></center>");
         }
@@ -5749,13 +5779,13 @@ function at_topmenu() {
 			if (zplit[0] == "guildstore") {
 				AddTopLink(toprow1, 'mainpane', 'fnord', '', 1);
 				AddTopLink(toprow1, 'mainpane', 'smeg', '', 1);
-				GM_get(server+'/store.php?whichstore=2', function(t) {
+				GM_get(server+'store.php?whichstore=2', function(t) {
 					if (t.length>10 && t.indexOf("You don't belong") == -1)
 						$('a[href="fnord"]')
 						.attr('href', 'store.php?whichstore=2')
 						.html('gouda');
 				});
-				GM_get(server+'/store.php?whichstore=3', function(t) {
+				GM_get(server+'store.php?whichstore=3', function(t) {
 					if (t.length>10 && t.indexOf("You don't belong") == -1)
 						$('a[href="smeg"]')
 						.attr('href', 'store.php?whichstore=3')
@@ -5787,7 +5817,7 @@ function at_topmenu() {
         a.setAttribute('href','#');
         a.setAttribute('target','mainpane');
         toprow1.appendChild(a);
-        GM_get(server+'/'+to_place('forestvillage&action=fv_friar'), function(t) {
+        GM_get(server+to_place('forestvillage&action=fv_friar'), function(t) {
             if (t.length>10 && t.indexOf("Back to the Distant Woods") == -1) {
                 $('#florist').html('florist')
                     .attr('href',to_place('forestvillage&action=fv_friar'));
@@ -5967,7 +5997,7 @@ function at_compactmenu() {
 				AddTopOption("Smith/Smash", "craft.php?mode=smith", selectItem, selectItem.options[i+7]);
 				AddTopOption("Closet", "closet.php", selectItem, selectItem.options[i+8]);
 				AddTopOption("-", "nothing", selectItem, selectItem.options[i+9]);
-				GM_get(server + "/knoll.php",function(response)	{	
+				GM_get(server + "knoll.php",function(response)	{	
 					if (response == "") return;
 					var s = document.getElementsByTagName('select')[0];
 					for (var i=0; i<s.options.length; i++) {
@@ -6029,7 +6059,7 @@ function at_compactmenu() {
 		AddTopOption("Hippy Store", "store.php?whichstore=h", selectItem, 0);
 		AddTopOption("Display Case", "managecollection.php", selectItem, 0);
 		AddTopOption("Hagnk","storage.php",selectItem,0);
-        GM_get(server+'/'+to_place('forestvillage&action=fv_friar'), function(t) {
+        GM_get(server+to_place('forestvillage&action=fv_friar'), function(t) {
             if (t.length>10 && t.indexOf("Back to the Distant Woods") == -1) {
                 AddTopOption("Florist",to_place('forestvillage&action=fv_friar'),selectItem, 0);
                 SetCharData("hasflorist",true);
@@ -6236,7 +6266,7 @@ function buildPrefs() {
 		ul4.setAttribute('id','hashrenew');
 		ul4.addEventListener('click',function(event)
 		{	this.innerHTML = 'Working...';
-			GM_get(server + '/store.php?whichstore=m', function(txt)
+			GM_get(server + 'store.php?whichstore=m', function(txt)
 			{	var nupwd = txt.match(/phash\svalue\=\"([a-z0-9]+)\"/)[1];
 				if (nupwd) { $("#hashrenew").html('Done'); SetPwd(nupwd); }
 				else $("#hashrenew").html('Fail!');
