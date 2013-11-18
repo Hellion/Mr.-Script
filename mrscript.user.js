@@ -349,6 +349,14 @@ function FindHash() {
 		var CharInfo = JSON.parse(html);
 		var hash = CharInfo["pwd"];
 		SetPwd(hash);
+        SetCharData("charname",CharInfo["name"]);
+        var moonsign = CharInfo["sign"];
+        GM_log("moon sign="+moonsign);
+        if ((moonsign == "Mongoose") || (moonsign == "Wallaby") || (moonsign == "Vole")) {
+            SetCharData("friendlyknoll",true);
+        } else {
+            SetCharData("friendlyknoll",false);
+        }
 	});
 }
 
@@ -747,8 +755,8 @@ function AddLinks(descId, theItem, formWhere, path) {
 			addWhere.append(AppendLink('[chasm]',to_place('orc_chasm&action=bridge0'))); break;
 			
 		case  602: 																// Degrassi Knoll shopping list
-			if (GetCharData("plungeraccess") == "Y") addWhere.append(AppendLink('[gnoll store]', "store.php?whichstore=5"));
-			else addWhere.append(AppendLink('[Knoll (1)]', snarfblat(18)));
+			if (GetCharData("friendlyknoll") == true) addWhere.append(AppendLink('[gnoll store]', "store.php?whichstore=5"));
+			else addWhere.append(AppendLink('[Knoll]', to_place('knoll_hostile')));// snarfblat(18)));
 			break;
 			
         case  609:                                                              // S.O.C.K
@@ -1166,16 +1174,16 @@ function AddAutoClear(box, setting) {
 
 // GOGOGADGETPLUNGER: Convert meat-paste links to The Plunger.
 function GoGoGadgetPlunger() {	
-	if (GetCharData("plungeraccess") == "Y") {
-		$('a[href*="craft.php?mode=combine"]').each(function() {
-			href = this.getAttribute('href');
-			href = href.replace('&a=','&item1=');
-			href = href.replace('&b=','&item2=');
-			href = href.replace('action=craft','action=combine');
-			this.setAttribute("href", href.replace(
-				"craft.php?mode=combine", to_place("knoll_friendly&action=dk_plunger")));
-		});
-	}	
+//	if (GetCharData("plungeraccess") == "Y") {
+//		$('a[href*="craft.php?mode=combine"]').each(function() {
+//			href = this.getAttribute('href');
+//			href = href.replace('&a=','&item1=');
+//			href = href.replace('&b=','&item2=');
+//			href = href.replace('action=craft','action=combine');
+//			this.setAttribute("href", href.replace(
+//				"craft.php?mode=combine", to_place("knoll_friendly&action=dk_plunger")));
+//		});
+//	}	
 }
 
 // DEFAULTS: Pay no attention to the function behind the curtain.
@@ -1334,22 +1342,22 @@ function at_main() {
 	FindHash();
 	setTimeout("if (top.frames[0].location == 'about:blank')" +
              " top.frames[0].location = 'topmenu.php'", 1500);	// fix for top menu not always loading properly
-	if (GetCharData("plungeraccess") == undefined || GetCharData("plungeraccess") == 0) {	// not set yet?  go check.
-		GM_get(server + to_place("knoll_friendly&action=dk_plunger"),function(response) {
-//            GM_log("plunger response:"+response);
-			if (response != "")	{
-                if ((response.indexOf("the heck out of Dodge") == -1)  ||	//zombie plunger not available message
-					(response.indexOf("No, no, no.") == -1))
-				{
-    				SetCharData("plungeraccess","Y");
-                } else {
-                    SetCharData("plungeraccess","N");
-                }
-			} else {
-				SetCharData("plungeraccess","N");
-			}
-		});
-	}
+//	if (GetCharData("plungeraccess") == undefined || GetCharData("plungeraccess") == 0) {	// not set yet?  go check.
+//		GM_get(server + to_place("knoll_friendly&action=dk_plunger"),function(response) {
+////            GM_log("plunger response:"+response);
+//			if (response != "")	{
+//                if ((response.indexOf("the heck out of Dodge") == -1)  ||	//zombie plunger not available message
+//					(response.indexOf("No, no, no.") == -1))
+//				{
+//    				SetCharData("plungeraccess","Y");
+//                } else {
+//                    SetCharData("plungeraccess","N");
+//                }
+//			} else {
+//				SetCharData("plungeraccess","N");
+//			}
+//		});
+//	}
 
 	// n.b. the :eq(1) below is important because of the nested-table layout.  only select the inner TR.
 	$('tr:contains("Noob."):eq(1)').append(AppendLink('[Toot]','tutorial.php?action=toot'));	// fresh from valhalla?  get things rolling.
@@ -1859,7 +1867,7 @@ function HTMLDecode(html) {
 function at_loggedout() {
 	SetPwd(0);
 	SetCharData("NSDoorCode",'');
-	SetCharData("plungeraccess",'');
+//  SetCharData("plungeraccess",'');
 }
 
 // LOGIN: clear password hash, just to be safe. :-)
@@ -1876,7 +1884,7 @@ function at_valhalla() {
 	// door code resets
 	SetCharData("NSDoorCode",'');
 	// might not go muscle sign this time
-	SetCharData("plungeraccess",'');
+//	SetCharData("plungeraccess",'');
 	// wipe the cellar wine info
 	SetCharData("corner178",0);
 	SetCharData("corner179",0);
@@ -2110,8 +2118,8 @@ function at_guild() {
 				td.append(AppendLink('[Road to WC (1)]', snarfblat(99)));
 			}
 			else if ((tdtext.indexOf("with the meatcar?") != -1) || (tdtext.indexOf("meatcar parts") != -1)) {
-				if (GetCharData("plungeraccess") == "Y") td.append(AppendLink('[gnoll store]', "store.php?whichstore=5"));
-				else td.append(AppendLink('[Knoll (1)]', snarfblat(18)));
+				if (GetCharData("friendlyknoll") == true) td.append(AppendLink('[gnoll store]', "store.php?whichstore=5"));
+				else td.append(AppendLink('[Knoll]', to_place('knoll_hostile')));
 			}
 		break;
 		case "?place=ocg": 
@@ -2304,9 +2312,9 @@ function at_choice() {
 
 // Forest Village: Untinker linker.
 function at_forestvillage() {
-	var plunger = GetCharData("plungeraccess") == "Y" ? true: false;
-	var linkloc = plunger ? to_place("knoll_friendly&action=dk_innabox") :snarfblat(18);
-	var linkname = plunger ? "[get it from Innabox]" : "[degrassi knoll (1)]";
+	var plunger = GetCharData("friendlyknoll");
+	var linkloc = plunger ? to_place("knoll_friendly&action=dk_innabox") : to_place('knoll_hostile');
+	var linkname = plunger ? "[get it from Innabox]" : "[head to degrassi knoll]";
 	$('td:contains("just lost without my"):last').append(AppendLink(linkname,linkloc));
 	$('td:contains("luck finding my screw"):last').append(AppendLink(linkname,linkloc));
 	if (plunger) $('b:contains("Untinker")').append(AppendLink('[innabox]',linkloc)); 
@@ -2331,7 +2339,7 @@ function at_bhh() {
 		["bloodstained briquettes",         "[Knob Outskirts (1)]", "114"],
 		["empty greasepaint tubes",         "[Funhouse (1)]",       "20"],
 		["chunks of hobo gristle",          "[Back Alley (1)]",     "112"],
-		["oily rags",                       "[Knoll (1)]",          "18"],
+		["oily rags",                       "[Knoll (1)]",          "354"],
 		["pink bat eyes",                   "[Bathole Entry (1)]",  "30"],
 		["shredded can labels",             "[Pantry (1)]",         "113"],
 		["triffid barks",                   "[spooky forest (1)]",  "15"],
@@ -2952,20 +2960,20 @@ function at_hermit() {
 }
 
 // MOUNTAINS: Always-visible hermit.
-function at_mountains() {	
-	var img = $('img:last');
-	if (img.attr('src').indexOf("mount4") != -1) {
-		img.attr('border', 0).attr('src','http://images.kingdomofloathing.com/'+
-			'otherimages/mountains/hermitage.gif');
-		var a = document.createElement('a');
-		$(a).attr('href','hermit.php')
-			.insertBefore(img)
-			.append(img);
-	}
-}
+//function at_mountains() {	
+//	var img = $('img:last');
+//	if (img.attr('src').indexOf("mount4") != -1) {
+//		img.attr('border', 0).attr('src','http://images.kingdomofloathing.com/'+
+//			'otherimages/mountains/hermitage.gif');
+//		var a = document.createElement('a');
+//		$(a).attr('href','hermit.php')
+//			.insertBefore(img)
+//			.append(img);
+//	}
+//}
 
-function at_knoll() {	
-	if (document.location.search == "?place=mayor") {
+function at_knoll_friendly() {	
+	if (document.location.search.indexOf("dk_mayor") != -1) { // == "?place=mayor") {
 		p = $('p:first');
 		p.append(AppendLink('[spooky barrow (1)]','adventure.php?snarfblat=48'));
 		p.append(AppendLink('[bugbear pens (1)]','adventure.php?snarfblat=47'));
@@ -3418,7 +3426,7 @@ function at_charpane() {
     '17c22c':549    // Fishy
 	};
 
-	SetData("charname",bText[0].textContent);
+//	SetData("charname",bText[0].textContent);
 
 	// Compact Mode
 	if (compactMode) {
@@ -3647,7 +3655,7 @@ function at_skills() {
 		var json = "{";
 		for (var i=0, len=sel.childNodes.length; i<len; i++) {	
 			var s = sel.childNodes[i];
-			s.setAttribute('style','max-width:180px;');
+			//s.setAttribute('style','max-width:180px;'); //this doesn't work anymore???
 			var temp = s.value;
 			// Store healing spells
 			if (temp == 3012 || temp == 1010 || temp == 5011
@@ -4942,6 +4950,18 @@ function at_bathole() {
     });
 }
 
+function spoil_knoll_friendly() {
+    $('#dk_pens > a > img').attr('title','ML: 13-20');
+    $('#dk_burrow > a > img').attr('title','ML: 55-65 (must have gravy fairy as active familiar)');
+}
+
+function spoil_knoll_hostile() {
+    $('#kh_zone1 > a > img').attr('title','ML: 10-13');
+    $('#kh_zone2 > a > img').attr('title','ML: 12-15');
+    $('#kh_zone3 > a > img').attr('title','ML: 9-11');
+    $('#kh_zone4 > a > img').attr('title','ML: 10-12; car parts here');
+}
+
 //Spoil_Krakrox: walk through the entire Jungles of Hyboria quest.
 function spoil_Krakrox(cNum) {
 var Krakrox = {
@@ -5997,15 +6017,15 @@ function at_compactmenu() {
 				AddTopOption("Smith/Smash", "craft.php?mode=smith", selectItem, selectItem.options[i+7]);
 				AddTopOption("Closet", "closet.php", selectItem, selectItem.options[i+8]);
 				AddTopOption("-", "nothing", selectItem, selectItem.options[i+9]);
-				GM_get(server + "knoll.php",function(response)	{	
-					if (response == "") return;
-					var s = document.getElementsByTagName('select')[0];
-					for (var i=0; i<s.options.length; i++) {
-						if (s.options[i].value == "craft.php?mode=combine")
-						{	s.options[i].value = "knoll.php?place=paster"; break;
-						}	
-					}	
-				});
+//				GM_get(server + "knoll.php",function(response)	{	
+//					if (response == "") return;
+//					var s = document.getElementsByTagName('select')[0];
+//					for (var i=0; i<s.options.length; i++) {
+//						if (s.options[i].value == "craft.php?mode=combine")
+//						{	s.options[i].value = "knoll.php?place=paster"; break;
+//						}	
+//					}	
+//				});
 			}
 			if (GetPref('logout') == 1 && selectItem.options[i].innerHTML == "Log Out") {
 				selectItem.options[i].value = "logout";
