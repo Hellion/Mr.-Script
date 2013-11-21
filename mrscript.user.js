@@ -298,6 +298,7 @@ function to_place(locName) {
 	return "place.php?whichplace="+locName;
 }
 
+// equip: return a link to equip the specified object.
 function equip(o) {
     var ie = "inv_equip.php?pwd=" + pwd + "&which=2";
     ie = ie + "&action=" + (o.a || 'equip'); 
@@ -349,7 +350,7 @@ function FindHash() {
 		var CharInfo = JSON.parse(html);
 		var hash = CharInfo["pwd"];
 		SetPwd(hash);
-        SetCharData("charname",CharInfo["name"]);
+        SetData("charname",CharInfo["name"]);
         var moonsign = CharInfo["sign"];
         GM_log("moon sign="+moonsign);
         if ((moonsign == "Mongoose") || (moonsign == "Wallaby") || (moonsign == "Vole")) {
@@ -662,7 +663,7 @@ function InvChecker (event)
 }
 
 
-// ADDTOPLINK: Much easier for a function to do all the work.
+// ADDTOPLINK: Add a link into the text-based top menu pane.
 function AddTopLink(putWhere, target, href, html, space) {
 	if (href == "") return;
 	var a = document.createElement('a');
@@ -724,9 +725,9 @@ function AddLinks(descId, theItem, formWhere, path) {
 		case 247:																// fermenting powder.
 			doWhat = 'cocktail'; break;
 
-		case 1438: case 1439: case 1440: case 1441: case 1442: case 1443:		// elemental powders
-		case 1444:
-			doWhat = 'malus'; break;
+//		case 1438: case 1439: case 1440: case 1441: case 1442: case 1443:		// elemental powders
+//		case 1444:
+//			doWhat = 'malus'; break;
 
 		case   74: case   75: case   76:										// spooky temple stuff
 			itemNum = 74; doWhat = 'oneuse'; break;
@@ -822,7 +823,7 @@ function AddLinks(descId, theItem, formWhere, path) {
 				//TODO: use the entire purchased amount, instead of just 1.
 //				mainpane_goto(inv_use(23));
 			} else 	{	
-				addWhere.append(AppendLink('[use]', inv_use.php(23)));
+				addWhere.append(AppendLink('[use]', inv_use(23)));
 			}
 			break;
 
@@ -1458,11 +1459,11 @@ function at_fight() {
 	"a spider gremlin":         ["band flyers","molybdenum magnet",0,1],
 	"a batwinged gremlin":      ["band flyers","molybdenum magnet",0,1],
 	" Ed the Undying":          ["band flyers","",0,0],
-	"a pygmy headhunter":       ["--","",0,3],
-	"a boaraffe":               ["--","",0,3],
-	"a pygmy blowgunner":       ["--","",0,3],
-	"a pygmy assault squad":    ["--","",0,3],
-	"an ancient protector spirit":["--","",0,3],
+//	"a pygmy headhunter":       ["--","",0,3],
+//	"a boaraffe":               ["--","",0,3],
+//	"a pygmy blowgunner":       ["--","",0,3],
+//	"a pygmy assault squad":    ["--","",0,3],
+//	"an ancient protector spirit":["--","",0,3],
 	"a clingy pirate":          ["cocktail napkin","",0,0],
 	"a sassy pirate":           ["The Big Book of Pirate Insults","",0,4],
 	"a shady pirate":           ["The Big Book of Pirate Insults","",0,4],
@@ -1584,25 +1585,25 @@ function at_fight() {
 				AddToTopOfMain(tr, document);
 			break;
 			
-			case 3: // hidden city monsters--look for sphere messages.
-				if (/You hold the \w+ stone sphere/.test(document.body.innerHTML)) {
-					var stone = {"mossy":2174, "smooth":2175, "cracked":2176, "rough":2177};
-					var snRegex = /You hold the (\w+) stone sphere/g;
-					var scRegex = /It radiates a bright (\w+) light,/g;
-					var sname; 
-					var color; 
-					while ((sname = snRegex.exec(document.body.innerHTML)) != null) {	// loop to account for funkslung stones.
-						color = scRegex.exec(document.body.innerHTML);
-						switch (color[1]) 
-						{
-							case "yellow":	SetCharData("altar1",stone[sname[1]]); break;
-							case "blue":	SetCharData("altar2",stone[sname[1]]); break;
-							case "red":		SetCharData("altar3",stone[sname[1]]); break;
-							case "green":	SetCharData("altar4",stone[sname[1]]);break;
-						}
-					}
-				}
-			break;
+//			case 3: // hidden city monsters--look for sphere messages.
+//				if (/You hold the \w+ stone sphere/.test(document.body.innerHTML)) {
+//					var stone = {"mossy":2174, "smooth":2175, "cracked":2176, "rough":2177};
+//					var snRegex = /You hold the (\w+) stone sphere/g;
+//					var scRegex = /It radiates a bright (\w+) light,/g;
+//					var sname; 
+//					var color; 
+//					while ((sname = snRegex.exec(document.body.innerHTML)) != null) {	// loop to account for funkslung stones.
+//						color = scRegex.exec(document.body.innerHTML);
+//						switch (color[1]) 
+//						{
+//							case "yellow":	SetCharData("altar1",stone[sname[1]]); break;
+//							case "blue":	SetCharData("altar2",stone[sname[1]]); break;
+//							case "red":		SetCharData("altar3",stone[sname[1]]); break;
+//							case "green":	SetCharData("altar4",stone[sname[1]]);break;
+//						}
+//					}
+//				}
+//			break;
 			case 4: // insulting pirates:
 				var insultsList = GetCharData("insults"); if (insultsList == undefined) insultsList = "0;0;0;0;0;0;0;0";
 				var insultsArray = insultsList.split(";");
@@ -1651,13 +1652,13 @@ function at_fight() {
         }
 		// Location-specific stuff:
 		if (square) {
-			if (square.indexOf("hiddencity") != -1) {  // add "explore next square" link
-				link_hiddencity(square);
-
-			} else if (square.indexOf("cellar.php") != -1) {	// add "explore L/R/U/D" links
+//			if (square.indexOf("hiddencity") != -1) {  // add "explore next square" link
+//				link_hiddencity(square);
+//			} else 
+			if (square.indexOf("cellar.php") != -1) {	// add "explore L/R/U/D" links
 				link_cellar(square);
-			} else if (square.indexOf("choice.php?whichchoice=804") != -1) { //new trick-or-treating
-				link_trickortreat(square);
+//			} else if (square.indexOf("choice.php?whichchoice=804") != -1) { //new trick-or-treating
+//				link_trickortreat(square);
 			} else {	// handling adventure.php?snarfblat=X options.
 				var location = integer(square.match(/(\d+)/)[1]);	// the 185 in "adventure.php?snarfblat=185"
 				switch (location)	{
@@ -1765,28 +1766,43 @@ function at_fight() {
 	}
 }
 
-function link_hiddencity(square) {
-	var thissquare = square.match(/(\d+)/)[1];	// break the "22" off of "rats.php?where=22", for example.
-	var hloc = '';
-	var lastsquare = 24;
-	hloc = "hiddencity.php?which=";
-	var nextsquare = integer(thissquare)+1;
-	if (nextsquare <= lastsquare) {
-		var myhref = hloc+nextsquare;
-		var clicky = "SetCharData('square','"+myhref+"')";
-		$('<center><p><a href="'+myhref+'" id="bwahaha">Explore Next Square</a></center>').prependTo($('center:last'));
-		$('#bwahaha').click(function() {
-			var a = $(this);
-			SetCharData("square",a.attr('href'));
-		});
-	}
-}
+//function link_hiddencity(square) {
+//	var thissquare = square.match(/(\d+)/)[1];	// break the "22" off of "rats.php?where=22", for example.
+//	var hloc = '';
+//	var lastsquare = 24;
+//	hloc = "hiddencity.php?which=";
+//	var nextsquare = integer(thissquare)+1;
+//	if (nextsquare <= lastsquare) {
+//		var myhref = hloc+nextsquare;
+//		var clicky = "SetCharData('square','"+myhref+"')";
+//		$('<center><p><a href="'+myhref+'" id="bwahaha">Explore Next Square</a></center>').prependTo($('center:last'));
+//		$('#bwahaha').click(function() {
+//			var a = $(this);
+//			SetCharData("square",a.attr('href'));
+//		});
+//	}
+//}
 
 function link_cellar(square) {
-	var thissquare = square.match(/(\d+)/)[1]; // get number from "cellar.php?action=explore&whichspot=19"
-	thissquare = integer(thissquare);
+	var thissq = square.match(/(\d+)/)[1]; // get number from "cellar.php?action=explore&whichspot=19"
+	thissq = integer(thissq);
 	var myhrefbase = "cellar.php?action=explore&whichspot=";
 	var myhref = "";
+	var UP = 8;
+	var DOWN = 4;
+	var LEFT = 2;
+	var RIGHT = 1;
+	var dtable=$('<table id="dirlinks"><tr>'+
+					'<td id=ul>&nbsp;</td>'+
+					'<td id=up><a>&nbsp;</a></td>'+
+					'<td id=ur>&nbsp;</td></tr>'+
+					'<tr><td id=left><a>&nbsp;</a></td>'+
+					'<td id=c>&nbsp;</td>'+
+					'<td id=right><a>&nbsp;</a></td></tr>'+
+					'<tr><td id=bl>&nbsp;</td>'+
+					'<td id=down><a>&nbsp;</a></td>'+
+					'<td id=br>&nbsp;</td></tr></table>');
+	
 	// grid: 1 hex digit per square for each of the 25 squares.
 	// 		8 = show UP link
 	//		4 =      DOWN
@@ -1794,38 +1810,43 @@ function link_cellar(square) {
 	//      	1 = 	 RIGHT
 	// plus a 0 at the front because Jick uses 1-based indexing for the tavern, the bastard.
 	var grid = [0,5,7,7,6,0,13,15,15,15,6,13,15,15,15,14,13,15,15,15,14,9,11,11,11,10];
-	var sqlist = GetCharData("squarelist") + ";" ;
-//    GM_log("sqlist="+sqlist);
+	var beenTo = GetCharData("squarelist") + ";" ;
 
-	// I should probably put all these in a table to make a proper grid of the directions.
-	if ((grid[thissquare] & 4) == 4) {
-		myhref = myhrefbase + (thissquare + 5);
-		if (sqlist.indexOf(";" + (thissquare+5) + ";") == -1) {
-			$('<center><p><a href="'+myhref+'" id="bwaha-d">Explore Downward</a></center>').prependTo($('center:last'));
-			$('#bwaha-d').click(cellar_linker);
-		}
+	//get the square you land on if you move in direction D from square S.
+	function move(s,d) {
+		if (d == UP) s = s-5;
+		if (d == DOWN) s = s+5;
+		if (d == LEFT) s = s-1;
+		if (d == RIGHT) s = s+1;	
+		return s;
 	}
-	if ((grid[thissquare] & 2) == 2) {
-		myhref = myhrefbase + (thissquare - 1);
-		if (sqlist.indexOf(";" + (thissquare-1) + ";") == -1) {
-			$('<center><p><a href="'+myhref+'" id="bwaha-l">Explore Leftward</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</center>').prependTo($('center:last'));
-			$('#bwaha-l').click(cellar_linker);
+	
+	//if we need to show a link for direction D from square S, return true.
+	function check(s,d) {
+		if (grid[s] & d) {	//if possible to move in that direction from here
+			s = move(s,d);
+			if (beenTo.indexOf(s + ";") == -1) { //and we haven't already visited that destination
+				return true;	
+			} else {
+				return false;
+			}
 		}
+		else return false;
 	}
-	if ((grid[thissquare] & 1) == 1) {
-		myhref = myhrefbase + (thissquare + 1);
-		if (sqlist.indexOf(";" + (thissquare+1) + ";") == -1) {
-			$('<center><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="'+myhref+'" id="bwaha-r">Explore Rightward</a></center>').prependTo($('center:last'));
-			$('#bwaha-r').click(cellar_linker);
-		}
-	}	
-	if ((grid[thissquare] & 8) == 8) {
-		myhref = myhrefbase + (thissquare - 5);
-		if (sqlist.indexOf(";" + (thissquare-5) + ";") == -1) {
-			$('<center><p><a href="'+myhref+'" id="bwaha-u">Explore Upward</a></center>').prependTo($('center:last'));
-			$('#bwaha-u').click(cellar_linker);
-		}
+	
+	function cLink(s,d,t) {
+		s = move(s, d);
+		return "<a class=cellarlinker href='cellar.php?action=explore&whichspot="+s+"'>"+t+"</a>";
 	}
+	
+	//    GM_log("sqlist="+sqlist);
+	dtable.prependTo($('center:last')).hide();
+	if (check(thissq,UP))  $('#up > a').replaceWith(cLink(thissq,UP,"Up")); 
+	if (check(thissq,DOWN)) $('#down > a').replaceWith(cLink(thissq,DOWN,"Down"));
+	if (check(thissq,LEFT)) $('#left > a').replaceWith(cLink(thissq,LEFT,"Left"));
+	if (check(thissq,RIGHT)) $('#right > a').replaceWith(cLink(thissq,RIGHT,"Right"));
+	$('.cellarlinker').click(cellar_linker);
+	dtable.show();
 }
 
 // SHOWYOINKS:  display pickpocketed items.
@@ -1942,29 +1963,29 @@ function at_cove() {
 // HIDDENCITY: remove non-useful spherical objects from the dropdown list.
 // 2174=mossy, 2175=smooth, 2176=cracked, 2177=rough.
 // altar 1=yellow, 2=blue, 3=red, 4=green.
-function at_hiddencity() {
-	var square = GetCharData("square");
-	SetCharData("square",false);		// if we click on an altar, unmark it.
-	var ball = {1: 1900, 2: 1901, 3: 1904, 4: 1905};	// that's "altar:ID of ball that gives buff at this altar".
-	var altarsrc = $('img:first').attr("src"); 
-	if (altarsrc && (altarsrc.indexOf("/altar") != -1)) {
-		var altar = integer(altarsrc.charAt(altarsrc.indexOf("/altar") + 6));	// This will be a number from 1 to 4 on the right pages.
-		var stone = GetCharData('altar'+altar);
-		if ((stone != undefined) && (stone != '')) {
-			$('option:not([value="'+stone+'"]):not([value="'+ball[altar]+'"])').remove();
-			$('select[name="whichitem"]').attr('style','color:green');	// mark as ID'd
-			$('option[value="'+stone+'"]').attr('selected','selected');// select the right stone
-		} else {
-			$('option:not([value="2174"]):not([value="2175"]):not([value="2176"]):not([value="2177"]):not([value="'+ball[altar]+'"])').remove();
-		}
-	}
-	$('a').click(function() {
-		var a = $(this);
-		SetCharData("square",a.attr('href'));
-	});
-}
+//function at_hiddencity() {
+//	var square = GetCharData("square");
+//	SetCharData("square",false);		// if we click on an altar, unmark it.
+//	var ball = {1: 1900, 2: 1901, 3: 1904, 4: 1905};	// that's "altar:ID of ball that gives buff at this altar".
+//	var altarsrc = $('img:first').attr("src"); 
+//	if (altarsrc && (altarsrc.indexOf("/altar") != -1)) {
+//		var altar = integer(altarsrc.charAt(altarsrc.indexOf("/altar") + 6));	// This will be a number from 1 to 4 on the right pages.
+//		var stone = GetCharData('altar'+altar);
+//		if ((stone != undefined) && (stone != '')) {
+//			$('option:not([value="'+stone+'"]):not([value="'+ball[altar]+'"])').remove();
+//			$('select[name="whichitem"]').attr('style','color:green');	// mark as ID'd
+//			$('option[value="'+stone+'"]').attr('selected','selected');// select the right stone
+//		} else {
+//			$('option:not([value="2174"]):not([value="2175"]):not([value="2176"]):not([value="2177"]):not([value="'+ball[altar]+'"])').remove();
+//		}
+//	}
+//	$('a').click(function() {
+//		var a = $(this);
+//		SetCharData("square",a.attr('href'));
+//	});
+//}
 
-// Cellar_Linker is used not only in At_Cellar below but also in at_fight() for adding links post-fight.
+// Cellar_Linker: remember what square we clicked on.
 function cellar_linker() {
 	var a = $(this);
 	SetCharData("square", a.attr('href'));
@@ -2192,7 +2213,7 @@ function at_arcade() {
 			var i1 = response.split('inventory = ')[1].split(';')[0];	// should get everything from { to }, inclusive.
 			response = i1;
 		}
-		var invcache = $.parseJSON(response); //eval('('+response+')');
+		var invcache = $.parseJSON(response); 
 		var tokens = ((invcache[4621] === undefined) ? "no" : invcache[4621]) + " token" + ((invcache[4621] == 1) ? " " : "s ");
 		var tickets = ((invcache[4622] === undefined) ? "no" : invcache[4622]) + " ticket" + ((invcache[4622] == 1) ? ". " : "s. ");
 		var arcadeInfo = document.createElement('div');
@@ -2607,30 +2628,28 @@ function process_results(rText, insLoc) {
 }
 
 function checkForRedirects(resultsText) {
-    var goloc = "";
-
-    if (resultsText.indexOf("ladder into the Bat Hole") != -1 &&
-		weCameFrom('bathole'))	// used a sonar at the bathole
-	        goloc = to_place("bathole"); // '/bathole.php';
-	else if (resultsText.indexOf("cheap ratchet") != -1 &&
-		weCameFrom('pyramid'))	// used a tomb ratchet at the pyramid
-    		goloc = '/pyramid.php';
-	else if (resultsText.indexOf("All items unequipped") != -1 &&
-		weCameFrom('lair6'))	// clicked the 'get nekkid' link at the gash
-		    goloc = '/lair6.php';
-	else if (resultsText.indexOf("All items unequipped") != -1 &&
-		weCameFrom('lair1'))	// clicked the 'get nekkid' link at the NS entrance cavern
-	    	goloc = '/lair1.php';
-	else if (resultsText.indexOf("You discard your Instant Karma") != -1 && 
-		weCameFrom('lair6'))	// clicked the 'discard karma' link at the gash
-    		goloc = '/lair6.php';
-	else if (resultsText.indexOf("a tiny black hut with a sign") != -1)	// successfully used black market map
-        goloc = '/store.php?whichstore=l';
-    return goloc;
+	var cl = [
+		// "found this","came from here","send to here."
+		["ladder into the Bat Hole","bathole",to_place("bathole")],
+		["cheap ratchet","pyramid","/pyramid.php"],
+		["All items unequipped","lair6","/lair6.php"],
+		["All items unequipped","lair1","/lair1.php"],
+		["You discard your Instant Karma","lair6","/lair6.php"],
+		["a tiny black hut with a sign","","/store.php?whichstore=l"]
+	];
+	var i;
+	var arrl = cl.length;
+	for (i=0; i < arrl; i++) {
+		if (resultsText.indexOf(cl[i][0]) != -1 && weCameFrom(cl[i][1])) {
+			return cl[i][2];
+		}
+	}
+	return "";
 }
 
 function weCameFrom(somepage) {
     if (document.referrer.indexOf(somepage) != -1) return true;
+	else if (somepage == "") return true;
     else return false;
 }
 
@@ -4387,7 +4406,7 @@ function at_pandamonium() {
 function at_pyramid() {
 	var ratch = document.createElement('a');
 	ratch.innerHTML = '<font size="2">[use a ratchet]</font>';
-	ratch.setAttribute('href',inv_use(2540)); // 'inv_use.php?pwd=' + pwd + '&which=3&whichitem=2540');
+	ratch.setAttribute('href',inv_use(2540));
 	var checkInv = document.createElement('a');
 	checkInv.innerHTML = '<font size="2">[check inventory]</font>';
 	checkInv.setAttribute('href', '#');
@@ -4865,7 +4884,7 @@ function at_basement() {
 			aa.setAttribute('id','usephial'); 
 			if (curphial > 0)	//if the charpane sez we're already phialed, then we have to unphial first.
 				aa.setAttribute('curphial',"uneffect.php?using=Yep.&pwd=" + pwd + "&whicheffect=" + curphial);
-			aa.setAttribute('phial',inv_use(phial)); // "/inv_use.php?pwd=" + pwd + "&which=3&whichitem=" + phial);
+			aa.setAttribute('phial',inv_use(phial));
 			aa.addEventListener('click',function(event) {
 				this.innerHTML = "Using Phial...";
 				if (this.getAttribute('curphial'))	//remove old phial effect if present
