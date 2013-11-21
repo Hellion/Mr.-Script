@@ -1175,16 +1175,6 @@ function AddAutoClear(box, setting) {
 
 // GOGOGADGETPLUNGER: Convert meat-paste links to The Plunger.
 function GoGoGadgetPlunger() {	
-//	if (GetCharData("plungeraccess") == "Y") {
-//		$('a[href*="craft.php?mode=combine"]').each(function() {
-//			href = this.getAttribute('href');
-//			href = href.replace('&a=','&item1=');
-//			href = href.replace('&b=','&item2=');
-//			href = href.replace('action=craft','action=combine');
-//			this.setAttribute("href", href.replace(
-//				"craft.php?mode=combine", to_place("knoll_friendly&action=dk_plunger")));
-//		});
-//	}	
 }
 
 // DEFAULTS: Pay no attention to the function behind the curtain.
@@ -1343,22 +1333,6 @@ function at_main() {
 	FindHash();
 	setTimeout("if (top.frames[0].location == 'about:blank')" +
              " top.frames[0].location = 'topmenu.php'", 1500);	// fix for top menu not always loading properly
-//	if (GetCharData("plungeraccess") == undefined || GetCharData("plungeraccess") == 0) {	// not set yet?  go check.
-//		GM_get(server + to_place("knoll_friendly&action=dk_plunger"),function(response) {
-////            GM_log("plunger response:"+response);
-//			if (response != "")	{
-//                if ((response.indexOf("the heck out of Dodge") == -1)  ||	//zombie plunger not available message
-//					(response.indexOf("No, no, no.") == -1))
-//				{
-//    				SetCharData("plungeraccess","Y");
-//                } else {
-//                    SetCharData("plungeraccess","N");
-//                }
-//			} else {
-//				SetCharData("plungeraccess","N");
-//			}
-//		});
-//	}
 
 	// n.b. the :eq(1) below is important because of the nested-table layout.  only select the inner TR.
 	$('tr:contains("Noob."):eq(1)').append(AppendLink('[Toot]','tutorial.php?action=toot'));	// fresh from valhalla?  get things rolling.
@@ -1370,7 +1344,6 @@ function at_main() {
 		$('table:first').before(update);
 		SetData("Update",'');
 	}
-// may also want to add a check for Funkslinging here.
 }
 
 // GAME: look for updates and post link if needed.
@@ -1459,11 +1432,6 @@ function at_fight() {
 	"a spider gremlin":         ["band flyers","molybdenum magnet",0,1],
 	"a batwinged gremlin":      ["band flyers","molybdenum magnet",0,1],
 	" Ed the Undying":          ["band flyers","",0,0],
-//	"a pygmy headhunter":       ["--","",0,3],
-//	"a boaraffe":               ["--","",0,3],
-//	"a pygmy blowgunner":       ["--","",0,3],
-//	"a pygmy assault squad":    ["--","",0,3],
-//	"an ancient protector spirit":["--","",0,3],
 	"a clingy pirate":          ["cocktail napkin","",0,0],
 	"a sassy pirate":           ["The Big Book of Pirate Insults","",0,4],
 	"a shady pirate":           ["The Big Book of Pirate Insults","",0,4],
@@ -1585,25 +1553,6 @@ function at_fight() {
 				AddToTopOfMain(tr, document);
 			break;
 			
-//			case 3: // hidden city monsters--look for sphere messages.
-//				if (/You hold the \w+ stone sphere/.test(document.body.innerHTML)) {
-//					var stone = {"mossy":2174, "smooth":2175, "cracked":2176, "rough":2177};
-//					var snRegex = /You hold the (\w+) stone sphere/g;
-//					var scRegex = /It radiates a bright (\w+) light,/g;
-//					var sname; 
-//					var color; 
-//					while ((sname = snRegex.exec(document.body.innerHTML)) != null) {	// loop to account for funkslung stones.
-//						color = scRegex.exec(document.body.innerHTML);
-//						switch (color[1]) 
-//						{
-//							case "yellow":	SetCharData("altar1",stone[sname[1]]); break;
-//							case "blue":	SetCharData("altar2",stone[sname[1]]); break;
-//							case "red":		SetCharData("altar3",stone[sname[1]]); break;
-//							case "green":	SetCharData("altar4",stone[sname[1]]);break;
-//						}
-//					}
-//				}
-//			break;
 			case 4: // insulting pirates:
 				var insultsList = GetCharData("insults"); if (insultsList == undefined) insultsList = "0;0;0;0;0;0;0;0";
 				var insultsArray = insultsList.split(";");
@@ -1652,13 +1601,8 @@ function at_fight() {
         }
 		// Location-specific stuff:
 		if (square) {
-//			if (square.indexOf("hiddencity") != -1) {  // add "explore next square" link
-//				link_hiddencity(square);
-//			} else 
 			if (square.indexOf("cellar.php") != -1) {	// add "explore L/R/U/D" links
 				link_cellar(square);
-//			} else if (square.indexOf("choice.php?whichchoice=804") != -1) { //new trick-or-treating
-//				link_trickortreat(square);
 			} else {	// handling adventure.php?snarfblat=X options.
 				var location = integer(square.match(/(\d+)/)[1]);	// the 185 in "adventure.php?snarfblat=185"
 				switch (location)	{
@@ -1766,28 +1710,9 @@ function at_fight() {
 	}
 }
 
-//function link_hiddencity(square) {
-//	var thissquare = square.match(/(\d+)/)[1];	// break the "22" off of "rats.php?where=22", for example.
-//	var hloc = '';
-//	var lastsquare = 24;
-//	hloc = "hiddencity.php?which=";
-//	var nextsquare = integer(thissquare)+1;
-//	if (nextsquare <= lastsquare) {
-//		var myhref = hloc+nextsquare;
-//		var clicky = "SetCharData('square','"+myhref+"')";
-//		$('<center><p><a href="'+myhref+'" id="bwahaha">Explore Next Square</a></center>').prependTo($('center:last'));
-//		$('#bwahaha').click(function() {
-//			var a = $(this);
-//			SetCharData("square",a.attr('href'));
-//		});
-//	}
-//}
-
 function link_cellar(square) {
 	var thissq = square.match(/(\d+)/)[1]; // get number from "cellar.php?action=explore&whichspot=19"
 	thissq = integer(thissq);
-	var myhrefbase = "cellar.php?action=explore&whichspot=";
-	var myhref = "";
 	var UP = 8;
 	var DOWN = 4;
 	var LEFT = 2;
@@ -1807,7 +1732,7 @@ function link_cellar(square) {
 	// 		8 = show UP link
 	//		4 =      DOWN
 	// 		2 =      LEFT
-	//      	1 = 	 RIGHT
+	//     	1 = 	 RIGHT
 	// plus a 0 at the front because Jick uses 1-based indexing for the tavern, the bastard.
 	var grid = [0,5,7,7,6,0,13,15,15,15,6,13,15,15,15,14,13,15,15,15,14,9,11,11,11,10];
 	var beenTo = GetCharData("squarelist") + ";" ;
@@ -1839,7 +1764,6 @@ function link_cellar(square) {
 		return "<a class=cellarlinker href='cellar.php?action=explore&whichspot="+s+"'>"+t+"</a>";
 	}
 	
-	//    GM_log("sqlist="+sqlist);
 	dtable.prependTo($('center:last')).hide();
 	if (check(thissq,UP))  $('#up > a').replaceWith(cLink(thissq,UP,"Up")); 
 	if (check(thissq,DOWN)) $('#down > a').replaceWith(cLink(thissq,DOWN,"Down"));
@@ -1960,31 +1884,6 @@ function at_cove() {
 	$('#H_insultreset').click(function(){SetCharData("insults","0;0;0;0;0;0;0;0");window.location = "cove.php";});
 }
 
-// HIDDENCITY: remove non-useful spherical objects from the dropdown list.
-// 2174=mossy, 2175=smooth, 2176=cracked, 2177=rough.
-// altar 1=yellow, 2=blue, 3=red, 4=green.
-//function at_hiddencity() {
-//	var square = GetCharData("square");
-//	SetCharData("square",false);		// if we click on an altar, unmark it.
-//	var ball = {1: 1900, 2: 1901, 3: 1904, 4: 1905};	// that's "altar:ID of ball that gives buff at this altar".
-//	var altarsrc = $('img:first').attr("src"); 
-//	if (altarsrc && (altarsrc.indexOf("/altar") != -1)) {
-//		var altar = integer(altarsrc.charAt(altarsrc.indexOf("/altar") + 6));	// This will be a number from 1 to 4 on the right pages.
-//		var stone = GetCharData('altar'+altar);
-//		if ((stone != undefined) && (stone != '')) {
-//			$('option:not([value="'+stone+'"]):not([value="'+ball[altar]+'"])').remove();
-//			$('select[name="whichitem"]').attr('style','color:green');	// mark as ID'd
-//			$('option[value="'+stone+'"]').attr('selected','selected');// select the right stone
-//		} else {
-//			$('option:not([value="2174"]):not([value="2175"]):not([value="2176"]):not([value="2177"]):not([value="'+ball[altar]+'"])').remove();
-//		}
-//	}
-//	$('a').click(function() {
-//		var a = $(this);
-//		SetCharData("square",a.attr('href'));
-//	});
-//}
-
 // Cellar_Linker: remember what square we clicked on.
 function cellar_linker() {
 	var a = $(this);
@@ -2030,8 +1929,8 @@ function at_adventure() {
 	var square=GetCharData("square");
 	SetCharData("square",false);
 	if (square) {
-		if (square.indexOf("hiddencity") != -1) link_hiddencity(square);
-//		if (square.indexOf("cellar.php") != -1) link_cellar(square);
+//		if (square.indexOf("hiddencity") != -1) link_hiddencity(square);
+//		if (square.indexOf("cellar.php") != -1) link_cellar(square); //why is this commented out?  hm.
 	}
 	var NCTitle = $('b:eq(1)');
 	//GM_log("NCTtext=["+$(NCTitle).text()+"]");
@@ -2064,10 +1963,6 @@ function at_adventure() {
 		SetCharData("winelist",'');
 		SetCharData("wineHTML",'');
 		SetCharData("winesNeeded",'');
-		SetCharData("altar1",'');
-		SetCharData("altar2",'');
-		SetCharData("altar3",'');
-		SetCharData("altar4",'');
 		break;
 	case "Whee!":
 		$('<center><a href="adventure.php?snarfblat=125">Adventure in the Middle Chamber</a></center><br />').prependTo($('a:last').parent());
@@ -2260,8 +2155,6 @@ function at_choice() {
                 .text("Adventure in BARRRNEY'S BARRR");
 		} else if (p0text.indexOf("go tell Bart") != -1) {  // the Tavern Faucet
 			p0.appendChild(AppendLink('[go on already]','tavern.php?place=barkeep'));
-//		} else if (choicetext.indexOf("Procrastination Giant's turn to guard") != -1) {	// castle wheel ready for giant castle map
-//			p0.appendChild(AppendLink('[use giant castle map]',inv_use(667))); 
         } else if (choicetext.indexOf("Goth Giant's turn to take out") != -1) { // finished new castle wheel
             $('a:last').parent()
                 .prepend('<center><a href=' + snarfblat(324) +
@@ -2629,7 +2522,7 @@ function process_results(rText, insLoc) {
 
 function checkForRedirects(resultsText) {
 	var cl = [
-		// "found this","came from here","send to here."
+		// "found this text","came from here","send to here."
 		["ladder into the Bat Hole","bathole",to_place("bathole")],
 		["cheap ratchet","pyramid","/pyramid.php"],
 		["All items unequipped","lair6","/lair6.php"],
@@ -2653,7 +2546,7 @@ function weCameFrom(somepage) {
     else return false;
 }
 
-//helper function for kolproxy
+//helper functions for kolproxy
 function at_inv_use() {
 	at_inventory();
 }
@@ -2978,21 +2871,8 @@ function at_hermit() {
 	}	
 }
 
-// MOUNTAINS: Always-visible hermit.
-//function at_mountains() {	
-//	var img = $('img:last');
-//	if (img.attr('src').indexOf("mount4") != -1) {
-//		img.attr('border', 0).attr('src','http://images.kingdomofloathing.com/'+
-//			'otherimages/mountains/hermitage.gif');
-//		var a = document.createElement('a');
-//		$(a).attr('href','hermit.php')
-//			.insertBefore(img)
-//			.append(img);
-//	}
-//}
-
 function at_knoll_friendly() {	
-	if (document.location.search.indexOf("dk_mayor") != -1) { // == "?place=mayor") {
+	if (document.location.search.indexOf("dk_mayor") != -1) { 
 		p = $('p:first');
 		p.append(AppendLink('[spooky barrow (1)]','adventure.php?snarfblat=48'));
 		p.append(AppendLink('[bugbear pens (1)]','adventure.php?snarfblat=47'));
@@ -3218,8 +3098,7 @@ function at_questlog() {
 					b.append(AppendLink('[beanstalk]', to_place('beanstalk')));
 					break;
 				case "Never Odd Or Even":
-					var subtext = $(this).parent().text(); // contents().get(2).data;
-	//				subtext = subtext.textContent;
+					var subtext = $(this).parent().text(); 
 	//				GM_log("Palindome subtext="+subtext);
 // TODO: ADD LINKS HERE.
 					if (subtext.indexOf("get into the Palindome.") != -1) {  // swash, cove.
@@ -5389,14 +5268,6 @@ function spoil_pandamonium()
 function spoil_beanstalk() {
     $('#stalk_airship > a > img').attr('title','ML: 91-120');
     $('#stalk_hole > a > img').attr('title','ML: 151-169');
-// old beanstalk:
-//	$('img').each(function() {
-//		var ml = null; var src = this.getAttribute('src');
-//		if (src.indexOf("hole") != -1) ml = '151-169';
-//		else if (src.indexOf("castle") != -1) ml = '125-146';
-//		else if (src.indexOf("airship") != -1) ml = '91-120';
-//		if (ml) this.setAttribute('title','ML: '+ml);
-//	});
 }
 
 function spoil_giantcastle() {
@@ -5434,24 +5305,9 @@ function spoil_mclargehuge() {
 		else if (src.indexOf("slope") != -1) ml = '73-75';
 		else if (src.indexOf("peak") != -1) ml = '105-107';
 		else if (src.indexOf("") != -1) ml = '';
-//		old peak...
-//		if (src.indexOf("omright") != -1) ml = '53-57';
-//		else if (src.indexOf("ommid") != -1) ml = '68';
-//		else if (src.indexOf("rightmid") != -1) ml = '71-76';
-//		else if (src.indexOf("leftmid") != -1) ml = '70-90';
-//		else if (src.indexOf("top") != -1) ml = '105-107';
 		if (ml) this.setAttribute('title','ML: '+ml);
 	});
 }
-
-//function spoil_canadia() {
-//	$('img').each(function() {
-//		var ml = null; var src = this.getAttribute('src');
-//		if (src.indexOf("olcamp") != -1) ml = '2-3';
-//		else if (src.indexOf("lcamp") != -1) ml = '35-40';
-//		if (ml) this.setAttribute('title','ML: '+ml);
-//	});
-//}
 
 function spoil_cave() {			// dark and dank and sinister cave, that is...
 	$('img[src*="chamberbottom"]').attr('title','ML: 20-25');
@@ -5620,10 +5476,6 @@ function at_topmenu() {
 		SetCharData("winelist",'');
 		SetCharData("wineHTML",'');
 		SetCharData("winesNeeded",'');
-		SetCharData("altar1",'');
-		SetCharData("altar2",'');
-		SetCharData("altar3",'');
-		SetCharData("altar4",'');
 		SetCharData("nunmoney",0);
 	}
 	var compactmode = document.getElementsByName('loc').length; // compact mode has a dropdown listbox called 'loc', full mode doesn't.
@@ -6036,15 +5888,6 @@ function at_compactmenu() {
 				AddTopOption("Smith/Smash", "craft.php?mode=smith", selectItem, selectItem.options[i+7]);
 				AddTopOption("Closet", "closet.php", selectItem, selectItem.options[i+8]);
 				AddTopOption("-", "nothing", selectItem, selectItem.options[i+9]);
-//				GM_get(server + "knoll.php",function(response)	{	
-//					if (response == "") return;
-//					var s = document.getElementsByTagName('select')[0];
-//					for (var i=0; i<s.options.length; i++) {
-//						if (s.options[i].value == "craft.php?mode=combine")
-//						{	s.options[i].value = "knoll.php?place=paster"; break;
-//						}	
-//					}	
-//				});
 			}
 			if (GetPref('logout') == 1 && selectItem.options[i].innerHTML == "Log Out") {
 				selectItem.options[i].value = "logout";
