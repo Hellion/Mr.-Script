@@ -78,7 +78,7 @@ $(document).on('animationstart',ResultHandler);
 anywhere(); // stuff we always add where we can
 
 // town_right to cover gourds, and forestvillage for untinkered results...
-if (/^(adventure|choice|craft|knoll|shore|town_right|forestvillage|place)$/.test(place)) {
+if (/^(adventure|choice|craft|knoll|shore|town_right|forestvillage|place|multiuse)$/.test(place)) {
 	dropped_item();
 }
 // where are we and what do we thus want to do?
@@ -171,7 +171,10 @@ function ResultHandler(event) {
 //            GM_log("event: resultHandler got unrecognized input: " + mystuff);
             btext = $(event.target).parents('#effdiv').children('center:first').text();
 //            GM_log("event: btext = " + btext);
-            process_results(btext,$(event.target).parents('#effdiv').children('center:first').find('tr:last'));
+            var insertAt = $(event.target).parents('#effdiv').children('blockquote:first');
+            if (insertAt.length === 0) insertAt = $(event.target).parent('#effdiv').children('center:first').find('tr:last');
+            process_results(btext,insertAt);
+//            process_results(btext,$(bnode).children(':last'));
         }
 	}
 }
@@ -182,8 +185,8 @@ function process_effect(effectname, jnode) {
 		case 'Filthworm Drone Stench':		jnode.after(AppendLink('[guard chamber (1)]',snarfblat(129))); 			break;
 		case 'Filthworm Guard Stench':		jnode.after(AppendLink('[Queen! (1)]',snarfblat(130)));				    break;
 		case 'Stone-Faced':			        jnode.after(AppendLink('[hidden temple (1)]',snarfblat(280)));			break;
-		case 'Down the Rabbit Hole':		jnode.after(AppendLink('[go down]',to_place(rabbithole'))
-            								.after(AppendLink('[tea party!]',to_place('rabbithole?action=teaparty')));	break;
+		case 'Down the Rabbit Hole':		jnode.after(AppendLink('[go down]',to_place('rabbithole')))
+            								.after(AppendLink('[tea party!]',to_place('rabbithole&action=rabbithole_teaparty')));	break;
 		case 'Knob Goblin Perfume':		    jnode.after(AppendLink('[knob]','cobbsknob.php'));				        break;
 	}
 }
@@ -197,7 +200,8 @@ function process_equip(itemname, jnode) {
 		case 'pool cue':			        jnode.after(AppendLink('[chalk it!]',inv_use(1794)));			break;
 		case "Talisman o' Nam":			    jnode.after(AppendLink('[Dome moD]',to_place('plains')));		break;
 		case 'worm-riding hooks':		    jnode.after(AppendLink('[drum!]',inv_use(2328)));				break;
-		case 'Mega Gem':			        jnode.after(AppendLink('[Dr. Awkward (1)]',snarfblat(119)));	break;
+//		case 'Mega Gem':			        jnode.after(AppendLink('[Dr. Awkward (1)]',snarfblat(119)));	break;
+        case 'Mega Gem':                  jnode.after(AppendLink("[Dr. Awkward's Office (1)]',to_place('palindome&action=pal_droffice'))); break;
 		case 'dingy planks':			    jnode.after(AppendLink('[boat]', inv_use(146)));				break; 
 		case "makeshift SCUBA gear": 		jnode.after(AppendLink('[odor]', 'lair2.php?action=odor'));		break;
         case 'worthless gew-gaw':
@@ -287,6 +291,11 @@ function inv_use(item) {
 	return "inv_use.php?pwd="+pwd+"&which=3&whichitem="+item;
 }
 
+// multiuse: ditto
+function multiuse(item,qty) {
+    return 'multiuse.php?pwd='+pwd+'&action=useitem&quantity='+qty+'&whichitem='+item+'&ajax=1';
+}
+
 // snarfblat: ditto
 function snarfblat(locNumber) {
 	return "adventure.php?snarfblat="+locNumber;
@@ -306,6 +315,21 @@ function equip(o) {
     if (o.i !== undefined) ie += "&whichitem=" + o.i;
     if (o.s !== undefined) ie += "&slot=" + o.s;
     return ie;
+}
+
+function parseItem(tbl) {
+	tbl = $(tbl);
+	var rel = tbl.attr('rel');
+	var data = {};
+	if (!rel) return data;
+	var parts = rel.split('&');
+	for (i in parts) {
+		if (!parts.hasOwnProperty(i)) continue;
+		var kv = parts[i].split('=');
+		tbl.data(kv[0], kv[1]);
+		data[kv[0]] = kv[1];
+	}
+	return data;
 }
 
 // Set/GetPref: store/retrieve data that applies to the script as a whole.
@@ -489,18 +513,30 @@ function AppendLink(linkString, linkURL) {
 	var font = document.createElement('font');
 
 	$(font)
+        .addClass('mrfont')
 		.attr('size', 1)
 		.html(' ' + linkString);
 
 	var link = document.createElement('a');
 
 	$(link)
+        .addClass('mrlink')
 		.attr('href', linkURL)
 		.attr('target', 'mainpane')
 		.append(font);
 
+//if it's not a 'spend-a-turn' link, ajax it!
+    if (linkURL.indexOf("snarfblat") == -1) {
+        $(link).click(function(e) {
+            e.preventDefault();
+            ajaxit(linkURL);
+            e.stopPropagation();
+        });
+    }
+
 	var finalSpan = document.createElement('span');
 	$(finalSpan)
+        .addClass('mrspan')
 		.append(' ')
 		.append(link);
 
@@ -618,7 +654,7 @@ function AddInvCheck(img) {
 function InvChecker (event) 
 {
 	if (this.getAttribute("done")) return;
-	item = this.parentNode.previousSibling.firstChild.getAttribute("value");
+	var item = this.parentNode.previousSibling.firstChild.getAttribute("value");
 	if (item === null) { 
 		item = this.parentNode.previousSibling.firstChild.nextSibling.getAttribute("value");
 	}
@@ -626,7 +662,10 @@ function InvChecker (event)
 	
 	var add = document.createElement('span');
 	var br = document.createElement('br');
-	$(add).attr('class','tiny').attr('id','span'+item).text("checking...");
+    var itemname = $(this).parent().next().text();
+    GM_log("itemname: [" + itemname + "]");
+
+    $(add).attr('class','tiny').attr('id','span'+item).text("checking: "+itemname+ "...");
 	$(this).parent().next().append(br).append(add);
 
     GM_get(server + 'submitnewchat.php?pwd='+pwd+'&graf=/count '+itemname, function(details) {
@@ -638,6 +677,31 @@ function InvChecker (event)
         $('#span'+item).text(addText);
 	});
 	this.setAttribute("done","done"); event.stopPropagation(); event.preventDefault();
+}
+
+//AJAXIT: retrieve some ajax results and stick 'em in at the top of the main pane.
+//gleefully stolen straight from KoL itself (with some drastic simplifications).
+function ajaxit(dourl) {
+    $.ajax({type:'GET',url:dourl+"&ajax=1", cache: false, data: null, global: false, 
+        success: function(out) {
+            if (out.match(/no\|/)) {
+                $('#ChatWindow').append('<font color="green">Oops!  Sorry, no can do.</font><br />\n');
+                return;
+            }
+            $(top.mainpane.document).find("#effdiv").remove();
+            var $eff = $(top.mainpane.document).find("#effdiv");
+            if ($eff.length == 0) {
+                var d = top.mainpane.document.createElement('div');
+                d.id = 'effdiv';
+                var b = top.mainpane.document.body;
+                b.insertBefore(d, b.firstChild);
+                $eff = $(d);
+            }
+            $eff.find('a[name="effdivtop"]').remove().end()
+                .prepend('<a name="effdivtop"></a><center>'+out+'</center>').css('display','block');
+            top.mainpane.document.location = top.mainpane.document.location+"#effdivtop";
+        }
+    });
 }
 
 // ADDTOPLINK: Add a link into the text-based top menu pane.
@@ -655,8 +719,15 @@ function mainpane_goto(go_here) {
 }
 // ADDLINKS: Extra links, etc. for items, independently of where they are.
 function AddLinks(descId, theItem, formWhere, path) {
-	var itemNum = $(theItem).parents('.item');
-	if (itemNum && itemNum.attr('rel')) itemNum = integer(itemNum.attr('rel').match(/id=(\d+)/)[1]);
+	var itemNo = $(theItem).parents('.item');
+    var itemQty = 0;
+    var itemNum = 0;
+    var rel = '';
+    if (itemNo) {
+        rel = parseItem(itemNo);
+        itemNum = rel.id;
+        itemQty = rel.n;
+    }
 	if (!itemNum) {
 		GM_log("unable to locate item number in AddLinks()");
 		return '';
@@ -787,14 +858,19 @@ function AddLinks(descId, theItem, formWhere, path) {
 
 		case   23: 																// gum
 			if (weCameFrom('hermit') && path == "/store.php") {	// came to the store from the hermit?  use it automatically.
-				//TODO: use the entire purchased amount, instead of just 1.
-//				mainpane_goto(inv_use(23));
-			} else 	{	
-				addWhere.append(AppendLink('[use]', inv_use(23)));
+                if (itemQty > 3) itemQty = 3;
+                var dourl = inv_use(23)+"&itemquantity="+itemQty+"&quantity="+itemQty+"&ajax=1";
+                GM_log("dourl="+dourl);
+                ajaxit(dourl);
+			} else 	{
+//                GM_log("23! pwd="+pwd);
+				addWhere.append(AppendLink('[use]', inv_use(23)+"&itemquantity="+itemQty+"&quantity="+itemQty));
+//                jaxify();
 			}
 			break;
 
 		case   42: 																// hermit permit
+        case   43: case  44: case  45:                                          // worthless thingies
 			if (weCameFrom('hermit') && path == "/store.php") {
 				mainpane_goto('/hermit.php');
 			} else {
@@ -860,7 +936,7 @@ function AddLinks(descId, theItem, formWhere, path) {
 		case  135: case  136: 													// Rims, Tires
 			addWhere.append(AppendLink('[wheels]','craft.php?mode=combine&' +
                                  'action=craft&a=135&b=136&pwd='+ pwd +
-                                 '&quantity=1')); GoGoGadgetPlunger(); 
+                                 '&quantity=1'));
 			break;
 
 		case 2044: 																// MacGuffin
@@ -869,7 +945,7 @@ function AddLinks(descId, theItem, formWhere, path) {
 		case  485: 																// snakehead charrrm: make talisman
 			addWhere.append(AppendLink('[man, o nam]', 'craft.php?mode=combine&' +
                                  'action=craft&a=485&b=485&pwd='+ pwd +
-                                 '&quantity=1')); GoGoGadgetPlunger(); 
+                                 '&quantity=1'));
 			break;
 
 		case 2338: 																// Black Pudding
@@ -883,7 +959,8 @@ function AddLinks(descId, theItem, formWhere, path) {
 		case 2064: 																// Forged documents
 			addWhere.append(AppendLink('[shore]',to_place('desertbeach'))); break;
 		case 2266:							                                    // wet stunt nut stew
-			addWhere.append(AppendLink('[visit Mr. Alarm (1)]',snarfblat(50))); break;
+//			addWhere.append(AppendLink('[visit Mr. Alarm (1)]',snarfblat(50))); break;
+            addWhere.append(AppendLink('[visit Mr. Alarm]',to_place('palindome&action=pal_mroffice'))); break;
 		case 2347:	                                                            //heart of the filthworm queen
 			addWhere.append(AppendLink('[turn it in!]','bigisland.php?place=orchard&action=stand&pwd='+pwd)); break;		
         case 3471:                                                              // damp old boot
@@ -892,7 +969,7 @@ function AddLinks(descId, theItem, formWhere, path) {
 			addWhere.append(AppendLink('[arcade]','arcade.php')); break;
 			
 		case 450: 	case 451: 	case 1258:										// Pretentious artist's stuff
-			addWhere.append(AppendLink('[artiste]',to_place('town_wrong&action-townwrong_artist_quest'))); break;
+			addWhere.append(AppendLink('[artiste]',to_place('town_wrong&action=townwrong_artist_quest'))); break;
 			
 		case 4961:  case 4948: 	case 4949: 	case 4950:							// subject 37 file, GOTO, weremoose spit, abominable blubber
 			addWhere.append(AppendLink('[visit 37]','cobbsknob.php?level=3&action=cell37')); break;
@@ -910,8 +987,17 @@ function AddLinks(descId, theItem, formWhere, path) {
             addWhere.append(AppendLink('[mothership!]',to_place('bugbearship&action=bb_bridge'))); break;
         case 5782:  case 5783:  case 5784:  case 5785:  case 5786:  case 5787:  // smut orc building materials
             addWhere.append(AppendLink('[build!]',to_place('orc_chasm&action=bridge')));    break;
-        case 6693:                                                              // McClusky file, page 5
+        case 6693:  case 6694:                                                  // McClusky file page 5, binder clip
             addWhere.append(AppendLink('[bind!]',inv_use(6694)));   break;
+        case 7179: case 7182: case 7184:                                        // First Pizza, Stankara Stone, Shield of Brook
+            addWhere.append(AppendLink('[Copperhead Club (1)]',snarfblat(383))); break;
+        case 7185: case 7178:                                                   // copperhead charms
+			addWhere.append(AppendLink('[man, o nam]', 'craft.php?mode=combine&' +
+                                 'action=craft&a=7185&b=7178&pwd='+ pwd +
+                                 '&qty=1')); 
+            break;
+        case 77777:                                                             // I Love Me, Vol. I:
+            addWhere.append(AppendLink('[The Dr is In!]',to_place('palindome&action=pal_droffice'))); break;
 		case 4029:		                                                        // Hyboria: memory of a grappling hook
 			if (GetCharData("Krakrox") == "A") {
 				SetCharData("Krakrox","B");
@@ -1556,6 +1642,9 @@ function at_fight() {
 			// nobody cares about toast, dammit
 			if (img.getAttribute("onClick") == "descitem(931984879)")
 				continue;
+            // don't try to "yoink" things that aren't actually items.
+            if (img.getAttribute("onClick").indexOf("descitem") == -1) 
+                continue;
 
 			var text = img.parentNode.parentNode.parentNode.parentNode.parentNode.innerHTML;
 			text = text.replace(/ acquire /, " yoinked "); 
@@ -1996,7 +2085,30 @@ function at_adventure() {
         $('<center><a href="cobbsknob.php?action=throneroom">Take out the KING</a></center><br />').prependTo($('a:last').parent());
         break;
     case "This Adventure Bites":
-        $('<br /><center><p><font color="blue">You need:<br />frilly skirt equipped, and 3 hot wings OR<br />orcish frat boy outfit equipped OR<br />mullet wig equipped, and a briefcase<br />before using those blueprints</font></center><br />').appendTo($('a:last').parent());
+        $('<br /><center><p><font color="blue">You need:<br/>frilly skirt equipped, and 3 hot wings OR<br/>orcish frat boy outfit equipped OR<br/>mullet wig equipped, and a briefcase<br/>before using those blueprints</font></center>').appendTo($('a:last').parent());
+        break;
+    case "A Sietch in Time": // put stuff here
+        GM_log("sietching");
+    	$('img').each(function() {
+    		var onclick = this.getAttribute("onclick");
+            GM_log("count an item with onclick="+onclick);
+    		if (/desc/.test(onclick || "")) {
+    	        var itemNum = this.parents('.item');
+            	if (itemNum && itemNum.attr('rel'))  {
+                    itemNum = integer(itemNum.attr('rel').match(/id=(\d+)/)[1]);
+                    GM_log("found item number " + itemNum);
+                    var displayLinks = GetCharData("gnasirstuff") + AppendLink('[use [item]]',inv_use(itemNum));
+                    SetCharData("gnasirstuff",displayLinks);
+                }
+    		}
+    	});
+        if ($('p').text().indexOf("good luck to you") != -1) {
+            $('p:last').append(GetCharData("gnasirstuff"));
+            SetCharData("gnasirstuff","");
+        }
+        break;
+    case "Not So Much With The Humanity":
+        $('<center><a href="'+snarfblat(385)+'">Adventure in the Red Zeppelin</a></center><br />').prependTo($('a:last').parent());
         break;
 	case "":	// got a "You shouldn't be here" or other reject message... (or an untitled Limerick Dungeon adventure, sigh)
 		$('center table tr td').each(function(){
@@ -2014,7 +2126,7 @@ function at_adventure() {
 		} else if (document.location.search=="?snarfblat=143") { // we were at the Other Back 40 (spooky dooks)
 			$('<center><a href="bigisland.php?place=farm&action=farmer&pwd='+pwd+'">See the Farmer</a></center><br />')
 				.prependTo($('a:last').parent());
-		} else if (document.location.search=="?snarfblat=324") { // no access to castle top floor
+		} else if (document.location.search=="?snarfblat=324") { // no access to top floor of castle
             $('<center><a href="'+snarfblat(323)+'">Work the Ground Floor Some More</a></center><br />')
                 .prependTo($('a:last').parent());
         }
@@ -2145,6 +2257,39 @@ function at_choice() {
 	if (cNum >= 366 && cNum <= 386) {
 		spoil_Krakrox(cNum);
 	}
+    GM_log("cNum = " + cNum);
+    if (cNum == 872) {  //new palindome shelves
+        var sels = $('select');
+        if (sels.length) {
+            GM_log("sel len = " +sels.length);
+            GM_log("trying to set selections");
+            sels.val(function(index, value) {
+                return [2259,7264,7263,7265][index];
+            });
+        }
+        return;
+    }
+    if (cNum == 805) {
+        GM_log("sietching");
+    	$('img').each(function() {
+    		var onclick = this.getAttribute("onclick");
+            GM_log("count an item with onclick="+onclick);
+    		if (/desc/.test(onclick || "")) {
+    	        var itemNum = $(theItem).parents('.item');
+            	if (itemNum && itemNum.attr('rel'))  {
+                    itemNum = integer(itemNum.attr('rel').match(/id=(\d+)/)[1]);
+                    GM_log("found item number " + itemNum);
+                    var displayLinks = GetCharData("gnasirstuff") + AddLink('[use [item]]',inv_use(itemNum));
+                    SetCharData("gnasirstuff",displayLinks);
+                    GM_log("gnasirstuff = " +gnasirstuff);
+                }
+    		}
+    	});
+        if ($('p').text().indexOf("good luck to you") != -1) {
+            $('p:last').append(GetCharData("gnasirstuff"));
+            SetCharData("gnasirstuff","");
+        }
+    }
 	var choicetext = $('body').text(); // for finding stuff that's not in a <p> tag.  sigh.
 	$('div[style*="green"] > p').addClass("greenP");
 	var p = $("p").not(".greenP");
@@ -2351,10 +2496,10 @@ function at_beerpong() {
 			if (opt.length > 0) opt.attr('selected','selected');
 			else val = 0;
 		}
-		if (val == 0) { 
+		if (val == 0) {
             sel.prepend($(document.createElement('option'))
-			    .attr('selected','selected').attr('value','0')
-    			.html(' '));
+		    	.attr('selected','selected').attr('value','0')
+			    .html(' '));
             $('table:last').append("<br /><center><font color='blue'>You don't have the right response for that insult.</font></center>");
         }
 
@@ -2522,9 +2667,13 @@ function process_results(rText, insLoc) {
     } else if (rText.indexOf("it just seemed like a cool spy thing") != -1) {
         insLoc.append(AppendLink('[venture into the Knob]','cobbsknob.php'));
     } else if (rText.indexOf("At least now you know where the pyramid is") != -1) {
-        insLoc.append(AppendLink('[$64,000 pyramid, baby]','place.php?whichplace=desertbeach&action=db_pyramid1'));
+        insLoc.append(AppendLink('[$64,000 pyramid, baby]',to_place('desertbeach&action=db_pyramid1')));
     } else if (rText.indexOf("named Mr. Alarm that Dr. Awkward") != -1) {
         insLoc.append(AppendLink('[knob lab (1)',snarfblat(50)));
+    } else if (rText.indexOf("insane, egotistical ramblings") != -1) {
+        insLoc.append(AppendLink('[Go to Dr, do tog]',to_place('palindome&action=pal_droffice')));
+    } else if (rText.indexOf('second volume is more of the same') != -1) {
+        insLoc.append(AppendLink('[Go see Mr Alarm, ee! sog.]', to_place('palindome&action=pal_mroffice')));
     }
 
 }
@@ -2532,12 +2681,12 @@ function process_results(rText, insLoc) {
 function checkForRedirects(resultsText) {
 	var cl = [
 		// "found this","came from here","send to here."
-		["ladder into the Bat Hole","bathole",to_place("bathole")],
+		["ladder into the Bat Hole","bathole",'/place.php?whichplace=bathole'],
 		["cheap ratchet","pyramid","/pyramid.php"],
 		["All items unequipped","lair6","/lair6.php"],
 		["All items unequipped","lair1","/lair1.php"],
 		["You discard your Instant Karma","lair6","/lair6.php"],
-		["a tiny black hut with a sign","","/store.php?whichstore=l"]
+		["a tiny black hut with a sign","","/shop.php?whichshop=blackmarket"]
 	];
 	var i;
 	var arrl = cl.length;
@@ -2575,8 +2724,7 @@ function at_galaktik() {
 		if (GetPref('docuse') == 1 && docG < 233) {	// 231=unguent, 232=ointment.  we can auto-use those.
 			var sanitycheck = FindMaxQuantity(docG, num, 0, 0) + 1;
 			if (num > sanitycheck) num = sanitycheck;
-            mainpane_goto(
-			    '/multiuse.php?action=useitem&quantity=' + num +
+            ajaxit('/multiuse.php?action=useitem&quantity=' + num +
     			'&pwd=' + pwd + '&whichitem=' + docG
             );
 		} else {
@@ -3429,6 +3577,8 @@ function at_charpane() {
 	}	// end full mode processing
 
 	if ($('#nudgeblock div:contains("a work in progress")').length > 0) $('#nudgeblock').hide();
+    if ($('#nudgeblock div:contains("none")').length > 0) $('#nudgeblock').hide();
+
 	// Re-hydrate (0)
 	var temphydr = integer(GetCharData('hydrate'));
 
@@ -3504,11 +3654,11 @@ function at_charpane() {
 					else if (/\(5\)/.test(hydtxt) || /\(20\)/.test(hydtxt))		// got 5 turns (or 20 from clover) now?  add Desert link.
 					{	if (compactMode) $('a[href="adventure.php?snarfblat=122"]')
 						.after(':<br /><a href="adventure.php?' +
-						'snarfblat=123" target="mainpane">' +
+						'snarfblat=364" target="mainpane">' +
 						'Desert</a>');
 						else $('a[href="adventure.php?snarfblat=122"]')
 						.after('<br /><br /><a href="adventure.php?' +
-						'snarfblat=123" target="mainpane">' +
+						'snarfblat=364" target="mainpane">' +
 						'The Arid, Extra-Dry Desert</a><br />')
 						.parent().parent().attr('align','center');
 					} 
@@ -3532,15 +3682,16 @@ function at_charpane() {
                 case 510:
                     $(img).parent().next().children('font').wrap('<a target=mainpane href="mountains.php" />');
                     break;
+                case 725:
+                    $(img).parent().next().children('font').wrap('<a target="'+to_place('rabbithole') + '"/>');
+                    break;
                 case 549: 
                     var fishyturns = img.parentNode.nextSibling.textContent;
                     if (/\(1\)/.test(fishyturns)) {  // last turn of fishy?
                         $(img).parent().next().wrap('<font color="red" />');
                     }
                     break;
-                case 725:
-                    $(img).parent().next().children('font').wrap('<a target="'+to_place('rabbithole') + '"/>');
-                    break;
+  
 				case 189: case 190: case 191: case 192: case 193: 
 					SetCharData("phial", effNum);
 					break;
@@ -4684,40 +4835,42 @@ function at_campground() {
 			var txt = this.textContent;
 			var snarf = false;
 			var gateInfo = [
-                //identifying text              item required           image           where to go                     link text               item ID
-                ["carving of an armchair",      ['pygmy pygment',       'pigment',      'hiddencity.php',               'hidden city',          '2242']],
-				["carving of a cowardly-l",     ['wussiness potion',    'potion5',      'friars.php',                   'deep fat friars',      '469']],
-				["carving of a banana peel",    ['gremlin juice',       'potion6',      'bigisland.php?place=junkyard', 'island',               '2631']],
-				["carving of a coiled viper",   ['adder bladder',       'bladder',      snarfblat(111),                 'black forest (1)',     '2056']],
-				["carving of a rose",           ['Angry Farmer candy',  'rcandy',       snarfblat(324),                 'castle top floor (1)', '617']],
-				["carving of a glum teenager",  ['thin black candle',   'bcandle',      snarfblat(324),                 'castle top floor (1)', '620']],
-				["carving of a hedgehog",       ['super-spiky hair gel','balm',         snarfblat(81),                  'fantasy airship (1)',  '587']],
-				["carving of a raven",          ['Black No. 2',         'blackdye',     snarfblat(111),                 'black forest (1)',     '2059']],
-				["carving of a smiling man",    ['Mick\'s IcyVapoHotness Rub','balm',   snarfblat(324),                 'castle top floor (1)', '618']],
-				["baseball bat",                ['baseball',            'baseball',     snarfblat(31),                  'guano junction (1)',   '181']],
-				["made of Meat",                ['meat vortex',         'vortex',       snarfblat(80),                  'valley (1)',           '546']],
-				["amber waves",                 ['bronzed locust',      'locust1',      to_place('desertbeach'),        'beach',                '2575']],
-				["slimy eyestalk",              ['fancy bath salts',    'potion4',      snarfblat(107),                 'bathroom (1)',         '2091']],
-				["flaming katana",              ['frigid ninja stars',  'ninjastars',   snarfblat(272),                 'ninja snowmen lair (1)','353']],
-				["translucent wing",            ['spider web',          'web',          snarfblat(112),                 'sleazy back alley (1)','27']],
-				["looking tophat",              ['sonar-in-a-biscuit',  'biscuit',      snarfblat(31),                  'guano junction (1)',   '563']],
-				["of albumen",                  ['black pepper',        'blpepper',     snarfblat(111),                 'black forest (1)',     '2341']],
-				["white ear",                   ['pygmy blowgun',       'tinyblowgun',  'hiddencity.php',               'hidden city',          '2237']],
-				["cowboy hat",                  ['chaos butterfly',     'butterfly',    snarfblat(323),                 'castle ground floor (1)','615']],
-				["periscope",                   ['photoprotoneutron torpedo','torpedo', snarfblat(81),                  'fantasy airship (1)',  '630']],
-				["strange shadow",              ['inkwell',             'inkwell',      snarfblat(104),                 'haunted library (1)',  '1958']],
-				["moonlight reflecting",        ['hair spray',          'spraycan',     'store.php?whichstore=m',       'General Store',        '744']],
-				["wooden frame",                ['disease',             'disease',      snarfblat(259),                 'knob harem (1)',       '452']],
-				["long coattails",              ['Knob Goblin firecracker','firecrack', snarfblat(114),                 'knob outskirts (1)',   '747']],
-				["steam shooting",              ['powdered organs',     'scpowder',     'pyramid.php',                  'pyramid',              '2538']],
-				["holding a spatula",           ['leftovers of indeterminate origin','leftovers',snarfblat(102),        'haunted kitchen (1)',  '1777']],
-				["bass guitar",                 ['mariachi G-string',   'string',       snarfblat(45),                  'south of the border (1)','1159']],
-				["North Pole",                  ['NG',                  'ng',           snarfblat(80),                  'valley (1)',           '624']],
-				["writing desk",                ['plot hole',           'hole',         snarfblat(323),                 'castle ground floor (1)','613']],
-				["cuticle",                     ['razor-sharp can lid', 'canlid',       snarfblat(113),                 'haunted pantry (1)',   '559']],
-				["formidable stinger",          ['tropical orchid',     'troporchid',   to_place('desertbeach'),        'shore',                '2492']],
-				["pair of horns",               ['barbed-wire fence',   'fence',        to_place('desertbeach'),        'shore',                '145']],
-				["wooden beam",                 ['stick of dynamite',   'dynamite',     to_place('desertbeach'),        'shore',                '2493']]
+                //note that using functions to define where to go just KILLS performance since the array must then be constructed on every page instead of 
+                //being a static, pre-defined object.  drat.
+                //identifying text              item required           image           where to go                                     link text               item ID
+                ["carving of an armchair",      ['pygmy pygment',       'pigment',      'hiddencity.php',                               'hidden city',          '2242']],
+				["carving of a cowardly-l",     ['wussiness potion',    'potion5',      'friars.php',                                   'deep fat friars',      '469']],
+				["carving of a banana peel",    ['gremlin juice',       'potion6',      'bigisland.php?place=junkyard',                 'island',               '2631']],
+				["carving of a coiled viper",   ['adder bladder',       'bladder',      'adventure.php?snarfblat=111',                  'black forest (1)',     '2056']],
+				["carving of a rose",           ['Angry Farmer candy',  'rcandy',       'adventure.php?snarfblat=324',                  'castle top floor (1)', '617']],
+				["carving of a glum teenager",  ['thin black candle',   'bcandle',      'adventure.php?snarfblat=324',                  'castle top floor (1)', '620']],
+				["carving of a hedgehog",       ['super-spiky hair gel','balm',         'adventure.php?snarfblat=81',                   'fantasy airship (1)',  '587']],
+				["carving of a raven",          ['Black No. 2',         'blackdye',     'adventure.php?snarfblat=111',                  'black forest (1)',     '2059']],
+				["carving of a smiling man",    ['Mick\'s IcyVapoHotness Rub','balm',   'adventure.php?snarfblat=324',                  'castle top floor (1)', '618']],
+				["baseball bat",                ['baseball',            'baseball',     'adventure.php?snarfblat=31',                   'guano junction (1)',   '181']],
+				["made of Meat",                ['meat vortex',         'vortex',       'adventure.php?snarfblat=80',                   'valley (1)',           '546']],
+				["amber waves",                 ['bronzed locust',      'locust1',      'place.php?whichplace=desertbeach',             'beach',                '2575']],
+				["slimy eyestalk",              ['fancy bath salts',    'potion4',      'adventure.php?snarfblat=107',                  'bathroom (1)',         '2091']],
+				["flaming katana",              ['frigid ninja stars',  'ninjastars',   'adventure.php?snarfblat=272',                  'ninja snowmen lair (1)','353']],
+				["translucent wing",            ['spider web',          'web',          'adventure.php?snarfblat=112',                  'sleazy back alley (1)','27']],
+				["looking tophat",              ['sonar-in-a-biscuit',  'biscuit',      'adventure.php?snarfblat=31',                   'guano junction (1)',   '563']],
+				["of albumen",                  ['black pepper',        'blpepper',     'adventure.php?snarfblat=111',                  'black forest (1)',     '2341']],
+				["white ear",                   ['pygmy blowgun',       'tinyblowgun',  'hiddencity.php',                               'hidden city',          '2237']],
+				["cowboy hat",                  ['chaos butterfly',     'butterfly',    'adventure.php?snarfblat=323',                  'castle ground floor (1)','615']],
+				["periscope",                   ['photoprotoneutron torpedo','torpedo', 'adventure.php?snarfblat=81',                   'fantasy airship (1)',  '630']],
+				["strange shadow",              ['inkwell',             'inkwell',      'adventure.php?snarfblat=104',                  'haunted library (1)',  '1958']],
+				["moonlight reflecting",        ['hair spray',          'spraycan',     'store.php?whichstore=m',                       'General Store',        '744']],
+				["wooden frame",                ['disease',             'disease',      'adventure.php?snarfblat=259',                  'knob harem (1)',       '452']],
+				["long coattails",              ['Knob Goblin firecracker','firecrack', 'adventure.php?snarfblat=114',                  'knob outskirts (1)',   '747']],
+				["steam shooting",              ['powdered organs',     'scpowder',     'pyramid.php',                                  'pyramid',              '2538']],
+				["holding a spatula",           ['leftovers of indeterminate origin','leftovers','adventure.php?snarfblat=102',         'haunted kitchen (1)',  '1777']],
+				["bass guitar",                 ['mariachi G-string',   'string',       'adventure.php?snarfblat=45',                   'south of the border (1)','1159']],
+				["North Pole",                  ['NG',                  'ng',           'adventure.php?snarfblat=80',                   'valley (1)',           '624']],
+				["writing desk",                ['plot hole',           'hole',         'adventure.php?snarfblat=323',                  'castle ground floor (1)','613']],
+				["cuticle",                     ['razor-sharp can lid', 'canlid',       'adventure.php?snarfblat=113',                  'haunted pantry (1)',   '559']],
+				["formidable stinger",          ['tropical orchid',     'troporchid',   'place.php?whichplace=desertbeach',             'shore',                '2492']],
+				["pair of horns",               ['barbed-wire fence',   'fence',        'place.php?whichplace=desertbeach',             'shore',                '145']],
+				["wooden beam",                 ['stick of dynamite',   'dynamite',     'place.php?whichplace=desertbeach',             'shore',                '2493']]
 			];
 			for (var i = 0; i < gateInfo.length; i++) {
 				if (txt.indexOf(gateInfo[i][0]) != -1) {
@@ -5043,6 +5196,10 @@ function spoil_orc_chasm() {
 	$('#smut_orc_camp > a > img').attr('title','ML: 75-85');
 }
 
+function spoil_spookyraven2() { 
+    spoil_manor2();
+}
+
 function spoil_manor2() {
 	$('img').each(function() {
 		var ml = null; var src = this.getAttribute('src');
@@ -5095,7 +5252,7 @@ function spoil_bathole() {
     $('#bathole_junction > a > img').attr('title','ML: 14-18');
     $('#bathole_burrow > a > img').attr('title','ML: 16-20');
     $('#bathole_chamber > a > img').attr('title','ML: 22');
-    $('#bathole_lair > a > img').attr('title','ML: 26-35');
+    $('#bathole_lair > a > img').attr('title','ML: 26-35\nMCD=4 for Boss Bat Britches (+5 mox pants)\nMCD=8 for Boss Bat Bling (+3 Mus/+3 Mox accessory)');
 }
 
 function spoil_plains() {
@@ -5149,7 +5306,7 @@ function spoil_cobbsknob() {
 		else if (alt.indexOf('Kitchens') != -1) ml = '20-23';
 		else if (alt.indexOf('Harem') != -1) ml = '25-30';
 		else if (alt.indexOf('Treasury') != -1) ml = '21-25';
-		else if (alt.indexOf('Throne') != -1) ml = '57';
+		else if (alt.indexOf('Throne') != -1) ml = '57\nMCD=3 for Glass Balls (+14 Mys)\nMCD=7 for Codpiece (+7 Mox)';
 		else if (alt.indexOf('Laboratory') != -1) ml = '38-45';
 		else if (alt.indexOf('Knob Shaft') != -1) ml = '30';
 		else if (alt.indexOf('Menagerie Level 1') != -1) ml = '50-56';
@@ -5172,7 +5329,7 @@ function spoil_crypt() {
 	});
 	$('area').each(function() {
 		var ml = null; var alt = this.getAttribute('alt');
-		if (alt.indexOf("Haert of the Cyrpt") != -1) ml = '91';
+		if (alt.indexOf("Haert of the Cyrpt") != -1) ml = '91\nMCD=5 for Rib (2h staff, +5Mus/+5Mys/+15spellDmg)\nMCD=10 for vertebra (+hemp string=acc, +5Mus/+5Mys/+30Init)';
 		if (ml) this.setAttribute('title','ML: '+ml);
 	});
 }
@@ -5383,10 +5540,10 @@ function spoil_sea_merkin() {
         var ml = null;
         var title = this.getAttribute('title');
         if      (title.indexOf('Mer-kin Colosseum') != -1) ml = '800-1300';
-        else if (title.indexOf('Mer-kin Gymnasium (1)') != -1) ml = '720-780';
-        else if (title.indexOf('Mer-kin Elementary School (1)') != -1 ) ml = '600-700';
-        else if (title.indexOf('Mer-kin Library (1)') != -1) ml = '750-850';
-        else if (title.indexOf('Mer-kin Temple (1)') != -1) ml = '4000 (as gladiator), 400 (as scholar), 42000 (Dad)';
+        else if (title.indexOf('Mer-kin Gymnasium') != -1) ml = '720-780';
+        else if (title.indexOf('Mer-kin Elementary School') != -1 ) ml = '600-700';
+        else if (title.indexOf('Mer-kin Library') != -1) ml = '750-850';
+        else if (title.indexOf('Mer-kin Temple') != -1) ml = '4000 (as gladiator), 400 (as scholar), 42000 (Dad)';
         if (ml) this.setAttribute('title','ML: '+ml);
     });
 }
@@ -5408,9 +5565,9 @@ function spoil_sea_skatepark() {
 function spoil_wormwood() {
 	$('img').each(function() {
 		var ml= null; var src = this.getAttribute('src');
-		if (src.indexOf("wormwood3") != -1) ml = '9-7 for skirt, STLT, myst; 5-4 for !pipe, necklace, moxie; 1 for flask, mask, muscle'; // Mansion 
-		if (src.indexOf("wormwood4") != -1) ml = '9-7 for mask, !pipe, muscle; 5-4 for skirt, flask, myst; 1 for STLT, necklace, moxie'; // dome
-		if (src.indexOf("wormwood8") != -1) ml = '9-7 for necklace, flask, moxie; 5-4 for mask, STLT, muscle; 1 for skirt, !pipe, myst'; // windmill
+		if (src.indexOf("wormwood3") != -1) ml = 'ML scales up to 125\nturn 9-7 for skirt, STLT, myst\nturn 5-4 for !pipe, necklace, moxie\nturn 1 for flask, mask, muscle'; // Mansion 
+		if (src.indexOf("wormwood4") != -1) ml = 'ML scales up to 125\nturn 9-7 for mask, !pipe, muscle\nturn 5-4 for skirt, flask, myst\nturn 1 for STLT, necklace, moxie'; // dome
+		if (src.indexOf("wormwood8") != -1) ml = 'ML scales up to 125\nturn 9-7 for necklace, flask, moxie\nturn 5-4 for mask, STLT, muscle\nturn 1 for skirt, !pipe, myst'; // windmill
 		if (ml) this.setAttribute('title',ml);
 	});
 }
