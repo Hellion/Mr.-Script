@@ -171,8 +171,10 @@ function ResultHandler(event) {
 //            GM_log("event: resultHandler got unrecognized input: " + mystuff);
             btext = $(event.target).parents('#effdiv').children('center:first').text();
 //            GM_log("event: btext = " + btext);
-            var insertAt = $(event.target).parents('#effdiv').children('blockquote:first');
+            var insertAt = $(event.target).parents('#effdiv').find('blockquote:first');
+            GM_log('inserting at a: ' + insertAt.length);
             if (insertAt.length === 0) insertAt = $(event.target).parent('#effdiv').children('center:first').find('tr:last');
+            GM_log('inserting at ' + insertAt.length);
             process_results(btext,insertAt);
 //            process_results(btext,$(bnode).children(':last'));
         }
@@ -198,7 +200,7 @@ function process_equip(itemname, jnode) {
 		case 'huge mirror shard':		    jnode.after(AppendLink('[chamber]','lair6.php?place=1'));	    break;
 		case 'snorkel':				        jnode.after(AppendLink('[map]',inv_use(26)));					break;
 		case 'pool cue':			        jnode.after(AppendLink('[chalk it!]',inv_use(1794)));			break;
-		case "Talisman o' Nam":			    jnode.after(AppendLink('[Dome moD]',to_place('plains')));		break;
+		case "Talisman o' Nam":			    jnode.after(AppendLink('[Dome moD]',to_place('palindome')));	break;
 		case 'worm-riding hooks':		    jnode.after(AppendLink('[drum!]',inv_use(2328)));				break;
         case 'Mega Gem':                    jnode.after(AppendLink("[Dr. Awkward Office (1)]",to_place('palindome&action=pal_droffice'))); break;
 		case 'dingy planks':			    jnode.after(AppendLink('[boat]', inv_use(146)));				break; 
@@ -292,7 +294,7 @@ function inv_use(item) {
 
 // multiuse: ditto
 function multiuse(item,qty) {
-    return 'multiuse.php?pwd='+pwd+'&action=useitem&quantity='+qty+'&whichitem='+item+'&ajax=1';
+    return 'multiuse.php?pwd='+pwd+'&action=useitem&quantity='+qty+'&whichitem='+item;
 }
 
 // snarfblat: ditto
@@ -510,7 +512,13 @@ function GM_get(dest, callback, errCallback) {
 // APPENDLINK: Create link and return pointer to span
 // will ajax the link unless it's a snarfblat URL or the jaxify flag is FALSE.
 function AppendLink(linkString, linkURL,jaxify) {
-    if (typeof jaxify == 'undefined') b = true;
+
+    if (typeof jaxify == 'undefined') {             
+        if ((linkURL.indexOf("inv_") != -1) || (linkURL.indexOf("multiuse") != -1)) {    
+            jaxify = true;              // auto-ajax inv_ (equip, eat, use, booze) and multiuse.
+        }
+        else jaxify = false;
+    }
 	var font = document.createElement('font');
 
 	$(font)
@@ -526,8 +534,7 @@ function AppendLink(linkString, linkURL,jaxify) {
 		.attr('target', 'mainpane')
 		.append(font);
 
-//if it's not a 'spend-a-turn' link, ajax it!
-    if ((linkURL.indexOf("snarfblat") == -1) && jaxify) {
+    if (jaxify) {
         $(link).click(function(e) {
             e.preventDefault();
             ajaxit(linkURL);
@@ -779,7 +786,7 @@ function AddLinks(descId, theItem, formWhere, path) {
 
 		case  275: case  191: case  313: case 1244: case 1245:	case 675:		// larva, boss bat bandana, KGKing items, dagon skull,
 		case 2334: case	2766: case  2829:										// MacGuffin, solid gold bowling ball, really dense meat stack
-			addWhere.append(AppendLink('[council]','council.php')); break;
+			addWhere.append(AppendLink('[council]','council.php',false)); break;
 			
 		case   32: case   50: case   54: case   57: case   60: case   68: 		// EWs
 		case 2556: case 2557: case 2558: case 2559: case 2560: case 2561: 		// LEWs
@@ -809,7 +816,7 @@ function AddLinks(descId, theItem, formWhere, path) {
             addWhere.append(AppendLink('[giant Basement (1)]',snarfblat(322)));     break;
 		case  727:	case 728: 													// Hedge maze puzzle piece/key
 
-			addWhere.append(AppendLink('[maze]', 'hedgepuzzle.php')); break;
+			addWhere.append(AppendLink('[maze]', 'hedgepuzzle.php',false)); break;
         case 1766:                                                              // ballroom key
             addWhere.append(AppendLink('[ballroom (1)]',snarfblat(109))); break;
 
@@ -977,7 +984,7 @@ function AddLinks(descId, theItem, formWhere, path) {
 		case 5193:	case 5194:													// 11-inch knob sausage, exorcised sandwich
 			addWhere.append(AppendLink('[back to the guild]','guild.php?place=challenge')); break;
         case 5221:                                                              // fat loot token
-            addWhere.append(AppendLink('[spend it!]','shop.php?whichshop=damachine'));       break;
+            addWhere.append(AppendLink('[spend it!]','shop.php?whichshop=damachine',false));       break;
 		case 1764:												                // spookyraven library key
 			addWhere.append(AppendLink('[library (1)]',snarfblat(104))); break;
         case 5570:                                                              // ninja carabiner
@@ -997,8 +1004,9 @@ function AddLinks(descId, theItem, formWhere, path) {
                                  'action=craft&a=7185&b=7178&pwd='+ pwd +
                                  '&qty=1')); 
             break;
-        case 77777:                                                             // I Love Me, Vol. I:
-            addWhere.append(AppendLink('[The Dr is In!]',to_place('palindome&action=pal_droffice'))); break;
+        case 7262: case 7270:                                                   // I Love Me, 2 Love Me
+            doWhat = "oneuse";
+//            addWhere.append(AppendLink('[The Dr is In!]',to_place('palindome&action=pal_droffice'))); break;
 		case 4029:		                                                        // Hyboria: memory of a grappling hook
 			if (GetCharData("Krakrox") == "A") {
 				SetCharData("Krakrox","B");
@@ -2284,8 +2292,10 @@ function at_choice() {
     	});
     }
     //this bit of Gnasir-ing happens where there's no buttons so there's no cNum.
-    if ($('p:last').text().indexOf("good luck to you") != -1) {
-        $('p:last').append(GetCharData("gnasirstuff"));
+    if ($('p').text().indexOf("good luck to you") != -1) {
+        var gstuff = GetCharData("gnasirstuff")
+        GM_log("inserting gnasirstuff of: "+gstuff.html());
+        $('p:contains("good luck to you")').append(GetCharData("gnasirstuff"));
         SetCharData("gnasirstuff","");
     }
     
@@ -2347,7 +2357,9 @@ function at_choice() {
         } else if (choicetext.indexOf("You give the wheel a mighty turn") != -1) {
             mainpane_goto('pyramid.php');
         } else if (p0text.indexOf("You make your way up into") != -1) {
-            p0.appendChild(AppendLink('[hidden city]',to_place('hiddencity')));
+            $('<center><a href="'+to_place('hiddencity')+'">Visit Beautiful Downtown Hidden City</a></center><br />')
+                .prependTo($('a:contains("Go back to")').parent());
+//            p0.appendChild(AppendLink('[hidden city]',to_place('hiddencity')));
         } else if (choicetext.indexOf("hacienda. You do find an") != -1) {
             var clueText = /You do find an (\.*?),/.match(choicetext)[1];
             clueText = "<br /><font color='blue'>You found <b>" + clueText + "</b></font><br/>";
@@ -2652,7 +2664,7 @@ function at_inventory() {
 }
 
 function process_results(rText, insLoc) {
-//    GM_log("process_results: rText = " + rText);
+    GM_log("process_results: rText = " + rText);
     if (rText.indexOf("You can easily climb the branches") != -1) {
         insLoc.append(AppendLink('[temple (1)]',snarfblat(280)));
     } else if (rText.indexOf("You should go to A-Boo Peak") != -1) {
@@ -5437,7 +5449,7 @@ function spoil_lair3() {
 	if (hedge.length>0) {
 		hedge.attr('title','ML: 232');
 		$('img[src*="castletoptower.gif"]')
-			.before(AppendLink('[hedge puzzle]', 'hedgepuzzle.php'))
+			.before(AppendLink('[hedge puzzle]', 'hedgepuzzle.php', false))
 			.before('<br /><br />')
 			.parent().attr('style','text-align:center;');
 	}
