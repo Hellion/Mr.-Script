@@ -3122,15 +3122,15 @@ function at_council() {
 				p.append(AppendLink('[use map+key]',inv_use(2442)));
 			else if (txt.indexOf("Sinister") != -1)
 				p.append(AppendLink('[cave]', 'cave.php'));
-			else if (txt.indexOf("Deep Fat") != -1)
+			else if ((txt.indexOf("Deep Fat") != -1) || (txt.indexOf("Friars") != -1))
 				p.append(AppendLink('[copse]', 'friars.php'));
 			else if (txt.indexOf("Cyrpt") != -1)
 				p.append(AppendLink('[cyrpt]', 'crypt.php'));
-			else if (txt.indexOf("the Trapper,") != -1)
+			else if (txt.indexOf("the Trapper") != -1)
 				p.append(AppendLink('[John, M.D.]', to_place('mclargehuge&action=trappercabin')));
 			else if (txt.indexOf("Chasm") != -1)
 				p.append(AppendLink('[mountains]', 'mountains.php'));
-			else if (txt.indexOf("Highland Lord") != -1) {
+			else if ((txt.indexOf("Highland Lord") != -1) || (txt.indexOf("Black Angus") != -1)) {
 				p.append(AppendLink('[chasm]',to_place('orc_chasm')));
 				p.append(AppendLink('[highlands]',to_place('highlands')));
 			}
