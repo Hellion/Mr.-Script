@@ -1,4 +1,4 @@
-{"version":"1.7.6",
+{"version":"1.7.7",
 "url1":"http://userscripts.org/scripts/source/65705.user.js",
 "url2":"http://noblesse-oblige.org/hellion/scripts/MrScript.user.js",
-"desc":"<b>New</b><br/>spoilers for new hidden city<br/>link to chasm bridge from dropped bridge parts<br/>spoilers for DeepCity, Skate Park, Marais<br/>Moleform effect links to molehill<br/>Transpondent effect links to Spaaaace<br />Fishy effect turns red with 1 turn left<br /><br /><b>Fixed:</b><br />wrong snarfblat after opening top floor of castle<br />fixed many places that now use place.php<br />correctly detect lack of plunger in Zombie Slayer path<br />"}
+"desc":"<b>New</b><br/>script-based links for using items are now ajaxed<br/>more spoilers in Hidden City, Wormwood, and other places<br/>rat-cellar links are laid out more visually<br/>added spoilers for New Palindome<br /><br /><b>Fixed:</b><br />Some Council links wouldn't show in AoSP<br />correctly detect friendly vs. hostile knoll<br />work better with unified crafting interface (no separate innabox/plunger pages)<br />"}
