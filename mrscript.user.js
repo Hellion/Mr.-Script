@@ -1,4 +1,4 @@
-// Mr. Script v1.7.6
+// Mr. Script v1.7.7
 //
 // --------------------------------------------------------------------
 // This is a user script.  To install it, you need Greasemonkey 0.8 or
@@ -168,13 +168,9 @@ function ResultHandler(event) {
 		} else if (mystuff.indexOf("You acquire an effect:") != -1) {
 			process_effect(btext, bnode);
 		} else { // some non-equip/acquire event took place, such as a quest item opening a zone.
-//            GM_log("event: resultHandler got unrecognized input: " + mystuff);
             btext = $(event.target).parents('#effdiv').children('center:first').text();
-//            GM_log("event: btext = " + btext);
             var insertAt = $(event.target).parents('#effdiv').find('blockquote:first');
-            GM_log('inserting at a: ' + insertAt.length);
             if (insertAt.length === 0) insertAt = $(event.target).parent('#effdiv').children('center:first').find('tr:last');
-            GM_log('inserting at ' + insertAt.length);
             process_results(btext,insertAt);
 //            process_results(btext,$(bnode).children(':last'));
         }
@@ -376,7 +372,6 @@ function FindHash() {
 		SetPwd(hash);
         SetData("charname",CharInfo["name"]);
         var moonsign = CharInfo["sign"];
-        GM_log("moon sign="+moonsign);
         if ((moonsign == "Mongoose") || (moonsign == "Wallaby") || (moonsign == "Vole")) {
             SetCharData("friendlyknoll",true);
         } else {
@@ -677,10 +672,8 @@ function InvChecker (event)
 	$(this).parent().next().append(br).append(add);
 
     GM_get(server + 'submitnewchat.php?pwd='+pwd+'&graf=/count '+itemname, function(details) {
-//        GM_log("chat returned:" + details);
         itemqty = details.match(/ou have (\d+)/)[1];
         if (itemqty === undefined) itemqty = 0;
-//        GM_log("it said you have " + itemqty);
         addText = "(" + itemqty + " in inventory)";
         $('#span'+item).text(addText);
 	});
@@ -868,12 +861,9 @@ function AddLinks(descId, theItem, formWhere, path) {
 			if (weCameFrom('hermit') && path == "/store.php") {	// came to the store from the hermit?  use it automatically.
                 if (itemQty > 3) itemQty = 3;
                 var dourl = inv_use(23)+"&itemquantity="+itemQty+"&quantity="+itemQty+"&ajax=1";
-                GM_log("dourl="+dourl);
                 ajaxit(dourl);
 			} else 	{
-//                GM_log("23! pwd="+pwd);
 				addWhere.append(AppendLink('[use]', inv_use(23)+"&itemquantity="+itemQty+"&quantity="+itemQty));
-//                jaxify();
 			}
 			break;
 
@@ -1258,7 +1248,9 @@ function Defaults(revert) {
 		  	 ['lairspoil', 1],
 		 	 ['moonslink', 1],
 			 ['malllink', 1],
-			 ['ascension_list','cooked key pies, exploded chef, exploded bartender, discarded karma, bought a skill']
+			 ['ascension_list','cooked key pies, exploded chef, exploded bartender, discarded karma, bought a skill'],
+             ['compressfam', 0],
+             ['questbottom', 0]
 			];
 	var menu1 = ['market;town_market.php','hermit;hermit.php',
 		'untinker;place.php?whichplace=forestvillage&action=fv_untinker',
@@ -1855,7 +1847,6 @@ function link_cellar(square) {
 		return "<a class=cellarlinker href='cellar.php?action=explore&whichspot="+s+"'>"+t+"</a>";
 	}
 	
-	//    GM_log("sqlist="+sqlist);
 	dtable.prependTo($('center:last')).hide();
 	if (check(thissq,UP))  $('#up > a').replaceWith(cLink(thissq,UP,"Up")); 
 	if (check(thissq,DOWN)) $('#down > a').replaceWith(cLink(thissq,DOWN,"Down"));
@@ -2107,7 +2098,9 @@ function at_adventure() {
             	if (itemNum && itemNum.attr('rel'))  {
                     itemNum = integer(itemNum.attr('rel').match(/id=(\d+)/)[1]);
                     GM_log("found item number " + itemNum);
-                    var displayLinks = GetCharData("gnasirstuff") + AppendLink('[use [item]]',inv_use(itemNum));
+                    var gnasirstuff = AppendLink('[use [item]]',inv_use(itemNum));
+                    gnasirstuff = gnasirstuff.toString();
+                    var displayLinks = GetCharData("gnasirstuff") + gnasirstuff;
                     SetCharData("gnasirstuff",displayLinks);
                 }
     		}
@@ -2294,7 +2287,7 @@ function at_choice() {
     //this bit of Gnasir-ing happens where there's no buttons so there's no cNum.
     if ($('p').text().indexOf("good luck to you") != -1) {
         var gstuff = GetCharData("gnasirstuff")
-        GM_log("inserting gnasirstuff of: "+gstuff.html());
+        GM_log("inserting gnasirstuff of: "+gstuff);
         $('p:contains("good luck to you")').append(GetCharData("gnasirstuff"));
         SetCharData("gnasirstuff","");
     }
@@ -3452,11 +3445,18 @@ function at_questlog() {
 	}
 }
 
-function CompressThrallAndFamiliar() {
+function CompressThrallAndFamiliar(compressLevel) {
+    var weight = 0;
     var fInfo = $('.familiarpick').parent().children('font').text().slice(6);
-    $('.familiarpick:first').parent().next().hide();
+    if (compressLevel == 2) {
+        weight = /(d+)/.match(fInfo)[1];
+        $('.familiarpick:first').parent().next().text('(' + weight + 'lb)');
+    } else {
+        $('.familiarpick:first').parent().next().hide();
+    }
     $('.familiarpick:first').appendTo('b:contains(Familiar)').attr('title',fInfo);
     var tParent = $('b:contains(Thrall)').parent();
+
     tParent.siblings('font').children('b').text('');    //nuke the name
     var thrallInfo = tParent.siblings('font').text();
     tParent.siblings(':not(img, center, p)').hide();
@@ -3504,8 +3504,10 @@ function at_charpane() {
 	};
 
 //	SetData("charname",bText[0].textContent);
-    
-    CompressThrallAndFamiliar();
+    var compressfam = GetPref("compressfam");
+    if (compressfam > 0) { 
+        CompressThrallAndFamiliar(compressfam);
+    }
 
 	// Compact Mode
 	if (compactMode) {
@@ -3542,9 +3544,9 @@ function at_charpane() {
 	} else { // Full Mode
 		function parse_cur_and_max(names, data) {
 			for each (var name in names) {
-				var cur_max = data.shift().split('/').map(integer);
-				SetCharData("current"+ name, cur_max[0]);
-				SetCharData("max"    + name, cur_max[1]);
+//				var cur_max = data.shift().split('/').map(integer);
+//				SetCharData("current"+ name, cur_max[0]);
+//				SetCharData("max"    + name, cur_max[1]);
 //                GM_log(name + ": " + cur_max[0] + ", " + cur_max[1]);
 			}
 		}
@@ -3561,6 +3563,8 @@ function at_charpane() {
         if (data.length == 2) {
             data = $.makeArray($('td[valign="center"]').slice(1, 5)).map(text);
         }
+        GM_log("data.length = " + data.length);
+        for (var i = 0; i < data.length; i++) GM_log("data[i]="+data[i]);
         // parse regular hp/mp display
   		parse_cur_and_max(["HP", "MP"], data);
 	    //data.shift(); // meat, if MP are present
@@ -3592,6 +3596,12 @@ function at_charpane() {
 
 	if ($('#nudgeblock div:contains("a work in progress")').length > 0) $('#nudgeblock').hide();
     if ($('#nudgeblock div:contains("none")').length > 0) $('#nudgeblock').hide();
+    //make this configurable:
+    if (GetPref("questbottom") == 1) {
+        $('#nudgeblock').appendTo($('center:eq(1)'));
+    }
+//    $('#nudgeblock div').hide();
+//    $('#nudgeblock div a').show();
 
 	// Re-hydrate (0)
 	var temphydr = integer(GetCharData('hydrate'));
@@ -3661,9 +3671,11 @@ function at_charpane() {
 			switch (effNum) {
 				case 275: // hydrated
 					var hydtxt = img.parentNode.nextSibling.textContent;
+                    GM_log("hydtxt=" + hydtxt);
+                    GM_log("advcount = " +advcount);
 					if (/\(1\)/.test(hydtxt)) {			// 1 turn left?  set marker to add rehydrate link next adventure.
 						SetCharData('hydrate', advcount-1);
-//                        GM_log("1 turn left, hydrate should be " + advcount-1);
+                        GM_log("1 turn left, hydrate should be " + advcount-1);
                     }
 					else if (/\(5\)/.test(hydtxt) || /\(20\)/.test(hydtxt))		// got 5 turns (or 20 from clover) now?  add Desert link.
 					{	if (compactMode) $('a[href="adventure.php?snarfblat=122"]')
@@ -3697,7 +3709,7 @@ function at_charpane() {
                     $(img).parent().next().children('font').wrap('<a target=mainpane href="mountains.php" />');
                     break;
                 case 725:
-                    $(img).parent().next().children('font').wrap('<a target="'+to_place('rabbithole') + '"/>');
+                    $(img).parent().next().children('font').wrap('<a target=mainpane href="'+to_place('rabbithole') + '"/>');
                     break;
                 case 549: 
                     var fishyturns = img.parentNode.nextSibling.textContent;
@@ -4131,10 +4143,10 @@ function at_manor3() {
 		6:"0 adv/2 drunk, lose 80-90% of maxHP"
 	};
 	var wineConfig = {
-		0:[25,"Merlot, Pinot Noir, Port"], 
-		1:[42,"Marsala, Pinot Noir, Zinfandel"], 
-		2:[52,"Muscat, Port, Zinfandel"],
-		3:[7,"Marsala, Merlot, Muscat"]
+		0:[25,"Merlot, Pinot Noir, Port"],          //25 = 011001 
+		1:[42,"Marsala, Pinot Noir, Zinfandel"],    //42 = 101010
+		2:[52,"Muscat, Port, Zinfandel"],           //52 = 110100
+		3:[7,"Marsala, Merlot, Muscat"]             // 7 = 000111
 	};
 	var CornerSpoilers = document.createElement('table');
 	CornerSpoilers.setAttribute('border','1');
@@ -4595,11 +4607,11 @@ function at_lair1() {
 			else if (ptxt.indexOf("Torment") != -1) p.appendChild(AppendLink('[tamarind gum]',inv_use(297)));
 			else if (ptxt.indexOf("Zest") != -1) p.appendChild(AppendLink('[lime & chile gum]',inv_use(298)));
 	// gate 3:
-			else if (ptxt.indexOf("Hidden") != -1) p.appendChild(AppendLink('[dod potion - object]','multiuse.php'));
-			else if (ptxt.indexOf("Light") != -1) p.appendChild(AppendLink('[dod potion - moxie]','multiuse.php'));
-			else if (ptxt.indexOf("Mind") != -1) p.appendChild(AppendLink('[dod potion - myst]','multiuse.php'));
-			else if (ptxt.indexOf("Ogre") != -1) p.appendChild(AppendLink('[dod potion - muscle]','multiuse.php'));
-			else if (ptxt.indexOf("Not a Gate") != -1) p.appendChild(AppendLink('[dod potion - teleport]','multiuse.php'));
+			else if (ptxt.indexOf("Hidden") != -1) p.appendChild(AppendLink('[dod potion - object]','multiuse.php',false));
+			else if (ptxt.indexOf("Light") != -1) p.appendChild(AppendLink('[dod potion - moxie]','multiuse.php',false));
+			else if (ptxt.indexOf("Mind") != -1) p.appendChild(AppendLink('[dod potion - myst]','multiuse.php',false));
+			else if (ptxt.indexOf("Ogre") != -1) p.appendChild(AppendLink('[dod potion - muscle]','multiuse.php',false));
+			else if (ptxt.indexOf("Not a Gate") != -1) p.appendChild(AppendLink('[dod potion - teleport]','multiuse.php',false));
 		}
 		var letsgetnaked = $("p:last").text();
 		if ((letsgetnaked.indexOf("path is now clear") != -1) || (letsgetnaked.indexOf("is clear") != -1))
@@ -4719,7 +4731,6 @@ function at_lair6() {
 function at_familiar() {
 	if ($('img:first').attr('src').indexOf('blackbird') != -1)
 	{
-        GM_log("blackbird!");
         $('img:first').nextAll('b:first').after(AppendLink('[map it!]',inv_use(2054)));
     }
 }
@@ -4781,9 +4792,7 @@ function at_mining() {
 		if (myimage !== undefined) {
 			$(this).attr('src',myimage);
 		}
-//		else GM_log("which="+foo+" was undefined");
 	});	
-	
 }
 
 function clearwhiches() {
@@ -6185,18 +6194,20 @@ function buildPrefs() {
 		select.options[3].innerHTML = "Saved";
 		select.options[4].innerHTML = "PvP";
 		prefSpan.appendChild(choice);
-		prefSpan.appendChild(MakeOption("Mall Link -> Search", 2, 'malllink', "Off", "On"));
+//		prefSpan.appendChild(MakeOption("Mall Link -> Search", 2, 'malllink', "Off", "On"));
 
-		prefSpan.appendChild(MakeOption("Monster Level Spoiler: ", 2, 'zonespoil', "Off", "On"));
+		prefSpan.appendChild(MakeOption("ML and zone Spoilers: ", 2, 'zonespoil', "Off", "On"));
 		prefSpan.appendChild(MakeOption("Never Grey Out Skills: ", 2, 'nodisable', "Off", "On"));
 		prefSpan.appendChild(MakeOption("1-Klick Klaw: ", 2, 'klaw', "Off", "On"));
 		prefSpan.appendChild(MakeOption("Logout Confirmation: ", 2, 'logout', "Off", "On"));
 		prefSpan.appendChild(MakeOption("Telescope Spoilers: ", 2, 'telescope', "Off", "On"));
 		prefSpan.appendChild(MakeOption("Lair Spoilers: ", 2, 'lairspoil', "Off", "On"));
-		prefSpan.appendChild(MakeOption("Moons link to NO Calendar: ", 2, 'moonslink', "Off", "On"));
+		prefSpan.appendChild(MakeOption("Moons link to NO Calendar: ", 2, 'moonslink', "No", "Yes"));
 		prefSpan.appendChild(MakeOption("Sword-Guy Link: ", -1, 'swordguy', 0, 0));
 		prefSpan.appendChild(MakeOption("Backup Outfit Name: ", -1, 'backup', 0, 0));
 		prefSpan.appendChild(MakeOption("Ascension Checklist: ", -1, 'ascension_list', 0, 0));
+        prefSpan.appendChild(MakeOption("Compress familiar/thrall info: ", 2, 'compressfam', "No", "Yes"));
+        prefSpan.appendChild(MakeOption("Questblock to bottom of charpane: ", 2, 'questbottom', "No", "Yes"));
 	}
 	
 	function createMenu1(menu1Span) {
@@ -6350,21 +6361,21 @@ function buildPrefs() {
 		bigSpan.style["padding"] = "5px";
 
 		var spanSpan = document.createElement('span');
-		var clicky1 = 'javascript:document.getElementById("scriptpref1").setAttribute("style","");' +
-		'javascript:document.getElementById("scriptpref2").setAttribute("style","display:none;");' +
-		'javascript:document.getElementById("scriptpref3").setAttribute("style","display:none;");';
-		var clicky2 = 'javascript:document.getElementById("scriptpref1").setAttribute("style","display:none;");' +
-		'javascript:document.getElementById("scriptpref2").setAttribute("style","");' +
-		'javascript:document.getElementById("scriptpref3").setAttribute("style","display:none;");';
-		var clicky3 = 'javascript:document.getElementById("scriptpref1").setAttribute("style","display:none;");' +
-		'javascript:document.getElementById("scriptpref2").setAttribute("style","display:none;");' +
-		'javascript:document.getElementById("scriptpref3").setAttribute("style","");';
+ 		var clicky1 = 'javascript:document.getElementById("scriptpref1").setAttribute("style","");' +
+ 		'javascript:document.getElementById("scriptpref2").setAttribute("style","display:none;");' +
+ 		'javascript:document.getElementById("scriptpref3").setAttribute("style","display:none;");';
+ 		var clicky2 = 'javascript:document.getElementById("scriptpref1").setAttribute("style","display:none;");' +
+ 		'javascript:document.getElementById("scriptpref2").setAttribute("style","");' +
+ 		'javascript:document.getElementById("scriptpref3").setAttribute("style","display:none;");';
+ 		var clicky3 = 'javascript:document.getElementById("scriptpref1").setAttribute("style","display:none;");' +
+ 		'javascript:document.getElementById("scriptpref2").setAttribute("style","display:none;");' +
+ 		'javascript:document.getElementById("scriptpref3").setAttribute("style","");';
 
-		spanSpan.innerHTML = "<a href='" + clicky1 + "'>[Settings]</a>" + 
+		spanSpan.innerHTML = "<a class=MrTabber id=show1 href='"+clicky1+"'>[Settings]</a>" + 
 			"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; " +
-			"<a href='" + clicky2 + "'>[Custom Links 1]</a>" + 
+			"<a class=MrTabber id=show2 href='"+clicky2+"'>[Custom Links 1]</a>" + 
 			"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; " + 
-			"<a href='" + clicky3 + "'>[Custom Links 2]</a>";
+			"<a class=MrTabber id=show3 href='"+clicky3+"'>[Custom Links 2]</a>";
 		spanSpan.setAttribute('style','font-size:12px;text-align:center;');
 		var prefSpan = document.createElement('span');
 		prefSpan.setAttribute('id','scriptpref1');
@@ -6392,9 +6403,8 @@ function buildPrefs() {
 		bigSpan.appendChild(menu2Span);
 		bigSpan.appendChild(document.createElement('hr'));
 		bigSpan.appendChild(centeredlinks);
-
-		outerdiv.appendChild(bigSpan);
-		
+        
+        outerdiv.appendChild(bigSpan);		
 		guts.appendChild(outerdiv); 
         return guts;
     }
@@ -6407,16 +6417,16 @@ function at_account() { // new option menu, yay
 }
 
 // HAGNK'S/MANAGESTORE/STASH: Support autoclear for added rows
-function managestore() {
+function at_managestore() {
   autoclear_added_rows();
 }
-function clan_stash() {
+function at_clan_stash() {
   autoclear_added_rows();
 }
-function storage() {
+function at_storage() {
   autoclear_added_rows();
 }
-function sendmessage() {
+function at_sendmessage() {
   autoclear_added_rows();
 }
 
