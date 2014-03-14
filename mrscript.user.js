@@ -2966,7 +2966,7 @@ function process_results(rText, insLoc) {
 	}
 }
 
-}
+
 
 function checkForRedirects(resultsText) {
 	var cl = [
