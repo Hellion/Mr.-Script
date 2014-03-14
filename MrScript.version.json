@@ -1,4 +1,4 @@
-{	"version":"1.7.1",
-	"url1":"http://userscripts.org/scripts/source/65705.user.js",
-	"url2":"http://noblesse-oblige.org/hellion/scripts/MrScript.user.js",
-	"desc":"<b>Fixed:</b>hidden city problem interaction with kolproxy<br/><br/><b>New:</b>helpful links appear in Results box when using/equipping stuff from chat<br/>spoilers for new level-9 quests (trapper, highland lord)<br/>"}
+{"version":"1.7.7",
+"url1":"http://userscripts.org/scripts/source/65705.user.js",
+"url2":"http://noblesse-oblige.org/hellion/scripts/MrScript.user.js",
+"desc":"<b>New</b><br/>script-based links for using items are now ajaxed<br/>more spoilers in Hidden City, Wormwood, and other places<br/>rat-cellar links are laid out more visually<br/>added spoilers for New Palindome<br /><br /><b>Fixed:</b><br />Some Council links wouldn't show in AoSP<br />correctly detect friendly vs. hostile knoll<br />work better with unified crafting interface (no separate innabox/plunger pages)<br />"}
