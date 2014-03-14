@@ -2804,6 +2804,27 @@ function at_inventory() {
 		}
 	}
 
+	// Real-time filtration (not ready for prime-time)
+//	if(GetPref("inlineitemfilter"))
+	$("#filter input").on("keyup", function(e) {
+		var $input = $(this);
+		var filterVal = $input.val().toLowerCase();
+		if(!filterVal) { $(".item").show(); return true; }
+
+		if(!window.currentItems) {
+			window.currentItems = {};
+			$(".item").each(function() {
+				var $item = $(this);
+				window.currentItems[$item.find("b").text().toLowerCase()] = $item;
+			});
+		}
+
+		$.each(window.currentItems, function(k, $item) {
+			$item.toggle(k.indexOf(filterVal) !== -1);
+		});
+	});
+
+
 	// Equipment page only
 	if (gearpage == 1) {
 		var backup = GetPref('backup');
