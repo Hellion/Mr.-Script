@@ -1686,9 +1686,9 @@ function at_fight() {
 	var monsterNameShort = monsterName.replace(/^an?\s/, '');
 	var infight = GetCharData("infight");
 
-	$monster.html('a <a href="http://kol.coldfront.net/thekolwiki/index.php/'+
+	$monster.html(' <a href="http://kol.coldfront.net/thekolwiki/index.php/'+
 		'Special:Search?search='+ monsterNameShort.replace(/\s/g, '+').replace('"', '')+
-		'&go=Go" target="_blank">'+monsterNameShort+'</a>');
+		'&go=Go" target="_blank">'+monsterName+'</a>');
 
 	// fix the ugly new Hell Ion image...
 	if (monsterName == "a Hellion") {
