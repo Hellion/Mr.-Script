@@ -1256,7 +1256,9 @@ function Defaults(revert) {
 			 ['ascension_list','cooked key pies, exploded chef, exploded bartender, discarded karma, bought a skill'],
              ['compressfam', 0],
              ['questbottom', 0],
-			 ['inlineitemdesc', 1]
+			 ['inlineitemdesc', 1],
+             ['monsterlinks',1],
+             ['choicelinks',1]
 			];
 	var menu1 = ['market;town_market.php','hermit;hermit.php',
 		'untinker;place.php?whichplace=forestvillage&action=fv_untinker',
@@ -1511,7 +1513,7 @@ function InlineItemDescriptions() {
 						"transform": "scale(1)"
 					})
 
-					var $b = $desc.find("b:first")
+					var $b = $desc.find("b:first");
 					$b.wrap('<a href="http://kol.coldfront.net/thekolwiki/index.php/Special:'+
 						'Search?search='+ $b.text().replace(/\s/g, '+').replace('"', '')+
 						'&go=Go" target="_blank"></a>');
@@ -1686,10 +1688,11 @@ function at_fight() {
 	var monsterNameShort = monsterName.replace(/^an?\s/, '');
 	var infight = GetCharData("infight");
 
-	$monster.html(' <a href="http://kol.coldfront.net/thekolwiki/index.php/'+
-		'Special:Search?search='+ monsterNameShort.replace(/\s/g, '+').replace('"', '')+
-		'&go=Go" target="_blank">'+monsterName+'</a>');
-
+    if (GetPref("monsterlinks") == 1) {
+    	$monster.html(' <a href="http://kol.coldfront.net/thekolwiki/index.php/'+
+	    	'Special:Search?search='+ monsterNameShort.replace(/\s/g, '+').replace('"', '')+
+    		'&go=Go" target="_blank">'+monsterName+'</a>');
+    }
 	// fix the ugly new Hell Ion image...
 	if (monsterName == "a Hellion") {
 		$('#monpic')
@@ -2443,11 +2446,11 @@ function at_choice() {
 	var $NCTitle = $('b:eq(0)');
 	var NCText = $NCTitle.text();
 
-//	if(NCText !== "Results:")
-//		$NCTitle.wrap('<a style="color:white;" href="http://kol.coldfront.net/thekolwiki/index.php/'+
-//			'Special:Search?search='+ NCText.replace(/\s/g, '+').replace('"', '') +'&go=Go" '+
-//			'target="_blank"></a>');
-
+	if((NCText !== "Results:") && (GetPref("choicelinks") == 1)) {
+    	$NCTitle.wrap('<a style="color:white;" href="http://kol.coldfront.net/thekolwiki/index.php/'+
+			'Special:Search?search='+ NCText.replace(/\s/g, '+').replace('"', '') +'&go=Go" '+
+			'target="_blank"></a>');
+    }
 	if (square) {
 		if (square.indexOf("hiddencity") != -1) link_hiddencity(square);
 		if (square.indexOf("cellar.php") != -1) {
@@ -6561,6 +6564,8 @@ function buildPrefs() {
         prefSpan.appendChild(choice);
 
         prefSpan.appendChild(MakeOption("Questblock to bottom of charpane: ", 2, 'questbottom', "No", "Yes"));
+        prefSpan.appendChild(MakeOption("Monster name links to wiki: ", 2, 'monsterlinks', "No", "Yes"));
+        prefSpan.appendChild(MakeOption("Choice Title links to wiki: ", 2, 'choicelinks', "No", "Yes"));
 	}
 
 	function createMenu1(menu1Span) {
