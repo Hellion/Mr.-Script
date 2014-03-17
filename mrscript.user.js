@@ -191,7 +191,7 @@ function process_equip(itemname, jnode) {
 		case "Talisman o' Nam":			    jnode.after(AppendLink('[Dome moD]',to_place('palindome')));	break;
 		case 'worm-riding hooks':		    jnode.after(AppendLink('[drum!]',inv_use(2328)));				break;
         case 'Mega Gem':                    jnode.after(AppendLink("[Dr. Awkward Office (1)]",to_place('palindome&action=pal_droffice'))); break;
-		case 'dingy planks':			    jnode.after(AppendLink('[boat]', inv_use(146)));				break; 
+		case 'dingy planks':			    jnode.after(AppendLink('[boat]', inv_use(146)));				break;
 		case "makeshift SCUBA gear": 		jnode.after(AppendLink('[odor]', 'lair2.php?action=odor'));		break;
         case 'worthless gew-gaw':
         case 'worthless knick-knack':
@@ -1226,10 +1226,6 @@ function AddAutoClear(box, setting) {
 	}
 }
 
-// GOGOGADGETPLUNGER: Convert meat-paste links to The Plunger.
-function GoGoGadgetPlunger() {	
-}
-
 // DEFAULTS: Pay no attention to the function behind the curtain.
 function Defaults(revert) {
 	var basePrefs = [["splitinv",1],
@@ -2003,7 +1999,7 @@ function link_cellar(square) {
 					'<tr><td id=bl>&nbsp;</td>'+
 					'<td id=down><a>&nbsp;</a></td>'+
 					'<td id=br>&nbsp;</td></tr></table>');
-	
+
 	// grid: 1 hex digit per square for each of the 25 squares.
 	// 		8 = show UP link
 	//		4 =      DOWN
@@ -2091,7 +2087,7 @@ function at_loggedout() {
 	SetCharData("NSDoorCode",'');
 }
 
-// LOGIN: clear password hash, just to be safe. 
+// LOGIN: clear password hash, just to be safe.
 function at_login() {
 	at_loggedout();
 }
@@ -2188,7 +2184,7 @@ function at_cobbsknob() {
 		else if ((txt.indexOf("This is the last thing I need") != -1) ||
 			(txt.indexOf("be right back") != -1)) { $(this).append(AppendLink('[menagerie-3 (1)]',snarfblat(53))); }
 	});
-	// stupid not-<p>-tagged option... 
+	// stupid not-<p>-tagged option...
 	$("td:contains('How embarrassing.'):last").append(AppendLink('[menagerie-2 (1)]',snarfblat(52)));
 }
 
@@ -2427,7 +2423,7 @@ function at_guild() {
 // ARCADE: display # of tokens and tickets on the main arcade screen.
 function at_arcade() {
 	GM_get(server+'api.php?what=inventory&for=MrScript',function(response) {
-		var invcache = $.parseJSON(response); 
+		var invcache = $.parseJSON(response);
 		var tokens = ((invcache[4621] === undefined) ? "no" : invcache[4621]) + " token" + ((invcache[4621] == 1) ? " " : "s ");
 		var tickets = ((invcache[4622] === undefined) ? "no" : invcache[4622]) + " ticket" + ((invcache[4622] == 1) ? ". " : "s. ");
 		var arcadeInfo = document.createElement('div');
@@ -3758,7 +3754,7 @@ function CompressThrallAndFamiliar(compressLevel) {
     var $fp1 = $('.familiarpick:first');
     var $fp2 = $('.familiarpick:eq(1)');
     var fInfo = $fp2.siblings().text();
-    if (!fInfo) return;         // no familiar info found 
+    if (!fInfo) return;         // no familiar info found
     fInfo = fInfo.slice(6);     //cut off ", the"
     weight = $fp2.next().children('b').text();
     if (compressLevel == 2) {   //show weight and XP only
@@ -3822,7 +3818,7 @@ function at_charpane() {
 
 //	SetData("charname",bText[0].textContent);
     var compressfam = GetPref("compressfam");
-    if (compressfam > 0) { 
+    if (compressfam > 0) {
         CompressThrallAndFamiliar(compressfam);
     }
 
@@ -4376,7 +4372,7 @@ function at_spookyraven1() {
         mainpane_goto('/town_right.php');
     }
 	else if (GetPref('zonespoil') == 1) {
-		$('img').each(function() {	
+		$('img').each(function() {
 			var img = $(this);
 			var src = img.attr('src');
 			if (src.indexOf("sm1.gif") != -1)
@@ -4392,14 +4388,14 @@ function at_spookyraven1() {
 			else if (src.indexOf("sm9.gif") != -1)
 				img.attr('title','ML: 1-2');
 		});
-	}	
+	}
 }
 // MANOR: If manor is not present, redirect to town.
 function at_manor() {
 	if (document.body.textContent.length == 0)
 		mainpane_goto('/town_right.php');
 	else if (GetPref('zonespoil') == 1) {
-		$('img').each(function() {	
+		$('img').each(function() {
 			var img = $(this);
 			var src = img.attr('src');
 			if (src.indexOf("sm1.gif") != -1)
@@ -4415,12 +4411,12 @@ function at_manor() {
 			else if (src.indexOf("sm9.gif") != -1)
 				img.attr('title','ML: 1-2');
 		});
-	}	
+	}
 }
 
 // MANOR3: display wine-bottle glyph info.
-function at_manor3() { 
-	at_spookyraven3(); 
+function at_manor3() {
+	at_spookyraven3();
 } // FIXME: which one?
 
 function at_spookyraven3() {
@@ -4467,7 +4463,7 @@ function at_spookyraven3() {
 		6:"0 adv/2 drunk, lose 80-90% of maxHP"
 	};
 	var wineConfig = {
-		0:[25,"Merlot, Pinot Noir, Port"],          //25 = 011001 
+		0:[25,"Merlot, Pinot Noir, Port"],          //25 = 011001
 		1:[42,"Marsala, Pinot Noir, Zinfandel"],    //42 = 101010
 		2:[52,"Muscat, Port, Zinfandel"],           //52 = 110100
 		3:[7,"Marsala, Merlot, Muscat"]             // 7 = 000111
@@ -5182,7 +5178,7 @@ function at_campground() {
 			var txt = this.textContent;
 			var snarf = false;
 			var gateInfo = [
-                //note that using functions to define where to go just KILLS performance since the array must then be constructed on every page instead of 
+                //note that using functions to define where to go just KILLS performance since the array must then be constructed on every page instead of
                 //being a static, pre-defined object.  drat.
                 //identifying text              item required           image           where to go                                     link text               item ID
                 ["carving of an armchair",      ['pygmy pygment',       'pigment',      'hiddencity.php',                               'hidden city',          '2242']],
@@ -5509,7 +5505,7 @@ function spoil_canadia() {
     $('#lc_camp > a > img').attr('title','ML: 35-40');
 }
 
-function spoil_marais() { 
+function spoil_marais() {
     $('#swamp1 > a > img').attr('title','ML: 14-20; open swamp, sanctuargh');   //edge
     $('#swamp2 > a > img').attr('title','ML: 19-36; open bog, tower');          //swamp
     $('#swamp3 > a > img').attr('title','ML: 34-51; fight Bunion (axe)');       //bog
@@ -6729,10 +6725,10 @@ function buildPrefs() {
 		'javascript:document.getElementById("scriptpref2").setAttribute("style","display:none;");' +
 		'javascript:document.getElementById("scriptpref3").setAttribute("style","");';
 
-		spanSpan.innerHTML = "<a class=MrTabber id=show1 href='"+clicky1+"'>[Settings]</a>" + 
+		spanSpan.innerHTML = "<a class=MrTabber id=show1 href='"+clicky1+"'>[Settings]</a>" +
 			"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; " +
-			"<a class=MrTabber id=show2 href='"+clicky2+"'>[Custom Links 1]</a>" + 
-			"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; " + 
+			"<a class=MrTabber id=show2 href='"+clicky2+"'>[Custom Links 1]</a>" +
+			"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; " +
 			"<a class=MrTabber id=show3 href='"+clicky3+"'>[Custom Links 2]</a>";
 		spanSpan.setAttribute('style','font-size:12px;text-align:center;');
 		var prefSpan = document.createElement('span');
