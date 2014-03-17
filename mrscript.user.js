@@ -3819,7 +3819,7 @@ function at_charpane() {
 
 //	SetData("charname",bText[0].textContent);
     var compressfam = GetPref("compressfam");
-    if (compressfam >= 0) { 
+    if (compressfam > 0) { 
         CompressThrallAndFamiliar(compressfam);
     }
 
@@ -5550,7 +5550,6 @@ function spoil_manor() {
 	$('#sr1_library img')		.attr('title','ML: 49-57');
 	$('#sr1_gallery img')		.attr('title','ML: 105-115');
 }
-
 
 function spoil_spookyraven2() {
 	spoil_manor2();
