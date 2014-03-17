@@ -2644,7 +2644,7 @@ function at_bounty() {
 		["bits of sticky stardust",         "[hole (1)]",            "83"],
 		["beard crumbs",                    "[castle:basement (1)]", "322"],
 		["rusty tap handles",               "[bathroom (1)]",        "107"],
-	//	["spare abacus beads",              "[hidden city (1)]",     ""],
+		["spare abacus beads",              "[hidden city (1)]",     "343"],
 		["spent handwarmers",               "[slope (1)]",           "273"],
 		["warrrrrts",                       "[poop deck (1)]",       "159"],
 		["worthless pieces of yellow glass","[dungeons of doom (1)]","39"],
