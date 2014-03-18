@@ -670,7 +670,6 @@ function InvChecker(event) {
 	var add = document.createElement('span');
 	var br = document.createElement('br');
 	var itemname = $(this).parent().next().text();
-//	GM_log("itemname: [" + itemname + "]");
 
 	$(add).attr('class','tiny').attr('id','span'+item).text("checking: "+itemname+ "...");
 	$(this).parent().next().append(br).append(add);
@@ -2036,7 +2035,6 @@ function link_cellar(square) {
 		return "<a class=cellarlinker href='cellar.php?action=explore&whichspot="+s+"'>"+t+"</a>";
 	}
 
-//	GM_log("sqlist="+sqlist);
 	dtable.prependTo($('center:last')).hide();
 	if (check(thissq,UP))  $('#up > a').replaceWith(cLink(thissq,UP,"Up"));
 	if (check(thissq,DOWN)) $('#down > a').replaceWith(cLink(thissq,DOWN,"Down"));
@@ -2280,36 +2278,11 @@ function at_adventure() {
 		$('<br /><center><p><font color="blue">You need:<br/>frilly skirt equipped, and 3 hot wings OR<br/>orcish frat boy outfit equipped OR<br/>mullet wig equipped, and a briefcase<br/>before using those blueprints</font></center>').appendTo($('a:last').parent());
 		break;
 	case "A Sietch in Time": // put stuff here
-	//	GM_log("sietching");
-		$('img').each(function() {
-			var onclick = this.getAttribute("onclick");
-		//	GM_log("count an item with onclick="+onclick);
-			if (/desc/.test(onclick || "")) {
-				var itemNum = this.parents('.item');
-				if (itemNum && itemNum.attr('rel'))  {
-					itemNum = integer(itemNum.attr('rel').match(/id=(\d+)/)[1]);
-				//	GM_log("found item number " + itemNum);
-					var displayLinks = GetCharData("gnasirstuff") + AppendLink('[use [item]]',inv_use(itemNum));
-					SetCharData("gnasirstuff",displayLinks);
-				}
-			}
-		});
-		if ($('p').text().indexOf("good luck to you") != -1) {
-			$('p:last').append(GetCharData("gnasirstuff"));
-			SetCharData("gnasirstuff","");
-		}
-		if ($('p:last').text().indexOf("Gotcha.") != -1) {
-			$('<center><a href="'+to_place('desertbeach&action=db_gnasir')+'">Visit Gnasir\'s Tent</a></center><br />').prependTo($('a:last').parent());
-		}
 		break;
 	case "Not So Much With The Humanity":
 		$('<center><a href="'+snarfblat(385)+'">Adventure in the Red Zeppelin</a></center><br />').prependTo($('a:last').parent());
 		break;
 	case "":	// got a "You shouldn't be here" or other reject message... (or an untitled Limerick Dungeon adventure, sigh)
-		$('center table tr td').each(function(){
-		//	GM_log("NCTitle check:"+$(this).text());
-		});
-//		GM_log("srch="+document.location.search);
 		if (document.location.search=="?snarfblat=100") {	// we were trying for Whitey's Grove; go get the quest from the guild.
 			mainpane_goto("guild.php?place=paco");
 		} else if (document.location.search=="?snarfblat=141") { // we were at the Pond (frozen dooks)
@@ -2474,30 +2447,6 @@ function at_choice() {
 		}
 		return;
 	}
-	if (cNum == 805) {
-	//	GM_log("sietching");
-		$('img').each(function() {
-			var onclick = this.getAttribute("onclick");
-		//	GM_log("count an item with onclick="+onclick);
-			if (/desc/.test(onclick || "")) {
-				var itemNum = $(this).parents('.item');
-				if (itemNum && itemNum.attr('rel'))  {
-					itemNum = integer(itemNum.attr('rel').match(/id=(\d+)/)[1]);
-				//	GM_log("found item number " + itemNum);
-					var displayLinks = GetCharData("gnasirstuff") + AppendLink('[use [item]]',inv_use(itemNum));
-					SetCharData("gnasirstuff",displayLinks);
-				//	GM_log("gnasirstuff = " +displayLinks);
-				}
-			}
-		});
-	}
-	//this bit of Gnasir-ing happens where there's no buttons so there's no cNum.
-	if ($('p').text().indexOf("good luck to you") != -1) {
-		var gstuff = GetCharData("gnasirstuff")
-	//	GM_log("inserting gnasirstuff of: "+gstuff.html());
-		$('p:contains("good luck to you")').append(GetCharData("gnasirstuff"));
-		SetCharData("gnasirstuff","");
-	}
 
 	var choicetext = $('body').text(); // for finding stuff that's not in a <p> tag.  sigh.
 	$('div[style*="green"] > p').addClass("greenP");
@@ -2567,7 +2516,6 @@ function at_choice() {
 		} else if (choicetext.indexOf('Having finally fought your way') != -1) {
 			var p1 = $('p:contains("Having finally fought")').text;
 			nextZoneName = p1.match(/This must be (\w+),/)[1];
-		//	GM_log("zone name = " + nextZoneName);
 			$('a:contains("Adventure Again")')
 				.replaceWith('<a href="adventure.php?snarfblat=320">Adventure in '+nextZoneName+'</a>');
 		} else if (p0text.indexOf("Then good luck to you on your travels") != -1) {
@@ -2944,7 +2892,6 @@ function at_inventory() {
 }
 
 function process_results(rText, insLoc) {
-//	GM_log("process_results: rText = " + rText);
 	if (rText.indexOf("You can easily climb the branches") != -1) {
 		insLoc.append(AppendLink('[temple (1)]',snarfblat(280)));
 	} else if (rText.indexOf("You should go to A-Boo Peak") != -1) {
@@ -3567,9 +3514,6 @@ function at_questlog() {
 					break;
 				case "Never Odd Or Even":
 					var subtext = $(this).parent().text(); // contents().get(2).data;
-	//				subtext = subtext.textContent;
-	//				GM_log("Palindome subtext="+subtext);
-// TODO: ADD LINKS HERE.
 					if (subtext.indexOf("get into the Palindome.") != -1) {  // swash, cove.
 					} else if (subtext.indexOf("discovered the fabulous Palindome") != -1) { // talisman, palindome
 					} else if (subtext.indexOf("but then you lost it again") != -1) { // lab
@@ -3607,7 +3551,6 @@ function at_questlog() {
 					break;
 				case "Me and My Nemesis":
 					var subtext = $(this).parent().text();
-//					GM_log("nemesis subtext="+subtext);
 					if (subtext == undefined) break;
 					if (subtext.indexOf("smith an Epic Weapon") != -1) {
 						b.append(AppendLink("[casino]","town_wrong.php?place=casino"));
@@ -3678,7 +3621,6 @@ function at_questlog() {
 					break;
 				case "Out of Your Gourd":
 					var subtext = $(this).parent().text();
-//					GM_log("gourd subtext="+subtext);
 					if (subtext.indexOf("Back Alley") != -1)
 						b.append(AppendLink('[alley (1)]', snarfblat(112)));
 					else if (subtext.indexOf("Haunted Pantry") != -1)
@@ -3734,7 +3676,6 @@ function at_questlog() {
 				b.append(AppendLink('[gate (1)]', snarfblat(79)));
 			else if (txt.indexOf("Quest for the Holy MacGuffin") != -1) {
 				var subtext = $(this).parent().text(); //contents().get(2).data;
-//				GM_log("MacGuffin subtext="+subtext);
 				if (subtext.indexOf("find the Black Market") != -1)
 					b.append(AppendLink("[black forest (1)]",snarfblat(111)));
 				else if (subtext.indexOf("now to hit the Travel Agency") != -1)
@@ -3860,7 +3801,6 @@ function at_charpane() {
 				var cur_max = data.shift().split('/').map(integer);
         		SetCharData("current"+ name, cur_max[0]);
 				SetCharData("max"    + name, cur_max[1]);
-                GM_log(name + ": " + cur_max[0] + ", " + cur_max[1]);
 			}
 		}
 		var lvlblock = $("td:contains('Level'):first").text();
@@ -3878,8 +3818,6 @@ function at_charpane() {
         if (data.length == 2) { //I forget what this was guarding against already.
             data = $.makeArray($('td[valign="center"]').slice(1, 5)).map(text);
         }
-        GM_log("data.length = " + data.length);
-        for (var i = 0; i < data.length; i++) GM_log("data[i]="+data[i]);
         // parse regular hp/mp display
   		parse_cur_and_max(["HP", "MP"], data);
 	    //data.shift(); // meat, if MP are present
@@ -3984,11 +3922,8 @@ function at_charpane() {
 			switch (effNum) {
 				case 275: // hydrated
 					var hydtxt = img.parentNode.nextSibling.textContent;
-                    GM_log("hydtxt=" + hydtxt);
-                    GM_log("advcount = " +advcount);
 					if (/\(1\)/.test(hydtxt)) {			// 1 turn left?  set marker to add rehydrate link next adventure.
 						SetCharData('hydrate', advcount-1);
-                        GM_log("1 turn left, hydrate should be " + advcount-1);
                     }
 					else if (/\(5\)/.test(hydtxt) || /\(20\)/.test(hydtxt))		// got 5 turns (or 20 from clover) now?  add Desert link.
 					{	if (compactMode) $('a[href="adventure.php?snarfblat=122"]')
