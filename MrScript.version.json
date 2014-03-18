@@ -1,4 +1,4 @@
-{"version":"1.7.7",
+{"version":"1.8.0",
 "url1":"http://userscripts.org/scripts/source/65705.user.js",
 "url2":"http://noblesse-oblige.org/hellion/scripts/MrScript.user.js",
-"desc":"<b>New</b><br/>script-based links for using items are now ajaxed<br/>more spoilers in Hidden City, Wormwood, and other places<br/>rat-cellar links are laid out more visually<br/>added spoilers for New Palindome<br /><br /><b>Fixed:</b><br />Some Council links wouldn't show in AoSP<br />correctly detect friendly vs. hostile knoll<br />work better with unified crafting interface (no separate innabox/plunger pages)<br />"}
+"desc":"<b>New:</b><br/>clicking on an item makes its descriptions pop up "inline" rather than in its own window (configurable)<br/>Thrall/Familiar compression is configurable<br/>CharPane Quest Nudge Block can be moved to bottom (configurable)<br/>monster names link to the wiki (configurable)<br />choice adventure titles link to wiki (configurable)<br /><b>Fixed:</b><br />Bounty Hunter links work again<br />fixed spoilers in spookyraven<br /><br />"}
