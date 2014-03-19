@@ -37,6 +37,9 @@
 // ==/UserScript==
 
 
+// At some point, this should no longer run by default, and instead be added to the Optionarium
+ImportGmDataToLocalStorage();
+
 var place = location.pathname.replace(/\/|\.(php|html)$/gi, "").toLowerCase();
 if(place === "place") {
 	var match = location.search.match(/whichplace=([0-9a-zA-Z_\-]*)/);
@@ -60,7 +63,7 @@ var global = this; //, mr = unsafeWindow.top.mr = global;
 var server = location.host + "/";
 var serverNo = (server.match(/(.)\./) || {1:"L"})[1]; 	// the "7" in www7.X, or an "L" if no . is in the hostname.
 
-var pwd = GM_getValue('hash.' + server.split('.')[0]);
+var pwd = localStorage.getItem('hash.' + server.split('.')[0]);
 
 var prefAutoclear = GetPref('autoclear');
 var prefSpoilers = GetPref('zonespoil') == 1;
@@ -262,7 +265,7 @@ function process_outfit(outfitname, jnode) {
 // Don't ask why this guy bothered to write wrapper functions. He just did. :-)
 function persist(key, value) {
 	try {
-		GM_setValue(key, value);
+		localStorage.setItem(key, value);
 	} catch(e) {
 		console.error('Error while setting ' + key + ' to ' + value + ': ' + e.message);
 	}
@@ -332,13 +335,46 @@ function parseItem(tbl) {
 	return data;
 }
 
+// Convert GM_getValue data to the faster localStorage
+function ImportGmDataToLocalStorage() {
+
+	if(localStorage.getItem('GMimported') !== "1" && typeof GM_listValues === "function") {
+		var keys = GM_listValues();
+
+		$.each(keys, function(n, key) {
+			try {
+			//	console.log("importing "+key+": "+GM_getValue(key));
+				localStorage.setItem(key, GM_getValue(key));
+			}
+			catch(msg) {
+			//	console.log("import err: "+msg);
+			}
+		});
+
+		localStorage.setItem('GMimported', '1');
+	}
+}
+
 // Set/GetPref: store/retrieve data that applies to the script as a whole.
 function SetPref(which, value) {
 	persist("pref." + which, value);
 }
 
 function GetPref(which) {
-	return GM_getValue("pref." + which);
+
+	var val = localStorage.getItem("pref." + which);
+
+	// Convert to int or float, as localStorage uses only strings
+	// (This may or may not be necessary.)
+
+	if(/^[0-9]+$/.test(val)) {
+		return integer(val);
+	}
+	else if(/^[0-9]+\.[0-9]+$/.test(val)) {
+		return parseFloat(val);
+	}
+
+	return val;
 }
 
 // Set/GetData: store/retrieve data related to a particular session
@@ -347,7 +383,23 @@ function SetData(which, value) {
 }
 
 function GetData(which) {
-	return GM_getValue(serverNo + which);
+	return maybeConvertToNumber(localStorage.getItem(serverNo + which));
+}
+
+function maybeConvertToNumber(val) {
+
+	// Convert to int or float, as localStorage uses only strings
+	// (This may or may not be necessary.)
+
+	if(/^[0-9]+$/.test(val)) {
+		return integer(val);
+	}
+	else if(/^[0-9]+\.[0-9]+$/.test(val)) {
+		return parseFloat(val);
+	}
+	else {
+		return val;
+	}
 }
 
 // Set/GetCharData: store/retrieve data related to a particular account/ascension
@@ -357,11 +409,11 @@ function SetCharData(which, value) {
 }
 function GetCharData(which) {
 	var charname = GetData("charname");
-	return GM_getValue(charname + which);
+	return maybeConvertToNumber(localStorage.getItem(charname + which));
 }
 function DelCharData(which) {
 	var charname = GetData("charname");
-	GM_deleteValue(charname + which);
+	localStorage.setItem(charname + which);
 }
 
 // Password hash functions.  whee.
@@ -1574,7 +1626,7 @@ function at_main() {
 // n.b. game.php is the outermost, non-frame window that contains all the frames.
 // 	as such, the script only sees it exactly once, when you're logging in.
 function at_game() {
-	var lastUpdated = integer(GM_getValue('MrScriptLastUpdate', 0));
+	var lastUpdated = integer(localStorage.getItem('MrScriptLastUpdate')) || 0;
 	var currentHours = integer(new Date().getTime()/3600000);
 
 	// reload topmenu exactly once after charpane has finished processing:
@@ -3893,7 +3945,7 @@ function at_charpane() {
 			img.addEventListener('contextmenu', function(event)	{
 				document.getElementsByName('poison')[0].childNodes[1].innerHTML = "<i><span style='font-size:10px;'>Un-un-unpoisoning...</span></i>";
 				GM_get(server+'api.php?what=inventory&for=MrScript',function(response) {			// see if we have some anti-anti-antidote onhand
-					var invcache = $.parseJSON(response); //eval('('+response+')');
+					var invcache = $.parseJSON(response);
 					var antianti = invcache[829];
 					if (antianti === undefined) antianti = 0;
 					if (antianti > 0) {
@@ -4713,7 +4765,7 @@ function at_pyramid() {
 				var i1 = response.split('inventory = ')[1].split(';')[0];	// should get everything from { to }, inclusive.
 				response = i1;
 			}
-			var invcache = $.parseJSON(response); //eval('('+response+')');
+			var invcache = $.parseJSON(response);
 			var ratchet = invcache[2540]; if (ratchet === undefined) ratch = 0;
 			var token = invcache[2317]; if (token === undefined) token = 0;
 			var bomb = invcache[2318]; if (bomb === undefined) bomb = 0;
