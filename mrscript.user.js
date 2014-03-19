@@ -30,6 +30,7 @@
 // @grant	GM_log
 // @grant	GM_setValue
 // @grant	GM_getValue
+// @grant	GM_listValues
 // @grant	GM_deleteValue
 // @grant	GM_xmlhttpRequest
 // @unwrap
@@ -2199,7 +2200,7 @@ function at_adventure() {
 	var square=GetCharData("square");
 	SetCharData("square",false);
 	if (square) {
-		if (square.indexOf("hiddencity") != -1) link_hiddencity(square);
+//		if (square.indexOf("hiddencity") != -1) link_hiddencity(square);
 //		if (square.indexOf("cellar.php") != -1) link_cellar(square);
 	}
 	var $NCTitle = $('b:eq(1)');
@@ -2421,7 +2422,7 @@ function at_choice() {
 			'target="_blank"></a>');
     }
 	if (square) {
-		if (square.indexOf("hiddencity") != -1) link_hiddencity(square);
+//		if (square.indexOf("hiddencity") != -1) link_hiddencity(square);
 		if (square.indexOf("cellar.php") != -1) {
 			if (NCText != "Results:") {
 				SetCharData("square",square);	// not "Results:" means it's the choosing half of the choice, where you don't need links.
@@ -2664,11 +2665,8 @@ function at_bounty() {
 }
 
 function at_mall() {
+	InlineItemDescriptions();
 	$('center table tr td center table:first').prepend('<tr><td><center><a href=managestore.php>Manage your Store</a><br /><br /></center></td></tr>');
-}
-
-function at_managestore() {
-	$('a[href="storelog.php"]').parent().append('<br /><br /><a href=mall.php>Search the Mall</a><br />');
 }
 
 // MALLSTORE: add fun links to (some of) the things you buy!
@@ -3007,6 +3005,9 @@ function at_galaktik() {
 
 // BIGISLAND: add inventory check, max buttons to Frat/Hippy Trade-In stores.
 function at_bigisland() {
+
+	InlineItemDescriptions();
+
 	$('img').each(function()
 	{	var onclick = this.getAttribute('onclick');
 		if (onclick != undefined && onclick.indexOf("desc") != -1)
@@ -4306,46 +4307,11 @@ function at_spookyraven1() {
     if (document.body.textContent.indexOf("know where that is.") != -1) {
         mainpane_goto('/town_right.php');
     }
-	else if (GetPref('zonespoil') == 1) {
-		$('img').each(function() {
-			var img = $(this);
-			var src = img.attr('src');
-			if (src.indexOf("sm1.gif") != -1)
-				img.attr('title','ML: 105-115');
-			else if (src.indexOf("sm4.gif") != -1)
-				img.attr('title','ML: 20');
-			else if (src.indexOf("sm3.gif") != -1)
-				img.attr('title','ML: 7-9');
-			else if (src.indexOf("sm6.gif") != -1)
-				img.attr('title','ML: 3-5');
-			else if (src.indexOf("sm7.gif") != -1)
-				img.attr('title','ML: 49-57');
-			else if (src.indexOf("sm9.gif") != -1)
-				img.attr('title','ML: 1-2');
-		});
-	}
 }
 // MANOR: If manor is not present, redirect to town.
 function at_manor() {
-	if (document.body.textContent.length == 0)
+	if (document.body.textContent.length == 0) {
 		mainpane_goto('/town_right.php');
-	else if (GetPref('zonespoil') == 1) {
-		$('img').each(function() {
-			var img = $(this);
-			var src = img.attr('src');
-			if (src.indexOf("sm1.gif") != -1)
-				img.attr('title','ML: 105-115');
-			else if (src.indexOf("sm4.gif") != -1)
-				img.attr('title','ML: 20');
-			else if (src.indexOf("sm3.gif") != -1)
-				img.attr('title','ML: 7-9');
-			else if (src.indexOf("sm6.gif") != -1)
-				img.attr('title','ML: 3-5');
-			else if (src.indexOf("sm7.gif") != -1)
-				img.attr('title','ML: 49-57');
-			else if (src.indexOf("sm9.gif") != -1)
-				img.attr('title','ML: 1-2');
-		});
 	}
 }
 
@@ -6660,11 +6626,11 @@ function buildPrefs() {
 		'javascript:document.getElementById("scriptpref2").setAttribute("style","display:none;");' +
 		'javascript:document.getElementById("scriptpref3").setAttribute("style","");';
 
-		spanSpan.innerHTML = "<a class=MrTabber id=show1 href='"+clicky1+"'>[Settings]</a>" +
+		spanSpan.innerHTML = "<a class=\"MrTabber\" id=\"show1\" href='"+clicky1+"'>[Settings]</a>" +
 			"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; " +
-			"<a class=MrTabber id=show2 href='"+clicky2+"'>[Custom Links 1]</a>" +
+			"<a class=\"MrTabber\" id=\"show2\" href='"+clicky2+"'>[Custom Links 1]</a>" +
 			"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; " +
-			"<a class=MrTabber id=show3 href='"+clicky3+"'>[Custom Links 2]</a>";
+			"<a class=\"MrTabber\" id=\"show3\" href='"+clicky3+"'>[Custom Links 2]</a>";
 		spanSpan.setAttribute('style','font-size:12px;text-align:center;');
 		var prefSpan = document.createElement('span');
 		prefSpan.setAttribute('id','scriptpref1');
@@ -6708,16 +6674,18 @@ function at_account() { // new option menu, yay
 
 // HAGNK'S/MANAGESTORE/STASH: Support autoclear for added rows
 function at_managestore() {
-  autoclear_added_rows();
+	$('a[href="storelog.php"]').parent().append('<br /><br /><a href=mall.php>Search the Mall</a><br />');
+	autoclear_added_rows();
 }
 function at_clan_stash() {
-  autoclear_added_rows();
+	autoclear_added_rows();
 }
 function at_storage() {
-  autoclear_added_rows();
+	InlineItemDescriptions();
+	autoclear_added_rows();
 }
 function at_sendmessage() {
-  autoclear_added_rows();
+	autoclear_added_rows();
 }
 
 function autoclear_added_rows() {
