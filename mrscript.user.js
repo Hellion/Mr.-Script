@@ -30,11 +30,15 @@
 // @grant	GM_log
 // @grant	GM_setValue
 // @grant	GM_getValue
+// @grant	GM_listValues
 // @grant	GM_deleteValue
 // @grant	GM_xmlhttpRequest
 // @unwrap
 // ==/UserScript==
 
+
+// At some point, this should no longer run by default, and instead be added to the Optionarium
+ImportGmDataToLocalStorage();
 
 var place = location.pathname.replace(/\/|\.(php|html)$/gi, "").toLowerCase();
 if(place === "place") {
@@ -59,7 +63,7 @@ var global = this; //, mr = unsafeWindow.top.mr = global;
 var server = location.host + "/";
 var serverNo = (server.match(/(.)\./) || {1:"L"})[1]; 	// the "7" in www7.X, or an "L" if no . is in the hostname.
 
-var pwd = GM_getValue('hash.' + server.split('.')[0]);
+var pwd = localStorage.getItem('hash.' + server.split('.')[0]);
 
 var prefAutoclear = GetPref('autoclear');
 var prefSpoilers = GetPref('zonespoil') == 1;
@@ -261,7 +265,7 @@ function process_outfit(outfitname, jnode) {
 // Don't ask why this guy bothered to write wrapper functions. He just did. :-)
 function persist(key, value) {
 	try {
-		GM_setValue(key, value);
+		localStorage.setItem(key, value);
 	} catch(e) {
 		console.error('Error while setting ' + key + ' to ' + value + ': ' + e.message);
 	}
@@ -331,13 +335,46 @@ function parseItem(tbl) {
 	return data;
 }
 
+// Convert GM_getValue data to the faster localStorage
+function ImportGmDataToLocalStorage() {
+
+	if(localStorage.getItem('GMimported') !== "1" && typeof GM_listValues === "function") {
+		var keys = GM_listValues();
+
+		$.each(keys, function(n, key) {
+			try {
+			//	console.log("importing "+key+": "+GM_getValue(key));
+				localStorage.setItem(key, GM_getValue(key));
+			}
+			catch(msg) {
+			//	console.log("import err: "+msg);
+			}
+		});
+
+		localStorage.setItem('GMimported', '1');
+	}
+}
+
 // Set/GetPref: store/retrieve data that applies to the script as a whole.
 function SetPref(which, value) {
 	persist("pref." + which, value);
 }
 
 function GetPref(which) {
-	return GM_getValue("pref." + which);
+
+	var val = localStorage.getItem("pref." + which);
+
+	// Convert to int or float, as localStorage uses only strings
+	// (This may or may not be necessary.)
+
+	if(/^[0-9]+$/.test(val)) {
+		return integer(val);
+	}
+	else if(/^[0-9]+\.[0-9]+$/.test(val)) {
+		return parseFloat(val);
+	}
+
+	return val;
 }
 
 // Set/GetData: store/retrieve data related to a particular session
@@ -346,7 +383,23 @@ function SetData(which, value) {
 }
 
 function GetData(which) {
-	return GM_getValue(serverNo + which);
+	return maybeConvertToNumber(localStorage.getItem(serverNo + which));
+}
+
+function maybeConvertToNumber(val) {
+
+	// Convert to int or float, as localStorage uses only strings
+	// (This may or may not be necessary.)
+
+	if(/^[0-9]+$/.test(val)) {
+		return integer(val);
+	}
+	else if(/^[0-9]+\.[0-9]+$/.test(val)) {
+		return parseFloat(val);
+	}
+	else {
+		return val;
+	}
 }
 
 // Set/GetCharData: store/retrieve data related to a particular account/ascension
@@ -356,11 +409,11 @@ function SetCharData(which, value) {
 }
 function GetCharData(which) {
 	var charname = GetData("charname");
-	return GM_getValue(charname + which);
+	return maybeConvertToNumber(localStorage.getItem(charname + which));
 }
 function DelCharData(which) {
 	var charname = GetData("charname");
-	GM_deleteValue(charname + which);
+	localStorage.setItem(charname + which);
 }
 
 // Password hash functions.  whee.
@@ -1573,7 +1626,7 @@ function at_main() {
 // n.b. game.php is the outermost, non-frame window that contains all the frames.
 // 	as such, the script only sees it exactly once, when you're logging in.
 function at_game() {
-	var lastUpdated = integer(GM_getValue('MrScriptLastUpdate', 0));
+	var lastUpdated = integer(localStorage.getItem('MrScriptLastUpdate')) || 0;
 	var currentHours = integer(new Date().getTime()/3600000);
 
 	// reload topmenu exactly once after charpane has finished processing:
@@ -2199,7 +2252,7 @@ function at_adventure() {
 	var square=GetCharData("square");
 	SetCharData("square",false);
 	if (square) {
-		if (square.indexOf("hiddencity") != -1) link_hiddencity(square);
+//		if (square.indexOf("hiddencity") != -1) link_hiddencity(square);
 //		if (square.indexOf("cellar.php") != -1) link_cellar(square);
 	}
 	var $NCTitle = $('b:eq(1)');
@@ -2421,7 +2474,7 @@ function at_choice() {
 			'target="_blank"></a>');
     }
 	if (square) {
-		if (square.indexOf("hiddencity") != -1) link_hiddencity(square);
+//		if (square.indexOf("hiddencity") != -1) link_hiddencity(square);
 		if (square.indexOf("cellar.php") != -1) {
 			if (NCText != "Results:") {
 				SetCharData("square",square);	// not "Results:" means it's the choosing half of the choice, where you don't need links.
@@ -2664,11 +2717,8 @@ function at_bounty() {
 }
 
 function at_mall() {
+	InlineItemDescriptions();
 	$('center table tr td center table:first').prepend('<tr><td><center><a href=managestore.php>Manage your Store</a><br /><br /></center></td></tr>');
-}
-
-function at_managestore() {
-	$('a[href="storelog.php"]').parent().append('<br /><br /><a href=mall.php>Search the Mall</a><br />');
 }
 
 // MALLSTORE: add fun links to (some of) the things you buy!
@@ -3007,6 +3057,9 @@ function at_galaktik() {
 
 // BIGISLAND: add inventory check, max buttons to Frat/Hippy Trade-In stores.
 function at_bigisland() {
+
+	InlineItemDescriptions();
+
 	$('img').each(function()
 	{	var onclick = this.getAttribute('onclick');
 		if (onclick != undefined && onclick.indexOf("desc") != -1)
@@ -3892,7 +3945,7 @@ function at_charpane() {
 			img.addEventListener('contextmenu', function(event)	{
 				document.getElementsByName('poison')[0].childNodes[1].innerHTML = "<i><span style='font-size:10px;'>Un-un-unpoisoning...</span></i>";
 				GM_get(server+'api.php?what=inventory&for=MrScript',function(response) {			// see if we have some anti-anti-antidote onhand
-					var invcache = $.parseJSON(response); //eval('('+response+')');
+					var invcache = $.parseJSON(response);
 					var antianti = invcache[829];
 					if (antianti === undefined) antianti = 0;
 					if (antianti > 0) {
@@ -4306,46 +4359,11 @@ function at_spookyraven1() {
     if (document.body.textContent.indexOf("know where that is.") != -1) {
         mainpane_goto('/town_right.php');
     }
-	else if (GetPref('zonespoil') == 1) {
-		$('img').each(function() {
-			var img = $(this);
-			var src = img.attr('src');
-			if (src.indexOf("sm1.gif") != -1)
-				img.attr('title','ML: 105-115');
-			else if (src.indexOf("sm4.gif") != -1)
-				img.attr('title','ML: 20');
-			else if (src.indexOf("sm3.gif") != -1)
-				img.attr('title','ML: 7-9');
-			else if (src.indexOf("sm6.gif") != -1)
-				img.attr('title','ML: 3-5');
-			else if (src.indexOf("sm7.gif") != -1)
-				img.attr('title','ML: 49-57');
-			else if (src.indexOf("sm9.gif") != -1)
-				img.attr('title','ML: 1-2');
-		});
-	}
 }
 // MANOR: If manor is not present, redirect to town.
 function at_manor() {
-	if (document.body.textContent.length == 0)
+	if (document.body.textContent.length == 0) {
 		mainpane_goto('/town_right.php');
-	else if (GetPref('zonespoil') == 1) {
-		$('img').each(function() {
-			var img = $(this);
-			var src = img.attr('src');
-			if (src.indexOf("sm1.gif") != -1)
-				img.attr('title','ML: 105-115');
-			else if (src.indexOf("sm4.gif") != -1)
-				img.attr('title','ML: 20');
-			else if (src.indexOf("sm3.gif") != -1)
-				img.attr('title','ML: 7-9');
-			else if (src.indexOf("sm6.gif") != -1)
-				img.attr('title','ML: 3-5');
-			else if (src.indexOf("sm7.gif") != -1)
-				img.attr('title','ML: 49-57');
-			else if (src.indexOf("sm9.gif") != -1)
-				img.attr('title','ML: 1-2');
-		});
 	}
 }
 
@@ -4747,7 +4765,7 @@ function at_pyramid() {
 				var i1 = response.split('inventory = ')[1].split(';')[0];	// should get everything from { to }, inclusive.
 				response = i1;
 			}
-			var invcache = $.parseJSON(response); //eval('('+response+')');
+			var invcache = $.parseJSON(response);
 			var ratchet = invcache[2540]; if (ratchet === undefined) ratch = 0;
 			var token = invcache[2317]; if (token === undefined) token = 0;
 			var bomb = invcache[2318]; if (bomb === undefined) bomb = 0;
@@ -6660,11 +6678,11 @@ function buildPrefs() {
 		'javascript:document.getElementById("scriptpref2").setAttribute("style","display:none;");' +
 		'javascript:document.getElementById("scriptpref3").setAttribute("style","");';
 
-		spanSpan.innerHTML = "<a class=MrTabber id=show1 href='"+clicky1+"'>[Settings]</a>" +
+		spanSpan.innerHTML = "<a class=\"MrTabber\" id=\"show1\" href='"+clicky1+"'>[Settings]</a>" +
 			"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; " +
-			"<a class=MrTabber id=show2 href='"+clicky2+"'>[Custom Links 1]</a>" +
+			"<a class=\"MrTabber\" id=\"show2\" href='"+clicky2+"'>[Custom Links 1]</a>" +
 			"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; " +
-			"<a class=MrTabber id=show3 href='"+clicky3+"'>[Custom Links 2]</a>";
+			"<a class=\"MrTabber\" id=\"show3\" href='"+clicky3+"'>[Custom Links 2]</a>";
 		spanSpan.setAttribute('style','font-size:12px;text-align:center;');
 		var prefSpan = document.createElement('span');
 		prefSpan.setAttribute('id','scriptpref1');
@@ -6708,16 +6726,18 @@ function at_account() { // new option menu, yay
 
 // HAGNK'S/MANAGESTORE/STASH: Support autoclear for added rows
 function at_managestore() {
-  autoclear_added_rows();
+	$('a[href="storelog.php"]').parent().append('<br /><br /><a href=mall.php>Search the Mall</a><br />');
+	autoclear_added_rows();
 }
 function at_clan_stash() {
-  autoclear_added_rows();
+	autoclear_added_rows();
 }
 function at_storage() {
-  autoclear_added_rows();
+	InlineItemDescriptions();
+	autoclear_added_rows();
 }
 function at_sendmessage() {
-  autoclear_added_rows();
+	autoclear_added_rows();
 }
 
 function autoclear_added_rows() {
